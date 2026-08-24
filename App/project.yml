@@ -1,0 +1,39 @@
+# xcodegen spec for the app target. The package (ArrdeckKit/ArrdeckUI) builds
+# and tests with Command Line Tools alone; only this target needs Xcode.
+#
+#   brew install xcodegen && cd App && xcodegen && open Arrdeck.xcodeproj
+name: Arrdeck
+options:
+  bundleIdPrefix: dk.thrawn
+  deploymentTarget:
+    iOS: "17.0"
+packages:
+  ArrdeckPackage:
+    path: ..
+targets:
+  Arrdeck:
+    type: application
+    platform: iOS
+    sources: [Sources]
+    dependencies:
+      - package: ArrdeckPackage
+        product: ArrdeckKit
+      - package: ArrdeckPackage
+        product: ArrdeckUI
+    info:
+      path: Sources/Info.plist
+      properties:
+        UILaunchScreen: {}
+        # Two separate iOS gates with the same silent-timeout symptom, both
+        # required for a LAN profile like http://10.0.0.154:3500 —
+        # NSAllowsLocalNetworking lifts ATS's plain-HTTP block for local hosts
+        # only (remote profiles still require TLS), and the usage description
+        # is what makes iOS show the local-network permission prompt at all.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+        NSLocalNetworkUsageDescription: >-
+          Arrdeck connects to your media server on your home network.
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dk.thrawn.arrdeck
+        SWIFT_VERSION: "6.0"

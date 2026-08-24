@@ -1,0 +1,5 @@
+.build/
+.swiftpm/
+App/Arrdeck.xcodeproj/
+xcuserdata/
+.DS_Store
