@@ -29,6 +29,7 @@ public struct AddProfileView: View {
             Section("Server") {
                 TextField("deck.example.com or 10.0.0.154:3500", text: $address)
                     .autocorrectionDisabled()
+                    .accessibilityIdentifier("server-address")
                 if let url = normalised, !address.isEmpty {
                     Text(url.absoluteString)
                         .font(.caption.monospaced())
@@ -48,13 +49,16 @@ public struct AddProfileView: View {
                     }
                 }
                 .disabled(normalised == nil || probing)
+                .accessibilityIdentifier("connect")
             }
 
             if let outcome {
                 Section {
                     OutcomeRow(outcome: outcome)
+                        .accessibilityIdentifier("probe-outcome")
                     if canCreate(outcome) {
-                        Button("Add server") { create(outcome) }
+                        Button("Save server") { create(outcome) }
+                            .accessibilityIdentifier("save-server")
                     }
                 }
             }

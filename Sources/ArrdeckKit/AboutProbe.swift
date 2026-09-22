@@ -100,9 +100,14 @@ public struct URLSessionTransport: HTTPTransport {
     /// probe, and iOS's two silent failure modes here (ATS refusing plain HTTP,
     /// the local-network permission not yet granted) both present as a hang.
     /// Ten seconds of spinner is the difference between "denied" and "broken".
-    public init(timeout: TimeInterval = 10) {
+    ///
+    /// Ephemeral for cache but wired to the shared cookie jar: the session
+    /// cookie the pairing web view captures lands in HTTPCookieStorage.shared,
+    /// and every subsequent call must carry it or a paired backend answers 401.
+    public init(timeout: TimeInterval = 10, cookies: HTTPCookieStorage? = .shared) {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = timeout
+        config.httpCookieStorage = cookies
         session = URLSession(configuration: config)
     }
 

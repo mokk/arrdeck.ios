@@ -22,17 +22,27 @@ public struct ProfileListView: View {
                     .foregroundStyle(.orange)
             }
             ForEach(profiles) { profile in
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(profile.name).font(.headline)
-                    Text(profile.baseURL.absoluteString)
-                        .font(.caption.monospaced())
-                        .foregroundStyle(.secondary)
-                    if let info = profile.lastKnown {
-                        Text(info.version.isEmpty ? "older backend" : "arrdeck \(info.version)")
-                            .font(.caption2)
+                NavigationLink {
+                    ProfileView(profile: profile) { updated in
+                        if let at = profiles.firstIndex(where: { $0.id == updated.id }) {
+                            profiles[at] = updated
+                            persist()
+                        }
+                    }
+                } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(profile.name).font(.headline)
+                        Text(profile.baseURL.absoluteString)
+                            .font(.caption.monospaced())
                             .foregroundStyle(.secondary)
+                        if let info = profile.lastKnown {
+                            Text(info.version.isEmpty ? "older backend" : "arrdeck \(info.version)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
+                .accessibilityIdentifier("profile-row")
             }
             .onDelete(perform: remove)
         }
@@ -43,6 +53,7 @@ public struct ProfileListView: View {
             } label: {
                 Label("Add server", systemImage: "plus")
             }
+            .accessibilityIdentifier("add-server")
         }
         .sheet(isPresented: $adding) {
             NavigationStack {
@@ -72,6 +83,15 @@ public struct ProfileListView: View {
     }
 
     func persist() {
-        try? store.save(profiles)
+        do {
+            try store.save(profiles)
+            loadError = nil
+        } catch {
+            // Surfaced, not swallowed: a silent save failure looks like working
+            // persistence until the next launch, which is the worst time to
+            // find out. (Found exactly that way: an unsigned simulator build
+            // has no keychain access, and try? hid it.)
+            loadError = "Could not save servers"
+        }
     }
 }
