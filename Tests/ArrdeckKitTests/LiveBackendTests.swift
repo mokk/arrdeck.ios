@@ -1,4 +1,6 @@
+import ArrdeckAPI
 import Foundation
+import OpenAPIURLSession
 import Testing
 @testable import ArrdeckKit
 
@@ -13,7 +15,7 @@ struct LiveBackendTests {
     func theRealBackendAnswersTheProbe() async throws {
         let raw = try #require(Self.liveURL)
         let base = try #require(URL(string: raw))
-        let outcome = await AboutProbe.probe(base, transport: URLSessionTransport())
+        let outcome = await AboutProbe.probe(base, transport: ArrdeckKit.URLSessionTransport())
         guard case let .reachable(info) = outcome else {
             Issue.record("expected .reachable from \(base), got \(outcome)")
             return
@@ -28,7 +30,7 @@ struct LiveBackendTests {
         // answers 200 HTML, and the probe must not read that as an arrdeck.
         let raw = try #require(Self.liveURL)
         let base = try #require(URL(string: raw))
-        let transport = URLSessionTransport()
+        let transport = ArrdeckKit.URLSessionTransport()
         let (body, status) = try await transport.get(
             base.appending(path: "/api/v1/definitely-not-a-route")
         )
@@ -37,5 +39,24 @@ struct LiveBackendTests {
             Issue.record("SPA fallback was mistaken for an arrdeck response")
             return
         }
+    }
+}
+
+/// The generated client, end to end: spec → swift-openapi-generator → typed
+/// call → real backend. This is the drift alarm in its final form — if the
+/// pinned spec and the running backend disagree about /about, this fails.
+struct LiveGeneratedClientTests {
+    @Test(.enabled(if: LiveBackendTests.liveURL != nil))
+    func theGeneratedClientReadsAbout() async throws {
+        let raw = try #require(LiveBackendTests.liveURL)
+        let base = try #require(URL(string: raw))
+        let client = ArrdeckAPI.Client(
+            serverURL: base,
+            transport: OpenAPIURLSession.URLSessionTransport()
+        )
+        let response = try await client.about_api_v1_about_get()
+        let about = try response.ok.body.json
+        #expect(about.name == "arrdeck")
+        #expect((about.features ?? []).contains("diagnose"))
     }
 }

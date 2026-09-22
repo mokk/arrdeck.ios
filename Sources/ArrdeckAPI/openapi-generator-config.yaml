@@ -1,0 +1,5 @@
+# Types and client only (no server); public so the app targets can import it.
+generate:
+  - types
+  - client
+accessModifier: public
