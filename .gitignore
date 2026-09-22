@@ -4,3 +4,4 @@ App/Arrdeck.xcodeproj/
 xcuserdata/
 .DS_Store
 App/Sources/Info.plist
+App/build/
