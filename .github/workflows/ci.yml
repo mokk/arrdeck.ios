@@ -1,0 +1,28 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-and-build:
+    runs-on: macos-latest
+    steps:
+      # The submodule matters: AboutContractTests reads the pinned backend's
+      # FEATURE_ROUTES table, so a checkout without it fails the contract tests
+      # rather than silently skipping them.
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Package tests
+        run: ./test.sh
+
+      - name: App target builds
+        run: |
+          brew install xcodegen
+          cd App && xcodegen
+          xcodebuild -project Arrdeck.xcodeproj -scheme Arrdeck \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build
