@@ -19,10 +19,13 @@ jobs:
       - name: Package tests
         run: ./test.sh
 
-      - name: App target builds
+      # build-for-testing compiles the UI test target too; the live test
+      # inside it skips itself when TEST_RUNNER_ARRDECK_LIVE_URL is absent, so
+      # CI proves everything compiles without needing a backend to hit.
+      - name: App and UI tests build
         run: |
           brew install xcodegen
           cd App && xcodegen
           xcodebuild -project Arrdeck.xcodeproj -scheme Arrdeck \
             -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO build
+            CODE_SIGNING_ALLOWED=NO build-for-testing

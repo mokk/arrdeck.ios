@@ -37,3 +37,24 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dk.thrawn.arrdeck
         SWIFT_VERSION: "6.0"
+  ArrdeckUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: Arrdeck
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dk.thrawn.arrdeck.uitests
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  Arrdeck:
+    build:
+      targets:
+        Arrdeck: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets: [ArrdeckUITests]
