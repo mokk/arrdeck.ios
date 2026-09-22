@@ -4,8 +4,12 @@ import SwiftUI
 /// The saved servers. Deliberately no edit-URL affordance: the address is the
 /// profile's identity (sessions are cookies, passkeys are host-scoped), so a
 /// changed address is a new profile — delete and re-add, pairing again.
+///
+/// With exactly one server saved the app opens straight into it: the list is
+/// for choosing, and there is nothing to choose.
 public struct ProfileListView: View {
     @State private var profiles: [ServerProfile] = []
+    @State private var path: [ServerProfile] = []
     @State private var adding = false
     @State private var loadError: String?
 
@@ -16,20 +20,27 @@ public struct ProfileListView: View {
     }
 
     public var body: some View {
+        NavigationStack(path: $path) {
+            list
+                .navigationDestination(for: ServerProfile.self) { profile in
+                    ServerView(profile: profile) { updated in
+                        if let at = profiles.firstIndex(where: { $0.id == updated.id }) {
+                            profiles[at] = updated
+                            persist()
+                        }
+                    }
+                }
+        }
+    }
+
+    var list: some View {
         List {
             if let loadError {
                 Label(loadError, systemImage: "exclamationmark.triangle")
                     .foregroundStyle(.orange)
             }
             ForEach(profiles) { profile in
-                NavigationLink {
-                    ProfileView(profile: profile) { updated in
-                        if let at = profiles.firstIndex(where: { $0.id == updated.id }) {
-                            profiles[at] = updated
-                            persist()
-                        }
-                    }
-                } label: {
+                NavigationLink(value: profile) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(profile.name).font(.headline)
                         Text(profile.baseURL.absoluteString)
@@ -70,6 +81,9 @@ public struct ProfileListView: View {
     func load() {
         do {
             profiles = try store.load()
+            if profiles.count == 1, let only = profiles.first {
+                path = [only]
+            }
         } catch {
             // Shown, not swallowed: an unreadable Keychain with saved servers
             // looks identical to a fresh install otherwise.

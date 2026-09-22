@@ -25,10 +25,13 @@ jobs:
       # build-for-testing compiles the UI test target too; the live test
       # inside it skips itself when TEST_RUNNER_ARRDECK_LIVE_URL is absent, so
       # CI proves everything compiles without needing a backend to hit.
+      # -skipPackagePluginValidation: xcodebuild otherwise refuses to run the
+      # OpenAPI generator plugin, which only Xcode's UI can approve.
       - name: App and UI tests build
         run: |
           brew install xcodegen
           cd App && xcodegen
           xcodebuild -project Arrdeck.xcodeproj -scheme Arrdeck \
             -destination 'generic/platform=iOS Simulator' \
+            -skipPackagePluginValidation \
             CODE_SIGNING_ALLOWED=NO build-for-testing

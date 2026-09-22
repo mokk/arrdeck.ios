@@ -18,12 +18,15 @@ let package = Package(
     products: [
         .library(name: "ArrdeckKit", targets: ["ArrdeckKit"]),
         .library(name: "ArrdeckAPI", targets: ["ArrdeckAPI"]),
+        .library(name: "ArrdeckData", targets: ["ArrdeckData"]),
         .library(name: "ArrdeckUI", targets: ["ArrdeckUI"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0"),
+        // Only for the tests' stub transport; the runtime already depends on it.
+        .package(url: "https://github.com/apple/swift-http-types", from: "1.0.0"),
     ],
     targets: [
         .target(name: "ArrdeckKit"),
@@ -37,12 +40,31 @@ let package = Package(
                 .plugin(name: "OpenAPIGenerator", package: "swift-openapi-generator")
             ]
         ),
+        // The screens' data layer: domain names over the generated types, the
+        // ServiceBlock states every card renders, poll cadence, formatting and
+        // the observable models. No SwiftUI, so all of it is unit-testable.
+        .target(
+            name: "ArrdeckData",
+            dependencies: [
+                "ArrdeckAPI",
+                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+                .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
+            ]
+        ),
         // Views compile against the macOS SDK too, so type errors surface from
         // `swift build` without Xcode. iOS-only API stays out of this target.
-        .target(name: "ArrdeckUI", dependencies: ["ArrdeckKit"]),
+        .target(name: "ArrdeckUI", dependencies: ["ArrdeckKit", "ArrdeckData"]),
         .testTarget(
             name: "ArrdeckKitTests",
             dependencies: ["ArrdeckKit", "ArrdeckAPI"]
+        ),
+        .testTarget(
+            name: "ArrdeckDataTests",
+            dependencies: [
+                "ArrdeckData", "ArrdeckAPI",
+                .product(name: "HTTPTypes", package: "swift-http-types"),
+                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+            ]
         ),
     ]
 )

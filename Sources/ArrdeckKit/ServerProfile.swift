@@ -1,7 +1,7 @@
 import Foundation
 
 /// One arrdeck deployment the app knows about.
-public struct ServerProfile: Identifiable, Codable, Equatable, Sendable {
+public struct ServerProfile: Identifiable, Codable, Hashable, Sendable {
     public let id: UUID
 
     /// Immutable by design. Sessions are cookies and passkeys are rp_id-scoped,
@@ -26,7 +26,7 @@ public struct ServerProfile: Identifiable, Codable, Equatable, Sendable {
 }
 
 /// The identity and capabilities a backend reports from /api/v1/about.
-public struct BackendInfo: Codable, Equatable, Sendable {
+public struct BackendInfo: Codable, Hashable, Sendable {
     public let version: String
     /// Feature names as the backend sent them. Kept as raw strings so a newer
     /// backend's unknown features survive a round-trip through storage instead

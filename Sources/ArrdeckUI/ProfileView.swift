@@ -1,25 +1,19 @@
 import ArrdeckKit
 import SwiftUI
 
-/// One profile's standing: where it is, whether it works from here, and the
-/// pairing entry point when it does not.
+/// One profile's connection details: where it is, whether it works from here,
+/// and the pairing entry point when it does not. Shown full-screen while the
+/// session is unusable, and as a sheet from the dashboard once it is.
 public struct ProfileView: View {
-    @State private var session: ProfileSession = .unknown
     @State private var pairing = false
 
-    let profile: ServerProfile
-    let transport: any HTTPTransport
-    let onUpdate: (ServerProfile) -> Void
+    let controller: SessionController
 
-    public init(
-        profile: ServerProfile,
-        transport: any HTTPTransport = URLSessionTransport(),
-        onUpdate: @escaping (ServerProfile) -> Void
-    ) {
-        self.profile = profile
-        self.transport = transport
-        self.onUpdate = onUpdate
+    public init(controller: SessionController) {
+        self.controller = controller
     }
+
+    var profile: ServerProfile { controller.profile }
 
     public var body: some View {
         List {
@@ -31,7 +25,7 @@ public struct ProfileView: View {
                     .accessibilityIdentifier("session-status")
             }
 
-            if canPair {
+            if controller.canPair {
                 Section {
                     Button("Sign in") { pairing = true }
                         .accessibilityIdentifier("sign-in")
@@ -40,7 +34,13 @@ public struct ProfileView: View {
                 }
             }
 
-            if let info = SessionFlow.capabilities(of: session) ?? profile.lastKnown,
+            if case .offline = controller.session {
+                Section {
+                    Button("Try again") { Task { await controller.refresh() } }
+                }
+            }
+
+            if let info = SessionFlow.capabilities(of: controller.session) ?? profile.lastKnown,
                !info.features.isEmpty {
                 Section("Features") {
                     ForEach(info.features.sorted(), id: \.self) { feature in
@@ -49,28 +49,19 @@ public struct ProfileView: View {
                 }
             }
         }
-        .navigationTitle(profile.name)
-        .task { await refresh() }
         .sheet(isPresented: $pairing) {
             NavigationStack {
                 PairingView(profile: profile) {
                     pairing = false
-                    Task { await completePairing() }
+                    Task { await controller.completePairing() }
                 }
                 .navigationTitle("Sign in")
             }
         }
     }
 
-    var canPair: Bool {
-        switch session {
-        case .needsPairing, .rejected: true
-        default: false
-        }
-    }
-
     @ViewBuilder var statusRow: some View {
-        switch session {
+        switch controller.session {
         case .unknown:
             Label("Checking…", systemImage: "ellipsis.circle")
         case let .open(info):
@@ -96,33 +87,6 @@ public struct ProfileView: View {
         case let .notArrdeck(reason):
             Label("Not an arrdeck: \(reason)", systemImage: "xmark.circle")
                 .foregroundStyle(.red)
-        }
-    }
-
-    func refresh() async {
-        // Holding a cookie changes the question: not "is this an arrdeck" but
-        // "does my session still work" — the 401 answer means signed out, not
-        // pair-me.
-        let cookies = HTTPCookieStorage.shared.cookies ?? []
-        if SessionCookie.match(in: cookies, for: profile.baseURL) != nil {
-            await completePairing()
-        } else {
-            apply(SessionFlow.after(await AboutProbe.probe(profile.baseURL, transport: transport)))
-        }
-    }
-
-    func completePairing() async {
-        let (next, updated) = await Pairing.complete(profile, transport: transport)
-        session = next
-        if updated != profile { onUpdate(updated) }
-    }
-
-    func apply(_ next: ProfileSession) {
-        session = next
-        if let info = SessionFlow.capabilities(of: next), info != profile.lastKnown {
-            var updated = profile
-            updated.lastKnown = info
-            onUpdate(updated)
         }
     }
 }

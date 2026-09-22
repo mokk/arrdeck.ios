@@ -13,6 +13,7 @@ final class OnboardingUITests: XCTestCase {
         }
 
         let app = XCUIApplication()
+        app.launchArguments = ["--reset-profiles"]
         app.launch()
 
         // The local-network permission prompt can appear on first connect; iOS
@@ -50,12 +51,29 @@ final class OnboardingUITests: XCTestCase {
         ).firstMatch
         XCTAssert(row.waitForExistence(timeout: 5), "saved profile lost its capabilities")
 
-        // Relaunch: the row must come back from the Keychain, not from memory.
+        // Into the server: the dashboard, fed by the generated client through
+        // the same session, with a card that only renders once /services and
+        // /diskspace have both answered.
+        row.tap()
+        let dashboard = app.descendants(matching: .any)["dashboard"].firstMatch
+        XCTAssert(dashboard.waitForExistence(timeout: 10), "dashboard never appeared")
+        XCTAssertFalse(app.descendants(matching: .any)["connection-error"].exists, "dashboard reported a connection error")
+        // The list is lazy: a section below the fold is not in the
+        // accessibility tree until scrolled into view.
+        let storage = app.staticTexts["Storage"]
+        for _ in 0..<8 where !storage.exists {
+            app.swipeUp()
+        }
+        XCTAssert(storage.waitForExistence(timeout: 15), "storage card never rendered")
+
+        // Relaunch: the profile must come back from the Keychain, not from
+        // memory — and being the only one, it opens straight to its dashboard.
         // The first version of this test asserted only in-memory state and
         // passed while every Keychain call was failing (unsigned build).
         app.terminate()
+        app.launchArguments = []
         app.launch()
-        XCTAssert(row.waitForExistence(timeout: 5), "profile did not survive a relaunch")
+        XCTAssert(dashboard.waitForExistence(timeout: 10), "profile did not survive a relaunch")
         XCTAssertFalse(
             app.staticTexts["Could not read saved servers"].exists,
             "keychain read failed after relaunch"
