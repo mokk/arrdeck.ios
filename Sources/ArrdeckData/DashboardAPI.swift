@@ -35,7 +35,7 @@ public enum APIError: Error, Equatable, Sendable, CustomStringConvertible {
 
 /// Everything the dashboard asks of the backend, in domain terms. The model
 /// depends on this rather than on the generated client so tests can feed it
-/// canned answers; `LiveDashboardAPI` is the one real implementation.
+/// canned answers; `LiveAPI` is the one real implementation.
 public protocol DashboardAPI: Sendable {
     func services() async throws -> [ServiceInfo]
     func playSessions() async throws -> Block<[PlaySession]>
@@ -60,7 +60,7 @@ public protocol DashboardAPI: Sendable {
 
 /// The generated client, with each operation's output enum folded into a
 /// value or an `APIError`.
-public struct LiveDashboardAPI: DashboardAPI {
+public struct LiveAPI: DashboardAPI {
     let client: ArrdeckAPI.Client
 
     public init(client: ArrdeckAPI.Client) {
@@ -268,7 +268,7 @@ public struct LiveDashboardAPI: DashboardAPI {
     /// Everything that is not already an APIError is a transport failure:
     /// no route, a timeout, or a body that was not the JSON the spec promised
     /// (a reverse proxy's HTML error page, say).
-    private func call<T>(_ body: () async throws -> T) async throws -> T {
+    func call<T>(_ body: () async throws -> T) async throws -> T {
         do {
             return try await body()
         } catch let error as APIError {

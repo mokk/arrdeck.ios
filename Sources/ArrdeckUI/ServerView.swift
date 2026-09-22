@@ -9,6 +9,7 @@ public struct ServerView: View {
     @State private var controller: SessionController
     @State private var model: DashboardModel
     @State private var showingConnection = false
+    private let api: LiveAPI
 
     public init(
         profile: ServerProfile,
@@ -16,9 +17,11 @@ public struct ServerView: View {
         onUpdate: @escaping (ServerProfile) -> Void
     ) {
         let controller = SessionController(profile: profile, transport: transport, onUpdate: onUpdate)
+        let api = LiveAPI(baseURL: profile.baseURL)
+        self.api = api
         _controller = State(initialValue: controller)
         _model = State(initialValue: DashboardModel(
-            api: LiveDashboardAPI(baseURL: profile.baseURL),
+            api: api,
             onSessionLost: { controller.sessionLost() }
         ))
     }
@@ -28,7 +31,10 @@ public struct ServerView: View {
             if case .unknown = controller.session {
                 ProgressView("Connecting…")
             } else if controller.isUsable {
-                DashboardView(model: model, baseURL: controller.profile.baseURL)
+                DashboardView(
+                    model: model, baseURL: controller.profile.baseURL, api: api,
+                    onSessionLost: { [controller] in controller.sessionLost() }
+                )
                     .toolbar {
                         Button {
                             showingConnection = true

@@ -32,8 +32,8 @@ struct StubTransport: ClientTransport {
 }
 
 @Suite struct DecodingTests {
-    func api(_ routes: [String: StubTransport.Route]) -> LiveDashboardAPI {
-        LiveDashboardAPI(client: Client(
+    func api(_ routes: [String: StubTransport.Route]) -> LiveAPI {
+        LiveAPI(client: Client(
             serverURL: URL(string: "http://stub")!, transport: StubTransport(routes: routes)
         ))
     }

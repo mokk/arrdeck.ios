@@ -7,6 +7,15 @@ import XCTest
 /// env vars reach the test runner process); skipped when absent, so CI passes
 /// without a backend.
 final class OnboardingUITests: XCTestCase {
+    /// With TEST_RUNNER_ARRDECK_SCREENSHOT_DIR set, drops a PNG of the current
+    /// screen there — the simulator has no other way to reach a screen that
+    /// takes several taps to get to.
+    func snap(_ name: String) {
+        guard let dir = ProcessInfo.processInfo.environment["ARRDECK_SCREENSHOT_DIR"] else { return }
+        let url = URL(fileURLWithPath: dir).appendingPathComponent("\(name).png")
+        try? XCUIScreen.main.screenshot().pngRepresentation.write(to: url)
+    }
+
     func testAddingTheLANServerEndToEnd() throws {
         guard let live = ProcessInfo.processInfo.environment["ARRDECK_LIVE_URL"] else {
             throw XCTSkip("set TEST_RUNNER_ARRDECK_LIVE_URL to run against a real backend")
@@ -65,6 +74,20 @@ final class OnboardingUITests: XCTestCase {
             app.swipeUp()
         }
         XCTAssert(storage.waitForExistence(timeout: 15), "storage card never rendered")
+        snap("dashboard-lower")
+
+        // Into Downloads: the merged torrent list from /torrents, through the
+        // same client. The header counts rows once the first page has landed.
+        app.buttons["downloads-link"].tap()
+        let downloads = app.descendants(matching: .any)["downloads"].firstMatch
+        XCTAssert(downloads.waitForExistence(timeout: 10), "downloads screen never appeared")
+        let counted = app.staticTexts.matching(
+            NSPredicate(format: "label MATCHES '[1-9][0-9]* of [0-9]+ torrents'")
+        ).firstMatch
+        XCTAssert(counted.waitForExistence(timeout: 20), "torrent list never loaded")
+        XCTAssert(app.descendants(matching: .any)["torrent-row"].firstMatch.exists, "no torrent rows rendered")
+        snap("downloads")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
 
         // Relaunch: the profile must come back from the Keychain, not from
         // memory — and being the only one, it opens straight to its dashboard.

@@ -8,10 +8,17 @@ import SwiftUI
 public struct DashboardView: View {
     let model: DashboardModel
     let baseURL: URL
+    let api: any DownloadsAPI
+    let onSessionLost: @MainActor () -> Void
 
-    public init(model: DashboardModel, baseURL: URL) {
+    public init(
+        model: DashboardModel, baseURL: URL, api: any DownloadsAPI,
+        onSessionLost: @escaping @MainActor () -> Void
+    ) {
         self.model = model
         self.baseURL = baseURL
+        self.api = api
+        self.onSessionLost = onSessionLost
     }
 
     public var body: some View {
@@ -43,6 +50,17 @@ public struct DashboardView: View {
         .dashboardListStyle()
         .refreshable { await model.refresh() }
         .task { await model.run() }
+        .toolbar {
+            NavigationLink {
+                DownloadsView(
+                    api: api, clients: model.torrentClients, hasArr: model.hasArr,
+                    onSessionLost: onSessionLost
+                )
+            } label: {
+                Label("Downloads", systemImage: "arrow.down.circle")
+            }
+            .accessibilityIdentifier("downloads-link")
+        }
         .alert("Action failed", isPresented: actionFailed) {
             Button("OK") { model.actionError = nil }
         } message: {
@@ -279,7 +297,12 @@ struct QueueSection: View {
                         StaleNote(age: age)
                     }
                     ForEach(items, id: \.id) { item in
-                        QueueRow(item: item, model: model)
+                        QueueRow(
+                            item: item,
+                            pending: model.isPending("queue-\(item.app.rawValue)-\(item.id)"),
+                            forceImport: { Task { await model.forceImport(item) } },
+                            retry: { Task { await model.blocklistRetry(item) } }
+                        )
                     }
                 }
             }
@@ -289,7 +312,10 @@ struct QueueSection: View {
 
 struct QueueRow: View {
     let item: QueueItem
-    let model: DashboardModel
+    let pending: Bool
+    let forceImport: () -> Void
+    let retry: () -> Void
+    var remove: (() -> Void)? = nil
 
     var troubled: Bool {
         !(item.errors ?? []).isEmpty || item.tracked_status == "warning" || item.tracked_status == "error"
@@ -318,15 +344,19 @@ struct QueueRow: View {
             Spacer(minLength: 0)
             VStack(spacing: 6) {
                 if let state = item.tracked_state, state.hasPrefix("import"), state != "imported" {
-                    Button("Force import") { Task { await model.forceImport(item) } }
+                    Button("Force import", action: forceImport)
                         .buttonStyle(.bordered).controlSize(.small)
                 }
                 if troubled {
-                    Button("Blocklist & retry") { Task { await model.blocklistRetry(item) } }
+                    Button("Blocklist & retry", action: retry)
                         .buttonStyle(.bordered).controlSize(.small).tint(.orange)
                 }
+                if let remove {
+                    Button("Remove", role: .destructive, action: remove)
+                        .buttonStyle(.bordered).controlSize(.small)
+                }
             }
-            .disabled(model.isPending("queue-\(item.app.rawValue)-\(item.id)"))
+            .disabled(pending)
         }
     }
 }
