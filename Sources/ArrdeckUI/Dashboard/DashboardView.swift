@@ -8,11 +8,14 @@ import SwiftUI
 public struct DashboardView: View {
     let model: DashboardModel
     let baseURL: URL
-    let api: any DownloadsAPI
+    let api: any DownloadsAPI & LibraryAPI
     let onSessionLost: @MainActor () -> Void
+    /// Pushed programmatically: a NavigationLink nested in the poster strip's
+    /// horizontal ScrollView inside a List row never fires, a Button does.
+    @State private var opened: MediaRef?
 
     public init(
-        model: DashboardModel, baseURL: URL, api: any DownloadsAPI,
+        model: DashboardModel, baseURL: URL, api: any DownloadsAPI & LibraryAPI,
         onSessionLost: @escaping @MainActor () -> Void
     ) {
         self.model = model
@@ -34,7 +37,7 @@ public struct DashboardView: View {
             NowPlayingSection(model: model)
             HealthSection(model: model)
             RequestsSection(model: model, baseURL: baseURL)
-            RecentSection(model: model, baseURL: baseURL)
+            RecentSection(model: model, baseURL: baseURL) { opened = $0 }
             TorrentSection(model: model)
             QueueSection(model: model)
             if model.hasArr {
@@ -50,6 +53,10 @@ public struct DashboardView: View {
         .dashboardListStyle()
         .refreshable { await model.refresh() }
         .task { await model.run() }
+        // NavigationLink(value:) takes the optional ref and pushes the wrapped
+        // value, so the destination is registered for MediaRef, not MediaRef?.
+        .navigationDestination(for: MediaRef.self) { ref in destination(ref) }
+        .navigationDestination(item: $opened) { ref in destination(ref) }
         .toolbar {
             NavigationLink {
                 DownloadsView(
@@ -74,6 +81,15 @@ public struct DashboardView: View {
             get: { model.actionError != nil },
             set: { if !$0 { model.actionError = nil } }
         )
+    }
+
+    @ViewBuilder func destination(_ ref: MediaRef) -> some View {
+        switch ref {
+        case let .movie(id):
+            MovieDetailView(id: id, api: api, baseURL: baseURL, hasPlex: model.has("plex"), onSessionLost: onSessionLost)
+        case let .series(id):
+            SeriesDetailView(id: id, api: api, baseURL: baseURL, hasPlex: model.has("plex"), onSessionLost: onSessionLost)
+        }
     }
 }
 
@@ -188,6 +204,7 @@ struct RequestsSection: View {
 struct RecentSection: View {
     let model: DashboardModel
     let baseURL: URL
+    let open: (MediaRef) -> Void
 
     var body: some View {
         if let recent = model.recent.value, !recent.isEmpty {
@@ -195,6 +212,9 @@ struct RecentSection: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .top, spacing: 12) {
                         ForEach(Array(recent.enumerated()), id: \.offset) { _, item in
+                            Button {
+                                if let ref = item.ref { open(ref) }
+                            } label: {
                             VStack(alignment: .leading, spacing: 4) {
                                 if item.poster != nil {
                                     Poster(path: item.poster, baseURL: baseURL, width: 92, cornerRadius: 12)
@@ -210,6 +230,10 @@ struct RecentSection: View {
                                 Text(item.subtitle ?? " ").font(.caption2).foregroundStyle(.secondary).lineLimit(1)
                             }
                             .frame(width: 92)
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(item.ref == nil)
+                            .accessibilityIdentifier("recent-poster")
                         }
                     }
                     .padding(.horizontal, 16)
@@ -430,19 +454,22 @@ struct HistorySection: View {
                     EmptyNote("Nothing grabbed yet")
                 }
                 ForEach(Array(merged.prefix(12).enumerated()), id: \.offset) { _, item in
-                    HStack(alignment: .top, spacing: 12) {
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(item.title).font(.subheadline.weight(.medium)).lineLimit(1)
-                            HStack(spacing: 4) {
-                                StateBadge(state: item.app.rawValue)
-                                ForEach(item.events ?? [], id: \._type) { event in
-                                    StateBadge(state: event._type)
+                    NavigationLink(value: item.ref) {
+                        HStack(alignment: .top, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(item.title).font(.subheadline.weight(.medium)).lineLimit(1)
+                                HStack(spacing: 4) {
+                                    StateBadge(state: item.app.rawValue)
+                                    ForEach(item.events ?? [], id: \._type) { event in
+                                        StateBadge(state: event._type)
+                                    }
                                 }
                             }
+                            Spacer(minLength: 0)
+                            Text(Format.dayTime(item.date)).font(.caption).foregroundStyle(.secondary)
                         }
-                        Spacer(minLength: 0)
-                        Text(Format.dayTime(item.date)).font(.caption).foregroundStyle(.secondary)
                     }
+                    .disabled(item.ref == nil)
                 }
             }
         }

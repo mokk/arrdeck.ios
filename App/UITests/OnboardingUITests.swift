@@ -89,6 +89,22 @@ final class OnboardingUITests: XCTestCase {
         snap("downloads")
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
+        // Into a title: the first recently-added poster opens its detail
+        // screen, movie or series depending on which arr it came from.
+        let poster = app.descendants(matching: .any)["recent-poster"].firstMatch
+        for _ in 0..<8 where !poster.exists {
+            app.swipeDown()   // back to the top: the strip sits above the fold
+        }
+        XCTAssert(poster.waitForExistence(timeout: 10), "no recently-added poster to tap")
+        poster.tap()
+        let detail = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier IN {'movie-detail', 'series-detail'}")
+        ).firstMatch
+        XCTAssert(detail.waitForExistence(timeout: 10), "detail screen never appeared")
+        XCTAssert(app.buttons["Search now"].waitForExistence(timeout: 15), "detail never loaded its actions")
+        snap("detail")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
         // Relaunch: the profile must come back from the Keychain, not from
         // memory — and being the only one, it opens straight to its dashboard.
         // The first version of this test asserted only in-memory state and
