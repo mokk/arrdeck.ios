@@ -6,9 +6,10 @@
 // Xcode app target (App/) merely consumes it.
 //
 // ArrdeckAPI is the generated client: swift-openapi-generator runs as a build
-// plugin over the committed spec in the arrdeck submodule (symlinked into the
-// target), so the 125 routes are typed and drift from the pinned backend is a
-// compile error rather than a runtime surprise.
+// plugin over Sources/ArrdeckAPI/openapi.json, which Scripts/derive-spec.sh
+// derives from the pinned submodule's spec (see Scripts/derive-spec.jq for the
+// one rewrite it applies). The 125 routes are typed, and drift from the pinned
+// backend is a compile error rather than a runtime surprise.
 import PackageDescription
 
 let package = Package(

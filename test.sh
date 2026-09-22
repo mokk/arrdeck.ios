@@ -7,6 +7,16 @@
 # there — so the framework directory is passed explicitly and the overlay
 # (whose conveniences these tests do not use) is disabled.
 set -e
+cd "$(dirname "$0")"
+
+# The generator's spec is derived from the submodule's; a stale copy would
+# type the client against a backend other than the pinned one.
+./Scripts/derive-spec.sh
+if ! git diff --quiet -- Sources/ArrdeckAPI/openapi.json; then
+    echo "Sources/ArrdeckAPI/openapi.json was out of date; regenerated — commit it." >&2
+    exit 1
+fi
+
 case "$(xcode-select -p 2>/dev/null)" in
 *CommandLineTools*)
     FW=/Library/Developer/CommandLineTools/Library/Developer/Frameworks

@@ -16,6 +16,9 @@ jobs:
         with:
           submodules: true
 
+      # test.sh also re-derives the generator's spec from the submodule and
+      # fails on drift, so a submodule bump without Scripts/derive-spec.sh
+      # is caught here rather than by a client typed against the wrong backend.
       - name: Package tests
         run: ./test.sh
 
