@@ -142,6 +142,22 @@ final class OnboardingUITests: XCTestCase {
         app.buttons["manage-connections"].tap()
         XCTAssert(app.staticTexts["configured"].firstMatch.waitForExistence(timeout: 20), "connections never loaded")
         snap("connections")
+
+        // Add: Overseerr's popular titles fill the grid while the box is empty.
+        app.tabBars.buttons["Add"].tap()
+        XCTAssert(app.descendants(matching: .any)["add"].firstMatch.waitForExistence(timeout: 10), "add screen never appeared")
+        XCTAssert(app.descendants(matching: .any)["search-result"].firstMatch.waitForExistence(timeout: 30), "no popular titles rendered")
+        snap("add")
+
+        // Popular: the cached snapshot, or the honest "building" note if the
+        // backend has not produced one yet.
+        app.tabBars.buttons["Popular"].tap()
+        XCTAssert(app.descendants(matching: .any)["popular"].firstMatch.waitForExistence(timeout: 10), "popular screen never appeared")
+        let popularLoaded = app.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS 'releases in' OR label CONTAINS 'Building the first list' OR label CONTAINS 'Offline'")
+        ).firstMatch
+        XCTAssert(popularLoaded.waitForExistence(timeout: 30), "popular never rendered")
+        snap("popular")
         app.tabBars.buttons["Home"].tap()
 
         // Relaunch: the profile must come back from the Keychain, not from
