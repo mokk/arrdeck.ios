@@ -23,12 +23,16 @@ public struct ProfileListView: View {
     }
 
     public var body: some View {
-        if let selected {
-            ServerView(profile: selected, onUpdate: update, onSwitch: { self.selected = nil })
-                .id(selected.id)
-        } else {
-            NavigationStack { list }
+        Group {
+            if let selected {
+                ServerView(profile: selected, onUpdate: update, onSwitch: { self.selected = nil })
+                    .id(selected.id)
+            } else {
+                NavigationStack { list }
+            }
         }
+        // the palette and appearance chosen under Settings → Display
+        .themed()
     }
 
     var list: some View {

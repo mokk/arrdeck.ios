@@ -63,6 +63,7 @@ public struct AddProfileView: View {
                 }
             }
         }
+        .themedList()
         .navigationTitle("Add server")
     }
 

@@ -78,7 +78,7 @@ struct Completion: View {
     var body: some View {
         if total > 0 {
             ProgressView(value: Double(min(have, total)), total: Double(total))
-                .tint(have >= total ? .green : .accentColor)
+                .tint(have >= total ? .green : Color.accent)
         }
     }
 }
@@ -156,8 +156,8 @@ private struct UpNextRow: View {
                 Text(Format.when(air))
                     .font(.caption.weight(.semibold))
                     .padding(.horizontal, 8).padding(.vertical, 3)
-                    .background(Color.accentColor.opacity(0.15), in: Capsule())
-                    .foregroundStyle(Color.accentColor)
+                    .background(Color.accent.opacity(0.15), in: Capsule())
+                    .foregroundStyle(Color.accent)
             }
         }
         .padding(.horizontal, 12).padding(.vertical, 8)
@@ -347,7 +347,7 @@ struct CollectionsLibraryList: View {
                 Completion(have: have, total: total)
             }
             Spacer(minLength: 0)
-            if item.monitored == true { Image(systemName: "bookmark.fill").foregroundStyle(Color.accentColor) }
+            if item.monitored == true { Image(systemName: "bookmark.fill").foregroundStyle(Color.accent) }
         }
         .padding(.horizontal, 12).padding(.vertical, 8)
         .contentShape(Rectangle())

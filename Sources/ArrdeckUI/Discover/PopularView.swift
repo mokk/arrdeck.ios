@@ -64,7 +64,7 @@ public struct PopularView: View {
                     HStack(alignment: .top, spacing: 10) {
                         Text("\(index + 1)")
                             .font(.subheadline.weight(.bold))
-                            .foregroundStyle(index < 3 ? Color.accentColor : Color.secondary)
+                            .foregroundStyle(index < 3 ? Color.accent : Color.secondary)
                             .frame(width: 20)
                         VStack(alignment: .leading, spacing: 3) {
                             Text(release.title ?? "").font(.subheadline.weight(.medium)).lineLimit(2)

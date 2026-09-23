@@ -54,6 +54,7 @@ struct AddTorrentSheet: View {
                     Section { ErrorNote(error) }
                 }
             }
+            .themedList()
             .navigationTitle("Add torrent")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }

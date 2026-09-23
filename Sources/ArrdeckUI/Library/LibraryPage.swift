@@ -445,7 +445,7 @@ struct LibraryListRow: View {
                 .overlay(alignment: .topTrailing) {
                     if let selected {
                         Image(systemName: selected ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(selected ? Color.accentColor : Color.white)
+                            .foregroundStyle(selected ? Color.accent : Color.white)
                             .padding(3)
                     }
                 }
@@ -492,7 +492,7 @@ struct LetterStrip: View {
                 VStack(spacing: 0) {
                     ForEach(letters, id: \.self) { letter in
                         Text(letter).font(.system(size: min(11, step - 3), weight: .semibold))
-                            .foregroundStyle(Color.accentColor)
+                            .foregroundStyle(Color.accent)
                             .frame(width: 20, height: step)
                     }
                 }
@@ -545,11 +545,11 @@ struct LibraryCard: View {
 
     var dotColor: Color { Self.color(row.dot) }
 
-    static func color(_ dot: LibraryRow.Dot) -> Color {
+    @MainActor static func color(_ dot: LibraryRow.Dot) -> Color {
         switch dot {
-        case .complete: .green
-        case .wanted: .blue
-        case .unmonitored: .orange
+        case .complete: Color.success
+        case .wanted: Color.accent
+        case .unmonitored: Color.warning
         }
     }
 
@@ -561,7 +561,7 @@ struct LibraryCard: View {
                     if let selected {
                         Image(systemName: selected ? "checkmark.circle.fill" : "circle")
                             .font(.title3)
-                            .foregroundStyle(selected ? Color.accentColor : Color.white)
+                            .foregroundStyle(selected ? Color.accent : Color.white)
                             .padding(6)
                     } else {
                         Circle().fill(dotColor).frame(width: 10, height: 10)
@@ -587,25 +587,6 @@ struct LibraryCard: View {
     }
 }
 
-extension Color {
-    /// A card on the grouped background, on both platforms.
-    static var card: Color {
-        #if os(iOS)
-        Color(uiColor: .secondarySystemGroupedBackground)
-        #else
-        Color(nsColor: .controlBackgroundColor)
-        #endif
-    }
-
-    /// The grouped background behind cards, on both platforms.
-    static var grouped: Color {
-        #if os(iOS)
-        Color(uiColor: .systemGroupedBackground)
-        #else
-        Color(nsColor: .windowBackgroundColor)
-        #endif
-    }
-}
 
 extension SearchFieldPlacement {
     /// The field always shown under the title on iOS; macOS keeps its default.

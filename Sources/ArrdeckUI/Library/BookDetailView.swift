@@ -37,7 +37,7 @@ public struct BookDetailView: View {
                             if let authorID = book.author_id {
                                 NavigationLink {
                                     AuthorDetailView(id: authorID, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
-                                } label: { Text(author).foregroundStyle(Color.accentColor) }
+                                } label: { Text(author).foregroundStyle(Color.accent) }
                                 .buttonStyle(.plain)
                                 .accessibilityIdentifier("book-author")
                             } else {

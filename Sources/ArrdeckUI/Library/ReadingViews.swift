@@ -77,6 +77,7 @@ struct OpdsSettingsView: View {
                 Text("E-reader apps such as KOReader, Moon+ Reader or Thorium can browse the books on disk here and download them. Add the address to the app as an OPDS catalogue.")
             }
         }
+        .themedList()
         .navigationTitle("Reading apps")
         .confirmationDialog("New address", isPresented: $confirmingNew, titleVisibility: .visible) {
             Button("New address", role: .destructive) { Task { await set(true) } }

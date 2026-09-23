@@ -115,7 +115,7 @@ public struct CalendarScreen: View {
                         } header: {
                             HStack {
                                 Text(dayHeading(day))
-                                if day == model.today { Text("today").foregroundStyle(Color.accentColor) }
+                                if day == model.today { Text("today").foregroundStyle(Color.accent) }
                             }
                         }
                     }
@@ -193,7 +193,7 @@ public struct CalendarScreen: View {
                 }
                 Text(date.formatted(.dateTime.day()))
                     .font(.caption.weight(isToday ? .bold : .regular))
-                    .foregroundStyle(isToday ? Color.accentColor : Color.primary)
+                    .foregroundStyle(isToday ? Color.accent : Color.primary)
                 HStack(spacing: 2) {
                     ForEach(Array(items.prefix(4).enumerated()), id: \.offset) { _, item in
                         Circle().fill(dotColor(item)).frame(width: 5, height: 5)
@@ -203,7 +203,7 @@ public struct CalendarScreen: View {
             }
             .frame(maxWidth: .infinity, minHeight: tall ? 56 : 64)
             .background(.background, in: RoundedRectangle(cornerRadius: 10))
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(selected ? Color.accentColor : .clear, lineWidth: 2))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(selected ? Color.accent : .clear, lineWidth: 2))
         }
         .buttonStyle(.plain)
         // the coloured dots alone don't say how much is on a day
@@ -248,7 +248,7 @@ struct FilterChip: View {
         Button(action: action) {
             Text(label).font(.caption.weight(.semibold))
                 .padding(.horizontal, 12).padding(.vertical, 6)
-                .background(on ? Color.accentColor : Color.secondary.opacity(0.15), in: Capsule())
+                .background(on ? Color.accent : Color.secondary.opacity(0.15), in: Capsule())
                 .foregroundStyle(on ? Color.white : Color.secondary)
         }
         .buttonStyle(.plain)

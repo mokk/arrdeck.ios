@@ -25,14 +25,14 @@ struct AppTabBar: View {
                                         .font(.system(size: 10, weight: .bold))
                                         .foregroundStyle(.white)
                                         .padding(.horizontal, 4).padding(.vertical, 1)
-                                        .background(Color.accentColor, in: Capsule())
+                                        .background(Color.accent, in: Capsule())
                                         .offset(x: 10, y: -6)
                                         .accessibilityLabel("\(count) new")
                                 }
                             }
                         Text(tab.label).font(.system(size: 10, weight: selected == tab ? .semibold : .regular))
                     }
-                    .foregroundStyle(selected == tab ? Color.accentColor : Color.secondary)
+                    .foregroundStyle(selected == tab ? Color.accent : Color.secondary)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 8)
                     .contentShape(Rectangle())

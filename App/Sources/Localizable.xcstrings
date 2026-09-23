@@ -11,6 +11,16 @@
         }
       }
     },
+    "%@ has no light variant, so it always shows dark.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ har ingen lys udgave, så det vises altid mørkt."
+          }
+        }
+      }
+    },
     "%@ overdue": {
       "localizations": {
         "da": {
@@ -612,6 +622,16 @@
         }
       }
     },
+    "Appearance": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Udseende"
+          }
+        }
+      }
+    },
     "Apply": {
       "localizations": {
         "da": {
@@ -1040,6 +1060,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Brugerdefinerede formater: %@"
+          }
+        }
+      }
+    },
+    "Dark": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mørk"
+          }
+        }
+      }
+    },
+    "Dark only": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kun mørk"
           }
         }
       }
@@ -1997,6 +2037,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Biblioteksstørrelse"
+          }
+        }
+      }
+    },
+    "Light": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lys"
+          }
+        }
+      }
+    },
+    "Light · Dark": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lys · Mørk"
           }
         }
       }
@@ -3704,6 +3764,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Filerne slettes fra disken, hvilket frigør omkring %@. Det kan ikke fortrydes."
+          }
+        }
+      }
+    },
+    "Theme": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tema"
           }
         }
       }

@@ -75,7 +75,7 @@ struct CleanupView: View {
             Button { model.toggle(item) } label: {
                 Image(systemName: model.picked[item.key] != nil ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
-                    .foregroundStyle(model.picked[item.key] != nil ? Color.accentColor : Color.secondary)
+                    .foregroundStyle(model.picked[item.key] != nil ? Color.accent : Color.secondary)
             }
             .buttonStyle(.borderless)
             .accessibilityLabel(Text("Select \(item.title ?? "")"))
@@ -117,6 +117,7 @@ struct CleanupView: View {
                     }
                 }
             }
+            .themedList()
             .navigationTitle("Delete \(model.chosen.count) titles?")
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { confirming = false } } }
         }

@@ -61,7 +61,7 @@ public struct DownloadsView: View {
                         HStack(spacing: 10) {
                             if model.selecting {
                                 Image(systemName: model.selected.contains(torrent.key) ? "checkmark.circle.fill" : "circle")
-                                    .foregroundStyle(model.selected.contains(torrent.key) ? Color.accentColor : Color.secondary)
+                                    .foregroundStyle(model.selected.contains(torrent.key) ? Color.accent : Color.secondary)
                             }
                             TorrentRow(torrent: torrent)
                         }

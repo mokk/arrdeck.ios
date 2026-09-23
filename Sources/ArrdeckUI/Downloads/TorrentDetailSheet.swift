@@ -161,7 +161,7 @@ struct TorrentDetailSheet: View {
                         ForEach(extras.allTags, id: \.self) { tag in
                             Button(tag) { Task { await extras.toggle(tag: tag) } }
                                 .buttonStyle(.bordered).controlSize(.small)
-                                .tint(extras.tags.contains(tag) ? .accentColor : .secondary)
+                                .tint(extras.tags.contains(tag) ? Color.accent : .secondary)
                         }
                     }
                 }
@@ -183,7 +183,7 @@ struct FileRow: View {
     var body: some View {
         HStack {
             Image(systemName: skipped ? "square" : "checkmark.square.fill")
-                .foregroundStyle(skipped ? Color.secondary : Color.accentColor)
+                .foregroundStyle(skipped ? Color.secondary : Color.accent)
             Text(file.name)
                 .font(.caption)
                 .lineLimit(1)

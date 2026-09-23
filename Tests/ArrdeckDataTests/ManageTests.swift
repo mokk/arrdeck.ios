@@ -380,3 +380,16 @@ struct FakeCleanupAPI: CleanupAPI {
         #expect(GlobalSearch.hits(rows, authors: [], query: "d").isEmpty, "one letter is too little to search")
     }
 }
+
+@Suite struct PaletteTests {
+    @Test func variantsAndDarkOnly() {
+        #expect(Palette.allCases.count == 9)
+        #expect(Palette.arrdeck.dark == nil && !Palette.arrdeck.darkOnly, "arrdeck's own uses the system colours")
+        #expect(Palette.dracula.darkOnly && Palette.dracula.light == nil)
+        #expect(Palette.catppuccin.light?.background == 0xE6E9EF)
+        #expect(Palette.catppuccin.dark?.background == 0x181825)
+        for palette in Palette.allCases where palette != .arrdeck {
+            #expect(palette.dark != nil, "\(palette) needs a dark variant")
+        }
+    }
+}

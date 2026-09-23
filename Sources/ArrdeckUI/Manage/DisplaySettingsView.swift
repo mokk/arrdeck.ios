@@ -19,8 +19,26 @@ struct DisplaySettingsView: View {
     var allTabs: [AppTab] { AppTab.arrange(AppTab.available(configured: configured), order: AppTab.list(tabOrder), hidden: []) }
     var hidden: Set<AppTab> { Set(AppTab.list(hiddenTabs)) }
 
+    @State private var theme = ThemeStore.shared
+
     var body: some View {
         Form {
+            Section {
+                ForEach(Palette.allCases, id: \.self) { palette in
+                    Button { theme.palette = palette } label: { PaletteRow(palette: palette, selected: theme.palette == palette) }
+                        .buttonStyle(.plain)
+                }
+                Picker("Appearance", selection: $theme.appearance) {
+                    ForEach(Appearance.allCases, id: \.self) { Text($0.label).tag($0) }
+                }
+                .disabled(theme.palette.darkOnly)
+            } header: {
+                Text("Theme")
+            } footer: {
+                if theme.palette.darkOnly {
+                    Text("\(theme.palette.name) has no light variant, so it always shows dark.")
+                }
+            }
             Section("Tabs") {
                 Picker("Open on", selection: $startTab) {
                     Text("Default").tag("")
@@ -86,6 +104,7 @@ struct DisplaySettingsView: View {
             }
         }
         .alwaysEditing()
+        .themedList()
         .navigationTitle("Display")
     }
 }
@@ -169,6 +188,7 @@ struct NotificationSettingsView: View {
                 }
             }
         }
+        .themedList()
         .navigationTitle("Notifications")
         .task {
             await model.load()
@@ -199,5 +219,48 @@ private extension View {
         #else
         self
         #endif
+    }
+}
+
+/// A palette with a strip of its colours in the mode it would show in.
+private struct PaletteRow: View {
+    let palette: Palette
+    let selected: Bool
+    @Environment(\.colorScheme) private var scheme
+
+    var tokens: PaletteTokens? {
+        scheme == .light ? (palette.light ?? palette.dark) : palette.dark
+    }
+
+    var subtitle: String {
+        if palette.darkOnly { return String(localized: "Dark only") }
+        return palette.variants ?? String(localized: "Light · Dark")
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            HStack(spacing: 3) {
+                ForEach(swatches, id: \.self) { color in
+                    Circle().fill(color).frame(width: 14, height: 14)
+                }
+            }
+            .padding(6)
+            .background(tokens.map { Color(hex: $0.background) } ?? Color.grouped, in: Capsule())
+            .overlay(Capsule().stroke(.quaternary))
+            VStack(alignment: .leading, spacing: 1) {
+                Text(verbatim: palette.name).font(.body)
+                Text(subtitle).font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer()
+            if selected { Image(systemName: "checkmark").foregroundStyle(Color.accent).fontWeight(.semibold) }
+        }
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    var swatches: [Color] {
+        guard let t = tokens else { return [.accentColor, .green, .orange, .red] }
+        return [t.accent, t.success, t.warning, t.danger].map { Color(hex: $0) }
     }
 }

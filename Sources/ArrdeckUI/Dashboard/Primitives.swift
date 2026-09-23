@@ -111,7 +111,7 @@ struct ProgressBar: View {
     let value: Double
     var body: some View {
         ProgressView(value: min(1, max(0, value)))
-            .tint(value >= 1 ? .green : .accentColor)
+            .tint(value >= 1 ? .green : Color.accent)
     }
 }
 
@@ -190,7 +190,7 @@ struct Sparkline: View {
                 let y = size.height - inset - (size.height - 2 * inset) * CGFloat((value - low) / span)
                 if index == 0 { path.move(to: CGPoint(x: x, y: y)) } else { path.addLine(to: CGPoint(x: x, y: y)) }
             }
-            context.stroke(path, with: .color(.accentColor), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+            context.stroke(path, with: .color(Color.accent), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
         }
         .frame(minHeight: 28)
         .accessibilityHidden(true)
@@ -218,9 +218,9 @@ extension View {
     /// needs to compile.
     func dashboardListStyle() -> some View {
         #if os(iOS)
-        listStyle(.insetGrouped)
+        listStyle(.insetGrouped).themedList()
         #else
-        listStyle(.inset)
+        listStyle(.inset).themedList()
         #endif
     }
 }
