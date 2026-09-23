@@ -76,9 +76,22 @@ final class OnboardingUITests: XCTestCase {
         XCTAssert(storage.waitForExistence(timeout: 15), "storage card never rendered")
         snap("dashboard-lower")
 
+        // Into the calendar from the Upcoming card's header link.
+        let calendarLink = app.buttons["calendar-link"]
+        for _ in 0..<4 where !calendarLink.exists {
+            app.swipeDown()
+        }
+        XCTAssert(calendarLink.waitForExistence(timeout: 5), "no calendar link on the dashboard")
+        calendarLink.tap()
+        let calendarScreen = app.descendants(matching: .any)["calendar"].firstMatch
+        XCTAssert(calendarScreen.waitForExistence(timeout: 10), "calendar never appeared")
+        XCTAssert(app.buttons["Agenda"].waitForExistence(timeout: 5), "calendar view picker missing")
+        snap("calendar")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
         // Into Downloads: the merged torrent list from /torrents, through the
         // same client. The header counts rows once the first page has landed.
-        app.buttons["downloads-link"].tap()
+        app.tabBars.buttons["Downloads"].tap()
         let downloads = app.descendants(matching: .any)["downloads"].firstMatch
         XCTAssert(downloads.waitForExistence(timeout: 10), "downloads screen never appeared")
         let counted = app.staticTexts.matching(
@@ -87,7 +100,7 @@ final class OnboardingUITests: XCTestCase {
         XCTAssert(counted.waitForExistence(timeout: 20), "torrent list never loaded")
         XCTAssert(app.descendants(matching: .any)["torrent-row"].firstMatch.exists, "no torrent rows rendered")
         snap("downloads")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.tabBars.buttons["Home"].tap()
 
         // Into a title: the first recently-added poster opens its detail
         // screen, movie or series depending on which arr it came from.

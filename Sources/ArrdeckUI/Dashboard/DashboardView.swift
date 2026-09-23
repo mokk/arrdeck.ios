@@ -8,14 +8,14 @@ import SwiftUI
 public struct DashboardView: View {
     let model: DashboardModel
     let baseURL: URL
-    let api: any DownloadsAPI & LibraryAPI & WantedAPI
+    let api: any DownloadsAPI & LibraryAPI & WantedAPI & CalendarAPI
     let onSessionLost: @MainActor () -> Void
     /// Pushed programmatically: a NavigationLink nested in the poster strip's
     /// horizontal ScrollView inside a List row never fires, a Button does.
     @State private var opened: MediaRef?
 
     public init(
-        model: DashboardModel, baseURL: URL, api: any DownloadsAPI & LibraryAPI & WantedAPI,
+        model: DashboardModel, baseURL: URL, api: any DownloadsAPI & LibraryAPI & WantedAPI & CalendarAPI,
         onSessionLost: @escaping @MainActor () -> Void
     ) {
         self.model = model
@@ -41,7 +41,9 @@ public struct DashboardView: View {
             TorrentSection(model: model)
             QueueSection(model: model)
             if model.hasArr {
-                CalendarSection(model: model)
+                CalendarSection(model: model) {
+                    CalendarScreen(api: api, onSessionLost: onSessionLost)
+                }
                 StorageSection(model: model)
             }
             if model.has("gluetun") { VpnSection(model: model) }
@@ -69,15 +71,6 @@ public struct DashboardView: View {
                 }
                 .accessibilityIdentifier("wanted-link")
             }
-            NavigationLink {
-                DownloadsView(
-                    api: api, clients: model.torrentClients, hasArr: model.hasArr,
-                    onSessionLost: onSessionLost
-                )
-            } label: {
-                Label("Downloads", systemImage: "arrow.down.circle")
-            }
-            .accessibilityIdentifier("downloads-link")
         }
         .alert("Action failed", isPresented: actionFailed) {
             Button("OK") { model.actionError = nil }
@@ -396,11 +389,12 @@ struct QueueRow: View {
     }
 }
 
-struct CalendarSection: View {
+struct CalendarSection<Destination: View>: View {
     let model: DashboardModel
+    @ViewBuilder let destination: () -> Destination
 
     var body: some View {
-        Section("Upcoming (14 days)") {
+        Section {
             RefreshNote(error: model.cardErrors[.calendar])
             switch model.calendar {
             case .loading:
@@ -438,6 +432,15 @@ struct CalendarSection: View {
                         }
                     }
                 }
+            }
+        } header: {
+            HStack {
+                Text("Upcoming (14 days)")
+                Spacer()
+                NavigationLink { destination() } label: {
+                    Text("See all →").font(.caption.weight(.semibold)).textCase(nil)
+                }
+                .accessibilityIdentifier("calendar-link")
             }
         }
     }
