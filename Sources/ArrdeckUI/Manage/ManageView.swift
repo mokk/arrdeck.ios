@@ -53,6 +53,12 @@ public struct ManageView: View {
                 }
                 .accessibilityIdentifier("connection")
             }
+            Section {
+                NavigationLink {
+                    DisplaySettingsView(apps: [.readarr, .radarr, .sonarr].filter { model.has($0.rawValue) })
+                } label: { Label("Display", systemImage: "paintpalette") }
+                .accessibilityIdentifier("settings-display")
+            }
             Section("More") {
                 if model.has("prowlarr") {
                     NavigationLink {

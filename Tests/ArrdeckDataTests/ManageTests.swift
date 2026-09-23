@@ -13,6 +13,25 @@ import Testing
         #expect(LibraryRow(LibrarySeries(id: 9)).ref == .series(9))
     }
 
+    @Test func letterIndexAndUnmonitored() {
+        let dune = LibraryRow(LibraryMovie(id: 1, monitored: false, title: "dune"))
+        let odyssey = LibraryRow(LibraryMovie(id: 2, title: "2001: A Space Odyssey"))
+        #expect(LibrarySorting.letter(dune, sort: .title) == "D")
+        #expect(LibrarySorting.letter(odyssey, sort: .title) == "#")
+        #expect(LibrarySorting.letter(LibraryRow(LibraryBook(author: "Ørsted", id: 3)), sort: .author) == "Ø")
+        #expect(LibrarySorting.isAlphabetical(.title) && !LibrarySorting.isAlphabetical(.added))
+        // a film is unmonitored when neither wanted nor on disk; a show by its flag
+        #expect(dune.isUnmonitored)
+        #expect(!LibraryRow(LibraryMovie(has_file: true, id: 4, monitored: false)).isUnmonitored)
+        #expect(LibraryRow(LibrarySeries(id: 5, monitored: false, status: "ended")).isUnmonitored)
+    }
+
+    @Test func detailFactsAreCarried() {
+        let row = LibraryRow(LibraryMovie(id: 1, quality: "WEBDL-2160p", rating: 7.4, slug: "1078605"))
+        #expect(row.quality == "WEBDL-2160p" && row.rating == 7.4 && row.slug == "1078605")
+        #expect(LibraryRow(LibrarySeries(id: 2, network: "Apple TV")).network == "Apple TV")
+    }
+
     @Test func filterAndSort() {
         let rows = [
             LibraryRow(LibraryMovie(id: 1, size_on_disk: 30, tags: [1], title: "Beta", year: 2020)),

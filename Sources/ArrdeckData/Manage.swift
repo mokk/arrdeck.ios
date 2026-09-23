@@ -43,6 +43,21 @@ public struct LibraryRow: Identifiable, Hashable, Sendable {
     public var seriesTitle: String?
     /// When the arr started monitoring it — the default sort, newest first.
     public var added: Date?
+    /// The details layout's extra facts: the file's quality, a rating out of
+    /// 10 (5 for books), the network a show airs on.
+    public var quality: String?
+    public var rating: Double?
+    public var network: String?
+    /// The arr's own URL segment, for "Open in Radarr".
+    public var slug: String?
+
+    /// What "dim" and "hide" apply to. A show is unmonitored by its flag; a film
+    /// or a book only when it is neither wanted nor on disk, the way the PWA
+    /// counts it.
+    public var isUnmonitored: Bool {
+        if case .series = ref { return !monitored }
+        return status == "unmonitored"
+    }
 
     public init(_ book: LibraryBook) {
         id = book.id
@@ -57,6 +72,8 @@ public struct LibraryRow: Identifiable, Hashable, Sendable {
         added = book.added
         author = book.author
         seriesTitle = book.series_title
+        rating = book.rating
+        slug = book.slug
     }
 
     public init(_ movie: LibraryMovie) {
@@ -73,6 +90,9 @@ public struct LibraryRow: Identifiable, Hashable, Sendable {
         added = movie.added
         tmdb = movie.tmdb_id
         imdb = movie.imdb_id
+        quality = movie.quality
+        rating = movie.rating
+        slug = movie.slug
     }
 
     public init(_ series: LibrarySeries) {
@@ -91,6 +111,9 @@ public struct LibraryRow: Identifiable, Hashable, Sendable {
         tmdb = nil
         tvdb = series.tvdb_id
         imdb = series.imdb_id
+        network = series.network
+        rating = series.rating
+        slug = series.slug
     }
 }
 
@@ -147,6 +170,17 @@ public enum LibrarySorting {
             return descending ? !less && !isEqual(a, b, sort) : less
         }
     }
+
+    /// The index letter for a row under a title or author sort: its first
+    /// character upper-cased, anything that is not a letter under "#".
+    public static func letter(_ row: LibraryRow, sort: LibrarySort) -> String {
+        let value = sort == .author ? (row.author ?? "") : row.title
+        guard let first = value.trimmingCharacters(in: .whitespaces).first, first.isLetter else { return "#" }
+        return String(first).uppercased()
+    }
+
+    /// Whether a sort reads alphabetically, so a letter index makes sense.
+    public static func isAlphabetical(_ sort: LibrarySort) -> Bool { sort == .title || sort == .author }
 
     private static func isEqual(_ a: LibraryRow, _ b: LibraryRow, _ sort: LibrarySort) -> Bool {
         switch sort {
@@ -448,6 +482,32 @@ public final class LibraryListModel {
             }
             selecting = false
             await loadRows()
+        } catch APIError.unauthorized {
+            onSessionLost()
+        } catch {
+            actionError = (error as? APIError)?.description ?? error.localizedDescription
+        }
+    }
+
+    // MARK: One title, from the long-press menu
+
+    public func setMonitored(_ row: LibraryRow, _ monitored: Bool) async {
+        await act { try await self.api.update(row.ref, monitored: monitored, qualityProfile: nil) }
+        await loadRows()
+    }
+
+    public func search(_ row: LibraryRow) async {
+        await act { try await self.api.triggerSearch(row.ref) }
+    }
+
+    public func delete(_ row: LibraryRow, deleteFiles: Bool) async {
+        await act { try await self.api.delete(row.ref, deleteFiles: deleteFiles) }
+        await loadRows()
+    }
+
+    private func act(_ work: @escaping () async throws -> Void) async {
+        do {
+            try await work()
         } catch APIError.unauthorized {
             onSessionLost()
         } catch {

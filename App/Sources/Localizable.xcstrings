@@ -211,6 +211,16 @@
         }
       }
     },
+    "%lld/%lld episodes": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld/%lld afsnit"
+          }
+        }
+      }
+    },
     "(none)": {
       "localizations": {
         "da": {
@@ -341,6 +351,36 @@
         }
       }
     },
+    "Add a book": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj en bog"
+          }
+        }
+      }
+    },
+    "Add a movie": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj en film"
+          }
+        }
+      }
+    },
+    "Add a show": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj en serie"
+          }
+        }
+      }
+    },
     "Add book": {
       "localizations": {
         "da": {
@@ -417,6 +457,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tilføjet"
+          }
+        }
+      }
+    },
+    "Added %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføjet %@"
           }
         }
       }
@@ -693,6 +743,16 @@
         }
       }
     },
+    "Clear search": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ryd søgning"
+          }
+        }
+      }
+    },
     "Client": {
       "localizations": {
         "da": {
@@ -935,12 +995,42 @@
         }
       }
     },
+    "Details": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detaljer"
+          }
+        }
+      }
+    },
+    "Dim": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nedton"
+          }
+        }
+      }
+    },
     "Direction": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Retning"
+          }
+        }
+      }
+    },
+    "Display": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visning"
           }
         }
       }
@@ -1126,6 +1216,16 @@
         }
       }
     },
+    "Everything here is unmonitored, and unmonitored titles are hidden.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alt her er uovervåget, og uovervågede titler er skjult."
+          }
+        }
+      }
+    },
     "Features": {
       "localizations": {
         "da": {
@@ -1298,6 +1398,16 @@
         }
       }
     },
+    "Hide": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skjul"
+          }
+        }
+      }
+    },
     "History": {
       "localizations": {
         "da": {
@@ -1370,6 +1480,16 @@
         }
       }
     },
+    "Jump to letter": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hop til bogstav"
+          }
+        }
+      }
+    },
     "Key": {
       "localizations": {
         "da": {
@@ -1386,6 +1506,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Type"
+          }
+        }
+      }
+    },
+    "Layout": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Layout"
           }
         }
       }
@@ -1417,6 +1547,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Biblioteksstørrelse"
+          }
+        }
+      }
+    },
+    "List": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liste"
           }
         }
       }
@@ -1642,6 +1782,16 @@
         }
       }
     },
+    "No books yet.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen bøger endnu."
+          }
+        }
+      }
+    },
     "No custom formats defined": {
       "localizations": {
         "da": {
@@ -1663,12 +1813,21 @@
       }
     },
     "No matches": {
-      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Ingen match"
+          }
+        }
+      }
+    },
+    "No movies yet.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen film endnu."
           }
         }
       }
@@ -1679,6 +1838,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ingen tjenester konfigureret"
+          }
+        }
+      }
+    },
+    "No shows yet.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen serier endnu."
           }
         }
       }
@@ -1749,6 +1918,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "På disken"
+          }
+        }
+      }
+    },
+    "Open in %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åbn i %@"
+          }
+        }
+      }
+    },
+    "Open in Plex": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åbn i Plex"
           }
         }
       }
@@ -1850,6 +2039,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Populære udgivelser"
+          }
+        }
+      }
+    },
+    "Posters": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plakater"
           }
         }
       }
@@ -2377,6 +2576,16 @@
         }
       }
     },
+    "Show": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vis"
+          }
+        }
+      }
+    },
     "Show %lld rejected": {
       "localizations": {
         "da": {
@@ -2393,6 +2602,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vis kun accepterede"
+          }
+        }
+      }
+    },
+    "Show unmonitored": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vis uovervågede"
           }
         }
       }
@@ -2637,6 +2856,16 @@
         }
       }
     },
+    "These choices are kept on this device only.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valgene gemmes kun på denne enhed."
+          }
+        }
+      }
+    },
     "Throttle": {
       "localizations": {
         "da": {
@@ -2733,6 +2962,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stop overvågning"
+          }
+        }
+      }
+    },
+    "Unmonitored titles": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uovervågede titler"
           }
         }
       }

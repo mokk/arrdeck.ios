@@ -1782,6 +1782,14 @@
             "title": "Foreign Book Id",
             "type": "string"
           },
+          "genres": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Genres",
+            "type": "array"
+          },
           "has_file": {
             "default": false,
             "title": "Has File",
@@ -1808,6 +1816,10 @@
             "title": "Quality Profile Id",
             "type": "integer"
           },
+          "rating": {
+            "title": "Rating",
+            "type": "number"
+          },
           "series_title": {
             "title": "Series Title",
             "type": "string"
@@ -1816,6 +1828,10 @@
             "default": 0,
             "title": "Size On Disk",
             "type": "integer"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
           },
           "title": {
             "title": "Title",
@@ -1839,6 +1855,14 @@
             "title": "Added",
             "type": "string"
           },
+          "genres": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Genres",
+            "type": "array"
+          },
           "has_file": {
             "default": false,
             "title": "Has File",
@@ -1861,14 +1885,30 @@
             "title": "Poster",
             "type": "string"
           },
+          "quality": {
+            "title": "Quality",
+            "type": "string"
+          },
           "quality_profile_id": {
             "title": "Quality Profile Id",
+            "type": "integer"
+          },
+          "rating": {
+            "title": "Rating",
+            "type": "number"
+          },
+          "runtime": {
+            "title": "Runtime",
             "type": "integer"
           },
           "size_on_disk": {
             "default": 0,
             "title": "Size On Disk",
             "type": "integer"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
           },
           "tags": {
             "default": [],
@@ -1904,6 +1944,9 @@
             "title": "Added",
             "type": "string"
           },
+          "current_season": {
+            "$ref": "#/components/schemas/SeasonProgressOut"
+          },
           "episode_count": {
             "default": 0,
             "title": "Episode Count",
@@ -1913,6 +1956,14 @@
             "default": 0,
             "title": "Episode File Count",
             "type": "integer"
+          },
+          "genres": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Genres",
+            "type": "array"
           },
           "id": {
             "title": "Id",
@@ -1927,18 +1978,43 @@
             "title": "Monitored",
             "type": "boolean"
           },
+          "network": {
+            "title": "Network",
+            "type": "string"
+          },
+          "next_airing": {
+            "format": "date-time",
+            "title": "Next Airing",
+            "type": "string"
+          },
+          "next_episode": {
+            "$ref": "#/components/schemas/NextEpisodeOut"
+          },
           "poster": {
             "title": "Poster",
+            "type": "string"
+          },
+          "previous_airing": {
+            "format": "date-time",
+            "title": "Previous Airing",
             "type": "string"
           },
           "quality_profile_id": {
             "title": "Quality Profile Id",
             "type": "integer"
           },
+          "rating": {
+            "title": "Rating",
+            "type": "number"
+          },
           "size_on_disk": {
             "default": 0,
             "title": "Size On Disk",
             "type": "integer"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
           },
           "status": {
             "title": "Status",
@@ -1955,6 +2031,10 @@
           "title": {
             "title": "Title",
             "type": "string"
+          },
+          "tmdb_id": {
+            "title": "Tmdb Id",
+            "type": "integer"
           },
           "tvdb_id": {
             "title": "Tvdb Id",
@@ -2181,6 +2261,10 @@
       },
       "MovieDetailOut": {
         "properties": {
+          "fanart": {
+            "title": "Fanart",
+            "type": "string"
+          },
           "file": {
             "$ref": "#/components/schemas/MovieFileOut"
           },
@@ -2279,6 +2363,33 @@
           }
         },
         "title": "MovieFileOut",
+        "type": "object"
+      },
+      "NextEpisodeOut": {
+        "properties": {
+          "air_date": {
+            "format": "date-time",
+            "title": "Air Date",
+            "type": "string"
+          },
+          "episode": {
+            "title": "Episode",
+            "type": "integer"
+          },
+          "season": {
+            "title": "Season",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "season",
+          "episode"
+        ],
+        "title": "NextEpisodeOut",
         "type": "object"
       },
       "OptionsOut": {
@@ -3053,6 +3164,29 @@
         "title": "RenamePreviewOut",
         "type": "object"
       },
+      "RequestStateOut": {
+        "properties": {
+          "request_id": {
+            "title": "Request Id",
+            "type": "integer"
+          },
+          "requested_by": {
+            "default": "",
+            "title": "Requested By",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "request_id",
+          "status"
+        ],
+        "title": "RequestStateOut",
+        "type": "object"
+      },
       "RestoreIn": {
         "properties": {
           "credentials": {
@@ -3337,6 +3471,29 @@
         "title": "SeasonOut",
         "type": "object"
       },
+      "SeasonProgressOut": {
+        "properties": {
+          "have": {
+            "default": 0,
+            "title": "Have",
+            "type": "integer"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "number"
+        ],
+        "title": "SeasonProgressOut",
+        "type": "object"
+      },
       "SeriesBookOut": {
         "properties": {
           "book_id": {
@@ -3357,9 +3514,17 @@
             "title": "Position",
             "type": "string"
           },
+          "poster": {
+            "title": "Poster",
+            "type": "string"
+          },
           "title": {
             "title": "Title",
             "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
           }
         },
         "required": [
@@ -3388,6 +3553,10 @@
             "default": 0,
             "title": "Episode File Count",
             "type": "integer"
+          },
+          "fanart": {
+            "title": "Fanart",
+            "type": "string"
           },
           "genres": {
             "default": [],
@@ -3652,6 +3821,34 @@
         "title": "ServiceBlock[WatchedMapOut]",
         "type": "object"
       },
+      "ServiceBlock_dict_str__RequestStateOut__": {
+        "properties": {
+          "data": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RequestStateOut"
+            },
+            "title": "Data",
+            "type": "object"
+          },
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "stale_age_seconds": {
+            "title": "Stale Age Seconds",
+            "type": "number"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "title": "ServiceBlock[dict[str, RequestStateOut]]",
+        "type": "object"
+      },
       "ServiceBlock_list_ArrBackupOut__": {
         "properties": {
           "data": {
@@ -3904,6 +4101,34 @@
         "title": "ServiceBlock[list[ScheduledTaskOut]]",
         "type": "object"
       },
+      "ServiceBlock_list_WatchedEpisodeOut__": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/WatchedEpisodeOut"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "stale_age_seconds": {
+            "title": "Stale Age Seconds",
+            "type": "number"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "title": "ServiceBlock[list[WatchedEpisodeOut]]",
+        "type": "object"
+      },
       "ServiceInfoOut": {
         "properties": {
           "configured": {
@@ -3912,6 +4137,10 @@
           },
           "service": {
             "title": "Service",
+            "type": "string"
+          },
+          "web_url": {
+            "title": "Web Url",
             "type": "string"
           }
         },
@@ -4086,6 +4315,40 @@
           "services"
         ],
         "title": "SettingsImportIn",
+        "type": "object"
+      },
+      "ShelfSeriesOut": {
+        "description": "A series on the bookshelf: every book in it, owned or not, so the gaps\nshow. Only series with at least one book in the library are listed.",
+        "properties": {
+          "author": {
+            "title": "Author",
+            "type": "string"
+          },
+          "author_id": {
+            "title": "Author Id",
+            "type": "integer"
+          },
+          "books": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/SeriesBookOut"
+            },
+            "title": "Books",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ShelfSeriesOut",
         "type": "object"
       },
       "SpeedLimitIn": {
@@ -5002,11 +5265,33 @@
         "title": "WantedPageOut",
         "type": "object"
       },
+      "WatchedEpisodeOut": {
+        "properties": {
+          "episode": {
+            "title": "Episode",
+            "type": "integer"
+          },
+          "season": {
+            "title": "Season",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "season",
+          "episode"
+        ],
+        "title": "WatchedEpisodeOut",
+        "type": "object"
+      },
       "WatchedItemOut": {
         "properties": {
           "key": {
             "title": "Key",
             "type": "string"
+          },
+          "last_viewed_at": {
+            "title": "Last Viewed At",
+            "type": "integer"
           },
           "progress": {
             "default": 0.0,
@@ -6691,6 +6976,31 @@
           }
         },
         "summary": "Library Books",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/library/books/shelf": {
+      "get": {
+        "operationId": "book_shelf_api_v1_library_books_shelf_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ShelfSeriesOut"
+                  },
+                  "title": "Response Book Shelf Api V1 Library Books Shelf Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Book Shelf",
         "tags": [
           "library"
         ]
@@ -9019,6 +9329,28 @@
         ]
       }
     },
+    "/api/v1/requests/map": {
+      "get": {
+        "description": "Open requests keyed for the library badges. No titles, so no per-request\nTMDB lookups: the card already knows what it is.",
+        "operationId": "request_map_api_v1_requests_map_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceBlock_dict_str__RequestStateOut__"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Request Map",
+        "tags": [
+          "requests"
+        ]
+      }
+    },
     "/api/v1/requests/{request_id}/{action}": {
       "post": {
         "operationId": "request_action_api_v1_requests__request_id___action__post",
@@ -11008,6 +11340,49 @@
           }
         },
         "summary": "Watched",
+        "tags": [
+          "plex"
+        ]
+      }
+    },
+    "/api/v1/watched/episodes": {
+      "get": {
+        "description": "The watched episodes of one show, by the rating key the watched map gives.\nSpoiler protection needs this per episode; the map only has a ratio.",
+        "operationId": "watched_episodes_api_v1_watched_episodes_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceBlock_list_WatchedEpisodeOut__"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Watched Episodes",
         "tags": [
           "plex"
         ]

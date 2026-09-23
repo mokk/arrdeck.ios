@@ -18,6 +18,8 @@ public final class DashboardModel {
 
     public private(set) var configured: Set<String> = []
     public private(set) var servicesKnown = false
+    /// Where each arr's own web UI lives, for "Open in Radarr".
+    public private(set) var webURLs: [String: URL] = [:]
 
     public private(set) var sessions: Loadable<Block<[PlaySession]>> = .loading
     public private(set) var health: Loadable<Block<[HealthWarning]>> = .loading
@@ -140,6 +142,9 @@ public final class DashboardModel {
         do {
             let list = try await api.services()
             configured = Set(list.filter(\.configured).map(\.service))
+            webURLs = list.reduce(into: [:]) { urls, info in
+                if let raw = info.web_url, let url = URL(string: raw) { urls[info.service] = url }
+            }
             servicesKnown = true
             connectionError = nil
             return .ok

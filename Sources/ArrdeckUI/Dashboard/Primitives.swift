@@ -122,6 +122,10 @@ struct Poster: View {
     let baseURL: URL
     var width: CGFloat = 44
     var cornerRadius: CGFloat = 8
+    /// When set, a missing or broken cover becomes a coloured tile carrying
+    /// the title, instead of a grey box that reads as "still loading".
+    var title: String?
+    var subtitle: String?
 
     var url: URL? { path.flatMap { URL(string: $0, relativeTo: baseURL) } }
 
@@ -129,12 +133,44 @@ struct Poster: View {
         AsyncImage(url: url) { phase in
             if let image = phase.image {
                 image.resizable().aspectRatio(contentMode: .fill)
+            } else if let title, url == nil || phase.error != nil {
+                CoverPlaceholder(title: title, subtitle: subtitle, compact: width < 60)
             } else {
                 Rectangle().fill(.quaternary)
             }
         }
         .frame(width: width, height: width * 1.5)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+    }
+}
+
+struct CoverPlaceholder: View {
+    let title: String
+    let subtitle: String?
+    let compact: Bool
+
+    /// A stable hue per title, so a book keeps its colour between launches.
+    var hue: Double {
+        Double(title.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) % 360 }) / 360
+    }
+
+    var body: some View {
+        ZStack(alignment: compact ? .center : .bottomLeading) {
+            LinearGradient(colors: [Color(hue: hue, saturation: 0.45, brightness: 0.6),
+                                    Color(hue: hue, saturation: 0.5, brightness: 0.28)],
+                           startPoint: .topLeading, endPoint: .bottomTrailing)
+            if compact {
+                Text(title.prefix(1).uppercased()).font(.headline.bold())
+            } else {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(.caption.bold()).lineLimit(4)
+                    if let subtitle { Text(subtitle).font(.caption2).opacity(0.8).lineLimit(1) }
+                }
+                .padding(8)
+            }
+        }
+        .foregroundStyle(.white)
+        .accessibilityHidden(true)
     }
 }
 
