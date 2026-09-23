@@ -41,6 +41,16 @@
         }
       }
     },
+    "%lld active of %lld torrents · Show all": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld aktive af %lld torrents · Vis alle"
+          }
+        }
+      }
+    },
     "%lld grabs": {
       "localizations": {
         "da": {
@@ -271,6 +281,16 @@
         }
       }
     },
+    "Activity": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktivitet"
+          }
+        }
+      }
+    },
     "Add": {
       "localizations": {
         "da": {
@@ -311,12 +331,32 @@
         }
       }
     },
+    "Add movie": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj film"
+          }
+        }
+      }
+    },
     "Add server": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Tilføj server"
+          }
+        }
+      }
+    },
+    "Add show": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj serie"
           }
         }
       }
@@ -377,6 +417,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alle (%lld)"
+          }
+        }
+      }
+    },
+    "All tags": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle tags"
           }
         }
       }
@@ -448,6 +498,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Blokér & prøv igen"
+          }
+        }
+      }
+    },
+    "Books": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bøger"
           }
         }
       }
@@ -835,6 +895,16 @@
         }
       }
     },
+    "Downloading": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloader"
+          }
+        }
+      }
+    },
     "Edit": {
       "localizations": {
         "da": {
@@ -947,6 +1017,7 @@
       }
     },
     "Filter movies…": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -957,6 +1028,7 @@
       }
     },
     "Filter series…": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -1067,6 +1139,7 @@
       }
     },
     "Home": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -1158,6 +1231,7 @@
       }
     },
     "Library": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -1228,6 +1302,7 @@
       }
     },
     "Manage": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -1273,6 +1348,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Måned"
+          }
+        }
+      }
+    },
+    "More": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mere"
           }
         }
       }
@@ -1438,6 +1523,16 @@
         }
       }
     },
+    "Overview": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overblik"
+          }
+        }
+      }
+    },
     "Password (optional)": {
       "localizations": {
         "da": {
@@ -1485,6 +1580,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Populære"
+          }
+        }
+      }
+    },
+    "Popular releases": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Populære udgivelser"
           }
         }
       }
@@ -1565,6 +1670,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Radarr / Sonarr-kø"
+          }
+        }
+      }
+    },
+    "Readarr support is on its way.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Understøttelse af Readarr er på vej."
           }
         }
       }
@@ -1770,6 +1885,16 @@
         }
       }
     },
+    "Search movies": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg efter film"
+          }
+        }
+      }
+    },
     "Search movies…": {
       "localizations": {
         "da": {
@@ -1810,6 +1935,16 @@
         }
       }
     },
+    "Search shows": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg efter serier"
+          }
+        }
+      }
+    },
     "Searching indexers… this can take a while": {
       "localizations": {
         "da": {
@@ -1846,6 +1981,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vælg"
+          }
+        }
+      }
+    },
+    "Select…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg…"
           }
         }
       }
@@ -1920,6 +2065,16 @@
         }
       }
     },
+    "Settings": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indstillinger"
+          }
+        }
+      }
+    },
     "Show %lld rejected": {
       "localizations": {
         "da": {
@@ -1946,6 +2101,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Viser %lld af %lld"
+          }
+        }
+      }
+    },
+    "Shows": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serier"
           }
         }
       }
@@ -2096,6 +2261,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Undertekster"
+          }
+        }
+      }
+    },
+    "Switch": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skift"
           }
         }
       }
@@ -2705,6 +2880,16 @@
         }
       }
     },
+    "open": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "åben"
+          }
+        }
+      }
+    },
     "paused": {
       "extractionState": "manual",
       "localizations": {
@@ -2787,6 +2972,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "seeder"
+          }
+        }
+      }
+    },
+    "signed in": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "logget ind"
           }
         }
       }

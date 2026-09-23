@@ -12,19 +12,35 @@ public struct AddView: View {
     let baseURL: URL
     let hasPlex: Bool
     let onSessionLost: @MainActor () -> Void
+    /// Set when the page is scoped to one library: no kind picker, and a
+    /// Cancel button because it is presented as a sheet.
+    let fixed: AddTab?
+    let dismiss: (() -> Void)?
 
     public init(
         configured: Set<String>, api: any DiscoverAPI & LibraryAPI, baseURL: URL, hasPlex: Bool,
-        onSessionLost: @escaping @MainActor () -> Void
+        fixed: AddTab? = nil, onSessionLost: @escaping @MainActor () -> Void, dismiss: (() -> Void)? = nil
     ) {
         self.api = api
         self.baseURL = baseURL
         self.hasPlex = hasPlex
+        self.fixed = fixed
+        self.dismiss = dismiss
         self.onSessionLost = onSessionLost
-        _model = State(initialValue: AddModel(configured: configured, api: api, onSessionLost: onSessionLost))
+        let model = AddModel(configured: configured, api: api, onSessionLost: onSessionLost)
+        if let fixed { model.tab = fixed }
+        _model = State(initialValue: model)
     }
 
     public var body: some View {
+        if dismiss != nil {
+            NavigationStack { page }
+        } else {
+            page
+        }
+    }
+
+    var page: some View {
         Group {
             if model.tabs.isEmpty {
                 ContentUnavailableView("No services configured", systemImage: "plus.circle",
@@ -33,7 +49,12 @@ public struct AddView: View {
                 content
             }
         }
-        .navigationTitle("Add")
+        .toolbar {
+            if let dismiss {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+            }
+        }
+        .navigationTitle(fixed.map { $0 == .movies ? String(localized: "Add movie") : String(localized: "Add show") } ?? String(localized: "Add"))
         .searchable(text: $model.input, prompt: model.tab.prompt)
         .onSubmit(of: .search) { Task { await model.submit() } }
         .task { await model.load() }
@@ -56,7 +77,7 @@ public struct AddView: View {
 
     var content: some View {
         List {
-            if model.tabs.count > 1 {
+            if model.tabs.count > 1, fixed == nil {
                 Section {
                     Picker("Tab", selection: $model.tab) {
                         ForEach(model.tabs, id: \.self) { Text($0.label).tag($0) }

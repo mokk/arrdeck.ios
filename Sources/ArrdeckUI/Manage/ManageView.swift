@@ -6,33 +6,72 @@ import SwiftUI
 /// on iOS a list of destinations reads better and leaves room to grow.
 public struct ManageView: View {
     let model: DashboardModel
-    let api: any ManageAPI & LibraryAPI & ExtrasAPI & IndexerAddAPI
+    let api: any ManageAPI & LibraryAPI & ExtrasAPI & IndexerAddAPI & DiscoverAPI & HistoryAPI & DownloadsAPI & WantedAPI & CalendarAPI
     let baseURL: URL
+    let serverName: String
+    let sessionLabel: String
     let onSessionLost: @MainActor () -> Void
+    let onSwitchServer: () -> Void
+    let onShowConnection: () -> Void
 
-    public init(model: DashboardModel, api: any ManageAPI & LibraryAPI & ExtrasAPI & IndexerAddAPI, baseURL: URL, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(
+        model: DashboardModel,
+        api: any ManageAPI & LibraryAPI & ExtrasAPI & IndexerAddAPI & DiscoverAPI & HistoryAPI & DownloadsAPI & WantedAPI & CalendarAPI,
+        baseURL: URL, serverName: String, sessionLabel: String,
+        onSessionLost: @escaping @MainActor () -> Void,
+        onSwitchServer: @escaping () -> Void, onShowConnection: @escaping () -> Void
+    ) {
         self.model = model
         self.api = api
         self.baseURL = baseURL
+        self.serverName = serverName
+        self.sessionLabel = sessionLabel
         self.onSessionLost = onSessionLost
+        self.onSwitchServer = onSwitchServer
+        self.onShowConnection = onShowConnection
     }
 
     var hasPlex: Bool { model.has("plex") }
 
     public var body: some View {
         List {
-            Section("Library") {
-                if model.has("radarr") {
-                    NavigationLink {
-                        LibraryListView(app: .radarr, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
-                    } label: { Label("Movies", systemImage: "film") }
-                    .accessibilityIdentifier("manage-movies")
+            Section("Server") {
+                Button(action: onSwitchServer) {
+                    HStack {
+                        Label(serverName, systemImage: "server.rack")
+                        Spacer()
+                        Text("Switch").foregroundStyle(.secondary)
+                    }
                 }
-                if model.has("sonarr") {
+                .accessibilityIdentifier("servers")
+                Button(action: onShowConnection) {
+                    HStack {
+                        Label("Connection", systemImage: "info.circle")
+                        Spacer()
+                        Text(sessionLabel).foregroundStyle(.secondary)
+                    }
+                }
+                .accessibilityIdentifier("connection")
+            }
+            Section("More") {
+                if model.has("prowlarr") {
                     NavigationLink {
-                        LibraryListView(app: .sonarr, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
-                    } label: { Label("Series", systemImage: "tv") }
-                    .accessibilityIdentifier("manage-series")
+                        PopularView(api: api, onSessionLost: onSessionLost)
+                    } label: { Label("Popular releases", systemImage: "flame") }
+                }
+                NavigationLink {
+                    StatsScreen(api: api, onSessionLost: onSessionLost)
+                } label: { Label("Statistics", systemImage: "chart.line.uptrend.xyaxis") }
+                NavigationLink {
+                    DashboardView(model: model, baseURL: baseURL, api: api, onSessionLost: onSessionLost)
+                        .navigationTitle("Overview")
+                } label: { Label("Overview", systemImage: "square.grid.2x2") }
+                .accessibilityIdentifier("overview")
+                if model.hasArr {
+                    NavigationLink {
+                        WantedView(api: api, apps: ArrApp.allCases.filter { model.has($0.rawValue) },
+                                   baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+                    } label: { Label("Wanted", systemImage: "magnifyingglass.circle") }
                 }
             }
             if model.has("prowlarr") || model.hasArr {
@@ -59,7 +98,7 @@ public struct ManageView: View {
             }
         }
         .dashboardListStyle()
-        .navigationTitle("Manage")
+        .navigationTitle("Settings")
         .navigationDestination(for: MediaRef.self) { ref in
             switch ref {
             case let .movie(id):
@@ -68,138 +107,7 @@ public struct ManageView: View {
                 SeriesDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
             }
         }
-        .accessibilityIdentifier("manage")
-    }
-}
-
-struct LibraryListView: View {
-    @State private var model: LibraryListModel
-    @State private var confirmingBulkDelete = false
-    let baseURL: URL
-
-    init(app: ArrApp, api: any ManageAPI & LibraryAPI & ExtrasAPI, baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
-        self.baseURL = baseURL
-        _model = State(initialValue: LibraryListModel(app: app, api: api, hasPlex: hasPlex, onSessionLost: onSessionLost))
-    }
-
-    var body: some View {
-        List {
-            switch model.rows {
-            case .loading:
-                Section { LoadingRow() }
-            case let .failed(reason):
-                Section { ErrorNote(reason) }
-            case .loaded:
-                Section {
-                    if model.shown.isEmpty { EmptyNote("No matches") }
-                    ForEach(model.shown) { row in
-                        LibraryRowView(row: row, model: model, baseURL: baseURL)
-                    }
-                } header: {
-                    Text("\(model.shown.count) of \(model.rows.value?.count ?? 0)")
-                }
-            }
-        }
-        .dashboardListStyle()
-        .searchable(text: $model.query, prompt: model.app == .radarr ? "Filter movies…" : "Filter series…")
-        .navigationTitle(model.app == .radarr ? "Movies" : "Series")
-        .safeAreaInset(edge: .bottom) {
-            if model.selecting { BulkBarChrome { LibraryBulkBar(model: model) { confirmingBulkDelete = true } } }
-        }
-        .toolbar {
-            ToolbarItemGroup(placement: .automatic) {
-                Button(model.selecting ? "Done" : "Select") { model.selecting.toggle() }
-                tagMenu
-                sortMenu
-            }
-        }
-        .task { await model.load() }
-        .refreshable { await model.load() }
-        .confirmationDialog("Delete \(model.selected.count) titles", isPresented: $confirmingBulkDelete, titleVisibility: .visible) {
-            Button("Delete from library and disk", role: .destructive) { Task { await model.bulk(.delete(deleteFiles: true)) } }
-            Button("Remove from library only", role: .destructive) { Task { await model.bulk(.delete(deleteFiles: false)) } }
-            Button("Cancel", role: .cancel) {}
-        }
-        .alert("Action failed", isPresented: Binding(get: { model.actionError != nil }, set: { if !$0 { model.actionError = nil } })) {
-            Button("OK") { model.actionError = nil }
-        } message: {
-            Text(model.actionError ?? "")
-        }
-    }
-
-    @ViewBuilder var tagMenu: some View {
-        if !model.tags.isEmpty {
-            Menu {
-                Picker("Tag", selection: $model.tag) {
-                    Text("All").tag(Int?.none)
-                    ForEach(model.tags, id: \.id) { tag in Text(tag.label).tag(Int?.some(tag.id)) }
-                }
-            } label: {
-                Label("Tags", systemImage: model.tag == nil ? "tag" : "tag.fill")
-            }
-        }
-    }
-
-    var sortMenu: some View {
-        Menu {
-            Picker("Sort by", selection: $model.sort) {
-                ForEach(LibrarySort.keys(for: model.app), id: \.self) { key in
-                    Text(key.label).tag(key)
-                }
-            }
-            Picker("Direction", selection: $model.descending) {
-                Text("Ascending").tag(false)
-                Text("Descending").tag(true)
-            }
-        } label: {
-            Label("Sort", systemImage: "arrow.up.arrow.down")
-        }
-    }
-}
-
-struct LibraryRowView: View {
-    let row: LibraryRow
-    let model: LibraryListModel
-    let baseURL: URL
-
-    var badge: String { model.app == .radarr ? row.status : (row.monitored ? "ok" : "paused") }
-
-    var stats: String {
-        if model.app == .sonarr {
-            return "\(row.episodeFiles ?? 0)/\(row.episodes ?? 0) episodes · \(Format.bytes(row.sizeOnDisk))"
-        }
-        return Format.bytes(row.sizeOnDisk)
-    }
-
-    var content: some View {
-        HStack(spacing: 10) {
-            if model.selecting {
-                Image(systemName: model.selected.contains(row.id) ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(model.selected.contains(row.id) ? Color.accentColor : Color.secondary)
-            }
-            Poster(path: row.poster, baseURL: baseURL, width: 40, cornerRadius: 6)
-            VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 4) {
-                    Text(row.title).font(.subheadline.weight(.medium)).lineLimit(1)
-                    if let year = row.year { Text(String(year)).font(.subheadline).foregroundStyle(.secondary) }
-                }
-                HStack(spacing: 6) {
-                    StateBadge(state: badge)
-                    WatchedDot(watched: model.watched(row))
-                    Text(stats).font(.caption).foregroundStyle(.secondary)
-                }
-            }
-        }
-    }
-
-    var body: some View {
-        if model.selecting {
-            Button { model.toggleSelection(row) } label: { content }
-                .buttonStyle(.plain)
-        } else {
-            NavigationLink(value: row.ref) { content }
-                .accessibilityIdentifier("library-row")
-        }
+        .accessibilityIdentifier("settings")
     }
 }
 

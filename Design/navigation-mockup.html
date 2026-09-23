@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>arrdeck iOS — navigation mockup</title>
+<style>
+  :root { --bg:#f2f2f7; --card:#fff; --text:#111; --muted:#8a8a8e; --accent:#0a84ff; --green:#34c759; --orange:#ff9f0a; --blue:#0a84ff; --red:#ff3b30; }
+  body { margin:0; padding:32px; background:#e9e9ee; font-family: -apple-system, "SF Pro Text", Helvetica, Arial, sans-serif; color:var(--text); }
+  h1 { font-size:22px; margin:0 0 6px; } p.lead { color:#555; margin:0 0 28px; max-width:900px; line-height:1.5; }
+  .row { display:flex; gap:28px; flex-wrap:wrap; align-items:flex-start; }
+  .phone { width:390px; height:844px; background:var(--bg); border-radius:44px; border:10px solid #111; position:relative; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.25); }
+  .label { text-align:center; font-size:13px; color:#555; margin:10px 0 0; width:410px; }
+  .status { height:54px; display:flex; align-items:center; justify-content:space-between; padding:0 30px; font-weight:600; font-size:15px; }
+  .nav { display:flex; align-items:center; gap:10px; padding:4px 16px 0; }
+  .nav .title { font-size:34px; font-weight:800; letter-spacing:-.5px; flex:1; }
+  .tools { display:flex; align-items:center; gap:8px; padding:8px 16px 4px; }
+  .btn { width:38px; height:38px; border-radius:19px; background:var(--card); display:flex; align-items:center; justify-content:center; box-shadow:0 1px 2px rgba(0,0,0,.08); font-size:18px; color:var(--accent); }
+  .btn.plus { font-size:26px; font-weight:300; }
+  .search { flex:1; height:38px; border-radius:12px; background:#e3e3e8; display:flex; align-items:center; gap:8px; padding:0 12px; color:var(--muted); font-size:15px; }
+  .chips { display:flex; gap:8px; padding:8px 16px 4px; overflow:hidden; }
+  .chip { padding:6px 12px; border-radius:16px; background:var(--card); font-size:13px; font-weight:600; color:var(--muted); }
+  .chip.on { background:var(--accent); color:#fff; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; padding:10px 16px; }
+  .card { display:flex; flex-direction:column; gap:4px; }
+  .poster { aspect-ratio:2/3; border-radius:12px; background:linear-gradient(160deg,#2c3e50,#4ca1af); position:relative; }
+  .poster.b { background:linear-gradient(160deg,#41295a,#2f0743); } .poster.c { background:linear-gradient(160deg,#ff9966,#ff5e62); }
+  .poster.d { background:linear-gradient(160deg,#1f4037,#99f2c8); } .poster.e { background:linear-gradient(160deg,#544a7d,#ffd452); }
+  .poster.f { background:linear-gradient(160deg,#4b6cb7,#182848); } .poster.g { background:linear-gradient(160deg,#c31432,#240b36); }
+  .poster.h { background:linear-gradient(160deg,#134e5e,#71b280); } .poster.i { background:linear-gradient(160deg,#373b44,#4286f4); }
+  .dot { position:absolute; top:8px; right:8px; width:10px; height:10px; border-radius:5px; border:2px solid #fff; }
+  .dot.green{background:var(--green)} .dot.blue{background:var(--blue)} .dot.orange{background:var(--orange)}
+  .prog { position:absolute; left:8px; right:8px; bottom:8px; height:3px; border-radius:2px; background:rgba(255,255,255,.35); } .prog i { display:block; height:3px; width:62%; background:#fff; border-radius:2px; }
+  .card .t { font-size:12px; font-weight:600; line-height:1.2; height:29px; overflow:hidden; } .card .y { font-size:11px; color:var(--muted); }
+  .tab { position:absolute; left:0; right:0; bottom:0; height:84px; padding-bottom:18px; background:rgba(249,249,249,.96); border-top:1px solid #d9d9de; backdrop-filter:blur(20px); display:flex; align-items:center; justify-content:space-around; }
+  .tab div { display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; color:#8a8a8e; width:58px; } .tab div b { font-size:20px; font-weight:400; } .tab div.on { color:var(--accent); font-weight:600; }
+  .list { margin:8px 16px; background:var(--card); border-radius:16px; overflow:hidden; }
+  .li { display:flex; align-items:center; gap:12px; padding:12px 16px; border-top:1px solid #efeff4; font-size:15px; } .li:first-child{border-top:0} .li span.k{width:26px;text-align:center;font-size:18px} .li .r{margin-left:auto;color:var(--muted);font-size:13px}
+  .sec { padding:14px 20px 6px; font-size:13px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+  .banner { margin:4px 16px; background:var(--card); border-radius:14px; padding:10px 14px; display:flex; align-items:center; gap:10px; font-size:13px; } .banner .pill { background:#e8f2ff; color:var(--accent); border-radius:10px; padding:2px 8px; font-weight:600; font-size:12px }
+  .cal { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; padding:6px 16px; } .cal div { background:var(--card); border-radius:10px; height:54px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:13px; gap:4px } .cal .dots { display:flex; gap:2px } .cal .dots i { width:5px; height:5px; border-radius:3px; background:var(--green); display:block } .cal i.o{background:var(--orange)} .cal i.b{background:var(--blue)}
+  .seg { margin:8px 16px; height:32px; border-radius:9px; background:#e3e3e8; display:flex; padding:2px; } .seg div { flex:1; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; border-radius:7px; color:#333 } .seg div.on { background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.1) }
+  .menu { position:absolute; top:150px; left:118px; width:230px; background:rgba(250,250,250,.97); border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,.25); font-size:15px; overflow:hidden; z-index:3 }
+  .menu div { padding:11px 14px; border-top:1px solid #e5e5ea; display:flex; justify-content:space-between } .menu div:first-child{border-top:0} .menu .h{font-size:12px;color:var(--muted);text-transform:uppercase;padding:8px 14px 4px;border-top:0;background:#f0f0f4}
+  .dim { position:absolute; inset:0; background:rgba(0,0,0,.08); z-index:2 }
+  .note { font-size:13px; color:#555; line-height:1.5; max-width:900px; margin:34px 0 0 }
+</style>
+</head>
+<body>
+<h1>arrdeck iOS — proposed navigation</h1>
+<p class="lead">Books · Movies · Shows · Activity · Calendar · Settings, each shown only when its server is configured (Books needs Readarr, Movies needs Radarr, Shows needs Sonarr, Activity needs a download client or an arr, Calendar needs an arr, Settings is always there). The bar spans the full width. Movies and Shows are the library itself: sort, search, add — the cards are the whole page. Activity owns everything about downloads.</p>
+
+<div class="row">
+
+<div>
+<div class="phone">
+  <div class="status"><span>10.16</span><span>●●● ▲ ▮</span></div>
+  <div class="nav"><div class="title">Movies</div></div>
+  <div class="tools">
+    <div class="btn">⇅</div>
+    <div class="search">🔍 <span>Search movies</span></div>
+    <div class="btn plus">+</div>
+  </div>
+  <div class="grid">
+    <div class="card"><div class="poster"><i class="dot green"></i></div><div class="t">Mayday</div><div class="y">2026 · 10.4 GB</div></div>
+    <div class="card"><div class="poster b"><i class="dot blue"></i><div class="prog"><i></i></div></div><div class="t">Spider-Man: Brand New Day</div><div class="y">2026 · wanted</div></div>
+    <div class="card"><div class="poster c"><i class="dot green"></i></div><div class="t">The Gentlemen</div><div class="y">2019 · 30.9 GB</div></div>
+    <div class="card"><div class="poster d"><i class="dot green"></i></div><div class="t">Teenage Sex and Death at Camp Miasma</div><div class="y">2026 · 7.2 GB</div></div>
+    <div class="card"><div class="poster e"><i class="dot orange"></i></div><div class="t">Dune: Part Three</div><div class="y">2026 · Dec 16</div></div>
+    <div class="card"><div class="poster f"><i class="dot green"></i></div><div class="t">The Odyssey</div><div class="y">2026 · wanted</div></div>
+    <div class="card"><div class="poster g"><i class="dot green"></i></div><div class="t">Resident Evil</div><div class="y">2026 · 8.5 GB</div></div>
+    <div class="card"><div class="poster h"><i class="dot green"></i></div><div class="t">Coyote vs. Acme</div><div class="y">2026 · 6.1 GB</div></div>
+    <div class="card"><div class="poster i"><i class="dot green"></i></div><div class="t">The Mongoose</div><div class="y">2026 · 4.9 GB</div></div>
+  </div>
+  <div class="tab"><div><b>▤</b>Books</div><div class="on"><b>🎬</b>Movies</div><div><b>📺</b>Shows</div><div><b>⇅</b>Activity</div><div><b>▦</b>Calendar</div><div><b>⚙︎</b>Settings</div></div>
+</div>
+<p class="label"><b>Movies</b> — sort · search · add in the top bar, then the library as cards, nothing else. Dot = downloaded / wanted / unmonitored; the bar under a poster is an active download.</p>
+</div>
+
+<div>
+<div class="phone">
+  <div class="dim"></div>
+  <div class="status"><span>10.16</span><span>●●● ▲ ▮</span></div>
+  <div class="nav"><div class="title">Shows</div></div>
+  <div class="tools">
+    <div class="btn" style="background:var(--accent);color:#fff">⇅</div>
+    <div class="search">🔍 <span>Search shows</span></div>
+    <div class="btn plus">+</div>
+  </div>
+  <div class="menu">
+    <div class="h">Sort by</div>
+    <div><span>Title</span><span>✓</span></div><div>Year</div><div>Recently added</div><div>Size on disk</div><div>Episodes on disk</div>
+    <div class="h">Direction</div>
+    <div><span>Ascending</span><span>✓</span></div><div>Descending</div>
+  </div>
+  <div class="grid">
+    <div class="card"><div class="poster f"><i class="dot green"></i></div><div class="t">Lanterns</div><div class="y">6/6 · 10.8 GB</div></div>
+    <div class="card"><div class="poster b"><i class="dot green"></i></div><div class="t">Slow Horses</div><div class="y">44/44 · 61 GB</div></div>
+    <div class="card"><div class="poster g"><i class="dot blue"></i></div><div class="t">Monster</div><div class="y">18/21 · 35 GB</div></div>
+    <div class="card"><div class="poster h"><i class="dot green"></i></div><div class="t">Lioness</div><div class="y">16/16 · 28 GB</div></div>
+    <div class="card"><div class="poster d"><i class="dot green"></i></div><div class="t">Dark Matter</div><div class="y">13/13 · 41 GB</div></div>
+    <div class="card"><div class="poster e"><i class="dot orange"></i></div><div class="t">Scrubs</div><div class="y">0/2 · Oct 1</div></div>
+  </div>
+  <div class="tab"><div><b>▤</b>Books</div><div><b>🎬</b>Movies</div><div class="on"><b>📺</b>Shows</div><div><b>⇅</b>Activity</div><div><b>▦</b>Calendar</div><div><b>⚙︎</b>Settings</div></div>
+</div>
+<p class="label"><b>Shows</b> — same page, Sonarr's fields. The sort button opens this menu; the keys are the ones the PWA sorts on.</p>
+</div>
+
+<div>
+<div class="phone">
+  <div class="status"><span>10.16</span><span>●●● ▲ ▮</span></div>
+  <div class="nav"><div class="title">Activity</div><div class="btn" style="width:34px;height:34px;font-size:15px">🐢</div><div class="btn plus" style="width:34px;height:34px">+</div></div>
+  <div class="seg"><div class="on">Downloading</div><div>Queue</div><div>History</div></div>
+  <div class="sec" style="padding-top:6px">Radarr / Sonarr</div>
+  <div class="list">
+    <div class="li"><div style="flex:1;min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Monsters.2022.S03.1080p.NF.WEB-DL</div><div style="font-size:12px;color:var(--orange)">sonarr · import blocked · title mismatch</div></div><div style="display:flex;gap:6px"><span class="chip" style="color:var(--accent)">Import</span><span class="chip" style="color:var(--orange)">Retry</span></div></div>
+    <div class="li"><div style="flex:1"><div style="font-weight:600">Mayday (2026)</div><div style="font-size:12px;color:var(--muted)">radarr · downloading · 00:12:40 left</div><div style="height:3px;background:#e3e3e8;border-radius:2px;margin-top:6px"><div style="width:62%;height:3px;background:var(--accent);border-radius:2px"></div></div></div></div>
+  </div>
+  <div class="sec">Torrents <span style="float:right;font-weight:400;text-transform:none">↓ 4,2 MB/s · ↑ 110 KB/s</span></div>
+  <div class="list">
+    <div class="li"><div style="flex:1"><div style="font-weight:600">Mayday.2026.NORDiC.1080p.WEB-DL</div><div style="font-size:12px;color:var(--muted)">qBittorrent · downloading · 6,4 of 10,4 GB · 12 m</div><div style="height:3px;background:#e3e3e8;border-radius:2px;margin-top:6px"><div style="width:62%;height:3px;background:var(--accent);border-radius:2px"></div></div></div></div>
+    <div class="li"><div style="flex:1"><div style="font-weight:600">Slow.Horses.S06E02.1080p.WEB</div><div style="font-size:12px;color:var(--muted)">qBittorrent · seeding · 3,5 GB · ↑ 1,2 GB (0.34)</div></div></div>
+    <div class="li"><div style="flex:1"><div style="font-weight:600">Lanterns.2026.S01E06.1080p.WEB</div><div style="font-size:12px;color:var(--muted)">Transmission · seeding · 1,7 GB · ↑ 4,1 GB (2.41)</div></div></div>
+  </div>
+  <div style="text-align:center;font-size:12px;color:var(--muted);margin:10px">3 active of 1.956 torrents · <span style="color:var(--accent)">Show all</span></div>
+  <div class="tab"><div><b>▤</b>Books</div><div><b>🎬</b>Movies</div><div><b>📺</b>Shows</div><div class="on"><b>⇅</b>Activity</div><div><b>▦</b>Calendar</div><div><b>⚙︎</b>Settings</div></div>
+</div>
+<p class="label"><b>Activity</b> — everything about downloads in one tab. <b>Downloading</b> shows the arr queue (import/retry actions) and the torrents currently moving; <b>Queue</b> is the full torrent list with search, sort, select and throttle; <b>History</b> is grabs and imports with the blocklist. The turtle is the throttle, + adds a torrent.</p>
+</div>
+
+<div>
+<div class="phone">
+  <div class="status"><span>10.16</span><span>●●● ▲ ▮</span></div>
+  <div class="nav"><div class="title">Settings</div></div>
+  <div class="sec">Server</div>
+  <div class="list"><div class="li"><span class="k">🖥</span>10.0.0.154 <span class="r">arrdeck 0.2.0 · switch ›</span></div></div>
+  <div class="sec">More</div>
+  <div class="list">
+    <div class="li"><span class="k">🔥</span>Popular releases <span class="r">›</span></div>
+    <div class="li"><span class="k">📈</span>Statistics <span class="r">›</span></div>
+    <div class="li"><span class="k">▦</span>Overview <span class="r">the old dashboard ›</span></div>
+  </div>
+  <div class="sec">Services</div>
+  <div class="list">
+    <div class="li"><span class="k">🔗</span>Connections <span class="r">10 configured ›</span></div>
+    <div class="li"><span class="k">📡</span>Indexers <span class="r">2 ›</span></div>
+    <div class="li"><span class="k">🩺</span>System <span class="r">1 task overdue ›</span></div>
+  </div>
+  <div class="sec">About</div>
+  <div class="list"><div class="li"><span class="k">ℹ︎</span>Connection <span class="r">signed in ›</span></div></div>
+  <div class="tab"><div><b>🎬</b>Movies</div><div><b>📺</b>Shows</div><div><b>⇅</b>Activity</div><div><b>▦</b>Calendar</div><div class="on"><b>⚙︎</b>Settings</div></div>
+</div>
+<p class="label"><b>Settings</b> — the Manage hub plus Popular, Statistics and the old dashboard as "Overview". Shown here <b>without Readarr configured</b>, so Books is hidden and the bar has five tabs.</p>
+</div>
+
+<div>
+<div class="phone">
+  <div class="status"><span>10.16</span><span>●●● ▲ ▮</span></div>
+  <div class="nav"><div class="title">Calendar</div></div>
+  <div class="seg"><div class="on">Month</div><div>Week</div><div>Agenda</div></div>
+  <div class="tools" style="padding-top:2px"><div style="font-weight:700;font-size:17px;flex:1;padding-left:2px">September 2026</div><div class="btn" style="width:32px;height:32px">‹</div><div class="btn" style="width:32px;height:32px">›</div></div>
+  <div class="cal">
+    <div></div><div>2<div class="dots"><i></i></div></div><div>3<div class="dots"><i></i></div></div><div>4<div class="dots"><i></i></div></div><div>5</div><div>6<div class="dots"><i></i></div></div><div>7<div class="dots"><i></i></div></div>
+    <div>8<div class="dots"><i></i><i></i></div></div><div>9<div class="dots"><i></i></div></div><div>10</div><div>11<div class="dots"><i></i></div></div><div>12</div><div>13<div class="dots"><i></i></div></div><div>14<div class="dots"><i></i></div></div>
+    <div>15<div class="dots"><i></i></div></div><div>16<div class="dots"><i class="o"></i><i></i><i></i></div></div><div>17</div><div>18<div class="dots"><i></i><i></i><i></i></div></div><div>19</div><div>20<div class="dots"><i></i></div></div><div>21<div class="dots"><i></i></div></div>
+    <div>22</div><div style="color:var(--accent);font-weight:700">23<div class="dots"><i></i></div></div><div>24</div><div>25<div class="dots"><i class="b"></i><i class="b"></i><i class="b"></i></div></div><div>26</div><div>27</div><div>28<div class="dots"><i class="b"></i></div></div>
+    <div>29<div class="dots"><i class="o"></i><i class="b"></i></div></div><div>30<div class="dots"><i class="b"></i><i class="o"></i></div></div>
+  </div>
+  <div class="list">
+    <div class="li"><div><div style="font-weight:600">Reacher</div><div style="font-size:12px;color:var(--muted)">sonarr · S04E06 Plum Out of Luck</div></div><span class="r">Sep 2</span></div>
+    <div class="li"><div><div style="font-weight:600">Mayday</div><div style="font-size:12px;color:var(--muted)">radarr · Digital</div></div><span class="r">Sep 3</span></div>
+    <div class="li"><div><div style="font-weight:600">Slow Horses</div><div style="font-size:12px;color:var(--muted)">sonarr · S06E02 Daddy Issues</div></div><span class="r">Tomorrow</span></div>
+  </div>
+  <div class="tab"><div><b>▤</b>Books</div><div><b>🎬</b>Movies</div><div><b>📺</b>Shows</div><div><b>⇅</b>Activity</div><div class="on"><b>▦</b>Calendar</div><div><b>⚙︎</b>Settings</div></div>
+</div>
+<p class="label"><b>Calendar</b> — the existing screen, promoted to a tab.</p>
+</div>
+
+</div>
+
+<p class="note"><b>Books</b> is the same page as Movies with Readarr's fields (author · series · format). It stays hidden until the backend knows about Readarr, which is its own piece of work on the arrdeck side (client, library, calendar and history endpoints) before anything shows up here.</p>
+</body>
+</html>

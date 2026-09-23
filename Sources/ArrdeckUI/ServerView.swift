@@ -6,8 +6,8 @@ import SwiftUI
 /// connection screen whenever it does not. One controller decides which, so a
 /// card's 401 and a completed sign-in both flip it.
 ///
-/// Tabs follow the PWA's bottom bar — Home, Popular, Downloads, Add, Manage.
-/// Each tab has its own navigation stack.
+/// Tabs: Books · Movies · Shows · Activity · Calendar · Settings, each only
+/// while its service is configured. Each tab has its own navigation stack.
 public struct ServerView: View {
     @State private var controller: SessionController
     @State private var model: DashboardModel
@@ -42,6 +42,10 @@ public struct ServerView: View {
                 ProgressView("Connecting…")
             } else if controller.isUsable {
                 tabs
+                    // The dashboard model polls /services and the queue; its
+                    // cards live on under Settings › Overview, and the library
+                    // pages read its queue for download progress.
+                    .task { await model.run() }
             } else {
                 NavigationStack {
                     ProfileView(controller: controller)
@@ -59,61 +63,59 @@ public struct ServerView: View {
         }
     }
 
+    @State private var selectedTab: AppTab = .movies
+
+    /// TabView keeps each tab's stack alive; its own bar is hidden and ours
+    /// spans the bottom. Tabs appear only for configured services, so the
+    /// bar waits for /services before it knows what to show.
     var tabs: some View {
-        TabView {
-            NavigationStack {
-                DashboardView(model: model, baseURL: controller.profile.baseURL, api: api, onSessionLost: sessionLost)
-                    .navigationTitle(controller.profile.name)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) { serversButton }
-                        ToolbarItem(placement: .primaryAction) {
-                            Button {
-                                showingConnection = true
-                            } label: {
-                                Label("Connection", systemImage: "info.circle")
-                            }
-                            .accessibilityIdentifier("connection")
-                        }
+        let available = AppTab.available(configured: model.configured)
+        return Group {
+            if !model.servicesKnown {
+                ProgressView("Connecting…")
+            } else {
+                TabView(selection: $selectedTab) {
+                    ForEach(available, id: \.self) { tab in
+                        NavigationStack { tabContent(tab) }
+                            .hiddenSystemTabBar()
+                            .tag(tab)
                     }
-            }
-            .tabItem { Label("Home", systemImage: "house") }
-
-            if model.has("prowlarr") {
-                NavigationStack {
-                    PopularView(api: api, onSessionLost: sessionLost)
                 }
-                .tabItem { Label("Popular", systemImage: "flame") }
-            }
-
-            NavigationStack {
-                // The clients come from /services, so the screen waits for
-                // that answer rather than being built with an empty set.
-                if model.servicesKnown {
-                    DownloadsView(api: api, clients: model.torrentClients, hasArr: model.hasArr, onSessionLost: sessionLost)
-                } else {
-                    ProgressView().navigationTitle("Downloads")
+                .safeAreaInset(edge: .bottom, spacing: 0) {
+                    AppTabBar(tabs: available, selected: $selectedTab)
                 }
+                .onAppear { if !available.contains(selectedTab) { selectedTab = available.first ?? .settings } }
             }
-            .tabItem { Label("Downloads", systemImage: "arrow.down.circle") }
+        }
+    }
 
-            NavigationStack {
-                if model.servicesKnown {
-                    AddView(configured: model.configured, api: api, baseURL: controller.profile.baseURL,
-                            hasPlex: model.has("plex"), onSessionLost: sessionLost)
-                } else {
-                    ProgressView().navigationTitle("Add")
-                }
-            }
-            .tabItem { Label("Add", systemImage: "plus.circle") }
+    @ViewBuilder func tabContent(_ tab: AppTab) -> some View {
+        switch tab {
+        case .books:
+            ContentUnavailableView("Books", systemImage: "books.vertical", description: Text("Readarr support is on its way."))
+                .navigationTitle("Books")
+        case .movies:
+            LibraryPage(app: .radarr, dashboard: model, api: api, baseURL: controller.profile.baseURL, onSessionLost: sessionLost)
+        case .shows:
+            LibraryPage(app: .sonarr, dashboard: model, api: api, baseURL: controller.profile.baseURL, onSessionLost: sessionLost)
+        case .activity:
+            ActivityView(api: api, clients: model.torrentClients, hasArr: model.hasArr, onSessionLost: sessionLost)
+        case .calendar:
+            CalendarScreen(api: api, onSessionLost: sessionLost)
+        case .settings:
+            ManageView(
+                model: model, api: api, baseURL: controller.profile.baseURL,
+                serverName: controller.profile.name, sessionLabel: sessionLabel,
+                onSessionLost: sessionLost, onSwitchServer: onSwitch, onShowConnection: { showingConnection = true }
+            )
+        }
+    }
 
-            NavigationStack {
-                if model.servicesKnown {
-                    ManageView(model: model, api: api, baseURL: controller.profile.baseURL, onSessionLost: sessionLost)
-                } else {
-                    ProgressView().navigationTitle("Manage")
-                }
-            }
-            .tabItem { Label("Manage", systemImage: "slider.horizontal.3") }
+    var sessionLabel: String {
+        switch controller.session {
+        case .open: String(localized: "open")
+        case .paired, .legacy: String(localized: "signed in")
+        default: ""
         }
     }
 

@@ -83,7 +83,8 @@ public struct WantedView: View {
         .task { await model.load(reset: true) }
         .refreshable { await model.load(reset: true) }
         .sheet(item: $diagnosing) { item in
-            DiagnoseSheet(item: item, model: model) { diagnosing = nil }
+            DiagnoseSheet(app: item.ref?.app ?? .radarr, id: item.library_id,
+                          title: [item.title, item.subtitle].compactMap { $0 }.joined(separator: " "), api: api) { diagnosing = nil }
         }
         .sheet(item: $searching) { item in
             ReleasesSheet(
@@ -149,8 +150,10 @@ struct WantedRow: View {
 /// health in one go. Worst first, as the endpoint sorts them; the dot is the
 /// only colour cue, so it carries the level.
 struct DiagnoseSheet: View {
-    let item: WantedItem
-    let model: WantedModel
+    let app: ArrApp
+    let id: Int
+    let title: String
+    let api: any WantedAPI
     let dismiss: () -> Void
     @State private var diagnosis: Loadable<Diagnosis> = .loading
 
@@ -176,13 +179,13 @@ struct DiagnoseSheet: View {
                         }
                     }
                 } header: {
-                    Text([item.title, item.subtitle].compactMap { $0 }.joined(separator: " "))
+                    Text(title)
                 }
             }
             .navigationTitle("Why hasn't this arrived?")
             .toolbar { Button("Done") { dismiss() } }
             .task {
-                do { diagnosis = .loaded(try await model.diagnose(item)) }
+                do { diagnosis = .loaded(try await api.diagnose(app, id: id)) }
                 catch { diagnosis = .failed((error as? APIError)?.description ?? error.localizedDescription) }
             }
         }

@@ -11,6 +11,8 @@ public struct DownloadsView: View {
     @State private var confirmingBulkDelete = false
     let api: any DownloadsAPI & ExtrasAPI
     let onSessionLost: @MainActor () -> Void
+    /// Inside the Activity tab the model is shared and already polling.
+    private var embedded = false
 
     public init(
         api: any DownloadsAPI & ExtrasAPI,
@@ -23,6 +25,15 @@ public struct DownloadsView: View {
         _model = State(initialValue: DownloadsModel(
             api: api, clients: clients, hasArr: hasArr, onSessionLost: onSessionLost
         ))
+    }
+
+    /// Embedded in the Activity tab, sharing its model with the Downloading
+    /// segment.
+    init(model: DownloadsModel, api: any DownloadsAPI & ExtrasAPI, onSessionLost: @escaping @MainActor () -> Void) {
+        self.api = api
+        self.onSessionLost = onSessionLost
+        self.embedded = true
+        _model = State(initialValue: model)
     }
 
     public var body: some View {
@@ -109,8 +120,8 @@ public struct DownloadsView: View {
         .dashboardListStyle()
         .searchable(text: $model.searchText, prompt: "Filter by name…")
         .refreshable { await model.refresh() }
-        .task { await model.run() }
-        .navigationTitle("Downloads")
+        .task { if !embedded { await model.run() } }
+        .navigationTitle(embedded ? "Activity" : "Downloads")
         .safeAreaInset(edge: .bottom) {
             // Above the tab bar: a bottomBar toolbar item lands behind it.
             if model.selecting { BulkBarChrome { bulkBar } }
