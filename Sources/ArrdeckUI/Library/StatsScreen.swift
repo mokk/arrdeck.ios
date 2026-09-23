@@ -64,7 +64,7 @@ struct StatsChart: View {
                 if series.delta != 0 {
                     Text("\(series.delta > 0 ? "+" : "−")\(series.format(abs(series.delta)))")
                         .font(.caption)
-                        .foregroundStyle(series.delta > 0 ? Color.green : Color.red)
+                        .foregroundStyle(series.delta > 0 ? Color.success : Color.danger)
                 }
             }
             Sparkline(values: series.values)

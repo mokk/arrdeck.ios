@@ -97,6 +97,7 @@ extension Color {
     /// The palette's status colours; the system's under arrdeck's colours.
     @MainActor static var success: Color { ThemeStore.shared.color(\.success) ?? .green }
     @MainActor static var warning: Color { ThemeStore.shared.color(\.warning) ?? .orange }
+    @MainActor static var danger: Color { ThemeStore.shared.color(\.danger) ?? .red }
 
     /// The palette's accent; the app's own blue under arrdeck's colours.
     @MainActor static var accent: Color { ThemeStore.shared.color(\.accent) ?? .accentColor }

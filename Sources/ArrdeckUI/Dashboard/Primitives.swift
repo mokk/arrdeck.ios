@@ -43,7 +43,7 @@ struct ErrorNote: View {
     let text: String
     init(_ text: String) { self.text = text }
     var body: some View {
-        Text(text).font(.subheadline).foregroundStyle(.red)
+        Text(text).font(.subheadline).foregroundStyle(Color.danger)
     }
 }
 
@@ -62,7 +62,7 @@ struct RefreshNote: View {
         if let error {
             Text("Could not refresh — \(error)")
                 .font(.caption)
-                .foregroundStyle(.orange)
+                .foregroundStyle(Color.warning)
         }
     }
 }
@@ -72,19 +72,19 @@ struct StaleNote: View {
     var body: some View {
         Text("Service offline — showing data from \(Int((age / 60).rounded()))m ago")
             .font(.caption)
-            .foregroundStyle(.orange)
+            .foregroundStyle(Color.warning)
     }
 }
 
 /// The PWA's state colours: blue for in-progress, green for done, orange for
 /// waiting or worrying, red for broken.
 enum StateColor {
-    static func of(_ state: String) -> Color {
+    @MainActor static func of(_ state: String) -> Color {
         switch state {
-        case "downloading", "playing", "fetched": .blue
-        case "seeding", "completed", "ok", "imported", "downloaded": .green
-        case "stalled", "queued", "warning", "checking", "wanted", "paused": .orange
-        case "error", "failed", "deleted": .red
+        case "downloading", "playing", "fetched": Color.accent
+        case "seeding", "completed", "ok", "imported", "downloaded": Color.success
+        case "stalled", "queued", "warning", "checking", "wanted", "paused": Color.warning
+        case "error", "failed", "deleted": Color.danger
         default: .secondary
         }
     }
@@ -111,7 +111,7 @@ struct ProgressBar: View {
     let value: Double
     var body: some View {
         ProgressView(value: min(1, max(0, value)))
-            .tint(value >= 1 ? .green : Color.accent)
+            .tint(value >= 1 ? Color.success : Color.accent)
     }
 }
 

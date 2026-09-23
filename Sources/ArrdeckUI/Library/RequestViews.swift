@@ -12,7 +12,7 @@ struct RequestBadge: View {
             Text(pending ? "Request" : "Requested")
                 .font(.system(size: 10, weight: .bold))
                 .padding(.horizontal, 5).padding(.vertical, 2)
-                .background(pending ? Color.orange : Color.accent, in: RoundedRectangle(cornerRadius: 4))
+                .background(pending ? Color.warning : Color.accent, in: RoundedRectangle(cornerRadius: 4))
                 .foregroundStyle(pending ? Color.black : Color.white)
                 .accessibilityLabel(Text("Requested by \(request.requested_by ?? "")"))
         }

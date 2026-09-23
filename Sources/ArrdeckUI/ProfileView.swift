@@ -67,26 +67,26 @@ public struct ProfileView: View {
         case let .open(info):
             Label("Connected — arrdeck \(info.version), no sign-in needed here",
                   systemImage: "checkmark.circle")
-                .foregroundStyle(.green)
+                .foregroundStyle(Color.success)
         case let .paired(info):
             Label("Signed in — arrdeck \(info.version)", systemImage: "checkmark.circle")
-                .foregroundStyle(.green)
+                .foregroundStyle(Color.success)
         case .legacy:
             Label("Signed in — older backend", systemImage: "checkmark.circle")
-                .foregroundStyle(.green)
+                .foregroundStyle(Color.success)
         case .needsPairing:
             Label("Sign-in required", systemImage: "lock.circle")
-                .foregroundStyle(.blue)
+                .foregroundStyle(Color.accent)
         case .rejected:
             Label("Signed out — the session expired or was revoked",
                   systemImage: "lock.slash")
-                .foregroundStyle(.orange)
+                .foregroundStyle(Color.warning)
         case let .offline(reason):
             Label("Unreachable: \(reason)", systemImage: "wifi.slash")
-                .foregroundStyle(.orange)
+                .foregroundStyle(Color.warning)
         case let .notArrdeck(reason):
             Label("Not an arrdeck: \(reason)", systemImage: "xmark.circle")
-                .foregroundStyle(.red)
+                .foregroundStyle(Color.danger)
         }
     }
 }

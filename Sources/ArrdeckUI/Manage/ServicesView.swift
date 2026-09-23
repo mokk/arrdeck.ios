@@ -59,13 +59,13 @@ struct ServiceFormSection: View {
                     .help(form.dirty ? "Save first" : "Test the saved connection")
                 Spacer()
                 if let result = form.result {
-                    Text(result).font(.caption).foregroundStyle(form.resultOK ? Color.green : Color.red).lineLimit(1)
+                    Text(result).font(.caption).foregroundStyle(form.resultOK ? Color.success : Color.danger).lineLimit(1)
                 }
             }
         } header: {
             HStack(spacing: 8) {
                 if let status {
-                    Circle().fill(!status.ok ? Color.red : (status.isFlaky ? Color.orange : Color.green)).frame(width: 8, height: 8)
+                    Circle().fill(!status.ok ? Color.danger : (status.isFlaky ? Color.warning : Color.success)).frame(width: 8, height: 8)
                 }
                 Text(Services.label(form.name))
                 Spacer()

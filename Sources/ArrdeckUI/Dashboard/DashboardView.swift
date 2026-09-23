@@ -30,7 +30,7 @@ public struct DashboardView: View {
                 Section {
                     Label(error, systemImage: "wifi.slash")
                         .font(.subheadline)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Color.warning)
                         .accessibilityIdentifier("connection-error")
                 }
             }
@@ -182,8 +182,8 @@ struct RequestsSection: View {
                         }
                         Spacer(minLength: 0)
                         VStack(spacing: 6) {
-                            actionButton("Approve", .approve, request).tint(.green)
-                            actionButton("Decline", .decline, request).tint(.red)
+                            actionButton("Approve", .approve, request).tint(Color.success)
+                            actionButton("Decline", .decline, request).tint(Color.danger)
                         }
                     }
                 }
@@ -381,7 +381,7 @@ struct QueueRow: View {
                 }
                 if troubled {
                     Button("Blocklist & retry", action: retry)
-                        .buttonStyle(.bordered).controlSize(.small).tint(.orange)
+                        .buttonStyle(.bordered).controlSize(.small).tint(Color.warning)
                 }
                 if let remove {
                     Button("Remove", role: .destructive, action: remove)
@@ -562,7 +562,7 @@ struct VpnSection: View {
                         if vpn.port_matches == false {
                             StateBadge(state: "warning")
                             Text("qBittorrent is on \(vpn.client_port.map(String.init) ?? "—")")
-                                .foregroundStyle(.orange)
+                                .foregroundStyle(Color.warning)
                         }
                     }
                     .font(.caption)
@@ -588,7 +588,7 @@ struct SubtitlesSection: View {
                     if (subs.throttled_providers ?? 0) > 0 {
                         Text("\(subs.throttled_providers ?? 0) provider throttled")
                             .font(.caption)
-                            .foregroundStyle(.orange)
+                            .foregroundStyle(Color.warning)
                     }
                 }
                 ForEach((subs.items ?? []).prefix(8), id: \.id) { item in

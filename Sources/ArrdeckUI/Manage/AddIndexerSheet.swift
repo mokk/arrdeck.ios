@@ -81,7 +81,7 @@ struct AddIndexerSheet: View {
                 }
             }
             if let note = model.note {
-                Section { Text(note).font(.subheadline).foregroundStyle(model.noteOK ? Color.green : Color.red) }
+                Section { Text(note).font(.subheadline).foregroundStyle(model.noteOK ? Color.success : Color.danger) }
             }
             Section {
                 Button(model.busy ? "Testing…" : "Test") { Task { await model.test() } }

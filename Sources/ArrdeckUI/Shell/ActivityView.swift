@@ -101,7 +101,7 @@ struct DownloadingList: View {
     var body: some View {
         List {
             if let error = model.connectionError {
-                Section { Label(error, systemImage: "wifi.slash").font(.subheadline).foregroundStyle(.orange) }
+                Section { Label(error, systemImage: "wifi.slash").font(.subheadline).foregroundStyle(Color.warning) }
             }
             if model.hasArr {
                 Section("Radarr / Sonarr") {
@@ -141,7 +141,7 @@ struct DownloadingList: View {
                                     } label: {
                                         Label(torrent.isPaused ? "Resume" : "Pause", systemImage: torrent.isPaused ? "play.fill" : "pause.fill")
                                     }
-                                    .tint(.blue)
+                                    .tint(Color.accent)
                                 }
                         }
                     }
@@ -170,7 +170,7 @@ struct DownloadingList: View {
                         Label(model.isThrottled ? "Throttled" : "Throttle", systemImage: "tortoise")
                             .symbolVariant(model.isThrottled ? .fill : .none)
                     }
-                    .tint(model.isThrottled ? .orange : nil)
+                    .tint(model.isThrottled ? Color.warning : nil)
                     .disabled(model.isPending("throttle"))
                     Button { adding = true } label: { Label("Add torrent", systemImage: "plus") }
                         .accessibilityIdentifier("add-torrent")

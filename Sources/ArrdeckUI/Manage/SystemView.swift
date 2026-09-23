@@ -37,7 +37,7 @@ struct SystemView: View {
                 ForEach(list, id: \.service) { status in
                     HStack(spacing: 8) {
                         Circle()
-                            .fill(!status.ok ? Color.red : (status.isFlaky ? Color.orange : Color.green))
+                            .fill(!status.ok ? Color.danger : (status.isFlaky ? Color.warning : Color.success))
                             .frame(width: 8, height: 8)
                         Text(Services.label(status.service.rawValue)).font(.subheadline.weight(.medium))
                         Spacer()
@@ -45,13 +45,13 @@ struct SystemView: View {
                         // flaky wins the dot, since a service that keeps dropping
                         // matters more than a version.
                         if !status.ok {
-                            Text(status.error ?? "offline").font(.caption).foregroundStyle(.red).lineLimit(1)
+                            Text(status.error ?? "offline").font(.caption).foregroundStyle(Color.danger).lineLimit(1)
                         } else if status.isFlaky {
-                            Text("flaky · \(status.retries ?? 0) retries").font(.caption).foregroundStyle(.orange)
+                            Text("flaky · \(status.retries ?? 0) retries").font(.caption).foregroundStyle(Color.warning)
                         } else {
                             Text(status.version ?? "").font(.caption).foregroundStyle(.secondary)
                             if let update = status.update_available {
-                                Text("↑ \(update)").font(.caption).foregroundStyle(.orange)
+                                Text("↑ \(update)").font(.caption).foregroundStyle(Color.warning)
                             }
                         }
                     }
@@ -68,7 +68,7 @@ struct SystemView: View {
                 HStack {
                     if model.overdueCount > 0 {
                         Text(model.overdueCount == 1 ? "1 task overdue" : "\(model.overdueCount) tasks overdue")
-                            .font(.subheadline.weight(.semibold)).foregroundStyle(.orange)
+                            .font(.subheadline.weight(.semibold)).foregroundStyle(Color.warning)
                     } else {
                         Text("\(tasks.count) tasks, all on schedule").font(.subheadline).foregroundStyle(.secondary)
                     }
@@ -91,7 +91,7 @@ struct SystemView: View {
                         Spacer()
                         if task.overdue == true {
                             Text("\(Format.eta(Int(task.overdue_by_seconds ?? 0))) overdue")
-                                .font(.caption.weight(.semibold)).foregroundStyle(.orange)
+                                .font(.caption.weight(.semibold)).foregroundStyle(Color.warning)
                         } else {
                             Text(relative(task.next_execution)).font(.caption).foregroundStyle(.secondary)
                         }
@@ -173,8 +173,8 @@ struct LogRow: View {
 
     var levelColor: Color {
         switch entry.level {
-        case "error", "fatal": .red
-        case "warn": .orange
+        case "error", "fatal": Color.danger
+        case "warn": Color.warning
         default: .secondary
         }
     }
@@ -190,7 +190,7 @@ struct LogRow: View {
             }
             Text(entry.message ?? "").font(.caption.monospaced())
             if let exception = entry.exception?.split(separator: "\n").first {
-                Text(String(exception)).font(.caption2.monospaced()).foregroundStyle(.red).lineLimit(2)
+                Text(String(exception)).font(.caption2.monospaced()).foregroundStyle(Color.danger).lineLimit(2)
             }
         }
     }

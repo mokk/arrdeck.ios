@@ -33,7 +33,7 @@ struct ReleasesSheet: View {
                                     Text(release.title).font(.subheadline.weight(.medium)).lineLimit(2)
                                     Text(details(release)).font(.caption).foregroundStyle(.secondary).lineLimit(1)
                                     if release.approved != true, let reason = release.rejections?.first {
-                                        Text("rejected: \(reason)").font(.caption).foregroundStyle(.orange).lineLimit(2)
+                                        Text("rejected: \(reason)").font(.caption).foregroundStyle(Color.warning).lineLimit(2)
                                     }
                                 }
                                 Spacer(minLength: 0)

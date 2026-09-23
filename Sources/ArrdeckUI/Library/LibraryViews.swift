@@ -78,7 +78,7 @@ struct Completion: View {
     var body: some View {
         if total > 0 {
             ProgressView(value: Double(min(have, total)), total: Double(total))
-                .tint(have >= total ? .green : Color.accent)
+                .tint(have >= total ? Color.success : Color.accent)
         }
     }
 }

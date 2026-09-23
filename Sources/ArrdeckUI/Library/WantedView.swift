@@ -195,10 +195,10 @@ struct DiagnoseSheet: View {
 
     func levelColor(_ level: String) -> Color {
         switch level {
-        case "blocked": .red
-        case "warning": .orange
-        case "info": .blue
-        case "ok": .green
+        case "blocked": Color.danger
+        case "warning": Color.warning
+        case "info": Color.accent
+        case "ok": Color.success
         default: .secondary
         }
     }

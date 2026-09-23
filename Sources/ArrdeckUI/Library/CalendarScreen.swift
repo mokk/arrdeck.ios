@@ -211,8 +211,8 @@ public struct CalendarScreen: View {
     }
 
     func dotColor(_ item: CalendarItem) -> Color {
-        if item.has_file == true { return .green }
-        return item.app == .radarr ? .orange : .blue
+        if item.has_file == true { return Color.success }
+        return item.app == .radarr ? Color.warning : Color.accent
     }
 }
 

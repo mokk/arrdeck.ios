@@ -57,7 +57,7 @@ struct CleanupView: View {
                     Text("Reclaim \(Format.bytes(CleanupModel.total(model.chosen))) (\(model.chosen.count) titles)")
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent).tint(.red).controlSize(.large)
+                .buttonStyle(.borderedProminent).tint(Color.danger).controlSize(.large)
                 .padding()
                 .disabled(model.busy)
             }

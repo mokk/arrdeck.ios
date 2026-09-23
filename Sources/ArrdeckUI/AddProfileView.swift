@@ -105,16 +105,16 @@ struct OutcomeRow: View {
         switch outcome {
         case let .reachable(info):
             Label("arrdeck \(info.version) — no sign-in needed here", systemImage: "checkmark.circle")
-                .foregroundStyle(.green)
+                .foregroundStyle(Color.success)
         case .needsPairing:
             Label("Found an arrdeck — it will ask you to sign in", systemImage: "lock.circle")
-                .foregroundStyle(.blue)
+                .foregroundStyle(Color.accent)
         case let .notArrdeck(reason):
             Label("Not an arrdeck: \(reason)", systemImage: "xmark.circle")
-                .foregroundStyle(.red)
+                .foregroundStyle(Color.danger)
         case let .unreachable(reason):
             Label("Could not reach it: \(reason)", systemImage: "wifi.slash")
-                .foregroundStyle(.orange)
+                .foregroundStyle(Color.warning)
         }
     }
 }

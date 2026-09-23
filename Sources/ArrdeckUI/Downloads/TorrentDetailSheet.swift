@@ -81,11 +81,11 @@ struct TorrentDetailSheet: View {
                         Section("Trackers") {
                             ForEach(Array(trackers.enumerated()), id: \.offset) { _, tracker in
                                 HStack(spacing: 8) {
-                                    Circle().fill(tracker.ok == false ? .red : .green).frame(width: 6, height: 6)
+                                    Circle().fill(tracker.ok == false ? Color.danger : Color.success).frame(width: 6, height: 6)
                                     Text(tracker.host).font(.caption).lineLimit(1)
                                     Spacer()
                                     if tracker.ok == false, let message = tracker.message {
-                                        Text(message).font(.caption).foregroundStyle(.red).lineLimit(1)
+                                        Text(message).font(.caption).foregroundStyle(Color.danger).lineLimit(1)
                                     }
                                 }
                             }

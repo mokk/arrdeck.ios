@@ -246,7 +246,7 @@ struct PosterGrid: View {
                             if result.in_library == true, result.has_file == true || result.monitored == true {
                                 Text(result.has_file == true ? "Downloaded" : "Monitored")
                                     .font(.caption2.weight(.medium))
-                                    .foregroundStyle(result.has_file == true ? .green : .blue)
+                                    .foregroundStyle(result.has_file == true ? Color.success : Color.accent)
                             }
                         }
                     }
@@ -392,7 +392,7 @@ struct CollectionSheet: View {
                                         }
                                         Text(movie.libraryState.capitalized)
                                             .font(.caption)
-                                            .foregroundStyle(movie.has_file == true ? .green : (movie.in_library == true ? .blue : .secondary))
+                                            .foregroundStyle(movie.has_file == true ? Color.success : (movie.in_library == true ? Color.accent : .secondary))
                                     }
                                     Spacer()
                                     Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)

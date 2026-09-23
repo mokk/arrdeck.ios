@@ -215,7 +215,7 @@ struct WatchedDot: View {
     var body: some View {
         if let watched {
             Circle()
-                .fill(watched.watched ? Color.green : (watched.progress > 0 ? Color.orange : Color.secondary.opacity(0.3)))
+                .fill(watched.watched ? Color.success : (watched.progress > 0 ? Color.warning : Color.secondary.opacity(0.3)))
                 .frame(width: 8, height: 8)
                 .accessibilityLabel(watched.watched ? "Watched" : "Unwatched")
         }

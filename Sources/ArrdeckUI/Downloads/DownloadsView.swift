@@ -40,7 +40,7 @@ public struct DownloadsView: View {
         List {
             if let error = model.connectionError {
                 Section {
-                    Label(error, systemImage: "wifi.slash").font(.subheadline).foregroundStyle(.orange)
+                    Label(error, systemImage: "wifi.slash").font(.subheadline).foregroundStyle(Color.warning)
                 }
             }
             ForEach(model.clients, id: \.self) { client in
@@ -81,7 +81,7 @@ public struct DownloadsView: View {
                                     Label(torrent.isPaused ? "Resume" : "Pause",
                                           systemImage: torrent.isPaused ? "play.fill" : "pause.fill")
                                 }
-                                .tint(.blue)
+                                .tint(Color.accent)
                             }
                             .accessibilityIdentifier("torrent-row")
                     }
@@ -141,7 +141,7 @@ public struct DownloadsView: View {
                         Label(model.isThrottled ? "Throttled" : "Throttle", systemImage: "tortoise")
                             .symbolVariant(model.isThrottled ? .fill : .none)
                     }
-                    .tint(model.isThrottled ? .orange : nil)
+                    .tint(model.isThrottled ? Color.warning : nil)
                     .disabled(model.isPending("throttle"))
                     .accessibilityIdentifier("throttle")
                 }

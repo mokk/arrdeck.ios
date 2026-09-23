@@ -39,7 +39,7 @@ public struct ProfileListView: View {
         List {
             if let loadError {
                 Label(loadError, systemImage: "exclamationmark.triangle")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Color.warning)
             }
             ForEach(profiles) { profile in
                 Button {

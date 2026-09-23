@@ -196,7 +196,7 @@ struct BookFileRow: View {
         }
         .overlay(alignment: .bottomLeading) {
             if case let .failed(reason) = downloader.state {
-                Text(reason).font(.caption2).foregroundStyle(.red).offset(y: 14)
+                Text(reason).font(.caption2).foregroundStyle(Color.danger).offset(y: 14)
             }
         }
     }
