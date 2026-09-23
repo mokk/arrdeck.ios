@@ -77,6 +77,9 @@ struct UpNextList: View {
 private struct UpNextRow: View {
     let row: LibraryRow
     let baseURL: URL
+    // an episode that has not aired cannot have been watched, so any spoiler
+    // setting hides its title here
+    @AppStorage(DisplayKeys.spoilers) private var spoilers: Spoilers = .off
 
     var code: String? {
         guard let next = row.nextEpisode else { return nil }
@@ -89,7 +92,7 @@ private struct UpNextRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(row.title).font(.subheadline.weight(.semibold)).lineLimit(1)
                 if let code {
-                    (Text(verbatim: code).bold() + Text(verbatim: row.nextEpisode?.title.map { " · \($0)" } ?? ""))
+                    (Text(verbatim: code).bold() + Text(verbatim: spoilers == .off ? (row.nextEpisode?.title.map { " · \($0)" } ?? "") : ""))
                         .font(.caption).foregroundStyle(.secondary).lineLimit(1)
                 } else {
                     Text(row.status == "ended" ? "Ended" : "Nothing scheduled")
@@ -104,7 +107,7 @@ private struct UpNextRow: View {
             }
             Spacer(minLength: 0)
             if let air = row.nextEpisode?.air_date {
-                Text(air.formatted(.relative(presentation: .named)))
+                Text(Format.when(air))
                     .font(.caption.weight(.semibold))
                     .padding(.horizontal, 8).padding(.vertical, 3)
                     .background(Color.accentColor.opacity(0.15), in: Capsule())

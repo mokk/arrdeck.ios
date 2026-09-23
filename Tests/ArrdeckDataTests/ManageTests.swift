@@ -278,3 +278,35 @@ extension FakeManageAPI: ExtrasAPI {
         #expect(await api.count("bulksearch-1") == 0, "nothing selected, nothing sent")
     }
 }
+
+@Suite struct DisplayPrefsTests {
+    @Test func tabsFollowTheSavedOrderAndNeverHideSettings() {
+        let all: [AppTab] = [.books, .movies, .shows, .activity, .calendar, .settings]
+        #expect(AppTab.arrange(all, order: [.shows, .movies], hidden: []) == [.shows, .movies, .books, .activity, .calendar, .settings])
+        #expect(AppTab.arrange(all, order: [], hidden: [.calendar, .settings]) == [.books, .movies, .shows, .activity, .settings])
+        #expect(AppTab.list("shows,bogus,books") == [.shows, .books])
+    }
+
+    @Test func spoilerRules() {
+        #expect(!SpoilerGuard.hides(season: 1, episode: 2, mode: .off, watched: nil))
+        #expect(SpoilerGuard.hides(season: 1, episode: 2, mode: .always, watched: ["1x2"]))
+        #expect(!SpoilerGuard.hides(season: 1, episode: 2, mode: .unwatched, watched: ["1x2"]))
+        #expect(SpoilerGuard.hides(season: 1, episode: 3, mode: .unwatched, watched: ["1x2"]))
+        #expect(SpoilerGuard.hides(season: 1, episode: 2, mode: .unwatched, watched: nil), "no answer from Plex errs on the safe side")
+    }
+
+    @Test func confirmPolicy() {
+        #expect(ConfirmPolicy.always.asks(destructive: false))
+        #expect(!ConfirmPolicy.deletes.asks(destructive: false) && ConfirmPolicy.deletes.asks(destructive: true))
+        #expect(!ConfirmPolicy.never.asks(destructive: true))
+    }
+
+    @Test func sizesAndDates() {
+        let en = Locale(identifier: "en_US")
+        #expect(Format.bytes(1_500_000_000, locale: en, style: .decimal) == "1.5 GB")
+        #expect(Format.bytes(1_500_000_000, locale: en, style: .binary) == "1.4 GB")
+        let now = Date(timeIntervalSince1970: 1_790_139_600) // 2026-09-23
+        #expect(Format.when(Date(timeIntervalSince1970: 978_307_200), style: .absolute, now: now, locale: en).contains("2001"))
+        #expect(!Format.when(now.addingTimeInterval(-86_400 * 3), style: .absolute, now: now, locale: en).contains("2026"))
+    }
+}

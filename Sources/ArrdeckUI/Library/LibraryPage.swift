@@ -282,6 +282,7 @@ struct CardTap: ViewModifier {
     let webURL: URL?
     let diagnose: (LibraryRow) -> Void
     let delete: (LibraryRow) -> Void
+    @Environment(\.confirmCenter) private var confirmCenter
 
     /// Each arr shows one title at /movie/<slug>, /series/<slug>, /book/<slug>.
     var arrURL: URL? {
@@ -310,11 +311,15 @@ struct CardTap: ViewModifier {
                 .buttonStyle(.plain)
                 .contextMenu {
                     Button {
-                        Task { await model.setMonitored(row, !row.monitored) }
+                        ask(confirmCenter, row.monitored ? String(localized: "Unmonitor") : String(localized: "Monitor"), subject: row.title) {
+                            await model.setMonitored(row, !row.monitored)
+                        }
                     } label: {
                         row.monitored ? Label("Unmonitor", systemImage: "bookmark.slash") : Label("Monitor", systemImage: "bookmark")
                     }
-                    Button { Task { await model.search(row) } } label: { Label("Search now", systemImage: "magnifyingglass") }
+                    Button {
+                        ask(confirmCenter, String(localized: "Search now"), subject: row.title) { await model.search(row) }
+                    } label: { Label("Search now", systemImage: "magnifyingglass") }
                     if row.dot == .wanted, model.app != .readarr {
                         Button { diagnose(row) } label: { Label("Why hasn't this arrived?", systemImage: "questionmark.circle") }
                     }
@@ -381,7 +386,7 @@ struct LibraryListRow: View {
                 if details {
                     if !facts.isEmpty { Text(facts).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
                     if let added = row.added {
-                        Text("Added \(added.formatted(.relative(presentation: .named)))")
+                        Text("Added \(Format.when(added))")
                             .font(.caption2).foregroundStyle(.tertiary).lineLimit(1)
                     }
                 }

@@ -3,16 +3,30 @@ import Foundation
 /// Display formatting shared by the cards. Locale and clock are parameters so
 /// tests pin exact strings; the defaults are the device's.
 public enum Format {
-    /// "0 B", "1.5 GB", "2.4 TB" — 1024-based, one decimal above bytes, as the
-    /// PWA prints them.
-    public static func bytes(_ count: Int?, locale: Locale = .current) -> String {
+    /// "0 B", "1.5 GB", "2.4 TB" — one decimal above bytes, as the PWA prints
+    /// them; steps of 1024 or 1000 per Settings → Display.
+    public static func bytes(_ count: Int?, locale: Locale = .current, style: SizeStyle? = nil) -> String {
         guard let count, count > 0 else { return "0 B" }
+        let base: Double = (style ?? UserDefaults.standard.pref(DisplayKeys.sizes, default: SizeStyle.binary)) == .decimal ? 1000 : 1024
         let units = ["B", "KB", "MB", "GB", "TB"]
-        let exponent = min(Int(log(Double(count)) / log(1024)), units.count - 1)
-        let value = Double(count) / pow(1024, Double(exponent))
+        let exponent = min(Int(log(Double(count)) / log(base)), units.count - 1)
+        let value = Double(count) / pow(base, Double(exponent))
         let digits = exponent == 0 ? 0 : 1
         let number = value.formatted(.number.precision(.fractionLength(digits)).locale(locale))
         return "\(number) \(units[exponent])"
+    }
+
+    /// A moment as "3 days ago" or as a date, per Settings → Display; the year
+    /// shows when it is not this one.
+    public static func when(_ date: Date, style: DateStyle? = nil, now: Date = .now, locale: Locale = .current) -> String {
+        switch style ?? UserDefaults.standard.pref(DisplayKeys.dates, default: DateStyle.relative) {
+        case .relative:
+            return date.formatted(.relative(presentation: .named).locale(locale))
+        case .absolute:
+            let sameYear = Calendar.current.component(.year, from: date) == Calendar.current.component(.year, from: now)
+            let format = Date.FormatStyle(locale: locale).month(.abbreviated).day()
+            return date.formatted(sameYear ? format : format.year())
+        }
     }
 
     public static func speed(_ bytesPerSecond: Int, locale: Locale = .current) -> String {

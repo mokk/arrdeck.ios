@@ -85,11 +85,14 @@ public struct Watched: Equatable, Sendable {
     public var watched: Bool
     public var progress: Double
     public var url: URL?
+    /// Plex's rating key, for asking which episodes of a show were watched.
+    public var key: String?
 
-    public init(watched: Bool, progress: Double, url: URL?) {
+    public init(watched: Bool, progress: Double, url: URL?, key: String? = nil) {
         self.watched = watched
         self.progress = progress
         self.url = url
+        self.key = key
     }
 
     public static func lookup(
@@ -104,7 +107,7 @@ public struct Watched: Equatable, Sendable {
             // The Plex link is composed here rather than shipped per entry:
             // every one shared the same server prefix, two thirds of the payload.
             let url: URL? = if let base = map?.base_url, let key = item.key { URL(string: base + key) } else { nil }
-            return Watched(watched: item.watched ?? false, progress: item.progress ?? 0, url: url)
+            return Watched(watched: item.watched ?? false, progress: item.progress ?? 0, url: url, key: item.key)
         }
         return nil
     }

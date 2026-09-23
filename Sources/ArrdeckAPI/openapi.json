@@ -1323,6 +1323,10 @@
             "title": "Monitored",
             "type": "boolean"
           },
+          "overview": {
+            "title": "Overview",
+            "type": "string"
+          },
           "quality": {
             "title": "Quality",
             "type": "string"

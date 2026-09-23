@@ -55,7 +55,7 @@ public struct ManageView: View {
             }
             Section {
                 NavigationLink {
-                    DisplaySettingsView(apps: [.readarr, .radarr, .sonarr].filter { model.has($0.rawValue) })
+                    DisplaySettingsView(configured: model.configured, notifications: api as? any NotificationsAPI)
                 } label: { Label("Display", systemImage: "paintpalette") }
                 .accessibilityIdentifier("settings-display")
             }

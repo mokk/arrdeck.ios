@@ -44,8 +44,82 @@ public enum UnmonitoredMode: String, CaseIterable, Sendable, Hashable {
     }
 }
 
-/// The UserDefaults keys the views bind with @AppStorage, one per tab.
+/// Dates as "3 days ago" or as a date.
+public enum DateStyle: String, CaseIterable, Sendable {
+    case relative, absolute
+
+    public var label: String {
+        switch self {
+        case .relative: String(localized: "Relative (3 days ago)")
+        case .absolute: String(localized: "Dates (Sep 20)")
+        }
+    }
+}
+
+/// 1 GB as 1024 MB (what arrdeck always showed) or 1000 MB, as disks are sold.
+public enum SizeStyle: String, CaseIterable, Sendable {
+    case binary, decimal
+
+    public var label: String {
+        switch self {
+        case .binary: "1 GB = 1024 MB"
+        case .decimal: "1 GB = 1000 MB"
+        }
+    }
+}
+
+/// Hide what episodes are called and about: never, until watched, or always.
+public enum Spoilers: String, CaseIterable, Sendable {
+    case off, unwatched, always
+
+    public var label: String {
+        switch self {
+        case .off: String(localized: "Off")
+        case .unwatched: String(localized: "Unwatched episodes")
+        case .always: String(localized: "All episodes")
+        }
+    }
+}
+
+/// Which actions ask first. Deleting a title always asks whether to keep the
+/// files, since that is a choice rather than a confirmation.
+public enum ConfirmPolicy: String, CaseIterable, Sendable {
+    case always, deletes, never
+
+    public var label: String {
+        switch self {
+        case .always: String(localized: "Every action")
+        case .deletes: String(localized: "Deleting only")
+        case .never: String(localized: "Never")
+        }
+    }
+
+    public func asks(destructive: Bool) -> Bool {
+        switch self {
+        case .always: true
+        case .deletes: destructive
+        case .never: false
+        }
+    }
+}
+
+/// The UserDefaults keys the views bind with @AppStorage.
 public enum DisplayKeys {
     public static func layout(_ app: ArrApp) -> String { "display.layout.\(app.rawValue)" }
     public static func unmonitored(_ app: ArrApp) -> String { "display.unmonitored.\(app.rawValue)" }
+    public static let startTab = "display.startTab"
+    /// comma-separated AppTab raw values
+    public static let tabOrder = "display.tabOrder"
+    public static let hiddenTabs = "display.hiddenTabs"
+    public static let dates = "display.dates"
+    public static let sizes = "display.sizes"
+    public static let spoilers = "display.spoilers"
+    public static let confirm = "display.confirm"
+}
+
+extension UserDefaults {
+    /// A stored preference, or its default when unset or unknown.
+    public func pref<T: RawRepresentable>(_ key: String, default value: T) -> T where T.RawValue == String {
+        string(forKey: key).flatMap(T.init(rawValue:)) ?? value
+    }
 }

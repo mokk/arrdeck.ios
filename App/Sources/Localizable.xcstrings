@@ -511,6 +511,16 @@
         }
       }
     },
+    "All episodes": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle afsnit"
+          }
+        }
+      }
+    },
     "All tags": {
       "localizations": {
         "da": {
@@ -562,6 +572,16 @@
         }
       }
     },
+    "Ask before": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spørg før"
+          }
+        }
+      }
+    },
     "Author": {
       "localizations": {
         "da": {
@@ -608,6 +628,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bazarr følger ikke denne titel"
+          }
+        }
+      }
+    },
+    "Behaviour": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adfærd"
           }
         }
       }
@@ -894,6 +924,36 @@
         }
       }
     },
+    "Dates": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datoer"
+          }
+        }
+      }
+    },
+    "Dates (Sep 20)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datoer (20. sep.)"
+          }
+        }
+      }
+    },
+    "Default": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standard"
+          }
+        }
+      }
+    },
     "Delete": {
       "localizations": {
         "da": {
@@ -935,6 +995,7 @@
       }
     },
     "Delete file?": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -1011,6 +1072,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Slet…"
+          }
+        }
+      }
+    },
+    "Deleting only": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kun sletning"
           }
         }
       }
@@ -1235,6 +1306,26 @@
         }
       }
     },
+    "Events": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hændelser"
+          }
+        }
+      }
+    },
+    "Every action": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle handlinger"
+          }
+        }
+      }
+    },
     "Everything checks out — the indexers simply have not offered a matching release yet.": {
       "localizations": {
         "da": {
@@ -1347,6 +1438,16 @@
         }
       }
     },
+    "Formatting": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formatering"
+          }
+        }
+      }
+    },
     "Forwarded port %@": {
       "localizations": {
         "da": {
@@ -1373,6 +1474,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ledig plads"
+          }
+        }
+      }
+    },
+    "From": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fra"
           }
         }
       }
@@ -1437,12 +1548,32 @@
         }
       }
     },
+    "Hidden — tap to show": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skjult — tryk for at vise"
+          }
+        }
+      }
+    },
     "Hide": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Skjul"
+          }
+        }
+      }
+    },
+    "Hide %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skjul %@"
           }
         }
       }
@@ -1811,6 +1942,16 @@
         }
       }
     },
+    "Never": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aldrig"
+          }
+        }
+      }
+    },
     "New": {
       "localizations": {
         "da": {
@@ -1961,6 +2102,16 @@
         }
       }
     },
+    "Nothing is pushed in this window; it follows this device's time zone.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intet sendes i dette tidsrum; det følger enhedens tidszone."
+          }
+        }
+      }
+    },
     "Nothing new since you last looked": {
       "localizations": {
         "da": {
@@ -1981,12 +2132,32 @@
         }
       }
     },
+    "Notifications": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifikationer"
+          }
+        }
+      }
+    },
     "Now playing": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Afspilles nu"
+          }
+        }
+      }
+    },
+    "Off": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fra"
           }
         }
       }
@@ -2027,6 +2198,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Åbn i…"
+          }
+        }
+      }
+    },
+    "Open on": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åbn på"
           }
         }
       }
@@ -2182,6 +2363,16 @@
         }
       }
     },
+    "Quiet hours": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stille timer"
+          }
+        }
+      }
+    },
     "RSS sync is {minutes} minutes overdue, so nothing new is being picked up.": {
       "localizations": {
         "da": {
@@ -2249,6 +2440,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Genkontrollér"
+          }
+        }
+      }
+    },
+    "Relative (3 days ago)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relative (for 3 dage siden)"
           }
         }
       }
@@ -2665,6 +2866,16 @@
         }
       }
     },
+    "Show %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vis %@"
+          }
+        }
+      }
+    },
     "Show %lld rejected": {
       "localizations": {
         "da": {
@@ -2785,6 +2996,16 @@
         }
       }
     },
+    "Sizes": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Størrelser"
+          }
+        }
+      }
+    },
     "Sort": {
       "localizations": {
         "da": {
@@ -2821,6 +3042,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hastighedsgrænser"
+          }
+        }
+      }
+    },
+    "Spoiler protection": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spoilerbeskyttelse"
+          }
+        }
+      }
+    },
+    "Spoiler protection hides the titles and summaries of episodes Plex has not seen you watch; tap one to show it. Deleting a title always asks whether to keep its files.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spoilerbeskyttelse skjuler titler og resuméer på afsnit, Plex ikke har set dig se; tryk for at vise dem. Sletning af en titel spørger altid, om filerne skal beholdes."
           }
         }
       }
@@ -2895,6 +3136,16 @@
         }
       }
     },
+    "Tabs": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faner"
+          }
+        }
+      }
+    },
     "Test the saved connection": {
       "localizations": {
         "da": {
@@ -2936,11 +3187,22 @@
       }
     },
     "These choices are kept on this device only.": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Valgene gemmes kun på denne enhed."
+          }
+        }
+      }
+    },
+    "These choices are kept on this device only. Drag the tabs to reorder them.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valgene gemmes kun på denne enhed. Træk fanerne for at ændre rækkefølgen."
           }
         }
       }
@@ -3065,12 +3327,32 @@
         }
       }
     },
+    "Until": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Til"
+          }
+        }
+      }
+    },
     "Unwatched": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Ikke set"
+          }
+        }
+      }
+    },
+    "Unwatched episodes": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usete afsnit"
           }
         }
       }
@@ -3192,6 +3474,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uge"
+          }
+        }
+      }
+    },
+    "What arrdeck pushes to the browsers subscribed to it. This app cannot receive web push itself.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvad arrdeck sender til de browsere, der abonnerer. Denne app kan ikke selv modtage web push."
           }
         }
       }

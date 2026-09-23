@@ -22,6 +22,8 @@ public struct SeriesDetailView: View {
         _model = State(initialValue: SeriesDetailModel(id: id, api: api, hasPlex: hasPlex, onSessionLost: onSessionLost))
     }
 
+    @AppStorage(DisplayKeys.spoilers) private var spoilers: Spoilers = .off
+
     public var body: some View {
         List {
             switch model.series {
@@ -62,7 +64,13 @@ public struct SeriesDetailView: View {
         .dashboardListStyle()
         .navigationTitle(title)
         .toolbar { WatchedDot(watched: model.watched) }
-        .task { await model.load() }
+        .task {
+            await model.load()
+            if spoilers == .unwatched { await model.loadWatchedEpisodes() }
+        }
+        .onChange(of: spoilers) { _, mode in
+            if mode == .unwatched { Task { await model.loadWatchedEpisodes() } }
+        }
         .onChange(of: model.deleted) { _, deleted in if deleted { dismiss() } }
         .alert("Action failed", isPresented: actionFailed) {
             Button("OK") { model.actionError = nil }
@@ -161,7 +169,15 @@ struct EpisodeRow: View {
     let episode: Episode
     let model: SeriesDetailModel
     let search: () -> Void
-    @State private var confirmingDelete = false
+    @Environment(\.confirmCenter) private var confirmCenter
+    @AppStorage(DisplayKeys.spoilers) private var spoilers: Spoilers = .off
+    @State private var revealed = false
+    @State private var expanded = false
+
+    var hidden: Bool {
+        !revealed && SpoilerGuard.hides(season: episode.season, episode: episode.episode,
+                                        mode: spoilers, watched: model.watchedEpisodes)
+    }
 
     var fileDetails: String? {
         guard episode.has_file == true else { return nil }
@@ -175,7 +191,18 @@ struct EpisodeRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 4) {
                     Text(String(format: "E%02d", episode.episode)).font(.caption.monospaced()).foregroundStyle(.secondary)
-                    Text(episode.title ?? "").font(.subheadline).lineLimit(1)
+                    if hidden {
+                        Button("Hidden — tap to show") { revealed = true }
+                            .font(.subheadline.italic()).foregroundStyle(.secondary)
+                            .buttonStyle(.borderless)
+                    } else {
+                        Text(episode.title ?? "").font(.subheadline).lineLimit(1)
+                    }
+                }
+                if !hidden, let overview = episode.overview {
+                    Text(overview).font(.caption).foregroundStyle(.secondary)
+                        .lineLimit(expanded ? nil : 2)
+                        .onTapGesture { expanded.toggle() }
                 }
                 HStack(spacing: 6) {
                     if episode.has_file == true {
@@ -189,23 +216,23 @@ struct EpisodeRow: View {
             }
             Spacer(minLength: 0)
             if episode.has_file == true, episode.file_id != nil {
-                if confirmingDelete {
-                    Button("Delete file?", role: .destructive) {
-                        confirmingDelete = false
-                        Task { await model.deleteFile(of: episode) }
+                Button("Delete file", role: .destructive) {
+                    let label = String(format: "E%02d", episode.episode) + (hidden ? "" : " \(episode.title ?? "")")
+                    ask(confirmCenter, String(localized: "Delete file"), subject: label, destructive: true) {
+                        await model.deleteFile(of: episode)
                     }
-                    .buttonStyle(.borderedProminent).controlSize(.small)
-                } else {
-                    Button("Delete file", role: .destructive) { confirmingDelete = true }
-                        .buttonStyle(.borderless).controlSize(.small)
                 }
+                .buttonStyle(.borderless).controlSize(.small)
             }
             Button(episode.monitored == true ? "Unmonitor" : "Monitor") {
-                Task { await model.setEpisodeMonitored(episode, !(episode.monitored ?? false)) }
+                let on = !(episode.monitored ?? false)
+                ask(confirmCenter, on ? String(localized: "Monitor") : String(localized: "Unmonitor")) {
+                    await model.setEpisodeMonitored(episode, on)
+                }
             }
             .buttonStyle(.borderless).controlSize(.small)
             if episode.has_file != true {
-                Button("Search") { Task { await model.searchEpisode(episode) } }
+                Button("Search") { ask(confirmCenter, String(localized: "Search")) { await model.searchEpisode(episode) } }
                     .buttonStyle(.borderless).controlSize(.small)
             }
             Button(action: search) { Image(systemName: "chevron.right") }

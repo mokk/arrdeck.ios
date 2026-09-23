@@ -46,6 +46,7 @@ public struct ServerView: View {
                 ProgressView("Connecting…")
             } else if controller.isUsable {
                 tabs
+                    .confirmDialog(confirmCenter)
                     // The dashboard model polls /services and the queue; its
                     // cards live on under Settings › Overview, and the library
                     // pages read its queue for download progress.
@@ -69,6 +70,11 @@ public struct ServerView: View {
     }
 
     @State private var selectedTab: AppTab = .movies
+    @AppStorage(DisplayKeys.startTab) private var startTab = ""
+    @AppStorage(DisplayKeys.tabOrder) private var tabOrder = ""
+    @AppStorage(DisplayKeys.hiddenTabs) private var hiddenTabs = ""
+    @State private var openedOnStartTab = false
+    @State private var confirmCenter = ConfirmCenter()
 
     /// Every tab's stack stays mounted in a ZStack and only the selected one
     /// is visible, so switching tabs keeps scroll position and pushed screens.
@@ -77,7 +83,8 @@ public struct ServerView: View {
     /// of on the tab's root. Tabs appear only for configured services, so the
     /// bar waits for /services before it knows what to show.
     var tabs: some View {
-        let available = AppTab.available(configured: model.configured)
+        let available = AppTab.arrange(AppTab.available(configured: model.configured),
+                                       order: AppTab.list(tabOrder), hidden: Set(AppTab.list(hiddenTabs)))
         return Group {
             if !model.servicesKnown {
                 ProgressView("Connecting…")
@@ -99,7 +106,18 @@ public struct ServerView: View {
                 .safeAreaInset(edge: .bottom, spacing: 0) {
                     AppTabBar(tabs: available, selected: $selectedTab, badges: [.activity: feed.count])
                 }
-                .onAppear { if !available.contains(selectedTab) { selectedTab = available.first ?? .settings } }
+                .onAppear {
+                    // the chosen start tab once per launch; after that the
+                    // selection is whatever was tapped last
+                    if !openedOnStartTab, let start = AppTab(rawValue: startTab), available.contains(start) {
+                        selectedTab = start
+                    }
+                    openedOnStartTab = true
+                    if !available.contains(selectedTab) { selectedTab = available.first ?? .settings }
+                }
+                .onChange(of: available) { _, tabs in
+                    if !tabs.contains(selectedTab) { selectedTab = tabs.first ?? .settings }
+                }
             }
         }
     }

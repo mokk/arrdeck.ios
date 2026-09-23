@@ -54,6 +54,7 @@ struct DetailActions<Extra: View>: View {
     /// episode.
     @ViewBuilder let extra: () -> Extra
     @State private var confirmingDelete = false
+    @Environment(\.confirmCenter) private var confirmCenter
 
     var body: some View {
         Section {
@@ -61,9 +62,11 @@ struct DetailActions<Extra: View>: View {
                 ProfilePicker(model: model, selected: selectedProfile)
             }
             Button(monitored ? "Unmonitor" : "Monitor") {
-                Task { await model.setMonitored(!monitored) }
+                ask(confirmCenter, monitored ? String(localized: "Unmonitor") : String(localized: "Monitor")) {
+                    await model.setMonitored(!monitored)
+                }
             }
-            Button("Search now") { Task { await model.search() } }
+            Button("Search now") { ask(confirmCenter, String(localized: "Search now")) { await model.search() } }
             extra()
             Button("Delete…", role: .destructive) { confirmingDelete = true }
         }

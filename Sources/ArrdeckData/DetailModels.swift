@@ -185,6 +185,14 @@ public final class SeriesDetailModel: DetailModelBase {
         super.init(ref: .series(id), api: api, hasPlex: hasPlex, onSessionLost: onSessionLost)
     }
 
+    /// The watched episodes, "SxE", once asked for; nil until Plex answers.
+    public private(set) var watchedEpisodes: Set<String>?
+
+    public func loadWatchedEpisodes() async {
+        guard let key = watched?.key, let source = api as? any WatchedEpisodesAPI else { return }
+        watchedEpisodes = try? await source.watchedEpisodes(key: key)
+    }
+
     public var watched: Watched? {
         guard let series = series.value else { return nil }
         return Watched.lookup(watchedMap, tmdb: series.tmdb_id, tvdb: series.tvdb_id, imdb: series.imdb_id)

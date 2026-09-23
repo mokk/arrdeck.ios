@@ -28,6 +28,19 @@ public enum AppTab: String, CaseIterable, Sendable, Hashable {
         }
     }
 
+    /// The tabs in the order and selection chosen under Settings → Display.
+    /// Tabs missing from the saved order keep their natural place after the
+    /// ordered ones; Settings can never be hidden.
+    public static func arrange(_ tabs: [AppTab], order: [AppTab], hidden: Set<AppTab>) -> [AppTab] {
+        func rank(_ tab: AppTab) -> Int { order.firstIndex(of: tab) ?? order.count + (tabs.firstIndex(of: tab) ?? 0) }
+        return tabs.filter { $0 == .settings || !hidden.contains($0) }.sorted { rank($0) < rank($1) }
+    }
+
+    /// Parses the comma-separated form the preferences store.
+    public static func list(_ raw: String) -> [AppTab] {
+        raw.split(separator: ",").compactMap { AppTab(rawValue: String($0)) }
+    }
+
     /// Which tabs a backend with these services configured shows, in order.
     public static func available(configured: Set<String>) -> [AppTab] {
         let hasArr = configured.contains("radarr") || configured.contains("sonarr") || configured.contains("readarr")
