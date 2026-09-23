@@ -6,8 +6,8 @@ import SwiftUI
 /// connection screen whenever it does not. One controller decides which, so a
 /// card's 401 and a completed sign-in both flip it.
 ///
-/// Tabs follow the PWA's bottom bar — Home, Downloads, then Popular, Add and
-/// Manage as they are ported. Each tab has its own navigation stack.
+/// Tabs follow the PWA's bottom bar — Home, Downloads, Manage, then Popular
+/// and Add as they are ported. Each tab has its own navigation stack.
 public struct ServerView: View {
     @State private var controller: SessionController
     @State private var model: DashboardModel
@@ -88,6 +88,15 @@ public struct ServerView: View {
                 }
             }
             .tabItem { Label("Downloads", systemImage: "arrow.down.circle") }
+
+            NavigationStack {
+                if model.servicesKnown {
+                    ManageView(model: model, api: api, baseURL: controller.profile.baseURL, onSessionLost: sessionLost)
+                } else {
+                    ProgressView().navigationTitle("Manage")
+                }
+            }
+            .tabItem { Label("Manage", systemImage: "slider.horizontal.3") }
         }
     }
 

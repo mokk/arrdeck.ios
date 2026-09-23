@@ -129,6 +129,21 @@ final class OnboardingUITests: XCTestCase {
         snap("wanted")
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
+        // Manage: the hub, then the connection settings it links to — the one
+        // screen that reads every service's saved configuration.
+        app.tabBars.buttons["Manage"].tap()
+        let manage = app.descendants(matching: .any)["manage"].firstMatch
+        XCTAssert(manage.waitForExistence(timeout: 10), "manage hub never appeared")
+        snap("manage")
+        app.buttons["manage-system"].tap()
+        XCTAssert(app.staticTexts["Scheduled tasks"].waitForExistence(timeout: 20), "system screen never loaded")
+        snap("system")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["manage-connections"].tap()
+        XCTAssert(app.staticTexts["configured"].firstMatch.waitForExistence(timeout: 20), "connections never loaded")
+        snap("connections")
+        app.tabBars.buttons["Home"].tap()
+
         // Relaunch: the profile must come back from the Keychain, not from
         // memory — and being the only one, it opens straight to its dashboard.
         // The first version of this test asserted only in-memory state and
