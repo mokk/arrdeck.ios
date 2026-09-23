@@ -238,6 +238,7 @@ extension LiveAPI: ManageAPI {
             switch try await client.library_books_api_v1_library_books_get() {
             case let .ok(ok): try ok.body.json
             case let .undocumented(code, _): throw APIError.status(code)
+            case .unprocessableContent: throw APIError.unexpectedStatus(422)
             }
         }
     }
