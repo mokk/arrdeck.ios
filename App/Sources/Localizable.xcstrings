@@ -321,6 +321,16 @@
         }
       }
     },
+    "Add book": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj bog"
+          }
+        }
+      }
+    },
     "Add indexer": {
       "localizations": {
         "da": {
@@ -512,6 +522,16 @@
         }
       }
     },
+    "Book": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bog"
+          }
+        }
+      }
+    },
     "Books": {
       "localizations": {
         "da": {
@@ -588,6 +608,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kontrollerer…"
+          }
+        }
+      }
+    },
+    "Choose file…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg fil…"
           }
         }
       }
@@ -1352,6 +1382,16 @@
         }
       }
     },
+    "Metadata profile": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metadataprofil"
+          }
+        }
+      }
+    },
     "Missing": {
       "localizations": {
         "da": {
@@ -1569,6 +1609,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Åbner serverens egen indlogningsside. Adgangsnøgler virker der."
+          }
+        }
+      }
+    },
+    "Or a .torrent file": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eller en .torrent-fil"
           }
         }
       }
@@ -1916,6 +1966,17 @@
         }
       }
     },
+    "Search Readarr for a book to add.": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg efter en bog i Readarr for at tilføje den."
+          }
+        }
+      }
+    },
     "Search all": {
       "localizations": {
         "da": {
@@ -1932,6 +1993,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Søg efter bøger"
+          }
+        }
+      }
+    },
+    "Search books…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg bøger…"
           }
         }
       }

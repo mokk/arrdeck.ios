@@ -25,6 +25,52 @@
         "title": "AboutOut",
         "type": "object"
       },
+      "AddBookIn": {
+        "properties": {
+          "foreign_book_id": {
+            "title": "Foreign Book Id",
+            "type": "string"
+          },
+          "foreign_edition_id": {
+            "title": "Foreign Edition Id",
+            "type": "string"
+          },
+          "metadata_profile_id": {
+            "title": "Metadata Profile Id",
+            "type": "integer"
+          },
+          "monitored": {
+            "default": true,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "quality_profile_id": {
+            "title": "Quality Profile Id",
+            "type": "integer"
+          },
+          "root_folder_path": {
+            "title": "Root Folder Path",
+            "type": "string"
+          },
+          "search_now": {
+            "default": true,
+            "title": "Search Now",
+            "type": "boolean"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "foreign_book_id",
+          "title",
+          "quality_profile_id",
+          "root_folder_path"
+        ],
+        "title": "AddBookIn",
+        "type": "object"
+      },
       "AddIndexerIn": {
         "properties": {
           "display_name": {
@@ -2829,6 +2875,18 @@
       },
       "SearchResultOut": {
         "properties": {
+          "author": {
+            "title": "Author",
+            "type": "string"
+          },
+          "foreign_edition_id": {
+            "title": "Foreign Edition Id",
+            "type": "string"
+          },
+          "foreign_id": {
+            "title": "Foreign Id",
+            "type": "string"
+          },
           "has_file": {
             "title": "Has File",
             "type": "boolean"
@@ -2845,7 +2903,8 @@
           "kind": {
             "enum": [
               "movie",
-              "series"
+              "series",
+              "book"
             ],
             "title": "Kind",
             "type": "string"
@@ -5126,6 +5185,49 @@
         "summary": "Blocklist Remove",
         "tags": [
           "arrmeta"
+        ]
+      }
+    },
+    "/api/v1/books": {
+      "post": {
+        "operationId": "add_book_api_v1_books_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddBookIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Add Book Api V1 Books Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Book",
+        "tags": [
+          "discover"
         ]
       }
     },
@@ -8337,6 +8439,52 @@
         "summary": "Restore",
         "tags": [
           "settings"
+        ]
+      }
+    },
+    "/api/v1/search/books": {
+      "get": {
+        "operationId": "search_books_api_v1_search_books_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "title": "Q",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SearchResultOut"
+                  },
+                  "title": "Response Search Books Api V1 Search Books Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Search Books",
+        "tags": [
+          "discover"
         ]
       }
     },

@@ -1,11 +1,15 @@
 import ArrdeckData
 import SwiftUI
+import UniformTypeIdentifiers
 
-/// Adding a torrent by magnet link or URL. A .torrent file needs a multipart
-/// upload; that arrives with the file importer.
+/// Adding a torrent by magnet link, URL, or a .torrent file from the Files
+/// picker; a picked file takes precedence over the URL field.
 struct AddTorrentSheet: View {
     @State private var model: AddTorrentModel
+    @State private var importing = false
     let dismiss: () -> Void
+
+    private static let torrentType = UTType(filenameExtension: "torrent") ?? .data
 
     init(clients: [TorrentClient], api: any ExtrasAPI, onSessionLost: @escaping @MainActor () -> Void, dismiss: @escaping () -> Void) {
         self.dismiss = dismiss
@@ -25,6 +29,19 @@ struct AddTorrentSheet: View {
                     TextField("magnet:?xt=…", text: $model.url, axis: .vertical)
                         .autocorrectionDisabled()
                         .lineLimit(1...4)
+                        .disabled(model.fileData != nil)
+                }
+                Section("Or a .torrent file") {
+                    if let name = model.fileName {
+                        HStack {
+                            Label(name, systemImage: "doc").lineLimit(1)
+                            Spacer()
+                            Button("Remove", role: .destructive) { model.clearFile() }
+                        }
+                    } else {
+                        Button { importing = true } label: { Label("Choose file…", systemImage: "folder") }
+                            .accessibilityIdentifier("choose-torrent-file")
+                    }
                 }
                 if model.client == .qbittorrent, !model.categories.isEmpty {
                     Picker("Category", selection: $model.category) {
@@ -47,6 +64,21 @@ struct AddTorrentSheet: View {
             }
             .task { await model.loadCategories() }
             .onChange(of: model.done) { _, done in if done { dismiss() } }
+            .fileImporter(isPresented: $importing, allowedContentTypes: [Self.torrentType, .data]) { result in
+                switch result {
+                case let .success(url):
+                    // Files hands out a security-scoped URL; read it once, now.
+                    let scoped = url.startAccessingSecurityScopedResource()
+                    defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+                    do {
+                        model.attach(filename: url.lastPathComponent, data: try Data(contentsOf: url))
+                    } catch {
+                        model.error = error.localizedDescription
+                    }
+                case let .failure(error):
+                    model.error = error.localizedDescription
+                }
+            }
         }
     }
 }

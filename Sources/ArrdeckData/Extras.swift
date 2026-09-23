@@ -45,6 +45,7 @@ public protocol ExtrasAPI: Sendable {
     func renamePreview(_ ref: MediaRef) async throws -> [RenamePreview]
     func renameFiles(_ ref: MediaRef, fileIDs: [Int]) async throws
     func addTorrent(_ client: TorrentClient, url: String, category: String, paused: Bool) async throws
+    func addTorrentFile(_ client: TorrentClient, filename: String, data: Data, category: String, paused: Bool) async throws
     func qbitCategories() async throws -> [String]
     func qbitTags() async throws -> [String]
     func setLimits(_ client: TorrentClient, id: String, downloadKiB: Int, uploadKiB: Int) async throws
@@ -148,6 +149,23 @@ extension LiveAPI: ExtrasAPI {
             case let .undocumented(code, _): throw APIError.status(code)
             }
         }
+    }
+
+    /// Hand-built multipart: the generated client has no body type for this
+    /// operation. Same session and cookie jar as everything else.
+    public func addTorrentFile(_ torrentClient: TorrentClient, filename: String, data: Data, category: String, paused: Bool) async throws {
+        guard let baseURL, let session else { throw APIError.unexpectedStatus(0) }
+        var form = MultipartForm()
+        form.addFile("file", filename: filename, contentType: "application/x-bittorrent", data: data)
+        form.addField("category", value: category)
+        form.addField("paused", value: paused ? "true" : "false")
+        var request = URLRequest(url: baseURL.appending(path: "api/v1/torrents/\(torrentClient.rawValue)/add-file"))
+        request.httpMethod = "POST"
+        request.setValue(form.contentType, forHTTPHeaderField: "Content-Type")
+        let (_, response) = try await session.upload(for: request, from: form.encoded)
+        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        if status == 401 { throw APIError.unauthorized }
+        guard (200..<300).contains(status) else { throw APIError.unexpectedStatus(status) }
     }
 
     public func qbitCategories() async throws -> [String] {
@@ -347,9 +365,8 @@ public final class RenameModel {
     }
 }
 
-/// Adding a torrent by magnet or URL. (.torrent files need a multipart
-/// upload the generated client does not yet do; that arrives with the file
-/// importer.)
+/// Adding a torrent by magnet or URL, or from a .torrent file picked with the
+/// file importer; a picked file wins over whatever is in the URL field.
 @MainActor @Observable
 public final class AddTorrentModel {
     public let clients: [TorrentClient]
@@ -359,6 +376,8 @@ public final class AddTorrentModel {
     public var url = ""
     public var category = ""
     public var paused = false
+    public private(set) var fileName: String?
+    public private(set) var fileData: Data?
     public private(set) var categories: [String] = []
     public private(set) var busy = false
     public private(set) var done = false
@@ -374,7 +393,18 @@ public final class AddTorrentModel {
         self.onSessionLost = onSessionLost
     }
 
-    public var canSubmit: Bool { !url.trimmingCharacters(in: .whitespaces).isEmpty && !busy }
+    public var canSubmit: Bool { (fileData != nil || !url.trimmingCharacters(in: .whitespaces).isEmpty) && !busy }
+
+    public func attach(filename: String, data: Data) {
+        fileName = filename
+        fileData = data
+        error = nil
+    }
+
+    public func clearFile() {
+        fileName = nil
+        fileData = nil
+    }
 
     public func loadCategories() async {
         categories = client == .qbittorrent ? ((try? await api.qbitCategories()) ?? []) : []
@@ -384,7 +414,11 @@ public final class AddTorrentModel {
         busy = true
         defer { busy = false }
         do {
-            try await api.addTorrent(client, url: url.trimmingCharacters(in: .whitespaces), category: category, paused: paused)
+            if let fileData, let fileName {
+                try await api.addTorrentFile(client, filename: fileName, data: fileData, category: category, paused: paused)
+            } else {
+                try await api.addTorrent(client, url: url.trimmingCharacters(in: .whitespaces), category: category, paused: paused)
+            }
             done = true
         } catch APIError.unauthorized {
             onSessionLost()

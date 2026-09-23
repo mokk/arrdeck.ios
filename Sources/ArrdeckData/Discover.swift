@@ -14,20 +14,52 @@ public typealias RootFolder = Components.Schemas.RootFolderOut
 extension Components.Schemas.ServiceBlock_PopularSnapshotOut_: ServiceBlockShape {}
 
 public enum MediaKind: String, CaseIterable, Sendable, Hashable {
-    case movies, series
+    case movies, series, books
 
-    public var app: ArrApp { self == .movies ? .radarr : .sonarr }
-    public var label: String { String(localized: self == .movies ? "Movies" : "Series") }
+    public var app: ArrApp {
+        switch self {
+        case .movies: .radarr
+        case .series: .sonarr
+        case .books: .readarr
+        }
+    }
+
+    public var label: String {
+        switch self {
+        case .movies: String(localized: "Movies")
+        case .series: String(localized: "Series")
+        case .books: String(localized: "Books")
+        }
+    }
 }
 
 extension SearchResult {
     /// The library title, once it is one.
     public var ref: MediaRef? {
         guard let library_id else { return nil }
-        return kind == .movie ? .movie(library_id) : .series(library_id)
+        switch kind {
+        case .movie: return .movie(library_id)
+        case .series: return .series(library_id)
+        case .book: return .book(library_id)
+        }
     }
 
-    public var app: ArrApp { kind == .movie ? .radarr : .sonarr }
+    public var app: ArrApp {
+        switch kind {
+        case .movie: .radarr
+        case .series: .sonarr
+        case .book: .readarr
+        }
+    }
+
+    /// "Movie", "Series" or "Book", for the sheet's first badge.
+    public var kindLabel: String {
+        switch kind {
+        case .movie: String(localized: "Movie")
+        case .series: String(localized: "Series")
+        case .book: String(localized: "Book")
+        }
+    }
 
     /// Not in library / monitored / downloaded / in library, unmonitored.
     public var libraryState: String {
@@ -38,6 +70,7 @@ extension SearchResult {
 
     public var externalLinks: [ExternalLink] {
         var links: [ExternalLink] = []
+        if kind == .book { return links }
         if let imdb = imdb_id, let url = URL(string: "https://www.imdb.com/title/\(imdb)/") {
             links.append(.init(label: "IMDb", url: url))
         }
@@ -64,7 +97,8 @@ public protocol DiscoverAPI: Sendable {
     func searchReleases(_ query: String) async throws -> [Release]
     func discover(_ kind: MediaKind) async throws -> [SearchResult]
     func grab(guid: String, indexerID: Int) async throws
-    func add(_ result: SearchResult, qualityProfile: Int, rootFolder: String) async throws
+    /// `metadataProfile` matters for books only: Readarr keeps it on the author.
+    func add(_ result: SearchResult, qualityProfile: Int, rootFolder: String, metadataProfile: Int?) async throws
     func collections() async throws -> [Collection]
     func collectionDetail(_ id: Int) async throws -> CollectionDetail
     func setCollectionMonitored(_ id: Int, _ monitored: Bool) async throws
@@ -83,6 +117,12 @@ extension LiveAPI: DiscoverAPI {
                 }
             case .series:
                 switch try await client.search_series_api_v1_search_series_get(query: .init(q: query)) {
+                case let .ok(ok): return try ok.body.json
+                case .unprocessableContent: throw APIError.unexpectedStatus(422)
+                case let .undocumented(code, _): throw APIError.status(code)
+                }
+            case .books:
+                switch try await client.search_books_api_v1_search_books_get(query: .init(q: query)) {
                 case let .ok(ok): return try ok.body.json
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)
@@ -116,6 +156,8 @@ extension LiveAPI: DiscoverAPI {
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)
                 }
+            case .books:
+                return [] // Overseerr has no popular list for books
             }
         }
     }
@@ -130,9 +172,21 @@ extension LiveAPI: DiscoverAPI {
         }
     }
 
-    public func add(_ result: SearchResult, qualityProfile: Int, rootFolder: String) async throws {
+    public func add(_ result: SearchResult, qualityProfile: Int, rootFolder: String, metadataProfile: Int?) async throws {
         try await call {
             switch result.kind {
+            case .book:
+                switch try await client.add_book_api_v1_books_post(body: .json(.init(
+                    foreign_book_id: result.foreign_id ?? String(result.remote_id),
+                    foreign_edition_id: result.foreign_edition_id,
+                    metadata_profile_id: metadataProfile,
+                    quality_profile_id: qualityProfile, root_folder_path: rootFolder,
+                    title: result.title
+                ))) {
+                case .created: ()
+                case .unprocessableContent: throw APIError.unexpectedStatus(422)
+                case let .undocumented(code, _): throw APIError.status(code)
+                }
             case .movie:
                 switch try await client.add_movie_api_v1_movies_post(body: .json(.init(
                     quality_profile_id: qualityProfile, root_folder_path: rootFolder,
@@ -200,12 +254,13 @@ extension LiveAPI: DiscoverAPI {
 // MARK: - Add
 
 public enum AddTab: String, CaseIterable, Sendable, Hashable {
-    case movies, series, collections, releases
+    case movies, series, books, collections, releases
 
     public var label: String {
         switch self {
         case .movies: String(localized: "Movies")
         case .series: String(localized: "Series")
+        case .books: String(localized: "Books")
         case .collections: String(localized: "Collections")
         case .releases: String(localized: "Releases")
         }
@@ -215,14 +270,19 @@ public enum AddTab: String, CaseIterable, Sendable, Hashable {
         switch self {
         case .movies, .collections: "radarr"
         case .series: "sonarr"
+        case .books: "readarr"
         case .releases: "prowlarr"
         }
     }
+
+    /// The library this tab searches; nil for collections and raw releases.
+    public var mediaKind: MediaKind? { MediaKind(rawValue: rawValue) }
 
     public var prompt: String {
         switch self {
         case .movies: String(localized: "Search movies…")
         case .series: String(localized: "Search series…")
+        case .books: String(localized: "Search books…")
         case .collections: String(localized: "Filter by name…")
         case .releases: String(localized: "Search raw releases…")
         }
@@ -277,6 +337,8 @@ public final class AddModel {
         switch tab {
         case .movies, .series:
             if canDiscover { await loadDiscover(tab == .movies ? .movies : .series) }
+        case .books:
+            break // Overseerr knows nothing about books: no popular list
         case .collections:
             await loadCollections()
         case .releases:
@@ -293,7 +355,7 @@ public final class AddModel {
     }
 
     private func inputChanged() {
-        guard tab == .movies || tab == .series else { return }
+        guard tab.mediaKind != nil else { return }
         debounce?.cancel()
         guard searching else { results = nil; generation += 1; return }
         debounce = Task {
@@ -310,8 +372,8 @@ public final class AddModel {
         let mine = generation
         let query = input.trimmingCharacters(in: .whitespaces)
         switch tab {
-        case .movies, .series:
-            let kind: MediaKind = tab == .movies ? .movies : .series
+        case .movies, .series, .books:
+            let kind = tab.mediaKind ?? .movies
             if results?.value == nil { results = .loading }
             do {
                 let found = try await api.search(kind, query: query)
@@ -391,6 +453,8 @@ public final class MediaSheetModel {
     public private(set) var options: Options?
     public var qualityProfile: Int?
     public var rootFolder: String?
+    /// Books only: the metadata profile a new author is created with.
+    public var metadataProfile: Int?
     public private(set) var busy = false
     public private(set) var done = false
     public var error: String?
@@ -411,11 +475,13 @@ public final class MediaSheetModel {
         // The first of each is the default, as the PWA chose.
         if qualityProfile == nil { qualityProfile = result.quality_profile_id ?? options?.quality_profiles.first?.id }
         if rootFolder == nil { rootFolder = options?.root_folders.first?.path }
+        if metadataProfile == nil { metadataProfile = options?.metadata_profiles?.first?.id }
     }
 
     public func add() async {
         guard let qualityProfile, let rootFolder else { return }
-        await perform { try await api.add(result, qualityProfile: qualityProfile, rootFolder: rootFolder) }
+        let metadataProfile = result.kind == .book ? metadataProfile : nil
+        await perform { try await api.add(result, qualityProfile: qualityProfile, rootFolder: rootFolder, metadataProfile: metadataProfile) }
     }
 
     public func setMonitored(_ monitored: Bool) async {

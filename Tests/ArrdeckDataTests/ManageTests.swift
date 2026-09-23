@@ -207,6 +207,7 @@ extension FakeManageAPI: ExtrasAPI {
     func bulkEdit(_ app: ArrApp, ids: [Int], monitored: Bool?, qualityProfile: Int?, tags: [Int]?, tagChange: TagChange?) async throws {
         log("bulk-\(ids.map(String.init).joined(separator: ","))-\(monitored.map(String.init) ?? "_")-\(qualityProfile.map(String.init) ?? "_")-\(tags?.first.map(String.init) ?? "_")-\(tagChange?.rawValue ?? "_")")
     }
+    func addTorrentFile(_ client: TorrentClient, filename: String, data: Data, category: String, paused: Bool) async throws {}
     func bulkDelete(_ app: ArrApp, ids: [Int], deleteFiles: Bool) async throws { log("bulkdelete-\(ids.count)-\(deleteFiles)") }
     func bulkSearch(_ app: ArrApp, ids: [Int]) async throws { log("bulksearch-\(ids.count)") }
 }

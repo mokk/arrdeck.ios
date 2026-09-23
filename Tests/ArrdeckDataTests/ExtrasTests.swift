@@ -27,6 +27,9 @@ actor FakeExtrasAPI: ExtrasAPI {
     func addTorrent(_ client: TorrentClient, url: String, category: String, paused: Bool) async throws {
         try log("add-\(client.rawValue)-\(url)-\(category)-\(paused)")
     }
+    func addTorrentFile(_ client: TorrentClient, filename: String, data: Data, category: String, paused: Bool) async throws {
+        try log("add-file-\(client.rawValue)-\(filename)-\(data.count)")
+    }
     func qbitCategories() async throws -> [String] { try log("categories"); return ["movies", "tv"] }
     func qbitTags() async throws -> [String] { try log("tags"); return ["keep", "temp"] }
     func setLimits(_ client: TorrentClient, id: String, downloadKiB: Int, uploadKiB: Int) async throws { try log("limits-\(id)-\(downloadKiB)-\(uploadKiB)") }
@@ -119,5 +122,18 @@ actor FakeExtrasAPI: ExtrasAPI {
         #expect(await api.count("priority-top") == 1)
         await model.forceStart()
         #expect(await api.count("force-h1") == 1)
+    }
+}
+
+@Suite struct MultipartFormTests {
+    @Test func encodesFieldsAndAFileWithAClosingBoundary() {
+        var form = MultipartForm(boundary: "b")
+        form.addField("category", value: "books")
+        form.addFile("file", filename: "a \"b\".torrent", contentType: "application/x-bittorrent", data: Data([1, 2, 3]))
+        let text = String(decoding: form.encoded, as: UTF8.self)
+        #expect(form.contentType == "multipart/form-data; boundary=b")
+        #expect(text.hasPrefix("--b\r\nContent-Disposition: form-data; name=\"category\"\r\n\r\nbooks\r\n"))
+        #expect(text.contains("name=\"file\"; filename=\"a 'b'.torrent\"\r\nContent-Type: application/x-bittorrent\r\n\r\n"))
+        #expect(text.hasSuffix("\r\n--b--\r\n"))
     }
 }

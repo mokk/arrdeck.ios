@@ -55,7 +55,7 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
         return [SearchResult(kind: .movie, remote_id: 9, title: "Popular")]
     }
     func grab(guid: String, indexerID: Int) async throws { try log("grab-\(guid)-\(indexerID)") }
-    func add(_ result: SearchResult, qualityProfile: Int, rootFolder: String) async throws {
+    func add(_ result: SearchResult, qualityProfile: Int, rootFolder: String, metadataProfile: Int?) async throws {
         try log("add-\(result.remote_id)-\(qualityProfile)-\(rootFolder)")
     }
     func collections() async throws -> [Collection] {

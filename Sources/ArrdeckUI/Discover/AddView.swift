@@ -40,6 +40,15 @@ public struct AddView: View {
         }
     }
 
+    var fixedTitle: String {
+        switch fixed {
+        case .movies?: String(localized: "Add movie")
+        case .series?: String(localized: "Add show")
+        case .books?: String(localized: "Add book")
+        default: String(localized: "Add")
+        }
+    }
+
     var page: some View {
         Group {
             if model.tabs.isEmpty {
@@ -54,7 +63,7 @@ public struct AddView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
             }
         }
-        .navigationTitle(fixed.map { $0 == .movies ? String(localized: "Add movie") : String(localized: "Add show") } ?? String(localized: "Add"))
+        .navigationTitle(fixedTitle)
         .searchable(text: $model.input, prompt: model.tab.prompt)
         .onSubmit(of: .search) { Task { await model.submit() } }
         .task { await model.load() }
@@ -95,6 +104,13 @@ public struct AddView: View {
                     resultsSection(model.discover[model.tab == .movies ? .movies : .series], title: model.tab == .movies ? "Popular movies" : "Popular series")
                 } else {
                     Section { EmptyNote("Configure Overseerr under Manage → Connections to browse popular titles.") }
+                }
+            case .books:
+                // Overseerr knows nothing about books, so there is no popular list.
+                if model.searching {
+                    resultsSection(model.results, title: nil)
+                } else {
+                    Section { EmptyNote("Search Readarr for a book to add.") }
                 }
             case .collections:
                 collectionsSection
@@ -263,7 +279,8 @@ struct MediaSheet: View {
             List {
                 Section {
                     DetailHero(poster: result.poster, baseURL: baseURL, overview: result.overview ?? "No description available.", links: result.externalLinks) {
-                        Text(result.kind == .movie ? "Movie" : "Series")
+                        Text(result.kindLabel)
+                        if let author = result.author { Text("· \(author)") }
                         if let year = result.year { Text("· \(year)") }
                         Text("· \(result.libraryState)")
                     }
@@ -288,6 +305,12 @@ struct MediaSheet: View {
         Section {
             Picker("Quality profile", selection: $model.qualityProfile) {
                 ForEach(model.options?.quality_profiles ?? [], id: \.id) { Text($0.name).tag(Int?.some($0.id)) }
+            }
+            // Readarr matches a new author against a metadata profile too.
+            if result.kind == .book, let profiles = model.options?.metadata_profiles, !profiles.isEmpty {
+                Picker("Metadata profile", selection: $model.metadataProfile) {
+                    ForEach(profiles, id: \.id) { Text($0.name).tag(Int?.some($0.id)) }
+                }
             }
             Picker("Root folder", selection: $model.rootFolder) {
                 ForEach(model.options?.root_folders ?? [], id: \.id) { folder in

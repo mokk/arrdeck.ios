@@ -62,9 +62,15 @@ public protocol DashboardAPI: Sendable {
 /// value or an `APIError`.
 public struct LiveAPI: DashboardAPI {
     let client: ArrdeckAPI.Client
+    /// For the few calls the generated client cannot make (multipart uploads);
+    /// nil when built around a bare client, as the tests do.
+    let baseURL: URL?
+    let session: URLSession?
 
     public init(client: ArrdeckAPI.Client) {
         self.client = client
+        baseURL = nil
+        session = nil
     }
 
     /// A client whose requests carry the session cookie pairing stored in
@@ -74,10 +80,11 @@ public struct LiveAPI: DashboardAPI {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = timeout
         config.httpCookieStorage = cookies
-        let transport = OpenAPIURLSession.URLSessionTransport(
-            configuration: .init(session: URLSession(configuration: config))
-        )
-        self.init(client: ArrdeckAPI.Client(serverURL: baseURL, transport: transport))
+        let session = URLSession(configuration: config)
+        let transport = OpenAPIURLSession.URLSessionTransport(configuration: .init(session: session))
+        client = ArrdeckAPI.Client(serverURL: baseURL, transport: transport)
+        self.baseURL = baseURL
+        self.session = session
     }
 
     public func services() async throws -> [ServiceInfo] {

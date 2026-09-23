@@ -68,12 +68,8 @@ public struct LibraryPage: View {
                     Button("Done") { model.selecting = false }
                 } else {
                     sortMenu
-                    // Adding a book waits on Readarr's lookup carrying the
-                    // author and edition data the add call needs.
-                    if app != .readarr {
-                        Button { adding = true } label: { Label("Add", systemImage: "plus") }
-                            .accessibilityIdentifier("library-add")
-                    }
+                    Button { adding = true } label: { Label("Add", systemImage: "plus") }
+                        .accessibilityIdentifier("library-add")
                 }
             }
         }
@@ -92,7 +88,7 @@ public struct LibraryPage: View {
         }
         .sheet(isPresented: $adding) {
             AddView(configured: dashboard.configured, api: api, baseURL: baseURL, hasPlex: dashboard.has("plex"),
-                    fixed: app == .sonarr ? .series : .movies, onSessionLost: onSessionLost) {
+                    fixed: addTab, onSessionLost: onSessionLost) {
                 adding = false
                 Task { await model.load() }
             }
@@ -113,6 +109,14 @@ public struct LibraryPage: View {
         .task { await model.load() }
         .refreshable { await model.load() }
         .accessibilityIdentifier("library-\(app.rawValue)")
+    }
+
+    var addTab: AddTab {
+        switch app {
+        case .radarr: .movies
+        case .sonarr: .series
+        case .readarr: .books
+        }
     }
 
     var sortMenu: some View {

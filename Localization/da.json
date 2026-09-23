@@ -354,5 +354,12 @@
   "Upcoming": "Kommende",
   "Deleted": "Slettet",
   "Download": "Download",
-  "Open in…": "Åbn i…"
+  "Open in…": "Åbn i…",
+  "Book": "Bog",
+  "Add book": "Tilføj bog",
+  "Metadata profile": "Metadataprofil",
+  "Choose file…": "Vælg fil…",
+  "Or a .torrent file": "Eller en .torrent-fil",
+  "Search books…": "Søg bøger…",
+  "Search Readarr for a book to add.": "Søg efter en bog i Readarr for at tilføje den."
 }
