@@ -93,7 +93,11 @@ enum StateColor {
 struct StateBadge: View {
     let state: String
     var body: some View {
+        // A badge never wraps: squeezed beside a long quality string it broke
+        // into "import-ed". The text beside it truncates instead.
         Text(state)
+            .lineLimit(1)
+            .fixedSize()
             .font(.caption2.weight(.semibold))
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
@@ -151,7 +155,7 @@ struct Sparkline: View {
             }
             context.stroke(path, with: .color(.accentColor), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
         }
-        .frame(height: 28)
+        .frame(minHeight: 28)
         .accessibilityHidden(true)
     }
 }

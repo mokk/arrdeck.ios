@@ -8,14 +8,14 @@ import SwiftUI
 public struct DashboardView: View {
     let model: DashboardModel
     let baseURL: URL
-    let api: any DownloadsAPI & LibraryAPI & WantedAPI & CalendarAPI
+    let api: any DownloadsAPI & LibraryAPI & WantedAPI & CalendarAPI & HistoryAPI
     let onSessionLost: @MainActor () -> Void
     /// Pushed programmatically: a NavigationLink nested in the poster strip's
     /// horizontal ScrollView inside a List row never fires, a Button does.
     @State private var opened: MediaRef?
 
     public init(
-        model: DashboardModel, baseURL: URL, api: any DownloadsAPI & LibraryAPI & WantedAPI & CalendarAPI,
+        model: DashboardModel, baseURL: URL, api: any DownloadsAPI & LibraryAPI & WantedAPI & CalendarAPI & HistoryAPI,
         onSessionLost: @escaping @MainActor () -> Void
     ) {
         self.model = model
@@ -48,9 +48,11 @@ public struct DashboardView: View {
             }
             if model.has("gluetun") { VpnSection(model: model) }
             if model.has("bazarr") { SubtitlesSection(model: model) }
-            if model.hasArr { HistorySection(model: model) }
+            if model.hasArr {
+                HistorySection(model: model) { HistoryScreen(api: api, onSessionLost: onSessionLost) }
+            }
             if model.has("prowlarr") { IndexerSection(model: model) }
-            TrendsSection(model: model)
+            TrendsSection(model: model) { StatsScreen(api: api, onSessionLost: onSessionLost) }
         }
         .dashboardListStyle()
         .refreshable { await model.refresh() }
@@ -446,11 +448,12 @@ struct CalendarSection<Destination: View>: View {
     }
 }
 
-struct HistorySection: View {
+struct HistorySection<Destination: View>: View {
     let model: DashboardModel
+    @ViewBuilder let destination: () -> Destination
 
     var body: some View {
-        Section("Recent history") {
+        Section {
             RefreshNote(error: model.cardErrors[.history])
             switch model.history {
             case .loading:
@@ -485,6 +488,15 @@ struct HistorySection: View {
                     }
                     .disabled(item.ref == nil)
                 }
+            }
+        } header: {
+            HStack {
+                Text("Recent history")
+                Spacer()
+                NavigationLink { destination() } label: {
+                    Text("See all →").font(.caption.weight(.semibold)).textCase(nil)
+                }
+                .accessibilityIdentifier("history-link")
             }
         }
     }
@@ -633,8 +645,9 @@ struct IndexerSection: View {
     }
 }
 
-struct TrendsSection: View {
+struct TrendsSection<Destination: View>: View {
     let model: DashboardModel
+    @ViewBuilder let destination: () -> Destination
 
     var body: some View {
         if let samples = model.trends.value, samples.count >= 2, let last = samples.last {
@@ -646,7 +659,7 @@ struct TrendsSection: View {
                 ("Series", String(last.series ?? 0), samples.map { Double($0.series ?? 0) }),
                 ("Grabs", String(last.indexer_grabs ?? 0), samples.map { Double($0.indexer_grabs ?? 0) }),
             ]
-            Section("Trends (30 days)") {
+            Section {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                     ForEach(tiles, id: \.0) { label, value, values in
                         VStack(alignment: .leading, spacing: 2) {
@@ -659,6 +672,15 @@ struct TrendsSection: View {
                     }
                 }
                 .padding(.vertical, 4)
+            } header: {
+                HStack {
+                    Text("Trends (30 days)")
+                    Spacer()
+                    NavigationLink { destination() } label: {
+                        Text("See all →").font(.caption.weight(.semibold)).textCase(nil)
+                    }
+                    .accessibilityIdentifier("stats-link")
+                }
             }
         }
     }

@@ -76,6 +76,23 @@ final class OnboardingUITests: XCTestCase {
         XCTAssert(storage.waitForExistence(timeout: 15), "storage card never rendered")
         snap("dashboard-lower")
 
+        // History and Statistics from their cards' header links, further down.
+        for (link, screen, marker, shot) in [
+            ("history-link", "history", "Blocklist", "history"),
+            ("stats-link", "stats", "Library size", "stats"),
+        ] {
+            let button = app.buttons[link]
+            for _ in 0..<8 where !button.exists { app.swipeUp() }
+            XCTAssert(button.waitForExistence(timeout: 5), "no \(link) on the dashboard")
+            button.tap()
+            XCTAssert(app.descendants(matching: .any)[screen].firstMatch.waitForExistence(timeout: 10), "\(screen) never appeared")
+            // Segmented-control labels are buttons, section titles are static
+            // texts; match either.
+            XCTAssert(app.descendants(matching: .any)[marker].firstMatch.waitForExistence(timeout: 20), "\(screen) never loaded")
+            snap(shot)
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+        }
+
         // Into the calendar from the Upcoming card's header link.
         let calendarLink = app.buttons["calendar-link"]
         for _ in 0..<4 where !calendarLink.exists {
