@@ -399,12 +399,25 @@
             "title": "Author Id",
             "type": "integer"
           },
+          "downloadable": {
+            "default": false,
+            "title": "Downloadable",
+            "type": "boolean"
+          },
           "editions": {
             "default": [],
             "items": {
               "$ref": "#/components/schemas/BookEditionOut"
             },
             "title": "Editions",
+            "type": "array"
+          },
+          "files": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/BookFileOut"
+            },
+            "title": "Files",
             "type": "array"
           },
           "genres": {
@@ -522,6 +535,32 @@
           }
         },
         "title": "BookEditionOut",
+        "type": "object"
+      },
+      "BookFileOut": {
+        "properties": {
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "size": {
+            "default": 0,
+            "title": "Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "BookFileOut",
         "type": "object"
       },
       "BulkDeleteIn": {
@@ -6041,6 +6080,59 @@
           }
         },
         "summary": "Book Detail",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/library/books/{book_id}/files/{file_id}": {
+      "get": {
+        "description": "Proxy a book file from our Readarr fork, which serves it from its own\nlibrary mount — arrdeck never touches the files itself. Range requests\npass through so a client can resume.",
+        "operationId": "download_book_file_api_v1_library_books__book_id__files__file_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "book_id",
+            "required": true,
+            "schema": {
+              "title": "Book Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "file_id",
+            "required": true,
+            "schema": {
+              "title": "File Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download Book File",
         "tags": [
           "library"
         ]

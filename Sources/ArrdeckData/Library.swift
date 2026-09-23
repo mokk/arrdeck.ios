@@ -49,6 +49,7 @@ public enum MediaRef: Hashable, Sendable {
 
 public typealias BookDetail = Components.Schemas.BookDetailOut
 public typealias BookEdition = Components.Schemas.BookEditionOut
+public typealias BookFile = Components.Schemas.BookFileOut
 
 extension RecentItem {
     public var ref: MediaRef? { MediaRef(app: app.rawValue, id: library_id) }

@@ -875,6 +875,16 @@
         }
       }
     },
+    "Download": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download"
+          }
+        }
+      }
+    },
     "Download queue": {
       "localizations": {
         "da": {
@@ -1539,6 +1549,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "På disken"
+          }
+        }
+      }
+    },
+    "Open in…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åbn i…"
           }
         }
       }

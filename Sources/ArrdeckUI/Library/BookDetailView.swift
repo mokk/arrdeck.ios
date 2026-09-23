@@ -7,6 +7,8 @@ import SwiftUI
 public struct BookDetailView: View {
     @State private var model: BookDetailModel
     @State private var searching = false
+    @State private var downloader = FileDownloadModel()
+    @State private var sharing: URL?
     @Environment(\.dismiss) private var dismiss
     let baseURL: URL
     let api: any LibraryAPI & ExtrasAPI
@@ -40,7 +42,17 @@ public struct BookDetailView: View {
                     Button("Interactive search") { searching = true }
                 }
                 Section("File") {
-                    if book.has_file == true {
+                    if let files = book.files, !files.isEmpty {
+                        ForEach(files, id: \.id) { file in
+                            BookFileRow(
+                                file: file,
+                                fallbackName: book.title ?? "",
+                                downloadable: book.downloadable == true,
+                                downloader: downloader,
+                                url: fileURL(book: book.id, file: file.id)
+                            )
+                        }
+                    } else if book.has_file == true {
                         Text(Format.bytes(book.size_on_disk)).font(.subheadline.weight(.medium))
                     } else {
                         EmptyNote("No file")
@@ -65,6 +77,14 @@ public struct BookDetailView: View {
         .navigationTitle(title)
         .task { await model.load() }
         .onChange(of: model.deleted) { _, deleted in if deleted { dismiss() } }
+        .onChange(of: downloader.state) { _, state in
+            if case let .done(url) = state { sharing = url }
+        }
+        #if os(iOS)
+        .sheet(isPresented: Binding(get: { sharing != nil }, set: { if !$0 { sharing = nil } })) {
+            if let sharing { ShareSheet(url: sharing) }
+        }
+        #endif
         .sheet(isPresented: $searching) {
             ReleasesSheet(target: .book(model.ref.id), title: title, api: api, onSessionLost: onSessionLost) { searching = false }
         }
@@ -79,6 +99,12 @@ public struct BookDetailView: View {
     var title: String {
         guard let book = model.book.value else { return "…" }
         return [book.title, book.year.map(String.init)].compactMap { $0 }.joined(separator: " ")
+    }
+
+    /// arrdeck proxies the file from our Readarr fork; the session cookie in
+    /// the shared jar authenticates the request like every other call.
+    func fileURL(book: Int, file: Int) -> URL {
+        baseURL.appending(path: "api/v1/library/books/\(book)/files/\(file)")
     }
 
     var actionFailed: Binding<Bool> {
@@ -108,3 +134,64 @@ struct EditionRow: View {
         }
     }
 }
+
+
+/// One stored file: format and size, and — only when the connected Readarr is
+/// our fork — a Download that ends in the share sheet, so the book can go to
+/// Apple Books or Files. Upstream Readarr has no endpoint to serve files.
+struct BookFileRow: View {
+    let file: BookFile
+    let fallbackName: String
+    let downloadable: Bool
+    let downloader: FileDownloadModel
+    let url: URL
+
+    var details: String {
+        [file.format, Format.bytes(file.size)].compactMap { $0 }.joined(separator: " · ")
+    }
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(file.name ?? fallbackName).font(.subheadline).lineLimit(1)
+                Text(details).font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer()
+            if downloadable {
+                switch downloader.state {
+                case .downloading:
+                    ProgressView()
+                case let .done(saved):
+                    ShareLink(item: saved) { Label("Open in…", systemImage: "square.and.arrow.up").labelStyle(.titleOnly) }
+                        .font(.subheadline.weight(.semibold))
+                case .idle, .failed:
+                    Button {
+                        Task { await downloader.download(url, suggestedName: file.name ?? fallbackName) }
+                    } label: { Label("Download", systemImage: "arrow.down.circle").labelStyle(.titleOnly) }
+                    .font(.subheadline.weight(.semibold))
+                    .accessibilityIdentifier("book-download")
+                }
+            }
+        }
+        .overlay(alignment: .bottomLeading) {
+            if case let .failed(reason) = downloader.state {
+                Text(reason).font(.caption2).foregroundStyle(.red).offset(y: 14)
+            }
+        }
+    }
+}
+
+#if os(iOS)
+import UIKit
+
+/// The system share sheet: "Copy to Books", "Save to Files" and any reader app.
+struct ShareSheet: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: [url], applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
+}
+#endif
