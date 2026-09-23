@@ -1,7 +1,9 @@
 # xcodegen spec for the app target. The package (ArrdeckKit/ArrdeckUI) builds
 # and tests with Command Line Tools alone; only this target needs Xcode.
 #
-#   brew install xcodegen && cd App && xcodegen && open Arrdeck.xcodeproj
+#   brew install xcodegen && cd App && ./generate.sh && open Arrdeck.xcodeproj
+# (generate.sh, not bare xcodegen: it copies the package's pinned versions
+# into the project so Xcode does not resolve dependencies afresh.)
 name: Arrdeck
 options:
   bundleIdPrefix: dk.thrawn

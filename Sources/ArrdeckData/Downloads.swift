@@ -38,16 +38,16 @@ public enum TorrentSort: String, CaseIterable, Sendable, Hashable {
 
     public var label: String {
         switch self {
-        case .addedOn: "Added"
-        case .name: "Name"
-        case .state: "State"
-        case .progress: "Progress"
-        case .size: "Size"
-        case .dlSpeed: "Speed"
-        case .eta: "ETA"
-        case .ratio: "Ratio"
-        case .uploaded: "Uploaded"
-        case .tracker: "Indexer"
+        case .addedOn: String(localized: "Added")
+        case .name: String(localized: "Name")
+        case .state: String(localized: "State")
+        case .progress: String(localized: "Progress")
+        case .size: String(localized: "Size")
+        case .dlSpeed: String(localized: "Speed")
+        case .eta: String(localized: "ETA")
+        case .ratio: String(localized: "Ratio")
+        case .uploaded: String(localized: "Uploaded")
+        case .tracker: String(localized: "Indexer")
         }
     }
 

@@ -160,9 +160,9 @@ public enum StatsWindow: Int, CaseIterable, Sendable, Hashable {
 
     public var label: String {
         switch self {
-        case .month: "30 days"
-        case .quarter: "90 days"
-        case .year: "1 year"
+        case .month: String(localized: "30 days")
+        case .quarter: String(localized: "90 days")
+        case .year: String(localized: "1 year")
         }
     }
 }
@@ -189,14 +189,14 @@ public enum StatsSeriesBuilder {
         let bytes: @Sendable (Double) -> String = { Format.bytes(Int($0), locale: locale) }
         let count: @Sendable (Double) -> String = { String(Int($0.rounded())) }
         return [
-            StatsSeries(id: "library", label: "Library size", values: samples.map { Double($0.library_bytes ?? 0) }, format: bytes),
-            StatsSeries(id: "free", label: "Free space", values: samples.map { Double($0.disk_free_bytes ?? 0) }, format: bytes),
-            StatsSeries(id: "movies", label: "Movies", values: samples.map { Double($0.movies ?? 0) }, format: count),
-            StatsSeries(id: "series", label: "Series", values: samples.map { Double($0.series ?? 0) }, format: count),
-            StatsSeries(id: "episodes", label: "Episode files", values: samples.map { Double($0.episode_files ?? 0) }, format: count),
-            StatsSeries(id: "torrents", label: "Torrents", values: samples.map { Double(($0.torrents_qbit ?? 0) + ($0.torrents_tm ?? 0)) }, format: count),
-            StatsSeries(id: "grabs", label: "Grabs", values: samples.map { Double($0.indexer_grabs ?? 0) }, format: count),
-            StatsSeries(id: "queries", label: "Queries", values: samples.map { Double($0.indexer_queries ?? 0) }, format: count),
+            StatsSeries(id: "library", label: String(localized: "Library size"), values: samples.map { Double($0.library_bytes ?? 0) }, format: bytes),
+            StatsSeries(id: "free", label: String(localized: "Free space"), values: samples.map { Double($0.disk_free_bytes ?? 0) }, format: bytes),
+            StatsSeries(id: "movies", label: String(localized: "Movies"), values: samples.map { Double($0.movies ?? 0) }, format: count),
+            StatsSeries(id: "series", label: String(localized: "Series"), values: samples.map { Double($0.series ?? 0) }, format: count),
+            StatsSeries(id: "episodes", label: String(localized: "Episode files"), values: samples.map { Double($0.episode_files ?? 0) }, format: count),
+            StatsSeries(id: "torrents", label: String(localized: "Torrents"), values: samples.map { Double(($0.torrents_qbit ?? 0) + ($0.torrents_tm ?? 0)) }, format: count),
+            StatsSeries(id: "grabs", label: String(localized: "Grabs"), values: samples.map { Double($0.indexer_grabs ?? 0) }, format: count),
+            StatsSeries(id: "queries", label: String(localized: "Queries"), values: samples.map { Double($0.indexer_queries ?? 0) }, format: count),
         ]
     }
 }

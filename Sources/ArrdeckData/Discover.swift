@@ -17,7 +17,7 @@ public enum MediaKind: String, CaseIterable, Sendable, Hashable {
     case movies, series
 
     public var app: ArrApp { self == .movies ? .radarr : .sonarr }
-    public var label: String { self == .movies ? "Movies" : "Series" }
+    public var label: String { String(localized: self == .movies ? "Movies" : "Series") }
 }
 
 extension SearchResult {
@@ -31,9 +31,9 @@ extension SearchResult {
 
     /// Not in library / monitored / downloaded / in library, unmonitored.
     public var libraryState: String {
-        guard in_library == true else { return "not in library" }
-        if has_file == true { return "downloaded" }
-        return monitored == true ? "monitored" : "in library, unmonitored"
+        guard in_library == true else { return String(localized: "not in library") }
+        if has_file == true { return String(localized: "downloaded") }
+        return String(localized: monitored == true ? "monitored" : "in library, unmonitored")
     }
 
     public var externalLinks: [ExternalLink] {
@@ -204,10 +204,10 @@ public enum AddTab: String, CaseIterable, Sendable, Hashable {
 
     public var label: String {
         switch self {
-        case .movies: "Movies"
-        case .series: "Series"
-        case .collections: "Collections"
-        case .releases: "Releases"
+        case .movies: String(localized: "Movies")
+        case .series: String(localized: "Series")
+        case .collections: String(localized: "Collections")
+        case .releases: String(localized: "Releases")
         }
     }
 
@@ -221,10 +221,10 @@ public enum AddTab: String, CaseIterable, Sendable, Hashable {
 
     public var prompt: String {
         switch self {
-        case .movies: "Search movies…"
-        case .series: "Search series…"
-        case .collections: "Filter by name…"
-        case .releases: "Search raw releases…"
+        case .movies: String(localized: "Search movies…")
+        case .series: String(localized: "Search series…")
+        case .collections: String(localized: "Filter by name…")
+        case .releases: String(localized: "Search raw releases…")
         }
     }
 }
@@ -460,9 +460,9 @@ public enum PopularKind: String, CaseIterable, Sendable, Hashable {
 
     public var label: String {
         switch self {
-        case .all: "All"
-        case .movie: "Movies"
-        case .tv: "TV"
+        case .all: String(localized: "All")
+        case .movie: String(localized: "Movies")
+        case .tv: String(localized: "TV")
         }
     }
 }

@@ -94,8 +94,9 @@ struct StateBadge: View {
     let state: String
     var body: some View {
         // A badge never wraps: squeezed beside a long quality string it broke
-        // into "import-ed". The text beside it truncates instead.
-        Text(state)
+        // into "import-ed". The text beside it truncates instead. The raw
+        // state is the localisation key; service names have no translation.
+        Text(String(localized: String.LocalizationValue(state)))
             .lineLimit(1)
             .fixedSize()
             .font(.caption2.weight(.semibold))

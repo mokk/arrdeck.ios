@@ -13,8 +13,8 @@ public enum WantedKind: String, CaseIterable, Sendable, Hashable {
 
     public var label: String {
         switch self {
-        case .missing: "Missing"
-        case .cutoff: "Upgrades"
+        case .missing: String(localized: "Missing")
+        case .cutoff: String(localized: "Upgrades")
         }
     }
 }
@@ -50,23 +50,23 @@ extension DiagnosisFinding {
 /// live here in English. An unknown code falls back to the code itself,
 /// which beats an empty row.
 public enum DiagnosisText {
-    static let templates: [String: String] = [
-        "queue_downloading": "It is downloading now ({state}).",
-        "queue_stalled": "The download has stalled ({state}) — no data is moving.",
-        "queue_importing": "Downloaded, waiting to be imported.",
-        "queue_failed": "The download failed and is stuck in the queue: {reason}",
-        "not_monitored": "It is not monitored, so nothing will search for it.",
-        "not_yet_available": "Not out yet — the arr waits until it is {availability}.",
-        "not_yet_available_dated": "Not out yet — the arr waits until it is {availability}, expected {date}.",
-        "blocklisted": "A release was grabbed and rejected, so it will not be tried again: {release} from {indexer}.",
-        "rss_overdue": "RSS sync is {minutes} minutes overdue, so nothing new is being picked up.",
-        "rss_stale": "RSS sync last ran {minutes} minutes ago.",
-        "delay_profile": "A delay profile is holding grabs on purpose — usenet {usenet}m, torrent {torrent}m.",
-        "no_indexers": "No indexers are enabled, so there is nowhere to search.",
-        "indexers_failing": "{count} indexer problem reported: {message}",
-    ]
+    static var templates: [String: String] { [
+        "queue_downloading": String(localized: "It is downloading now ({state})."),
+        "queue_stalled": String(localized: "The download has stalled ({state}) — no data is moving."),
+        "queue_importing": String(localized: "Downloaded, waiting to be imported."),
+        "queue_failed": String(localized: "The download failed and is stuck in the queue: {reason}"),
+        "not_monitored": String(localized: "It is not monitored, so nothing will search for it."),
+        "not_yet_available": String(localized: "Not out yet — the arr waits until it is {availability}."),
+        "not_yet_available_dated": String(localized: "Not out yet — the arr waits until it is {availability}, expected {date}."),
+        "blocklisted": String(localized: "A release was grabbed and rejected, so it will not be tried again: {release} from {indexer}."),
+        "rss_overdue": String(localized: "RSS sync is {minutes} minutes overdue, so nothing new is being picked up."),
+        "rss_stale": String(localized: "RSS sync last ran {minutes} minutes ago."),
+        "delay_profile": String(localized: "A delay profile is holding grabs on purpose — usenet {usenet}m, torrent {torrent}m."),
+        "no_indexers": String(localized: "No indexers are enabled, so there is nowhere to search."),
+        "indexers_failing": String(localized: "{count} indexer problem reported: {message}"),
+    ] }
 
-    public static let nothingFound = "Everything checks out — the indexers simply have not offered a matching release yet."
+    public static var nothingFound: String { String(localized: "Everything checks out — the indexers simply have not offered a matching release yet.") }
 
     public static func sentence(for finding: DiagnosisFinding) -> String {
         let params = finding.parameters

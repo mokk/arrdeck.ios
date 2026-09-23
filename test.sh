@@ -17,6 +17,10 @@ if ! git diff --quiet -- Sources/ArrdeckAPI/openapi.json; then
     exit 1
 fi
 
+# The string catalog is generated from what the compiler finds localisable;
+# a new Text("…") without a Danish entry, or a stale catalog, fails here.
+./Scripts/localize.py --check
+
 case "$(xcode-select -p 2>/dev/null)" in
 *CommandLineTools*)
     FW=/Library/Developer/CommandLineTools/Library/Developer/Frameworks

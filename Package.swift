@@ -27,6 +27,10 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0"),
         // Only for the tests' stub transport; the runtime already depends on it.
         .package(url: "https://github.com/apple/swift-http-types", from: "1.0.0"),
+        // Transitive via the OpenAPI runtime, pinned here on purpose: 1.7.0's
+        // ContainersPreview needs a Swift runtime (swift_initBorrow) newer than
+        // the iOS 26.3 simulator ships, and the app died in dyld before main.
+        .package(url: "https://github.com/apple/swift-collections", "1.0.0"..<"1.7.0"),
     ],
     targets: [
         .target(name: "ArrdeckKit"),

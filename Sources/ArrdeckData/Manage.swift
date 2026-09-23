@@ -78,11 +78,11 @@ public enum LibrarySort: String, CaseIterable, Sendable, Hashable {
 
     public var label: String {
         switch self {
-        case .title: "Title"
-        case .year: "Year"
-        case .status: "Status"
-        case .size: "Size"
-        case .episodes: "Episodes"
+        case .title: String(localized: "Title")
+        case .year: String(localized: "Year")
+        case .status: String(localized: "Status")
+        case .size: String(localized: "Size")
+        case .episodes: String(localized: "Episodes")
         }
     }
 
@@ -138,10 +138,10 @@ public enum ServiceField: String, CaseIterable, Sendable {
 
     public var label: String {
         switch self {
-        case .url: "URL"
-        case .apiKey: "API key"
-        case .username: "Username (optional)"
-        case .password: "Password (optional)"
+        case .url: String(localized: "URL")
+        case .apiKey: String(localized: "API key")
+        case .username: String(localized: "Username (optional)")
+        case .password: String(localized: "Password (optional)")
         }
     }
 
@@ -611,11 +611,11 @@ public final class ServicesModel {
                 form.name, url: form.url, apiKey: form.apiKey, username: form.username, password: form.password
             )
             form.markSaved(configured: configured)
-            form.note(configured ? "ok: saved" : "saved (disabled)", ok: true)
+            form.note(String(localized: configured ? "ok: saved" : "saved (disabled)"), ok: true)
         } catch APIError.unauthorized {
             onSessionLost()
         } catch {
-            form.note("error: \((error as? APIError)?.description ?? error.localizedDescription)", ok: false)
+            form.note(String(localized: "error: \((error as? APIError)?.description ?? error.localizedDescription)"), ok: false)
         }
     }
 
@@ -625,11 +625,11 @@ public final class ServicesModel {
         defer { form.setBusy(false) }
         do {
             let version = try await api.testService(form.name)
-            form.note("ok: v\(version)", ok: true)
+            form.note(String(localized: "ok: v\(version)"), ok: true)
         } catch APIError.unauthorized {
             onSessionLost()
         } catch {
-            form.note("error: \((error as? APIError)?.description ?? error.localizedDescription)", ok: false)
+            form.note(String(localized: "error: \((error as? APIError)?.description ?? error.localizedDescription)"), ok: false)
         }
     }
 }

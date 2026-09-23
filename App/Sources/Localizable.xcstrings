@@ -1,0 +1,2489 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ free": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ledig"
+          }
+        }
+      }
+    },
+    "%@ overdue": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ forsinket"
+          }
+        }
+      }
+    },
+    "%@ quality profiles": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kvalitetsprofiler"
+          }
+        }
+      }
+    },
+    "%@ — %lld scheduled": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — %lld planlagt"
+          }
+        }
+      }
+    },
+    "%lld grabs": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld hentninger"
+          }
+        }
+      }
+    },
+    "%lld items": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld emner"
+          }
+        }
+      }
+    },
+    "%lld movies, %lld episodes missing subtitles": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld film, %lld afsnit mangler undertekster"
+          }
+        }
+      }
+    },
+    "%lld of %lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld af %lld"
+          }
+        }
+      }
+    },
+    "%lld of %lld movies": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld af %lld film"
+          }
+        }
+      }
+    },
+    "%lld of %lld torrents": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld af %lld torrents"
+          }
+        }
+      }
+    },
+    "%lld provider throttled": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld udbyder begrænset"
+          }
+        }
+      }
+    },
+    "%lld queries · %lld grabs": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld forespørgsler · %lld hentninger"
+          }
+        }
+      }
+    },
+    "%lld releases in %lldh": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld udgivelser på %lld t"
+          }
+        }
+      }
+    },
+    "%lld tasks overdue": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld opgaver forsinket"
+          }
+        }
+      }
+    },
+    "%lld tasks, all on schedule": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld opgaver, alle til tiden"
+          }
+        }
+      }
+    },
+    "%lld torrents, %lld active": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld torrents, %lld aktive"
+          }
+        }
+      }
+    },
+    "%lld/%lld enabled": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld/%lld aktiveret"
+          }
+        }
+      }
+    },
+    "1 task overdue": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 opgave forsinket"
+          }
+        }
+      }
+    },
+    "1 year": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 år"
+          }
+        }
+      }
+    },
+    "30 days": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 dage"
+          }
+        }
+      }
+    },
+    "90 days": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "90 dage"
+          }
+        }
+      }
+    },
+    "A delay profile is holding grabs on purpose — usenet {usenet}m, torrent {torrent}m.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En forsinkelsesprofil holder bevidst hentninger tilbage — usenet {usenet} min, torrent {torrent} min."
+          }
+        }
+      }
+    },
+    "A release was grabbed and rejected, so it will not be tried again: {release} from {indexer}.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En udgivelse blev hentet og afvist, så den prøves ikke igen: {release} fra {indexer}."
+          }
+        }
+      }
+    },
+    "API key": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API-nøgle"
+          }
+        }
+      }
+    },
+    "Action failed": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Handlingen mislykkedes"
+          }
+        }
+      }
+    },
+    "Add": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj"
+          }
+        }
+      }
+    },
+    "Add & search": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj & søg"
+          }
+        }
+      }
+    },
+    "Add server": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj server"
+          }
+        }
+      }
+    },
+    "Added": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføjet"
+          }
+        }
+      }
+    },
+    "Adding…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføjer…"
+          }
+        }
+      }
+    },
+    "All": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle"
+          }
+        }
+      }
+    },
+    "All (%lld)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle (%lld)"
+          }
+        }
+      }
+    },
+    "Announced": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annonceret"
+          }
+        }
+      }
+    },
+    "Any event": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle hændelser"
+          }
+        }
+      }
+    },
+    "Ascending": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stigende"
+          }
+        }
+      }
+    },
+    "Back": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilbage"
+          }
+        }
+      }
+    },
+    "Blocklist": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blokeringsliste"
+          }
+        }
+      }
+    },
+    "Blocklist & retry": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blokér & prøv igen"
+          }
+        }
+      }
+    },
+    "Building the first list — this takes about a minute, then it refreshes hourly on its own.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bygger den første liste — det tager omkring et minut, derefter opdateres den selv hver time."
+          }
+        }
+      }
+    },
+    "Calendar": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kalender"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annullér"
+          }
+        }
+      }
+    },
+    "Cast & crew": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medvirkende"
+          }
+        }
+      }
+    },
+    "Checking…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontrollerer…"
+          }
+        }
+      }
+    },
+    "Cinema": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biograf"
+          }
+        }
+      }
+    },
+    "Clear %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ryd %@"
+          }
+        }
+      }
+    },
+    "Collections": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samlinger"
+          }
+        }
+      }
+    },
+    "Connect": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forbind"
+          }
+        }
+      }
+    },
+    "Connected — arrdeck %@, no sign-in needed here": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forbundet — arrdeck %@, ingen indlogning nødvendig herfra"
+          }
+        }
+      }
+    },
+    "Connecting…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forbinder…"
+          }
+        }
+      }
+    },
+    "Connection": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forbindelse"
+          }
+        }
+      }
+    },
+    "Connections": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forbindelser"
+          }
+        }
+      }
+    },
+    "Continuing": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fortsætter"
+          }
+        }
+      }
+    },
+    "Could not reach it: %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunne ikke nå den: %@"
+          }
+        }
+      }
+    },
+    "Could not refresh — %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunne ikke opdatere — %@"
+          }
+        }
+      }
+    },
+    "Custom formats: %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brugerdefinerede formater: %@"
+          }
+        }
+      }
+    },
+    "Delete": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet"
+          }
+        }
+      }
+    },
+    "Delete from library and disk": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet fra bibliotek og disk"
+          }
+        }
+      }
+    },
+    "Delete torrent and files": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet torrent og filer"
+          }
+        }
+      }
+    },
+    "Delete torrent only": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet kun torrent"
+          }
+        }
+      }
+    },
+    "Deleted": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slettet"
+          }
+        }
+      }
+    },
+    "Delete…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet…"
+          }
+        }
+      }
+    },
+    "Descending": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faldende"
+          }
+        }
+      }
+    },
+    "Direction": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retning"
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Færdig"
+          }
+        }
+      }
+    },
+    "Download queue": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloadkø"
+          }
+        }
+      }
+    },
+    "Downloaded": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloadet"
+          }
+        }
+      }
+    },
+    "Downloaded, waiting to be imported.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloadet, venter på at blive importeret."
+          }
+        }
+      }
+    },
+    "Enabled": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktiveret"
+          }
+        }
+      }
+    },
+    "Ended": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afsluttet"
+          }
+        }
+      }
+    },
+    "Episode files": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afsnitsfiler"
+          }
+        }
+      }
+    },
+    "Episodes": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afsnit"
+          }
+        }
+      }
+    },
+    "Event": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hændelse"
+          }
+        }
+      }
+    },
+    "Everything checks out — the indexers simply have not offered a matching release yet.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alt ser rigtigt ud — indexerne har bare ikke tilbudt en passende udgivelse endnu."
+          }
+        }
+      }
+    },
+    "Features": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funktioner"
+          }
+        }
+      }
+    },
+    "File": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fil"
+          }
+        }
+      }
+    },
+    "Files (%lld)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filer (%lld)"
+          }
+        }
+      }
+    },
+    "Filter by name…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrér efter navn…"
+          }
+        }
+      }
+    },
+    "Filter movies…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrér film…"
+          }
+        }
+      }
+    },
+    "Filter series…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrér serier…"
+          }
+        }
+      }
+    },
+    "Filters": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtre"
+          }
+        }
+      }
+    },
+    "Force import": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gennemtving import"
+          }
+        }
+      }
+    },
+    "Forwarded port %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Videresendt port %@"
+          }
+        }
+      }
+    },
+    "Found an arrdeck — it will ask you to sign in": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fandt en arrdeck — den vil bede dig logge ind"
+          }
+        }
+      }
+    },
+    "Free space": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ledig plads"
+          }
+        }
+      }
+    },
+    "Grab": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hent"
+          }
+        }
+      }
+    },
+    "Grabbed": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hentet"
+          }
+        }
+      }
+    },
+    "Grabs": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hentninger"
+          }
+        }
+      }
+    },
+    "History": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historik"
+          }
+        }
+      }
+    },
+    "Home": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hjem"
+          }
+        }
+      }
+    },
+    "In cinemas": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I biografen"
+          }
+        }
+      }
+    },
+    "Indexers": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indexere"
+          }
+        }
+      }
+    },
+    "It is downloading now ({state}).": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den downloades nu ({state})."
+          }
+        }
+      }
+    },
+    "It is not monitored, so nothing will search for it.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den overvåges ikke, så intet søger efter den."
+          }
+        }
+      }
+    },
+    "Key": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vigtige"
+          }
+        }
+      }
+    },
+    "Kind": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type"
+          }
+        }
+      }
+    },
+    "Level": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niveau"
+          }
+        }
+      }
+    },
+    "Library": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bibliotek"
+          }
+        }
+      }
+    },
+    "Library size": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biblioteksstørrelse"
+          }
+        }
+      }
+    },
+    "Load more": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hent flere"
+          }
+        }
+      }
+    },
+    "Loading…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indlæser…"
+          }
+        }
+      }
+    },
+    "Logs": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log"
+          }
+        }
+      }
+    },
+    "Manage": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Administrér"
+          }
+        }
+      }
+    },
+    "Missing": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mangler"
+          }
+        }
+      }
+    },
+    "Monitor": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overvåg"
+          }
+        }
+      }
+    },
+    "Monitored": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overvåget"
+          }
+        }
+      }
+    },
+    "Month": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Måned"
+          }
+        }
+      }
+    },
+    "Movie": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Film"
+          }
+        }
+      }
+    },
+    "Movies": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Film"
+          }
+        }
+      }
+    },
+    "Name": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navn"
+          }
+        }
+      }
+    },
+    "Name (optional)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navn (valgfrit)"
+          }
+        }
+      }
+    },
+    "Needs attention": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kræver opmærksomhed"
+          }
+        }
+      }
+    },
+    "Next": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Næste"
+          }
+        }
+      }
+    },
+    "No custom formats defined": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen brugerdefinerede formater"
+          }
+        }
+      }
+    },
+    "No indexers are enabled, so there is nowhere to search.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen indexere er aktiveret, så der er ingen steder at søge."
+          }
+        }
+      }
+    },
+    "No services configured": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen tjenester konfigureret"
+          }
+        }
+      }
+    },
+    "Not an arrdeck: %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke en arrdeck: %@"
+          }
+        }
+      }
+    },
+    "Not out yet — the arr waits until it is {availability}, expected {date}.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke udkommet endnu — der ventes til den er {availability}, forventet {date}."
+          }
+        }
+      }
+    },
+    "Not out yet — the arr waits until it is {availability}.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke udkommet endnu — der ventes til den er {availability}."
+          }
+        }
+      }
+    },
+    "Now playing": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afspilles nu"
+          }
+        }
+      }
+    },
+    "On disk": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "På disken"
+          }
+        }
+      }
+    },
+    "Opens the server's own sign-in page. Passkeys work there.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åbner serverens egen indlogningsside. Adgangsnøgler virker der."
+          }
+        }
+      }
+    },
+    "Password (optional)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adgangskode (valgfrit)"
+          }
+        }
+      }
+    },
+    "Pending requests": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afventende ønsker"
+          }
+        }
+      }
+    },
+    "Physical": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fysisk"
+          }
+        }
+      }
+    },
+    "Popular": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Populære"
+          }
+        }
+      }
+    },
+    "Previous": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forrige"
+          }
+        }
+      }
+    },
+    "Progress": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fremgang"
+          }
+        }
+      }
+    },
+    "Quality profile": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kvalitetsprofil"
+          }
+        }
+      }
+    },
+    "Queries": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forespørgsler"
+          }
+        }
+      }
+    },
+    "RSS sync is {minutes} minutes overdue, so nothing new is being picked up.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RSS-synkronisering er {minutes} minutter forsinket, så intet nyt samles op."
+          }
+        }
+      }
+    },
+    "RSS sync last ran {minutes} minutes ago.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RSS-synkronisering kørte sidst for {minutes} minutter siden."
+          }
+        }
+      }
+    },
+    "Radarr / Sonarr queue": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Radarr / Sonarr-kø"
+          }
+        }
+      }
+    },
+    "Recent history": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seneste historik"
+          }
+        }
+      }
+    },
+    "Recently added": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Senest tilføjet"
+          }
+        }
+      }
+    },
+    "Recheck": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genkontrollér"
+          }
+        }
+      }
+    },
+    "Released": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Udgivet"
+          }
+        }
+      }
+    },
+    "Releases": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Udgivelser"
+          }
+        }
+      }
+    },
+    "Remove": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fjern"
+          }
+        }
+      }
+    },
+    "Remove from library only": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fjern kun fra bibliotek"
+          }
+        }
+      }
+    },
+    "Resume": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genoptag"
+          }
+        }
+      }
+    },
+    "Root folder": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rodmappe"
+          }
+        }
+      }
+    },
+    "Save": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gem"
+          }
+        }
+      }
+    },
+    "Save first": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gem først"
+          }
+        }
+      }
+    },
+    "Save server": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gem server"
+          }
+        }
+      }
+    },
+    "Scheduled tasks": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planlagte opgaver"
+          }
+        }
+      }
+    },
+    "Scope": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omfang"
+          }
+        }
+      }
+    },
+    "Search": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg"
+          }
+        }
+      }
+    },
+    "Search all": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg alle"
+          }
+        }
+      }
+    },
+    "Search movies…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg efter film…"
+          }
+        }
+      }
+    },
+    "Search now": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg nu"
+          }
+        }
+      }
+    },
+    "Search raw releases…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg i rå udgivelser…"
+          }
+        }
+      }
+    },
+    "Search series…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg efter serier…"
+          }
+        }
+      }
+    },
+    "Section": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sektion"
+          }
+        }
+      }
+    },
+    "See all →": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se alle →"
+          }
+        }
+      }
+    },
+    "Series": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serier"
+          }
+        }
+      }
+    },
+    "Servers": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servere"
+          }
+        }
+      }
+    },
+    "Service": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tjeneste"
+          }
+        }
+      }
+    },
+    "Service backups": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backups af tjenester"
+          }
+        }
+      }
+    },
+    "Service offline — showing data from %lldm ago": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tjenesten er offline — viser data fra %lld min siden"
+          }
+        }
+      }
+    },
+    "Services": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tjenester"
+          }
+        }
+      }
+    },
+    "Set up Radarr, Sonarr or Prowlarr under Manage → Connections.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opsæt Radarr, Sonarr eller Prowlarr under Administrér → Forbindelser."
+          }
+        }
+      }
+    },
+    "Show %lld rejected": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vis %lld afviste"
+          }
+        }
+      }
+    },
+    "Show accepted only": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vis kun accepterede"
+          }
+        }
+      }
+    },
+    "Showing %lld of %lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viser %lld af %lld"
+          }
+        }
+      }
+    },
+    "Sign in": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log ind"
+          }
+        }
+      }
+    },
+    "Sign-in required": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indlogning kræves"
+          }
+        }
+      }
+    },
+    "Signed in — arrdeck %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logget ind — arrdeck %@"
+          }
+        }
+      }
+    },
+    "Signed in — older backend": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logget ind — ældre backend"
+          }
+        }
+      }
+    },
+    "Signed out — the session expired or was revoked": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logget ud — sessionen udløb eller blev tilbagekaldt"
+          }
+        }
+      }
+    },
+    "Size": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Størrelse"
+          }
+        }
+      }
+    },
+    "Sort": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sortér"
+          }
+        }
+      }
+    },
+    "Sort by": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sortér efter"
+          }
+        }
+      }
+    },
+    "Speed": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hastighed"
+          }
+        }
+      }
+    },
+    "State": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilstand"
+          }
+        }
+      }
+    },
+    "Statistics": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statistik"
+          }
+        }
+      }
+    },
+    "Storage": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lagerplads"
+          }
+        }
+      }
+    },
+    "Subtitles": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undertekster"
+          }
+        }
+      }
+    },
+    "Tab": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fane"
+          }
+        }
+      }
+    },
+    "Test the saved connection": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test den gemte forbindelse"
+          }
+        }
+      }
+    },
+    "The download failed and is stuck in the queue: {reason}": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloadet mislykkedes og sidder fast i køen: {reason}"
+          }
+        }
+      }
+    },
+    "The download has stalled ({state}) — no data is moving.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloadet er gået i stå ({state}) — ingen data flytter sig."
+          }
+        }
+      }
+    },
+    "Throttle": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Begræns"
+          }
+        }
+      }
+    },
+    "Throttled": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Begrænset"
+          }
+        }
+      }
+    },
+    "Title": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Titel"
+          }
+        }
+      }
+    },
+    "Torrent activity": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Torrent-aktivitet"
+          }
+        }
+      }
+    },
+    "Trackers": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trackere"
+          }
+        }
+      }
+    },
+    "Trends (30 days)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tendenser (30 dage)"
+          }
+        }
+      }
+    },
+    "Try again": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prøv igen"
+          }
+        }
+      }
+    },
+    "Unblock": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ophæv"
+          }
+        }
+      }
+    },
+    "Unmonitor": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop overvågning"
+          }
+        }
+      }
+    },
+    "Unreachable: %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kan ikke nås: %@"
+          }
+        }
+      }
+    },
+    "Unwatched": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke set"
+          }
+        }
+      }
+    },
+    "Upcoming": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kommende"
+          }
+        }
+      }
+    },
+    "Upcoming (14 days)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kommende (14 dage)"
+          }
+        }
+      }
+    },
+    "Upgrades": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opgraderinger"
+          }
+        }
+      }
+    },
+    "Uploaded": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uploadet"
+          }
+        }
+      }
+    },
+    "Username (optional)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brugernavn (valgfrit)"
+          }
+        }
+      }
+    },
+    "View": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visning"
+          }
+        }
+      }
+    },
+    "Wanted": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ønsket"
+          }
+        }
+      }
+    },
+    "Watched": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set"
+          }
+        }
+      }
+    },
+    "Week": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uge"
+          }
+        }
+      }
+    },
+    "Where arrdeck finds each service. Changing these affects every screen.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvor arrdeck finder hver tjeneste. Ændringer her påvirker alle skærme."
+          }
+        }
+      }
+    },
+    "Why hasn't this arrived?": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvorfor er den ikke kommet?"
+          }
+        }
+      }
+    },
+    "Why?": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvorfor?"
+          }
+        }
+      }
+    },
+    "Window": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Periode"
+          }
+        }
+      }
+    },
+    "Year": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "År"
+          }
+        }
+      }
+    },
+    "arrdeck %@ — no sign-in needed here": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "arrdeck %@ — ingen indlogning nødvendig herfra"
+          }
+        }
+      }
+    },
+    "checking": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kontrollerer"
+          }
+        }
+      }
+    },
+    "completed": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "færdig"
+          }
+        }
+      }
+    },
+    "configured": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "konfigureret"
+          }
+        }
+      }
+    },
+    "deleted": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "slettet"
+          }
+        }
+      }
+    },
+    "disabled": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "deaktiveret"
+          }
+        }
+      }
+    },
+    "downloaded": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "downloadet"
+          }
+        }
+      }
+    },
+    "downloading": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "downloader"
+          }
+        }
+      }
+    },
+    "enabled": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aktiveret"
+          }
+        }
+      }
+    },
+    "error": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fejl"
+          }
+        }
+      }
+    },
+    "error: %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fejl: %@"
+          }
+        }
+      }
+    },
+    "failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "mislykkedes"
+          }
+        }
+      }
+    },
+    "fetched": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "hentet"
+          }
+        }
+      }
+    },
+    "flaky · %lld retries": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ustabil · %lld forsøg"
+          }
+        }
+      }
+    },
+    "http://10.0.0.154:1234 (empty = disabled)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "http://10.0.0.154:1234 (tom = deaktiveret)"
+          }
+        }
+      }
+    },
+    "ignored": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ignoreret"
+          }
+        }
+      }
+    },
+    "imported": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "importeret"
+          }
+        }
+      }
+    },
+    "in library, unmonitored": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "i biblioteket, ikke overvåget"
+          }
+        }
+      }
+    },
+    "monitored": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "overvåget"
+          }
+        }
+      }
+    },
+    "no upgrades": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ingen opgraderinger"
+          }
+        }
+      }
+    },
+    "not configured": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ikke konfigureret"
+          }
+        }
+      }
+    },
+    "not in library": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ikke i biblioteket"
+          }
+        }
+      }
+    },
+    "ok: saved": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ok: gemt"
+          }
+        }
+      }
+    },
+    "older backend": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ældre backend"
+          }
+        }
+      }
+    },
+    "paused": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pauset"
+          }
+        }
+      }
+    },
+    "playing": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "afspiller"
+          }
+        }
+      }
+    },
+    "qBittorrent is on %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "qBittorrent bruger %@"
+          }
+        }
+      }
+    },
+    "queued": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "i kø"
+          }
+        }
+      }
+    },
+    "renamed": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "omdøbt"
+          }
+        }
+      }
+    },
+    "saved (disabled)": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gemt (deaktiveret)"
+          }
+        }
+      }
+    },
+    "seeding": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "seeder"
+          }
+        }
+      }
+    },
+    "stalled": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gået i stå"
+          }
+        }
+      }
+    },
+    "today": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "i dag"
+          }
+        }
+      }
+    },
+    "unmonitored": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ikke overvåget"
+          }
+        }
+      }
+    },
+    "upgrades to %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "opgraderer til %@"
+          }
+        }
+      }
+    },
+    "wanted": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ønsket"
+          }
+        }
+      }
+    },
+    "warning": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "advarsel"
+          }
+        }
+      }
+    },
+    "{count} indexer problem reported: {message}": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} indexer-problem rapporteret: {message}"
+          }
+        }
+      }
+    },
+    "· %lld min/ep": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· %lld min/afsnit"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

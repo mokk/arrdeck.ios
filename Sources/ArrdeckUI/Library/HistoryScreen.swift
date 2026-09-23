@@ -4,7 +4,15 @@ import SwiftUI
 /// The merged history across both arrs, and the blocklist behind a second
 /// segment. Reached from the dashboard's Recent history card.
 public struct HistoryScreen: View {
-    enum Segment: String, CaseIterable { case history = "History", blocklist = "Blocklist" }
+    enum Segment: CaseIterable {
+        case history, blocklist
+        var label: String {
+            switch self {
+            case .history: String(localized: "History")
+            case .blocklist: String(localized: "Blocklist")
+            }
+        }
+    }
     @State private var model: HistoryModel
     @State private var segment: Segment = .history
     let hasDetail: Bool
@@ -18,7 +26,7 @@ public struct HistoryScreen: View {
         List {
             Section {
                 Picker("Section", selection: $segment) {
-                    ForEach(Segment.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                    ForEach(Segment.allCases, id: \.self) { Text($0.label).tag($0) }
                 }
                 .pickerStyle(.segmented)
                 .listRowBackground(Color.clear)

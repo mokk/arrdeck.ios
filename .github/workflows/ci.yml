@@ -17,8 +17,9 @@ jobs:
           submodules: true
 
       # test.sh also re-derives the generator's spec from the submodule and
-      # fails on drift, so a submodule bump without Scripts/derive-spec.sh
-      # is caught here rather than by a client typed against the wrong backend.
+      # regenerates the string catalog, failing on drift in either — so a
+      # submodule bump without Scripts/derive-spec.sh, or a new string without
+      # its Danish, is caught here.
       - name: Package tests
         run: ./test.sh
 
@@ -30,7 +31,7 @@ jobs:
       - name: App and UI tests build
         run: |
           brew install xcodegen
-          cd App && xcodegen
+          cd App && ./generate.sh
           xcodebuild -project Arrdeck.xcodeproj -scheme Arrdeck \
             -destination 'generic/platform=iOS Simulator' \
             -skipPackagePluginValidation \

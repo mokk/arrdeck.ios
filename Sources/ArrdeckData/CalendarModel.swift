@@ -6,9 +6,9 @@ public enum CalendarView: String, CaseIterable, Sendable, Hashable {
 
     public var label: String {
         switch self {
-        case .month: "Month"
-        case .week: "Week"
-        case .agenda: "Agenda"
+        case .month: String(localized: "Month")
+        case .week: String(localized: "Week")
+        case .agenda: String(localized: "Agenda")
         }
     }
 }
