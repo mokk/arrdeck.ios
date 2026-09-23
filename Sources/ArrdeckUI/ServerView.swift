@@ -30,7 +30,11 @@ public struct ServerView: View {
             api: api,
             onSessionLost: { controller.sessionLost() }
         ))
+        _feed = State(initialValue: ActivityFeedModel(api: api, onSessionLost: { controller.sessionLost() }))
     }
+
+    /// What happened since Activity was last opened — the badge on its tab.
+    @State private var feed: ActivityFeedModel
 
     var sessionLost: @MainActor () -> Void {
         { [controller] in controller.sessionLost() }
@@ -46,6 +50,7 @@ public struct ServerView: View {
                     // cards live on under Settings › Overview, and the library
                     // pages read its queue for download progress.
                     .task { await model.run() }
+                    .task { await feed.run() }
             } else {
                 NavigationStack {
                     ProfileView(controller: controller)
@@ -92,7 +97,7 @@ public struct ServerView: View {
                     }
                 }
                 .safeAreaInset(edge: .bottom, spacing: 0) {
-                    AppTabBar(tabs: available, selected: $selectedTab)
+                    AppTabBar(tabs: available, selected: $selectedTab, badges: [.activity: feed.count])
                 }
                 .onAppear { if !available.contains(selectedTab) { selectedTab = available.first ?? .settings } }
             }
@@ -108,7 +113,7 @@ public struct ServerView: View {
         case .shows:
             LibraryPage(app: .sonarr, dashboard: model, api: api, baseURL: controller.profile.baseURL, onSessionLost: sessionLost)
         case .activity:
-            ActivityView(api: api, clients: model.torrentClients, hasArr: model.hasArr,
+            ActivityView(api: api, feed: feed, clients: model.torrentClients, hasArr: model.hasArr,
                          baseURL: controller.profile.baseURL, hasPlex: model.has("plex"), onSessionLost: sessionLost)
         case .calendar:
             CalendarScreen(api: api, onSessionLost: sessionLost)

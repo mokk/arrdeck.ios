@@ -161,8 +161,16 @@ struct EpisodeRow: View {
     let episode: Episode
     let model: SeriesDetailModel
     let search: () -> Void
+    @State private var confirmingDelete = false
+
+    var fileDetails: String? {
+        guard episode.has_file == true else { return nil }
+        let parts = [episode.quality, episode.size.map { Format.bytes($0) }].compactMap { $0 }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
         HStack(spacing: 10) {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 4) {
@@ -176,9 +184,22 @@ struct EpisodeRow: View {
                         StateBadge(state: episode.monitored == true ? "wanted" : "paused")
                     }
                     Text(Format.day(episode.air_date)).font(.caption).foregroundStyle(.secondary)
+                    if let fileDetails { Text("· \(fileDetails)").font(.caption).foregroundStyle(.secondary).lineLimit(1) }
                 }
             }
             Spacer(minLength: 0)
+            if episode.has_file == true, episode.file_id != nil {
+                if confirmingDelete {
+                    Button("Delete file?", role: .destructive) {
+                        confirmingDelete = false
+                        Task { await model.deleteFile(of: episode) }
+                    }
+                    .buttonStyle(.borderedProminent).controlSize(.small)
+                } else {
+                    Button("Delete file", role: .destructive) { confirmingDelete = true }
+                        .buttonStyle(.borderless).controlSize(.small)
+                }
+            }
             Button(episode.monitored == true ? "Unmonitor" : "Monitor") {
                 Task { await model.setEpisodeMonitored(episode, !(episode.monitored ?? false)) }
             }
@@ -190,6 +211,12 @@ struct EpisodeRow: View {
             Button(action: search) { Image(systemName: "chevron.right") }
                 .buttonStyle(.borderless).controlSize(.small)
                 .accessibilityLabel("Interactive search")
+        }
+        if episode.has_file == true, let subtitles = model.subtitles[episode.id] {
+            SubtitleTracksView(subtitles: subtitles, busy: model.busy) { code in
+                Task { await model.getSubtitle(episode: episode, language: code) }
+            }
+        }
         }
         .disabled(model.busy)
     }

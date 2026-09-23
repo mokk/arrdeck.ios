@@ -32,7 +32,17 @@ public struct BookDetailView: View {
                 Section {
                     DetailHero(poster: book.poster, baseURL: baseURL, overview: book.overview, links: model.links) {
                         StateBadge(state: book.has_file == true ? "downloaded" : (book.monitored == true ? "wanted" : "unmonitored"))
-                        if let author = book.author { Text(author) }
+                        if let author = book.author {
+                            if let authorID = book.author_id {
+                                NavigationLink {
+                                    AuthorDetailView(id: authorID, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
+                                } label: { Text(author).foregroundStyle(Color.accentColor) }
+                                .buttonStyle(.plain)
+                                .accessibilityIdentifier("book-author")
+                            } else {
+                                Text(author)
+                            }
+                        }
                         if let pages = book.page_count, pages > 0 { Text("· \(pages) pages") }
                         if let rating = book.rating { Text("· ★ \(rating.formatted(.number.precision(.fractionLength(1))))") }
                     }
@@ -62,6 +72,13 @@ public struct BookDetailView: View {
                     Section("Editions") {
                         ForEach(Array(editions.enumerated()), id: \.offset) { _, edition in
                             EditionRow(edition: edition, fallbackTitle: book.title ?? "")
+                        }
+                    }
+                }
+                ForEach(book.series ?? [], id: \.id) { series in
+                    Section("Series: \(series.title ?? "")") {
+                        ForEach(series.books ?? [], id: \.book_id) { entry in
+                            SeriesBookRow(entry: entry, current: entry.book_id == book.id)
                         }
                     }
                 }
@@ -195,3 +212,24 @@ struct ShareSheet: UIViewControllerRepresentable {
     func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
 }
 #endif
+
+/// One volume of a book series: its position, the title, and whether you
+/// have it. Other volumes open their own page.
+struct SeriesBookRow: View {
+    let entry: SeriesBook
+    let current: Bool
+
+    var body: some View {
+        let content = HStack(spacing: 10) {
+            Text(verbatim: entry.position.map { "#\($0)" } ?? "").font(.caption.monospaced()).foregroundStyle(.secondary).frame(width: 32, alignment: .leading)
+            Text(entry.title ?? "").font(current ? .subheadline.weight(.semibold) : .subheadline).lineLimit(1)
+            Spacer()
+            StateBadge(state: entry.has_file == true ? "downloaded" : (entry.monitored == true ? "wanted" : "unmonitored"))
+        }
+        if current {
+            content
+        } else {
+            NavigationLink(value: MediaRef.book(entry.book_id)) { content }
+        }
+    }
+}

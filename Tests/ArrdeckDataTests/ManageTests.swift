@@ -96,6 +96,13 @@ extension FakeManageAPI: LibraryAPI {
     func movieCredits(_ id: Int) async throws -> Credits { .init() }
     func seriesDetail(_ id: Int) async throws -> SeriesDetail { .init(id: id, seasons: []) }
     func bookDetail(_ id: Int) async throws -> BookDetail { .init(id: id) }
+    func movieSubtitles(_ id: Int) async throws -> TitleSubtitles { .init() }
+    func seriesSubtitles(_ id: Int) async throws -> [EpisodeSubtitles] { [] }
+    func downloadSubtitle(_ target: SubtitleTarget, language: String) async throws {}
+    func deleteEpisodeFile(_ fileID: Int) async throws {}
+    func authorDetail(_ id: Int) async throws -> AuthorDetail { .init(id: id) }
+    func updateAuthor(_ id: Int, monitored: Bool?, monitorNewItems: String?) async throws -> AuthorSummary { .init(id: id) }
+    func bookEditions(edition: String) async throws -> [EditionChoice] { [] }
     func episodes(series: Int, season: Int) async throws -> [Episode] { [] }
     func options(_ app: ArrApp) async throws -> Options { .init(quality_profiles: [], root_folders: []) }
     func watched() async throws -> Block<WatchedMap> { log("watched"); return .healthy(.init()) }

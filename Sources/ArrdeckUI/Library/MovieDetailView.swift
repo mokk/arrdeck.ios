@@ -51,6 +51,13 @@ public struct MovieDetailView: View {
                         EmptyNote("No file")
                     }
                 }
+                if let subtitles = model.subtitles {
+                    Section("Subtitles") {
+                        SubtitleTracksView(subtitles: subtitles, busy: model.busy) { code in
+                            Task { await model.getSubtitle(language: code) }
+                        }
+                    }
+                }
                 CreditsSection(credits: model.credits, baseURL: baseURL)
                 DetailHistorySection(history: movie.history)
             }

@@ -7,9 +7,10 @@ import SwiftUI
 /// is grabs, imports and the blocklist.
 public struct ActivityView: View {
     enum Segment: CaseIterable {
-        case downloading, queue, history
+        case new, downloading, queue, history
         var label: String {
             switch self {
+            case .new: String(localized: "New")
             case .downloading: String(localized: "Downloading")
             case .queue: String(localized: "Queue")
             case .history: String(localized: "History")
@@ -17,8 +18,9 @@ public struct ActivityView: View {
         }
     }
 
-    @State private var segment: Segment = .downloading
+    @State private var segment: Segment = .new
     @State private var model: DownloadsModel
+    let feed: ActivityFeedModel
     let api: any DownloadsAPI & ExtrasAPI & HistoryAPI & LibraryAPI
     let hasArr: Bool
     let baseURL: URL
@@ -26,10 +28,11 @@ public struct ActivityView: View {
     let onSessionLost: @MainActor () -> Void
 
     public init(
-        api: any DownloadsAPI & ExtrasAPI & HistoryAPI & LibraryAPI, clients: [TorrentClient], hasArr: Bool,
+        api: any DownloadsAPI & ExtrasAPI & HistoryAPI & LibraryAPI, feed: ActivityFeedModel, clients: [TorrentClient], hasArr: Bool,
         baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void
     ) {
         self.api = api
+        self.feed = feed
         self.hasArr = hasArr
         self.baseURL = baseURL
         self.hasPlex = hasPlex
@@ -47,6 +50,8 @@ public struct ActivityView: View {
             .padding(.vertical, 8)
             .background(Color.grouped)
             switch segment {
+            case .new:
+                SinceLastLookList(feed: feed)
             case .downloading:
                 DownloadingList(model: model, api: api, onSessionLost: onSessionLost) { segment = .queue }
             case .queue:
@@ -182,5 +187,68 @@ struct DownloadingList: View {
             }
         }
         .accessibilityIdentifier("downloading")
+    }
+}
+
+/// Imports, failures, grabs and finished torrents since the tab was last
+/// opened. The mark moves once the list has been shown, so the badge clears
+/// while the list stays put.
+struct SinceLastLookList: View {
+    let feed: ActivityFeedModel
+
+    var body: some View {
+        List {
+            Section {
+                Text("Since \(Format.dayTime(feed.lastSeen.formatted(.iso8601)))").font(.caption).foregroundStyle(.secondary)
+            }
+            Section {
+                switch feed.feed ?? .loading {
+                case .loading: LoadingRow()
+                case let .failed(reason): ErrorNote(reason)
+                case let .loaded(since):
+                    if (since.items ?? []).isEmpty {
+                        EmptyNote(String(localized: "Nothing new since you last looked"))
+                    }
+                    ForEach(Array((since.items ?? []).enumerated()), id: \.offset) { _, event in
+                        ActivityEventRow(event: event)
+                    }
+                }
+            }
+        }
+        .dashboardListStyle()
+        .refreshable { await feed.refresh() }
+        .task {
+            if feed.feed?.value == nil { await feed.refresh() }
+            feed.markSeen()
+        }
+        .accessibilityIdentifier("activity-new")
+    }
+}
+
+struct ActivityEventRow: View {
+    let event: ActivityEvent
+
+    var ref: MediaRef? {
+        if let id = event.movie_id { return .movie(id) }
+        if let id = event.series_id { return .series(id) }
+        if let id = event.book_id { return .book(id) }
+        return nil
+    }
+
+    var body: some View {
+        let content = VStack(alignment: .leading, spacing: 3) {
+            Text(event.title).font(.subheadline).lineLimit(2)
+            HStack(spacing: 6) {
+                StateBadge(state: event.kind.rawValue)
+                Text(Services.label(event.app)).font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                Text(Format.dayTime(event.date)).font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        if let ref {
+            NavigationLink(value: ref) { content }
+        } else {
+            content
+        }
     }
 }

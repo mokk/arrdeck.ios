@@ -95,6 +95,8 @@ public class DetailModelBase {
 public final class MovieDetailModel: DetailModelBase {
     public private(set) var movie: Loadable<MovieDetail> = .loading
     public private(set) var credits: Credits?
+    /// nil until Bazarr answered; stays nil when it is not configured.
+    public private(set) var subtitles: TitleSubtitles?
 
     public init(id: Int, api: any LibraryAPI, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
         super.init(ref: .movie(id), api: api, hasPlex: hasPlex, onSessionLost: onSessionLost)
@@ -115,7 +117,17 @@ public final class MovieDetailModel: DetailModelBase {
             group.addTask { await self.loadOptions() }
             group.addTask { await self.loadWatched() }
             group.addTask { await self.loadCredits() }
+            group.addTask { await self.loadSubtitles() }
         }
+    }
+
+    func loadSubtitles() async {
+        subtitles = try? await api.movieSubtitles(ref.id)
+    }
+
+    public func getSubtitle(language: String) async {
+        await perform { try await api.downloadSubtitle(.movie(ref.id), language: language) }
+        await loadSubtitles()
     }
 
     override func reload() async {
@@ -165,6 +177,9 @@ public final class SeriesDetailModel: DetailModelBase {
     /// Episodes per season, fetched when a season is expanded.
     public private(set) var episodes: [Int: Loadable<[Episode]>] = [:]
     public var expanded: Set<Int> = []
+    /// Bazarr's view per episode id; empty when Bazarr is not configured.
+    public private(set) var subtitles: [Int: TitleSubtitles] = [:]
+    public private(set) var subtitlesKnown = false
 
     public init(id: Int, api: any LibraryAPI, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
         super.init(ref: .series(id), api: api, hasPlex: hasPlex, onSessionLost: onSessionLost)
@@ -182,6 +197,7 @@ public final class SeriesDetailModel: DetailModelBase {
     public func load() async {
         await withDiscardingTaskGroup { group in
             group.addTask { await self.reload() }
+            group.addTask { await self.loadSubtitles() }
             group.addTask { await self.loadOptions() }
             group.addTask { await self.loadWatched() }
         }
@@ -230,5 +246,77 @@ public final class SeriesDetailModel: DetailModelBase {
 
     public func searchEpisode(_ episode: Episode) async {
         await perform { try await api.searchEpisodes([episode.id]) }
+    }
+
+    public func deleteFile(of episode: Episode) async {
+        guard let fileID = episode.file_id else { return }
+        await perform { try await api.deleteEpisodeFile(fileID) }
+        await loadEpisodes(episode.season)
+        await reload()
+    }
+
+    public func loadSubtitles() async {
+        guard let rows = try? await api.seriesSubtitles(ref.id) else { return }
+        subtitles = Dictionary(rows.map { ($0.episode_id, $0.subtitles) }, uniquingKeysWith: { a, _ in a })
+        subtitlesKnown = true
+    }
+
+    public func getSubtitle(episode: Episode, language: String) async {
+        await perform { try await api.downloadSubtitle(.episode(series: ref.id, episode: episode.id), language: language) }
+        await loadSubtitles()
+    }
+}
+
+/// An author as Readarr keeps them: every book, monitored or not, and what
+/// happens to books it discovers later.
+@MainActor @Observable
+public final class AuthorDetailModel {
+    public let id: Int
+    public private(set) var author: Loadable<AuthorDetail> = .loading
+    public private(set) var busy = false
+    public var actionError: String?
+
+    private let api: any LibraryAPI
+    private let onSessionLost: @MainActor () -> Void
+
+    public init(id: Int, api: any LibraryAPI, onSessionLost: @escaping @MainActor () -> Void) {
+        self.id = id
+        self.api = api
+        self.onSessionLost = onSessionLost
+    }
+
+    public func load() async {
+        do {
+            author = .loaded(try await api.authorDetail(id))
+        } catch APIError.unauthorized {
+            onSessionLost()
+        } catch {
+            if author.value == nil { author = .failed((error as? APIError)?.description ?? error.localizedDescription) }
+        }
+    }
+
+    public func setMonitored(_ monitored: Bool) async {
+        await perform { _ = try await api.updateAuthor(id, monitored: monitored, monitorNewItems: nil) }
+    }
+
+    public func setMonitorNewItems(_ value: String) async {
+        await perform { _ = try await api.updateAuthor(id, monitored: nil, monitorNewItems: value) }
+    }
+
+    public func setBookMonitored(_ book: LibraryBook, _ monitored: Bool) async {
+        await perform { try await api.update(.book(book.id), monitored: monitored, qualityProfile: nil) }
+    }
+
+    private func perform(_ work: @Sendable () async throws -> Void) async {
+        busy = true
+        defer { busy = false }
+        do {
+            try await work()
+            await load()
+        } catch APIError.unauthorized {
+            onSessionLost()
+        } catch {
+            actionError = (error as? APIError)?.description ?? error.localizedDescription
+        }
     }
 }

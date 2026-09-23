@@ -7,6 +7,7 @@ import SwiftUI
 struct AppTabBar: View {
     let tabs: [AppTab]
     @Binding var selected: AppTab
+    var badges: [AppTab: Int] = [:]
 
     var body: some View {
         HStack(spacing: 0) {
@@ -18,6 +19,17 @@ struct AppTabBar: View {
                         Image(systemName: tab.symbol)
                             .font(.system(size: 21, weight: .regular))
                             .symbolVariant(selected == tab ? .fill : .none)
+                            .overlay(alignment: .topTrailing) {
+                                if let count = badges[tab], count > 0 {
+                                    Text(count > 99 ? "99+" : String(count))
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundStyle(.white)
+                                        .padding(.horizontal, 4).padding(.vertical, 1)
+                                        .background(Color.accentColor, in: Capsule())
+                                        .offset(x: 10, y: -6)
+                                        .accessibilityLabel("\(count) new")
+                                }
+                            }
                         Text(tab.label).font(.system(size: 10, weight: selected == tab ? .semibold : .regular))
                     }
                     .foregroundStyle(selected == tab ? Color.accentColor : Color.secondary)

@@ -25,6 +25,85 @@
         "title": "AboutOut",
         "type": "object"
       },
+      "ActivityEventOut": {
+        "description": "One thing that happened since the client last looked.",
+        "properties": {
+          "app": {
+            "title": "App",
+            "type": "string"
+          },
+          "book_id": {
+            "title": "Book Id",
+            "type": "integer"
+          },
+          "date": {
+            "title": "Date",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "imported",
+              "failed",
+              "fetched",
+              "incomplete",
+              "completed"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "movie_id": {
+            "title": "Movie Id",
+            "type": "integer"
+          },
+          "series_id": {
+            "title": "Series Id",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "app",
+          "title",
+          "date"
+        ],
+        "title": "ActivityEventOut",
+        "type": "object"
+      },
+      "ActivitySinceOut": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ActivityEventOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "now": {
+            "title": "Now",
+            "type": "string"
+          },
+          "since": {
+            "title": "Since",
+            "type": "string"
+          }
+        },
+        "required": [
+          "since",
+          "now",
+          "count"
+        ],
+        "title": "ActivitySinceOut",
+        "type": "object"
+      },
       "AddBookIn": {
         "properties": {
           "foreign_book_id": {
@@ -295,6 +374,159 @@
         "title": "ArrReleaseOut",
         "type": "object"
       },
+      "AuthorDetailOut": {
+        "properties": {
+          "available_count": {
+            "default": 0,
+            "title": "Available Count",
+            "type": "integer"
+          },
+          "book_count": {
+            "default": 0,
+            "title": "Book Count",
+            "type": "integer"
+          },
+          "books": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/LibraryBookOut"
+            },
+            "title": "Books",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "metadata_profile_id": {
+            "title": "Metadata Profile Id",
+            "type": "integer"
+          },
+          "monitor_new_items": {
+            "title": "Monitor New Items",
+            "type": "string"
+          },
+          "monitored": {
+            "default": false,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "overview": {
+            "title": "Overview",
+            "type": "string"
+          },
+          "poster": {
+            "title": "Poster",
+            "type": "string"
+          },
+          "quality_profile_id": {
+            "title": "Quality Profile Id",
+            "type": "integer"
+          },
+          "series": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/BookSeriesOut"
+            },
+            "title": "Series",
+            "type": "array"
+          },
+          "size_on_disk": {
+            "default": 0,
+            "title": "Size On Disk",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "AuthorDetailOut",
+        "type": "object"
+      },
+      "AuthorOut": {
+        "properties": {
+          "available_count": {
+            "default": 0,
+            "title": "Available Count",
+            "type": "integer"
+          },
+          "book_count": {
+            "default": 0,
+            "title": "Book Count",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "metadata_profile_id": {
+            "title": "Metadata Profile Id",
+            "type": "integer"
+          },
+          "monitor_new_items": {
+            "title": "Monitor New Items",
+            "type": "string"
+          },
+          "monitored": {
+            "default": false,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "poster": {
+            "title": "Poster",
+            "type": "string"
+          },
+          "quality_profile_id": {
+            "title": "Quality Profile Id",
+            "type": "integer"
+          },
+          "size_on_disk": {
+            "default": 0,
+            "title": "Size On Disk",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "AuthorOut",
+        "type": "object"
+      },
+      "AuthorUpdateIn": {
+        "properties": {
+          "metadata_profile_id": {
+            "title": "Metadata Profile Id",
+            "type": "integer"
+          },
+          "monitor_new_items": {
+            "enum": [
+              "all",
+              "none",
+              "new"
+            ],
+            "title": "Monitor New Items",
+            "type": "string"
+          },
+          "monitored": {
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "quality_profile_id": {
+            "title": "Quality Profile Id",
+            "type": "integer"
+          }
+        },
+        "title": "AuthorUpdateIn",
+        "type": "object"
+      },
       "BackupOut": {
         "properties": {
           "credentials": {
@@ -532,6 +764,14 @@
             "title": "Release Date",
             "type": "string"
           },
+          "series": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/BookSeriesOut"
+            },
+            "title": "Series",
+            "type": "array"
+          },
           "series_title": {
             "title": "Series Title",
             "type": "string"
@@ -607,6 +847,31 @@
           "id"
         ],
         "title": "BookFileOut",
+        "type": "object"
+      },
+      "BookSeriesOut": {
+        "properties": {
+          "books": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/SeriesBookOut"
+            },
+            "title": "Books",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "BookSeriesOut",
         "type": "object"
       },
       "BulkDeleteIn": {
@@ -951,6 +1216,44 @@
         "title": "DiskSpaceOut",
         "type": "object"
       },
+      "EditionChoiceOut": {
+        "properties": {
+          "foreign_edition_id": {
+            "title": "Foreign Edition Id",
+            "type": "string"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "language": {
+            "title": "Language",
+            "type": "string"
+          },
+          "monitored": {
+            "default": false,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "page_count": {
+            "title": "Page Count",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "foreign_edition_id"
+        ],
+        "title": "EditionChoiceOut",
+        "type": "object"
+      },
       "EpisodeIdsIn": {
         "properties": {
           "ids": {
@@ -998,6 +1301,10 @@
             "title": "Episode",
             "type": "integer"
           },
+          "file_id": {
+            "title": "File Id",
+            "type": "integer"
+          },
           "has_file": {
             "default": false,
             "title": "Has File",
@@ -1012,8 +1319,16 @@
             "title": "Monitored",
             "type": "boolean"
           },
+          "quality": {
+            "title": "Quality",
+            "type": "string"
+          },
           "season": {
             "title": "Season",
+            "type": "integer"
+          },
+          "size": {
+            "title": "Size",
             "type": "integer"
           },
           "title": {
@@ -1027,6 +1342,33 @@
           "episode"
         ],
         "title": "EpisodeOut",
+        "type": "object"
+      },
+      "EpisodeSubtitlesOut": {
+        "properties": {
+          "episode": {
+            "default": 0,
+            "title": "Episode",
+            "type": "integer"
+          },
+          "episode_id": {
+            "title": "Episode Id",
+            "type": "integer"
+          },
+          "season": {
+            "default": 0,
+            "title": "Season",
+            "type": "integer"
+          },
+          "subtitles": {
+            "$ref": "#/components/schemas/TitleSubtitlesOut"
+          }
+        },
+        "required": [
+          "episode_id",
+          "subtitles"
+        ],
+        "title": "EpisodeSubtitlesOut",
         "type": "object"
       },
       "GrabIn": {
@@ -2879,6 +3221,14 @@
             "title": "Author",
             "type": "string"
           },
+          "editions": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/EditionChoiceOut"
+            },
+            "title": "Editions",
+            "type": "array"
+          },
           "foreign_edition_id": {
             "title": "Foreign Edition Id",
             "type": "string"
@@ -2985,6 +3335,37 @@
           "monitored"
         ],
         "title": "SeasonOut",
+        "type": "object"
+      },
+      "SeriesBookOut": {
+        "properties": {
+          "book_id": {
+            "title": "Book Id",
+            "type": "integer"
+          },
+          "has_file": {
+            "default": false,
+            "title": "Has File",
+            "type": "boolean"
+          },
+          "monitored": {
+            "default": false,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "position": {
+            "title": "Position",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "book_id"
+        ],
+        "title": "SeriesBookOut",
         "type": "object"
       },
       "SeriesDetailOut": {
@@ -3792,6 +4173,29 @@
         "title": "StatsSampleOut",
         "type": "object"
       },
+      "SubtitleDownloadIn": {
+        "properties": {
+          "forced": {
+            "default": false,
+            "title": "Forced",
+            "type": "boolean"
+          },
+          "hi": {
+            "default": false,
+            "title": "Hi",
+            "type": "boolean"
+          },
+          "language": {
+            "title": "Language",
+            "type": "string"
+          }
+        },
+        "required": [
+          "language"
+        ],
+        "title": "SubtitleDownloadIn",
+        "type": "object"
+      },
       "SubtitleItemOut": {
         "properties": {
           "id": {
@@ -3857,6 +4261,38 @@
         "title": "SubtitleSearchIn",
         "type": "object"
       },
+      "SubtitleTrackOut": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "forced": {
+            "default": false,
+            "title": "Forced",
+            "type": "boolean"
+          },
+          "hi": {
+            "default": false,
+            "title": "Hi",
+            "type": "boolean"
+          },
+          "language": {
+            "title": "Language",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "language",
+          "code"
+        ],
+        "title": "SubtitleTrackOut",
+        "type": "object"
+      },
       "SubtitlesOut": {
         "properties": {
           "episodes": {
@@ -3902,6 +4338,33 @@
           "label"
         ],
         "title": "TagOut",
+        "type": "object"
+      },
+      "TitleSubtitlesOut": {
+        "properties": {
+          "missing": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/SubtitleTrackOut"
+            },
+            "title": "Missing",
+            "type": "array"
+          },
+          "present": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/SubtitleTrackOut"
+            },
+            "title": "Present",
+            "type": "array"
+          },
+          "tracked": {
+            "default": true,
+            "title": "Tracked",
+            "type": "boolean"
+          }
+        },
+        "title": "TitleSubtitlesOut",
         "type": "object"
       },
       "TorrentActionIn": {
@@ -4134,6 +4597,10 @@
             ],
             "title": "Client",
             "type": "string"
+          },
+          "completed_on": {
+            "title": "Completed On",
+            "type": "integer"
           },
           "dl_speed": {
             "title": "Dl Speed",
@@ -4671,6 +5138,48 @@
         "summary": "About",
         "tags": [
           "system"
+        ]
+      }
+    },
+    "/api/v1/activity/since": {
+      "get": {
+        "operationId": "activity_since_api_v1_activity_since_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "since",
+            "required": true,
+            "schema": {
+              "title": "Since",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivitySinceOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Activity Since",
+        "tags": [
+          "activity"
         ]
       }
     },
@@ -6023,6 +6532,123 @@
         ]
       }
     },
+    "/api/v1/library/authors": {
+      "get": {
+        "operationId": "library_authors_api_v1_library_authors_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AuthorOut"
+                  },
+                  "title": "Response Library Authors Api V1 Library Authors Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Library Authors",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/library/authors/{author_id}": {
+      "get": {
+        "operationId": "author_detail_api_v1_library_authors__author_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "author_id",
+            "required": true,
+            "schema": {
+              "title": "Author Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Author Detail",
+        "tags": [
+          "library"
+        ]
+      },
+      "patch": {
+        "operationId": "update_author_api_v1_library_authors__author_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "author_id",
+            "required": true,
+            "schema": {
+              "title": "Author Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Author",
+        "tags": [
+          "library"
+        ]
+      }
+    },
     "/api/v1/library/books": {
       "get": {
         "operationId": "library_books_api_v1_library_books_get",
@@ -6257,6 +6883,42 @@
           }
         },
         "summary": "Download Book File",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/library/episodes/files/{file_id}": {
+      "delete": {
+        "description": "Drop one episode's file so a search can replace it; the episode itself\nand its monitoring stay.",
+        "operationId": "delete_episode_file_api_v1_library_episodes_files__file_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "file_id",
+            "required": true,
+            "schema": {
+              "title": "File Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Episode File",
         "tags": [
           "library"
         ]
@@ -8488,6 +9150,53 @@
         ]
       }
     },
+    "/api/v1/search/books/editions": {
+      "get": {
+        "description": "Every edition of the work one edition belongs to, for the add sheet's\nlanguage/format picker. Needs our Readarr fork (bookLookupDetails):\nupstream's lookup carries no editions, so this comes back empty there and\nthe sheet keeps the single edition the search result had.",
+        "operationId": "book_editions_api_v1_search_books_editions_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "edition",
+            "required": true,
+            "schema": {
+              "title": "Edition",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EditionChoiceOut"
+                  },
+                  "title": "Response Book Editions Api V1 Search Books Editions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Book Editions",
+        "tags": [
+          "discover"
+        ]
+      }
+    },
     "/api/v1/search/movies": {
       "get": {
         "operationId": "search_movies_api_v1_search_movies_get",
@@ -8988,6 +9697,93 @@
         ]
       }
     },
+    "/api/v1/subtitles/movie/{radarr_id}": {
+      "get": {
+        "operationId": "movie_subtitles_api_v1_subtitles_movie__radarr_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "radarr_id",
+            "required": true,
+            "schema": {
+              "title": "Radarr Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TitleSubtitlesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Movie Subtitles",
+        "tags": [
+          "subtitles"
+        ]
+      }
+    },
+    "/api/v1/subtitles/movie/{radarr_id}/download": {
+      "post": {
+        "operationId": "movie_subtitle_download_api_v1_subtitles_movie__radarr_id__download_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "radarr_id",
+            "required": true,
+            "schema": {
+              "title": "Radarr Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubtitleDownloadIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Movie Subtitle Download",
+        "tags": [
+          "subtitles"
+        ]
+      }
+    },
     "/api/v1/subtitles/search": {
       "post": {
         "operationId": "subtitle_search_api_v1_subtitles_search_post",
@@ -9017,6 +9813,106 @@
           }
         },
         "summary": "Subtitle Search",
+        "tags": [
+          "subtitles"
+        ]
+      }
+    },
+    "/api/v1/subtitles/series/{series_id}": {
+      "get": {
+        "operationId": "series_subtitles_api_v1_subtitles_series__series_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "series_id",
+            "required": true,
+            "schema": {
+              "title": "Series Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EpisodeSubtitlesOut"
+                  },
+                  "title": "Response Series Subtitles Api V1 Subtitles Series  Series Id  Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Series Subtitles",
+        "tags": [
+          "subtitles"
+        ]
+      }
+    },
+    "/api/v1/subtitles/series/{series_id}/episodes/{episode_id}/download": {
+      "post": {
+        "operationId": "episode_subtitle_download_api_v1_subtitles_series__series_id__episodes__episode_id__download_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "series_id",
+            "required": true,
+            "schema": {
+              "title": "Series Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "episode_id",
+            "required": true,
+            "schema": {
+              "title": "Episode Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubtitleDownloadIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Episode Subtitle Download",
         "tags": [
           "subtitles"
         ]

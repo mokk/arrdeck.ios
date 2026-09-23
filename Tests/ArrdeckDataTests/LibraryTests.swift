@@ -60,6 +60,13 @@ actor FakeLibraryAPI: LibraryAPI {
     func movieCredits(_ id: Int) async throws -> Credits { try log("credits"); return .init(cast: [.init(name: "A B")]) }
     func seriesDetail(_ id: Int) async throws -> SeriesDetail { try log("series"); return series }
     func bookDetail(_ id: Int) async throws -> BookDetail { try log("book"); return .init(id: id, title: "Book") }
+    func movieSubtitles(_ id: Int) async throws -> TitleSubtitles { try log("subs-\(id)"); return .init(missing: [.init(code: "da", language: "Danish")], present: [], tracked: true) }
+    func seriesSubtitles(_ id: Int) async throws -> [EpisodeSubtitles] { try log("series-subs-\(id)"); return [] }
+    func downloadSubtitle(_ target: SubtitleTarget, language: String) async throws { try log("get-sub-\(language)") }
+    func deleteEpisodeFile(_ fileID: Int) async throws { try log("delete-file-\(fileID)") }
+    func authorDetail(_ id: Int) async throws -> AuthorDetail { try log("author-\(id)"); return .init(id: id, name: "Author") }
+    func updateAuthor(_ id: Int, monitored: Bool?, monitorNewItems: String?) async throws -> AuthorSummary { try log("author-update-\(id)"); return .init(id: id) }
+    func bookEditions(edition: String) async throws -> [EditionChoice] { try log("editions-\(edition)"); return [] }
     func episodes(series: Int, season: Int) async throws -> [Episode] { try log("episodes-\(season)"); return episodeList }
     func options(_ app: ArrApp) async throws -> Options {
         try log("options-\(app.rawValue)")

@@ -98,7 +98,7 @@ public protocol DiscoverAPI: Sendable {
     func discover(_ kind: MediaKind) async throws -> [SearchResult]
     func grab(guid: String, indexerID: Int) async throws
     /// `metadataProfile` matters for books only: Readarr keeps it on the author.
-    func add(_ result: SearchResult, qualityProfile: Int, rootFolder: String, metadataProfile: Int?) async throws
+    func add(_ result: SearchResult, qualityProfile: Int, rootFolder: String, metadataProfile: Int?, edition: String?) async throws
     func collections() async throws -> [Collection]
     func collectionDetail(_ id: Int) async throws -> CollectionDetail
     func setCollectionMonitored(_ id: Int, _ monitored: Bool) async throws
@@ -172,13 +172,13 @@ extension LiveAPI: DiscoverAPI {
         }
     }
 
-    public func add(_ result: SearchResult, qualityProfile: Int, rootFolder: String, metadataProfile: Int?) async throws {
+    public func add(_ result: SearchResult, qualityProfile: Int, rootFolder: String, metadataProfile: Int?, edition: String?) async throws {
         try await call {
             switch result.kind {
             case .book:
                 switch try await client.add_book_api_v1_books_post(body: .json(.init(
                     foreign_book_id: result.foreign_id ?? String(result.remote_id),
-                    foreign_edition_id: result.foreign_edition_id,
+                    foreign_edition_id: edition ?? result.foreign_edition_id,
                     metadata_profile_id: metadataProfile,
                     quality_profile_id: qualityProfile, root_folder_path: rootFolder,
                     title: result.title
@@ -455,6 +455,10 @@ public final class MediaSheetModel {
     public var rootFolder: String?
     /// Books only: the metadata profile a new author is created with.
     public var metadataProfile: Int?
+    /// Books only: every edition of the work (from the Readarr fork's lookup;
+    /// upstream gives just the one the search result had) and the pick.
+    public private(set) var editions: [EditionChoice] = []
+    public var edition: String?
     public private(set) var busy = false
     public private(set) var done = false
     public var error: String?
@@ -476,12 +480,20 @@ public final class MediaSheetModel {
         if qualityProfile == nil { qualityProfile = result.quality_profile_id ?? options?.quality_profiles.first?.id }
         if rootFolder == nil { rootFolder = options?.root_folders.first?.path }
         if metadataProfile == nil { metadataProfile = options?.metadata_profiles?.first?.id }
+        if result.kind == .book, result.in_library != true {
+            editions = result.editions ?? []
+            edition = edition ?? result.foreign_edition_id
+            if let known = result.foreign_edition_id, let all = try? await api.bookEditions(edition: known), all.count > editions.count {
+                editions = all
+            }
+        }
     }
 
     public func add() async {
         guard let qualityProfile, let rootFolder else { return }
         let metadataProfile = result.kind == .book ? metadataProfile : nil
-        await perform { try await api.add(result, qualityProfile: qualityProfile, rootFolder: rootFolder, metadataProfile: metadataProfile) }
+        let edition = result.kind == .book ? edition : nil
+        await perform { try await api.add(result, qualityProfile: qualityProfile, rootFolder: rootFolder, metadataProfile: metadataProfile, edition: edition) }
     }
 
     public func setMonitored(_ monitored: Bool) async {

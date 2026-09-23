@@ -55,7 +55,7 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
         return [SearchResult(kind: .movie, remote_id: 9, title: "Popular")]
     }
     func grab(guid: String, indexerID: Int) async throws { try log("grab-\(guid)-\(indexerID)") }
-    func add(_ result: SearchResult, qualityProfile: Int, rootFolder: String, metadataProfile: Int?) async throws {
+    func add(_ result: SearchResult, qualityProfile: Int, rootFolder: String, metadataProfile: Int?, edition: String?) async throws {
         try log("add-\(result.remote_id)-\(qualityProfile)-\(rootFolder)")
     }
     func collections() async throws -> [Collection] {
@@ -78,6 +78,13 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
     func movieCredits(_ id: Int) async throws -> Credits { .init() }
     func seriesDetail(_ id: Int) async throws -> SeriesDetail { .init(id: id, seasons: []) }
     func bookDetail(_ id: Int) async throws -> BookDetail { .init(id: id) }
+    func movieSubtitles(_ id: Int) async throws -> TitleSubtitles { .init() }
+    func seriesSubtitles(_ id: Int) async throws -> [EpisodeSubtitles] { [] }
+    func downloadSubtitle(_ target: SubtitleTarget, language: String) async throws {}
+    func deleteEpisodeFile(_ fileID: Int) async throws {}
+    func authorDetail(_ id: Int) async throws -> AuthorDetail { .init(id: id) }
+    func updateAuthor(_ id: Int, monitored: Bool?, monitorNewItems: String?) async throws -> AuthorSummary { .init(id: id) }
+    func bookEditions(edition: String) async throws -> [EditionChoice] { [] }
     func episodes(series: Int, season: Int) async throws -> [Episode] { [] }
     func options(_ app: ArrApp) async throws -> Options {
         try log("options-\(app.rawValue)")

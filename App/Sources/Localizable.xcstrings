@@ -81,12 +81,32 @@
         }
       }
     },
+    "%lld new": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld nye"
+          }
+        }
+      }
+    },
     "%lld of %lld": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "%lld af %lld"
+          }
+        }
+      }
+    },
+    "%lld of %lld books on disk": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld af %lld bøger på disken"
           }
         }
       }
@@ -492,12 +512,32 @@
         }
       }
     },
+    "Author monitored": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forfatter overvåget"
+          }
+        }
+      }
+    },
     "Back": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Tilbage"
+          }
+        }
+      }
+    },
+    "Bazarr does not track this title": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bazarr følger ikke denne titel"
           }
         }
       }
@@ -538,6 +578,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bøger"
+          }
+        }
+      }
+    },
+    "Books (%lld)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bøger (%lld)"
           }
         }
       }
@@ -784,6 +834,26 @@
         }
       }
     },
+    "Delete file": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet fil"
+          }
+        }
+      }
+    },
+    "Delete file?": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet fil?"
+          }
+        }
+      }
+    },
     "Delete from library and disk": {
       "localizations": {
         "da": {
@@ -875,6 +945,16 @@
         }
       }
     },
+    "Do not monitor": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overvåg ikke"
+          }
+        }
+      }
+    },
     "Done": {
       "localizations": {
         "da": {
@@ -961,6 +1041,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Redigér"
+          }
+        }
+      }
+    },
+    "Edition": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Udgave"
           }
         }
       }
@@ -1164,6 +1254,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Genrer"
+          }
+        }
+      }
+    },
+    "Get %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hent %@"
           }
         }
       }
@@ -1412,6 +1512,26 @@
         }
       }
     },
+    "Monitor all": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overvåg alle"
+          }
+        }
+      }
+    },
+    "Monitor new": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overvåg nye"
+          }
+        }
+      }
+    },
     "Monitored": {
       "localizations": {
         "da": {
@@ -1492,6 +1612,26 @@
         }
       }
     },
+    "New": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyt"
+          }
+        }
+      }
+    },
+    "New books": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nye bøger"
+          }
+        }
+      }
+    },
     "Next": {
       "localizations": {
         "da": {
@@ -1543,6 +1683,16 @@
         }
       }
     },
+    "No subtitle languages wanted": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen ønskede undertekstsprog"
+          }
+        }
+      }
+    },
     "Not an arrdeck: %@": {
       "localizations": {
         "da": {
@@ -1569,6 +1719,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ikke udkommet endnu — der ventes til den er {availability}."
+          }
+        }
+      }
+    },
+    "Nothing new since you last looked": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intet nyt siden du sidst kiggede"
           }
         }
       }
@@ -2137,6 +2297,16 @@
         }
       }
     },
+    "Series: %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serie: %@"
+          }
+        }
+      }
+    },
     "Servers": {
       "localizations": {
         "da": {
@@ -2293,6 +2463,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Logget ud — sessionen udløb eller blev tilbagekaldt"
+          }
+        }
+      }
+    },
+    "Since %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siden %@"
           }
         }
       }

@@ -50,6 +50,20 @@ public enum MediaRef: Hashable, Sendable {
 public typealias BookDetail = Components.Schemas.BookDetailOut
 public typealias BookEdition = Components.Schemas.BookEditionOut
 public typealias BookFile = Components.Schemas.BookFileOut
+public typealias BookSeries = Components.Schemas.BookSeriesOut
+public typealias SeriesBook = Components.Schemas.SeriesBookOut
+public typealias AuthorSummary = Components.Schemas.AuthorOut
+public typealias AuthorDetail = Components.Schemas.AuthorDetailOut
+public typealias EditionChoice = Components.Schemas.EditionChoiceOut
+public typealias TitleSubtitles = Components.Schemas.TitleSubtitlesOut
+public typealias SubtitleTrack = Components.Schemas.SubtitleTrackOut
+public typealias EpisodeSubtitles = Components.Schemas.EpisodeSubtitlesOut
+
+/// What a subtitle download is for.
+public enum SubtitleTarget: Hashable, Sendable {
+    case movie(Int)
+    case episode(series: Int, episode: Int)
+}
 
 extension RecentItem {
     public var ref: MediaRef? { MediaRef(app: app.rawValue, id: library_id) }
@@ -147,6 +161,16 @@ public protocol LibraryAPI: Sendable {
     func triggerSearch(_ ref: MediaRef) async throws
     func setSeasonMonitored(series: Int, season: Int, monitored: Bool) async throws
     func searchSeason(series: Int, season: Int) async throws
+    // Bazarr, per title. Fails when Bazarr is not configured; the views hide
+    // the section then instead of plumbing a flag through every screen.
+    func movieSubtitles(_ id: Int) async throws -> TitleSubtitles
+    func seriesSubtitles(_ id: Int) async throws -> [EpisodeSubtitles]
+    func downloadSubtitle(_ target: SubtitleTarget, language: String) async throws
+    func deleteEpisodeFile(_ fileID: Int) async throws
+    // Readarr authors and editions
+    func authorDetail(_ id: Int) async throws -> AuthorDetail
+    func updateAuthor(_ id: Int, monitored: Bool?, monitorNewItems: String?) async throws -> AuthorSummary
+    func bookEditions(edition: String) async throws -> [EditionChoice]
     func setEpisodesMonitored(_ ids: [Int], monitored: Bool) async throws
     func searchEpisodes(_ ids: [Int]) async throws
 }

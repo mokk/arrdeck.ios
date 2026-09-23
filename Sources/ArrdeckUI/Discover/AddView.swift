@@ -306,6 +306,16 @@ struct MediaSheet: View {
             Picker("Quality profile", selection: $model.qualityProfile) {
                 ForEach(model.options?.quality_profiles ?? [], id: \.id) { Text($0.name).tag(Int?.some($0.id)) }
             }
+            // Which edition: language and format. More than one only when the
+            // Readarr fork lists them; upstream's lookup has just the one.
+            if result.kind == .book, model.editions.count > 1 {
+                Picker("Edition", selection: $model.edition) {
+                    ForEach(model.editions, id: \.foreign_edition_id) { edition in
+                        Text([edition.title, edition.format, edition.language, edition.year.map(String.init)].compactMap { $0 }.joined(separator: " · "))
+                            .tag(String?.some(edition.foreign_edition_id))
+                    }
+                }
+            }
             // Readarr matches a new author against a metadata profile too.
             if result.kind == .book, let profiles = model.options?.metadata_profiles, !profiles.isEmpty {
                 Picker("Metadata profile", selection: $model.metadataProfile) {
