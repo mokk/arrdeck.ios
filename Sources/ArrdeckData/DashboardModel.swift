@@ -89,7 +89,7 @@ public final class DashboardModel {
     // MARK: Gating
 
     public func has(_ service: String) -> Bool { configured.contains(service) }
-    public var hasArr: Bool { has("radarr") || has("sonarr") }
+    public var hasArr: Bool { has("radarr") || has("sonarr") || has("readarr") }
     public var torrentClients: [TorrentClient] { TorrentClient.allCases.filter { has($0.rawValue) } }
 
     public func isPending(_ key: String) -> Bool { pending.contains(key) }

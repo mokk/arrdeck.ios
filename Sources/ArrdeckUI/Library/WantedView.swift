@@ -78,6 +78,8 @@ public struct WantedView: View {
                 MovieDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
             case let .series(id):
                 SeriesDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+            case let .book(id):
+                BookDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
             }
         }
         .task { await model.load(reset: true) }
@@ -88,7 +90,7 @@ public struct WantedView: View {
         }
         .sheet(item: $searching) { item in
             ReleasesSheet(
-                target: item.app == .radarr ? .movie(item.id) : .episode(series: item.library_id, episode: item.id),
+                target: item.app == .radarr ? .movie(item.id) : item.app == .readarr ? .book(item.id) : .episode(series: item.library_id, episode: item.id),
                 title: [item.title, item.subtitle].compactMap { $0 }.joined(separator: " "),
                 api: api, onSessionLost: onSessionLost
             ) { searching = nil }

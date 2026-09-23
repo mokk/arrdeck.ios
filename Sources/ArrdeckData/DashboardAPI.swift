@@ -142,7 +142,9 @@ public struct LiveAPI: DashboardAPI {
             switch try await client.queue_api_v1_queue_get() {
             case let .ok(ok):
                 let body = try ok.body.json
-                return [.radarr: Block(body.radarr), .sonarr: Block(body.sonarr)]
+                var out: [ArrApp: Block<[QueueItem]>] = [.radarr: Block(body.radarr), .sonarr: Block(body.sonarr)]
+                if let readarr = body.readarr { out[.readarr] = Block(readarr) }
+                return out
             case let .undocumented(code, _): throw APIError.status(code)
             }
         }
@@ -153,7 +155,9 @@ public struct LiveAPI: DashboardAPI {
             switch try await client.calendar_api_v1_calendar_get() {
             case let .ok(ok):
                 let body = try ok.body.json
-                return [.radarr: Block(body.radarr), .sonarr: Block(body.sonarr)]
+                var out: [ArrApp: Block<[CalendarItem]>] = [.radarr: Block(body.radarr), .sonarr: Block(body.sonarr)]
+                if let readarr = body.readarr { out[.readarr] = Block(readarr) }
+                return out
             case .unprocessableContent: throw APIError.unexpectedStatus(422)
             case let .undocumented(code, _): throw APIError.status(code)
             }
@@ -192,7 +196,9 @@ public struct LiveAPI: DashboardAPI {
             switch try await client.history_api_v1_history_get() {
             case let .ok(ok):
                 let body = try ok.body.json
-                return [.radarr: Block(body.radarr), .sonarr: Block(body.sonarr)]
+                var out: [ArrApp: Block<[HistoryItem]>] = [.radarr: Block(body.radarr), .sonarr: Block(body.sonarr)]
+                if let readarr = body.readarr { out[.readarr] = Block(readarr) }
+                return out
             case let .undocumented(code, _): throw APIError.status(code)
             }
         }

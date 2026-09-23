@@ -27,7 +27,21 @@ public struct LibraryPage: View {
         _model = State(initialValue: LibraryListModel(app: app, api: api, hasPlex: dashboard.has("plex"), onSessionLost: onSessionLost))
     }
 
-    var title: String { app == .radarr ? String(localized: "Movies") : String(localized: "Shows") }
+    var title: String {
+        switch app {
+        case .radarr: String(localized: "Movies")
+        case .sonarr: String(localized: "Shows")
+        case .readarr: String(localized: "Books")
+        }
+    }
+
+    var prompt: String {
+        switch app {
+        case .radarr: String(localized: "Search movies")
+        case .sonarr: String(localized: "Search shows")
+        case .readarr: String(localized: "Search books")
+        }
+    }
 
     public var body: some View {
         ScrollView {
@@ -47,16 +61,19 @@ public struct LibraryPage: View {
         }
         .background(Color.grouped)
         .navigationTitle(title)
-        .searchable(text: $model.query, placement: .alwaysVisible,
-                    prompt: app == .radarr ? "Search movies" : "Search shows")
+        .searchable(text: $model.query, placement: .alwaysVisible, prompt: Text(prompt))
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 if model.selecting {
                     Button("Done") { model.selecting = false }
                 } else {
                     sortMenu
-                    Button { adding = true } label: { Label("Add", systemImage: "plus") }
-                        .accessibilityIdentifier("library-add")
+                    // Adding a book waits on Readarr's lookup carrying the
+                    // author and edition data the add call needs.
+                    if app != .readarr {
+                        Button { adding = true } label: { Label("Add", systemImage: "plus") }
+                            .accessibilityIdentifier("library-add")
+                    }
                 }
             }
         }
@@ -69,11 +86,13 @@ public struct LibraryPage: View {
                 MovieDetailView(id: id, api: api, baseURL: baseURL, hasPlex: dashboard.has("plex"), onSessionLost: onSessionLost)
             case let .series(id):
                 SeriesDetailView(id: id, api: api, baseURL: baseURL, hasPlex: dashboard.has("plex"), onSessionLost: onSessionLost)
+            case let .book(id):
+                BookDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
             }
         }
         .sheet(isPresented: $adding) {
             AddView(configured: dashboard.configured, api: api, baseURL: baseURL, hasPlex: dashboard.has("plex"),
-                    fixed: app == .radarr ? .movies : .series, onSessionLost: onSessionLost) {
+                    fixed: app == .sonarr ? .series : .movies, onSessionLost: onSessionLost) {
                 adding = false
                 Task { await model.load() }
             }
@@ -151,7 +170,7 @@ struct CardTap: ViewModifier {
             NavigationLink(value: row.ref) { content }
                 .buttonStyle(.plain)
                 .contextMenu {
-                    if row.dot == .wanted {
+                    if row.dot == .wanted, model.app != .readarr {
                         Button { diagnose(row) } label: { Label("Why hasn't this arrived?", systemImage: "questionmark.circle") }
                     }
                     Button { model.selecting = true; model.toggleSelection(row) } label: { Label("Select", systemImage: "checkmark.circle") }
@@ -177,6 +196,8 @@ struct LibraryCard: View {
             return [row.year.map(String.init), detail].compactMap { $0 }.joined(separator: " · ")
         case .sonarr:
             return "\(row.episodeFiles ?? 0)/\(row.episodes ?? 0) · \(Format.bytes(row.sizeOnDisk))"
+        case .readarr:
+            return [row.author, row.year.map(String.init)].compactMap { $0 }.joined(separator: " · ")
         }
     }
 

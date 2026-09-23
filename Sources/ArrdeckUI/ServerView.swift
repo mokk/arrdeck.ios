@@ -65,8 +65,11 @@ public struct ServerView: View {
 
     @State private var selectedTab: AppTab = .movies
 
-    /// TabView keeps each tab's stack alive; its own bar is hidden and ours
-    /// spans the bottom. Tabs appear only for configured services, so the
+    /// Every tab's stack stays mounted in a ZStack and only the selected one
+    /// is visible, so switching tabs keeps scroll position and pushed screens.
+    /// Not a TabView: with six tabs UIKit folds the last ones into a "More"
+    /// list, and popping a pushed screen in the sixth tab landed there instead
+    /// of on the tab's root. Tabs appear only for configured services, so the
     /// bar waits for /services before it knows what to show.
     var tabs: some View {
         let available = AppTab.available(configured: model.configured)
@@ -74,11 +77,18 @@ public struct ServerView: View {
             if !model.servicesKnown {
                 ProgressView("Connecting…")
             } else {
-                TabView(selection: $selectedTab) {
+                ZStack {
                     ForEach(available, id: \.self) { tab in
-                        NavigationStack { tabContent(tab) }
-                            .hiddenSystemTabBar()
-                            .tag(tab)
+                        // accessibilityHidden has to sit inside the stack:
+                        // applied to the NavigationStack itself it is ignored
+                        // and the hidden tabs stay visible to VoiceOver.
+                        NavigationStack {
+                            tabContent(tab)
+                                .accessibilityHidden(tab != selectedTab)
+                        }
+                        .opacity(tab == selectedTab ? 1 : 0)
+                        .allowsHitTesting(tab == selectedTab)
+                        .zIndex(tab == selectedTab ? 1 : 0)
                     }
                 }
                 .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -92,14 +102,14 @@ public struct ServerView: View {
     @ViewBuilder func tabContent(_ tab: AppTab) -> some View {
         switch tab {
         case .books:
-            ContentUnavailableView("Books", systemImage: "books.vertical", description: Text("Readarr support is on its way."))
-                .navigationTitle("Books")
+            LibraryPage(app: .readarr, dashboard: model, api: api, baseURL: controller.profile.baseURL, onSessionLost: sessionLost)
         case .movies:
             LibraryPage(app: .radarr, dashboard: model, api: api, baseURL: controller.profile.baseURL, onSessionLost: sessionLost)
         case .shows:
             LibraryPage(app: .sonarr, dashboard: model, api: api, baseURL: controller.profile.baseURL, onSessionLost: sessionLost)
         case .activity:
-            ActivityView(api: api, clients: model.torrentClients, hasArr: model.hasArr, onSessionLost: sessionLost)
+            ActivityView(api: api, clients: model.torrentClients, hasArr: model.hasArr,
+                         baseURL: controller.profile.baseURL, hasPlex: model.has("plex"), onSessionLost: sessionLost)
         case .calendar:
             CalendarScreen(api: api, onSessionLost: sessionLost)
         case .settings:

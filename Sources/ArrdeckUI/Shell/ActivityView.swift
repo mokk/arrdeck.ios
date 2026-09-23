@@ -19,16 +19,20 @@ public struct ActivityView: View {
 
     @State private var segment: Segment = .downloading
     @State private var model: DownloadsModel
-    let api: any DownloadsAPI & ExtrasAPI & HistoryAPI
+    let api: any DownloadsAPI & ExtrasAPI & HistoryAPI & LibraryAPI
     let hasArr: Bool
+    let baseURL: URL
+    let hasPlex: Bool
     let onSessionLost: @MainActor () -> Void
 
     public init(
-        api: any DownloadsAPI & ExtrasAPI & HistoryAPI, clients: [TorrentClient], hasArr: Bool,
-        onSessionLost: @escaping @MainActor () -> Void
+        api: any DownloadsAPI & ExtrasAPI & HistoryAPI & LibraryAPI, clients: [TorrentClient], hasArr: Bool,
+        baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void
     ) {
         self.api = api
         self.hasArr = hasArr
+        self.baseURL = baseURL
+        self.hasPlex = hasPlex
         self.onSessionLost = onSessionLost
         _model = State(initialValue: DownloadsModel(api: api, clients: clients, hasArr: hasArr, onSessionLost: onSessionLost))
     }
@@ -52,6 +56,16 @@ public struct ActivityView: View {
             }
         }
         .navigationTitle("Activity")
+        .navigationDestination(for: MediaRef.self) { ref in
+            switch ref {
+            case let .movie(id):
+                MovieDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+            case let .series(id):
+                SeriesDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+            case let .book(id):
+                BookDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
+            }
+        }
         .task { await model.run() }
         .accessibilityIdentifier("activity")
     }

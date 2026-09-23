@@ -30,7 +30,7 @@ public enum AppTab: String, CaseIterable, Sendable, Hashable {
 
     /// Which tabs a backend with these services configured shows, in order.
     public static func available(configured: Set<String>) -> [AppTab] {
-        let hasArr = configured.contains("radarr") || configured.contains("sonarr")
+        let hasArr = configured.contains("radarr") || configured.contains("sonarr") || configured.contains("readarr")
         let hasClient = configured.contains("qbittorrent") || configured.contains("transmission")
         return allCases.filter { tab in
             switch tab {
@@ -53,7 +53,7 @@ extension LibraryRow {
     public var dot: Dot {
         guard monitored else { return .unmonitored }
         switch ref {
-        case .movie: return status == "downloaded" ? .complete : .wanted
+        case .movie, .book: return status == "downloaded" ? .complete : .wanted
         case .series: return (episodeFiles ?? 0) >= (episodes ?? 0) && (episodes ?? 0) > 0 ? .complete : .wanted
         }
     }
@@ -67,7 +67,7 @@ extension DashboardModel {
         let blocks: [Block<[QueueItem]>] = queue.value.map { Array($0.values) } ?? []
         for block in blocks {
             for item in block.value ?? [] {
-                let ref: MediaRef? = if let movie = item.movie_id { .movie(movie) } else if let series = item.series_id { .series(series) } else { nil }
+                let ref: MediaRef? = if let movie = item.movie_id { .movie(movie) } else if let series = item.series_id { .series(series) } else if let book = item.book_id { .book(book) } else { nil }
                 guard let ref, item.size > 0 else { continue }
                 let progress = (item.size - item.size_left) / item.size
                 out[ref] = max(out[ref] ?? 0, progress)

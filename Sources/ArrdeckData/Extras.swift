@@ -11,10 +11,14 @@ public enum ReleaseTarget: Hashable, Sendable {
     case movie(Int)
     case season(series: Int, season: Int)
     case episode(series: Int, episode: Int)
+    case book(Int)
 
     public var app: ArrApp {
-        if case .movie = self { return .radarr }
-        return .sonarr
+        switch self {
+        case .movie: .radarr
+        case .season, .episode: .sonarr
+        case .book: .readarr
+        }
     }
 }
 
@@ -55,7 +59,13 @@ public protocol ExtrasAPI: Sendable {
 
 extension ArrApp {
     /// The library kind the bulk endpoints are keyed by.
-    var libraryKind: String { self == .radarr ? "movies" : "series" }
+    var libraryKind: String {
+        switch self {
+        case .radarr: "movies"
+        case .sonarr: "series"
+        case .readarr: "books"
+        }
+    }
 }
 
 extension LiveAPI: ExtrasAPI {
@@ -80,6 +90,12 @@ extension LiveAPI: ExtrasAPI {
                 switch try await client.series_releases_api_v1_releases_series__series_id__get(
                     path: .init(series_id: series), query: .init(episode_id: episode)
                 ) {
+                case let .ok(ok): return try ok.body.json
+                case .unprocessableContent: throw APIError.unexpectedStatus(422)
+                case let .undocumented(code, _): throw APIError.status(code)
+                }
+            case let .book(id):
+                switch try await client.book_releases_api_v1_releases_book__book_id__get(path: .init(book_id: id)) {
                 case let .ok(ok): return try ok.body.json
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)

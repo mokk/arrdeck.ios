@@ -55,6 +55,7 @@ actor FakeManageAPI: ManageAPI {
 
     func libraryMovies() async throws -> [LibraryMovie] { log("movies"); return [.init(id: 1, title: "Film")] }
     func librarySeries() async throws -> [LibrarySeries] { log("series"); return [] }
+    func libraryBooks() async throws -> [LibraryBook] { log("books"); return [.init(author: "Gibson", has_file: true, id: 133, title: "Count Zero", year: 1986)] }
     func tags(_ app: ArrApp) async throws -> [LibraryTag] { log("tags"); return [.init(id: 1, label: "kids")] }
     func indexers() async throws -> [Indexer] { log("indexers"); return indexerList }
     func toggleIndexer(_ id: Int, enable: Bool) async throws {
@@ -94,6 +95,7 @@ extension FakeManageAPI: LibraryAPI {
     func movieDetail(_ id: Int) async throws -> MovieDetail { .init(id: id) }
     func movieCredits(_ id: Int) async throws -> Credits { .init() }
     func seriesDetail(_ id: Int) async throws -> SeriesDetail { .init(id: id, seasons: []) }
+    func bookDetail(_ id: Int) async throws -> BookDetail { .init(id: id) }
     func episodes(series: Int, season: Int) async throws -> [Episode] { [] }
     func options(_ app: ArrApp) async throws -> Options { .init(quality_profiles: [], root_folders: []) }
     func watched() async throws -> Block<WatchedMap> { log("watched"); return .healthy(.init()) }

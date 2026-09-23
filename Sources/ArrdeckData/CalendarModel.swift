@@ -70,7 +70,9 @@ extension LiveAPI: CalendarAPI {
             switch try await client.calendar_api_v1_calendar_get(query: .init(days: days, start_date: start)) {
             case let .ok(ok):
                 let body = try ok.body.json
-                return [.radarr: Block(body.radarr), .sonarr: Block(body.sonarr)]
+                var out: [ArrApp: Block<[CalendarItem]>] = [.radarr: Block(body.radarr), .sonarr: Block(body.sonarr)]
+                if let readarr = body.readarr { out[.readarr] = Block(readarr) }
+                return out
             case .unprocessableContent: throw APIError.unexpectedStatus(422)
             case let .undocumented(code, _): throw APIError.status(code)
             }

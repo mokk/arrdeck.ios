@@ -77,6 +77,7 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
     func movieDetail(_ id: Int) async throws -> MovieDetail { .init(id: id) }
     func movieCredits(_ id: Int) async throws -> Credits { .init() }
     func seriesDetail(_ id: Int) async throws -> SeriesDetail { .init(id: id, seasons: []) }
+    func bookDetail(_ id: Int) async throws -> BookDetail { .init(id: id) }
     func episodes(series: Int, season: Int) async throws -> [Episode] { [] }
     func options(_ app: ArrApp) async throws -> Options {
         try log("options-\(app.rawValue)")

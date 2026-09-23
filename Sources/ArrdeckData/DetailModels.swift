@@ -134,6 +134,32 @@ public final class MovieDetailModel: DetailModelBase {
 }
 
 @MainActor @Observable
+public final class BookDetailModel: DetailModelBase {
+    public private(set) var book: Loadable<BookDetail> = .loading
+
+    public init(id: Int, api: any LibraryAPI, onSessionLost: @escaping @MainActor () -> Void) {
+        super.init(ref: .book(id), api: api, hasPlex: false, onSessionLost: onSessionLost)
+    }
+
+    public var links: [ExternalLink] { book.value.map(ExternalLink.links(for:)) ?? [] }
+
+    public func load() async {
+        await withDiscardingTaskGroup { group in
+            group.addTask { await self.reload() }
+            group.addTask { await self.loadOptions() }
+        }
+    }
+
+    override func reload() async {
+        do {
+            book = .loaded(try await api.bookDetail(ref.id))
+        } catch {
+            if let reason = failure(error), book.value == nil { book = .failed(reason) }
+        }
+    }
+}
+
+@MainActor @Observable
 public final class SeriesDetailModel: DetailModelBase {
     public private(set) var series: Loadable<SeriesDetail> = .loading
     /// Episodes per season, fetched when a season is expanded.

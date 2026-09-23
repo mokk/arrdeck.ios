@@ -60,7 +60,19 @@ final class OnboardingUITests: XCTestCase {
         // library renders cards from /library/movies.
         let any = app.descendants(matching: .any)
         XCTAssert(any["tab-movies"].waitForExistence(timeout: 15), "tab bar never appeared")
-        XCTAssertFalse(any["tab-books"].exists, "Books must stay hidden without Readarr")
+        // Readarr is configured on this backend, so Books is the first tab.
+        XCTAssert(any["tab-books"].exists, "Books must appear when Readarr is configured")
+        any["tab-books"].tap()
+        XCTAssert(app.navigationBars["Books"].waitForExistence(timeout: 10), "books page never appeared")
+        XCTAssert(any["library-card"].firstMatch.waitForExistence(timeout: 20), "no book cards rendered")
+        snap("books")
+        any["library-card"].firstMatch.tap()
+        XCTAssert(any["book-detail"].waitForExistence(timeout: 10), "card did not open the book")
+        XCTAssert(app.buttons["Search now"].waitForExistence(timeout: 15), "book detail never loaded its actions")
+        snap("book-detail")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        any["tab-movies"].tap()
         // A ScrollView's identifier is not exposed under .searchable; the title is.
         XCTAssert(app.navigationBars["Movies"].waitForExistence(timeout: 10), "movies page never appeared")
         XCTAssert(any["library-card"].firstMatch.waitForExistence(timeout: 20), "no movie cards rendered")
@@ -108,7 +120,12 @@ final class OnboardingUITests: XCTestCase {
         for _ in 0..<8 where !storage.exists { app.swipeUp() }
         XCTAssert(storage.waitForExistence(timeout: 15), "storage card never rendered")
         app.navigationBars.buttons.element(boundBy: 0).tap()
-        app.buttons["manage-connections"].tap()
+        XCTAssert(app.navigationBars["Settings"].waitForExistence(timeout: 5), "did not return to Settings from Overview")
+        snap("settings-after-overview")
+        let connections = app.buttons["manage-connections"]
+        for _ in 0..<4 where !connections.exists { app.swipeUp() }
+        XCTAssert(connections.waitForExistence(timeout: 5), "connections row not reachable")
+        connections.tap()
         XCTAssert(app.staticTexts["configured"].firstMatch.waitForExistence(timeout: 20), "connections never loaded")
         app.navigationBars.buttons.element(boundBy: 0).tap()
 

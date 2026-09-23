@@ -389,6 +389,141 @@
         "title": "Body_add_torrent_file_api_v1_torrents__client__add_file_post",
         "type": "object"
       },
+      "BookDetailOut": {
+        "properties": {
+          "author": {
+            "title": "Author",
+            "type": "string"
+          },
+          "author_id": {
+            "title": "Author Id",
+            "type": "integer"
+          },
+          "editions": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/BookEditionOut"
+            },
+            "title": "Editions",
+            "type": "array"
+          },
+          "genres": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Genres",
+            "type": "array"
+          },
+          "goodreads_url": {
+            "title": "Goodreads Url",
+            "type": "string"
+          },
+          "has_file": {
+            "default": false,
+            "title": "Has File",
+            "type": "boolean"
+          },
+          "history": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/HistoryEventOut"
+            },
+            "title": "History",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "metadata_profile_id": {
+            "title": "Metadata Profile Id",
+            "type": "integer"
+          },
+          "monitored": {
+            "default": false,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "overview": {
+            "title": "Overview",
+            "type": "string"
+          },
+          "page_count": {
+            "title": "Page Count",
+            "type": "integer"
+          },
+          "poster": {
+            "title": "Poster",
+            "type": "string"
+          },
+          "quality_profile_id": {
+            "title": "Quality Profile Id",
+            "type": "integer"
+          },
+          "rating": {
+            "title": "Rating",
+            "type": "number"
+          },
+          "rating_votes": {
+            "title": "Rating Votes",
+            "type": "integer"
+          },
+          "release_date": {
+            "title": "Release Date",
+            "type": "string"
+          },
+          "series_title": {
+            "title": "Series Title",
+            "type": "string"
+          },
+          "size_on_disk": {
+            "default": 0,
+            "title": "Size On Disk",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "BookDetailOut",
+        "type": "object"
+      },
+      "BookEditionOut": {
+        "properties": {
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "is_ebook": {
+            "title": "Is Ebook",
+            "type": "boolean"
+          },
+          "monitored": {
+            "default": false,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "page_count": {
+            "title": "Page Count",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "title": "BookEditionOut",
+        "type": "object"
+      },
       "BulkDeleteIn": {
         "properties": {
           "delete_files": {
@@ -456,7 +591,8 @@
           "app": {
             "enum": [
               "radarr",
-              "sonarr"
+              "sonarr",
+              "readarr"
             ],
             "title": "App",
             "type": "string"
@@ -493,6 +629,9 @@
       "CalendarResponse": {
         "properties": {
           "radarr": {
+            "$ref": "#/components/schemas/ServiceBlock_list_CalendarItemOut__"
+          },
+          "readarr": {
             "$ref": "#/components/schemas/ServiceBlock_list_CalendarItemOut__"
           },
           "sonarr": {
@@ -909,10 +1048,15 @@
           "app": {
             "enum": [
               "radarr",
-              "sonarr"
+              "sonarr",
+              "readarr"
             ],
             "title": "App",
             "type": "string"
+          },
+          "book_id": {
+            "title": "Book Id",
+            "type": "integer"
           },
           "date": {
             "title": "Date",
@@ -975,6 +1119,9 @@
       "HistoryResponse": {
         "properties": {
           "radarr": {
+            "$ref": "#/components/schemas/ServiceBlock_list_HistoryItemOut__"
+          },
+          "readarr": {
             "$ref": "#/components/schemas/ServiceBlock_list_HistoryItemOut__"
           },
           "sonarr": {
@@ -1050,7 +1197,8 @@
           "app": {
             "enum": [
               "radarr",
-              "sonarr"
+              "sonarr",
+              "readarr"
             ],
             "title": "App",
             "type": "string"
@@ -1186,6 +1334,70 @@
           "stats"
         ],
         "title": "IndexerStatsOut",
+        "type": "object"
+      },
+      "LibraryBookOut": {
+        "properties": {
+          "author": {
+            "title": "Author",
+            "type": "string"
+          },
+          "author_id": {
+            "title": "Author Id",
+            "type": "integer"
+          },
+          "foreign_book_id": {
+            "title": "Foreign Book Id",
+            "type": "string"
+          },
+          "has_file": {
+            "default": false,
+            "title": "Has File",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "monitored": {
+            "default": false,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "page_count": {
+            "title": "Page Count",
+            "type": "integer"
+          },
+          "poster": {
+            "title": "Poster",
+            "type": "string"
+          },
+          "quality_profile_id": {
+            "title": "Quality Profile Id",
+            "type": "integer"
+          },
+          "series_title": {
+            "title": "Series Title",
+            "type": "string"
+          },
+          "size_on_disk": {
+            "default": 0,
+            "title": "Size On Disk",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "LibraryBookOut",
         "type": "object"
       },
       "LibraryMovieOut": {
@@ -1629,6 +1841,14 @@
       },
       "OptionsOut": {
         "properties": {
+          "metadata_profiles": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/QualityProfileOut"
+            },
+            "title": "Metadata Profiles",
+            "type": "array"
+          },
           "quality_profiles": {
             "items": {
               "$ref": "#/components/schemas/QualityProfileOut"
@@ -2156,10 +2376,15 @@
           "app": {
             "enum": [
               "radarr",
-              "sonarr"
+              "sonarr",
+              "readarr"
             ],
             "title": "App",
             "type": "string"
+          },
+          "book_id": {
+            "title": "Book Id",
+            "type": "integer"
           },
           "episode_id": {
             "title": "Episode Id",
@@ -2230,6 +2455,9 @@
           "radarr": {
             "$ref": "#/components/schemas/ServiceBlock_list_QueueItemOut__"
           },
+          "readarr": {
+            "$ref": "#/components/schemas/ServiceBlock_list_QueueItemOut__"
+          },
           "sonarr": {
             "$ref": "#/components/schemas/ServiceBlock_list_QueueItemOut__"
           }
@@ -2246,7 +2474,8 @@
           "app": {
             "enum": [
               "radarr",
-              "sonarr"
+              "sonarr",
+              "readarr"
             ],
             "title": "App",
             "type": "string"
@@ -3275,6 +3504,7 @@
             "enum": [
               "radarr",
               "sonarr",
+              "readarr",
               "prowlarr",
               "qbittorrent",
               "transmission",
@@ -4130,7 +4360,8 @@
           "app": {
             "enum": [
               "radarr",
-              "sonarr"
+              "sonarr",
+              "readarr"
             ],
             "title": "App",
             "type": "string"
@@ -5253,7 +5484,7 @@
     },
     "/api/v1/history/all": {
       "get": {
-        "description": "Merged, consolidated history across both apps, paged 50/app.",
+        "description": "Merged, consolidated history across the arrs, paged 50/app.",
         "operationId": "history_all_api_v1_history_all_get",
         "parameters": [
           {
@@ -5633,6 +5864,170 @@
         "summary": "Test Indexer",
         "tags": [
           "indexers"
+        ]
+      }
+    },
+    "/api/v1/library/books": {
+      "get": {
+        "operationId": "library_books_api_v1_library_books_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LibraryBookOut"
+                  },
+                  "title": "Response Library Books Api V1 Library Books Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Library Books",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/library/books/{book_id}": {
+      "delete": {
+        "operationId": "delete_book_api_v1_library_books__book_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "book_id",
+            "required": true,
+            "schema": {
+              "title": "Book Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "delete_files",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Delete Files",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Book",
+        "tags": [
+          "library"
+        ]
+      },
+      "patch": {
+        "operationId": "update_book_api_v1_library_books__book_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "book_id",
+            "required": true,
+            "schema": {
+              "title": "Book Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LibraryUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Book Api V1 Library Books  Book Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Book",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/library/books/{book_id}/detail": {
+      "get": {
+        "operationId": "book_detail_api_v1_library_books__book_id__detail_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "book_id",
+            "required": true,
+            "schema": {
+              "title": "Book Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Book Detail",
+        "tags": [
+          "library"
         ]
       }
     },
@@ -7339,6 +7734,52 @@
         "summary": "Force Import",
         "tags": [
           "importing"
+        ]
+      }
+    },
+    "/api/v1/releases/book/{book_id}": {
+      "get": {
+        "operationId": "book_releases_api_v1_releases_book__book_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "book_id",
+            "required": true,
+            "schema": {
+              "title": "Book Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ArrReleaseOut"
+                  },
+                  "title": "Response Book Releases Api V1 Releases Book  Book Id  Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Book Releases",
+        "tags": [
+          "releases"
         ]
       }
     },

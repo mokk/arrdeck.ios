@@ -34,7 +34,7 @@ extension Components.Schemas.ServiceBlock_IndexerStatsOut_: ServiceBlockShape {}
 
 /// The two arrs every paired endpoint answers for.
 public enum ArrApp: String, CaseIterable, Sendable, Hashable {
-    case radarr, sonarr
+    case radarr, sonarr, readarr
 }
 
 public enum TorrentClient: String, CaseIterable, Sendable, Hashable {
@@ -47,6 +47,7 @@ public enum Services {
         switch service {
         case "radarr": "Radarr"
         case "sonarr": "Sonarr"
+        case "readarr": "Readarr"
         case "prowlarr": "Prowlarr"
         case "qbittorrent": "qBittorrent"
         case "transmission": "Transmission"

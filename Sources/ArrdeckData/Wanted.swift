@@ -205,6 +205,7 @@ public final class WantedModel {
             switch item.app {
             case .radarr: try await api.triggerSearch(.movie(item.id))
             case .sonarr: try await api.searchEpisodes([item.id])
+            case .readarr: try await api.triggerSearch(.book(item.id))
             }
         }
     }

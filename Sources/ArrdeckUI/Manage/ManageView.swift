@@ -105,6 +105,8 @@ public struct ManageView: View {
                 MovieDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
             case let .series(id):
                 SeriesDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+            case let .book(id):
+                BookDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
             }
         }
         .accessibilityIdentifier("settings")

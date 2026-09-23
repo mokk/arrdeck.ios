@@ -59,6 +59,7 @@ actor FakeLibraryAPI: LibraryAPI {
     func movieDetail(_ id: Int) async throws -> MovieDetail { try log("movie"); return movie }
     func movieCredits(_ id: Int) async throws -> Credits { try log("credits"); return .init(cast: [.init(name: "A B")]) }
     func seriesDetail(_ id: Int) async throws -> SeriesDetail { try log("series"); return series }
+    func bookDetail(_ id: Int) async throws -> BookDetail { try log("book"); return .init(id: id, title: "Book") }
     func episodes(series: Int, season: Int) async throws -> [Episode] { try log("episodes-\(season)"); return episodeList }
     func options(_ app: ArrApp) async throws -> Options {
         try log("options-\(app.rawValue)")

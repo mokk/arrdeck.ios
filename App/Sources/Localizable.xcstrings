@@ -472,6 +472,16 @@
         }
       }
     },
+    "Author": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forfatter"
+          }
+        }
+      }
+    },
     "Back": {
       "localizations": {
         "da": {
@@ -915,6 +925,16 @@
         }
       }
     },
+    "Editions": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Udgaver"
+          }
+        }
+      }
+    },
     "Enabled": {
       "localizations": {
         "da": {
@@ -1094,6 +1114,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ledig plads"
+          }
+        }
+      }
+    },
+    "Genres": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genrer"
           }
         }
       }
@@ -1675,6 +1705,7 @@
       }
     },
     "Readarr support is on its way.": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -1871,6 +1902,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Søg alle"
+          }
+        }
+      }
+    },
+    "Search books": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg efter bøger"
           }
         }
       }
@@ -3066,6 +3107,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "· %lld min/afsnit"
+          }
+        }
+      }
+    },
+    "· %lld pages": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· %lld sider"
           }
         }
       }

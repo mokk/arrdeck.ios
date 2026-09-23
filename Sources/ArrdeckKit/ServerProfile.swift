@@ -62,6 +62,7 @@ public enum Feature: String, CaseIterable, Sendable {
     case popular
     case calendar
     case wanted
+    case books
     case manualImport = "manual_import"
     case interactiveSearch = "interactive_search"
     case subtitles

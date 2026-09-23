@@ -5,6 +5,7 @@ import OpenAPIRuntime
 
 public typealias LibraryMovie = Components.Schemas.LibraryMovieOut
 public typealias LibrarySeries = Components.Schemas.LibrarySeriesOut
+public typealias LibraryBook = Components.Schemas.LibraryBookOut
 public typealias LibraryTag = Components.Schemas.TagOut
 public typealias Indexer = Components.Schemas.IndexerOut
 public typealias ServiceStatus = Components.Schemas.ServiceStatus
@@ -37,6 +38,23 @@ public struct LibraryRow: Identifiable, Hashable, Sendable {
     public var tmdb: Int?
     public var tvdb: Int?
     public var imdb: String?
+    /// Books only: who wrote it, and the series it belongs to.
+    public var author: String?
+    public var seriesTitle: String?
+
+    public init(_ book: LibraryBook) {
+        id = book.id
+        ref = .book(book.id)
+        title = book.title ?? ""
+        year = book.year
+        poster = book.poster
+        tags = []
+        monitored = book.monitored ?? false
+        status = book.has_file == true ? "downloaded" : (book.monitored == true ? "wanted" : "unmonitored")
+        sizeOnDisk = book.size_on_disk ?? 0
+        author = book.author
+        seriesTitle = book.series_title
+    }
 
     public init(_ movie: LibraryMovie) {
         id = movie.id
@@ -75,6 +93,7 @@ public enum LibrarySort: String, CaseIterable, Sendable, Hashable {
     case title, year, status
     case size = "size_on_disk"
     case episodes = "episode_file_count"
+    case author
 
     public var label: String {
         switch self {
@@ -83,11 +102,16 @@ public enum LibrarySort: String, CaseIterable, Sendable, Hashable {
         case .status: String(localized: "Status")
         case .size: String(localized: "Size")
         case .episodes: String(localized: "Episodes")
+        case .author: String(localized: "Author")
         }
     }
 
     public static func keys(for app: ArrApp) -> [LibrarySort] {
-        app == .sonarr ? allCases : allCases.filter { $0 != .episodes }
+        switch app {
+        case .radarr: [.title, .year, .status, .size]
+        case .sonarr: [.title, .year, .status, .episodes, .size]
+        case .readarr: [.author, .title, .year, .status, .size]
+        }
     }
 }
 
@@ -110,6 +134,7 @@ public enum LibrarySorting {
             case .status: less = a.status < b.status
             case .size: less = a.sizeOnDisk < b.sizeOnDisk
             case .episodes: less = (a.episodeFiles ?? 0) < (b.episodeFiles ?? 0)
+            case .author: less = (a.author ?? "").lowercased() < (b.author ?? "").lowercased()
             }
             return descending ? !less && !isEqual(a, b, sort) : less
         }
@@ -122,6 +147,7 @@ public enum LibrarySorting {
         case .status: a.status == b.status
         case .size: a.sizeOnDisk == b.sizeOnDisk
         case .episodes: a.episodeFiles == b.episodeFiles
+        case .author: (a.author ?? "").lowercased() == (b.author ?? "").lowercased()
         }
     }
 }
@@ -161,6 +187,7 @@ public let serviceOrder = ["radarr", "sonarr", "prowlarr", "qbittorrent", "trans
 public protocol ManageAPI: Sendable {
     func libraryMovies() async throws -> [LibraryMovie]
     func librarySeries() async throws -> [LibrarySeries]
+    func libraryBooks() async throws -> [LibraryBook]
     func tags(_ app: ArrApp) async throws -> [LibraryTag]
     func indexers() async throws -> [Indexer]
     func toggleIndexer(_ id: Int, enable: Bool) async throws
@@ -191,6 +218,15 @@ extension LiveAPI: ManageAPI {
     public func librarySeries() async throws -> [LibrarySeries] {
         try await call {
             switch try await client.library_series_api_v1_library_series_get() {
+            case let .ok(ok): try ok.body.json
+            case let .undocumented(code, _): throw APIError.status(code)
+            }
+        }
+    }
+
+    public func libraryBooks() async throws -> [LibraryBook] {
+        try await call {
+            switch try await client.library_books_api_v1_library_books_get() {
             case let .ok(ok): try ok.body.json
             case let .undocumented(code, _): throw APIError.status(code)
             }
@@ -354,6 +390,7 @@ public final class LibraryListModel {
 
     public init(app: ArrApp, api: any ManageAPI & LibraryAPI & ExtrasAPI, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
         self.app = app
+        if app == .readarr { sort = .author }
         self.api = api
         self.hasPlex = hasPlex
         self.onSessionLost = onSessionLost
@@ -408,7 +445,7 @@ public final class LibraryListModel {
     }
 
     private func loadOptions() async { options = try? await api.options(app) }
-    private func loadTags() async { tags = (try? await api.tags(app)) ?? [] }
+    private func loadTags() async { tags = app == .readarr ? [] : ((try? await api.tags(app)) ?? []) }
     private func loadWatched() async { watchedMap = (try? await api.watched())?.value }
 
     private func loadRows() async {
@@ -416,6 +453,7 @@ public final class LibraryListModel {
             let rows: [LibraryRow] = switch app {
             case .radarr: try await api.libraryMovies().map(LibraryRow.init)
             case .sonarr: try await api.librarySeries().map(LibraryRow.init)
+            case .readarr: try await api.libraryBooks().map(LibraryRow.init)
             }
             self.rows = .loaded(rows)
         } catch {

@@ -20,12 +20,14 @@ extension Components.Schemas.ServiceBlock_WatchedMapOut_: ServiceBlockShape {}
 public enum MediaRef: Hashable, Sendable {
     case movie(Int)
     case series(Int)
+    case book(Int)
 
     public init?(app: String, id: Int?) {
         guard let id else { return nil }
         switch app {
         case "radarr": self = .movie(id)
         case "sonarr": self = .series(id)
+        case "readarr": self = .book(id)
         default: return nil
         }
     }
@@ -34,15 +36,19 @@ public enum MediaRef: Hashable, Sendable {
         switch self {
         case .movie: .radarr
         case .series: .sonarr
+        case .book: .readarr
         }
     }
 
     public var id: Int {
         switch self {
-        case let .movie(id), let .series(id): id
+        case let .movie(id), let .series(id), let .book(id): id
         }
     }
 }
+
+public typealias BookDetail = Components.Schemas.BookDetailOut
+public typealias BookEdition = Components.Schemas.BookEditionOut
 
 extension RecentItem {
     public var ref: MediaRef? { MediaRef(app: app.rawValue, id: library_id) }
@@ -52,6 +58,7 @@ extension HistoryItem {
     public var ref: MediaRef? {
         if let movie_id { return .movie(movie_id) }
         if let series_id { return .series(series_id) }
+        if let book_id { return .book(book_id) }
         return nil
     }
 }
@@ -104,6 +111,11 @@ public struct ExternalLink: Hashable, Sendable {
         return links
     }
 
+    public static func links(for book: BookDetail) -> [ExternalLink] {
+        guard let goodreads = book.goodreads_url, let url = URL(string: goodreads) else { return [] }
+        return [.init(label: "Goodreads", url: url)]
+    }
+
     public static func links(for series: SeriesDetail, watched: Watched?) -> [ExternalLink] {
         var links: [ExternalLink] = []
         if let url = watched?.url { links.append(.init(label: "Plex", url: url)) }
@@ -125,6 +137,7 @@ public protocol LibraryAPI: Sendable {
     func movieDetail(_ id: Int) async throws -> MovieDetail
     func movieCredits(_ id: Int) async throws -> Credits
     func seriesDetail(_ id: Int) async throws -> SeriesDetail
+    func bookDetail(_ id: Int) async throws -> BookDetail
     func episodes(series: Int, season: Int) async throws -> [Episode]
     func options(_ app: ArrApp) async throws -> Options
     func watched() async throws -> Block<WatchedMap>
@@ -161,6 +174,16 @@ extension LiveAPI: LibraryAPI {
     public func seriesDetail(_ id: Int) async throws -> SeriesDetail {
         try await call {
             switch try await client.series_detail_api_v1_library_series__series_id__detail_get(path: .init(series_id: id)) {
+            case let .ok(ok): try ok.body.json
+            case .unprocessableContent: throw APIError.unexpectedStatus(422)
+            case let .undocumented(code, _): throw APIError.status(code)
+            }
+        }
+    }
+
+    public func bookDetail(_ id: Int) async throws -> BookDetail {
+        try await call {
+            switch try await client.book_detail_api_v1_library_books__book_id__detail_get(path: .init(book_id: id)) {
             case let .ok(ok): try ok.body.json
             case .unprocessableContent: throw APIError.unexpectedStatus(422)
             case let .undocumented(code, _): throw APIError.status(code)
@@ -215,6 +238,12 @@ extension LiveAPI: LibraryAPI {
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)
                 }
+            case let .book(id):
+                switch try await client.update_book_api_v1_library_books__book_id__patch(path: .init(book_id: id), body: .json(body)) {
+                case .ok: ()
+                case .unprocessableContent: throw APIError.unexpectedStatus(422)
+                case let .undocumented(code, _): throw APIError.status(code)
+                }
             }
         }
     }
@@ -233,6 +262,14 @@ extension LiveAPI: LibraryAPI {
             case let .series(id):
                 switch try await client.delete_series_api_v1_library_series__series_id__delete(
                     path: .init(series_id: id), query: .init(delete_files: deleteFiles)
+                ) {
+                case .noContent: ()
+                case .unprocessableContent: throw APIError.unexpectedStatus(422)
+                case let .undocumented(code, _): throw APIError.status(code)
+                }
+            case let .book(id):
+                switch try await client.delete_book_api_v1_library_books__book_id__delete(
+                    path: .init(book_id: id), query: .init(delete_files: deleteFiles)
                 ) {
                 case .noContent: ()
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)

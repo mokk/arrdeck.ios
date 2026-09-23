@@ -83,6 +83,7 @@ struct DetailActions<Extra: View>: View {
         switch model {
         case let movie as MovieDetailModel: movie.movie.value?.quality_profile_id
         case let series as SeriesDetailModel: series.series.value?.quality_profile_id
+        case let book as BookDetailModel: book.book.value?.quality_profile_id
         default: nil
         }
     }
