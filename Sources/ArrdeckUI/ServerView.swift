@@ -47,6 +47,19 @@ public struct ServerView: View {
             } else if controller.isUsable {
                 tabs
                     .confirmDialog(confirmCenter)
+                    .onContinueUserActivity(spotlightActivity) { activity in
+                        if let id = activity.userInfo?[spotlightIdentifierKey] as? String,
+                           let ref = SpotlightIndexer.ref(from: id) {
+                            spotlit = SpotlightTarget(ref: ref)
+                        }
+                    }
+                    .sheet(item: $spotlit) { target in
+                        NavigationStack {
+                            MediaDestination(ref: target.ref, api: api, baseURL: controller.profile.baseURL,
+                                             hasPlex: model.has("plex"), onSessionLost: sessionLost)
+                                .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Done") { spotlit = nil } } }
+                        }
+                    }
                     // The dashboard model polls /services and the queue; its
                     // cards live on under Settings › Overview, and the library
                     // pages read its queue for download progress.
@@ -75,6 +88,8 @@ public struct ServerView: View {
     @AppStorage(DisplayKeys.hiddenTabs) private var hiddenTabs = ""
     @State private var openedOnStartTab = false
     @State private var confirmCenter = ConfirmCenter()
+    /// A title opened from iOS search.
+    @State private var spotlit: SpotlightTarget?
 
     /// Every tab's stack stays mounted in a ZStack and only the selected one
     /// is visible, so switching tabs keeps scroll position and pushed screens.
@@ -158,4 +173,9 @@ public struct ServerView: View {
         }
         .accessibilityIdentifier("servers")
     }
+}
+
+struct SpotlightTarget: Identifiable {
+    let ref: MediaRef
+    var id: String { SpotlightIndexer.identifier(ref) }
 }

@@ -365,3 +365,18 @@ struct FakeCleanupAPI: CleanupAPI {
         #expect(OpdsSettings(enabled: false).url(on: base) == nil)
     }
 }
+
+@Suite struct GlobalSearchTests {
+    @Test func groupsAndRanksAcrossLibraries() {
+        let rows = [
+            LibraryRow(LibraryMovie(id: 1, title: "The Dune Sea")),
+            LibraryRow(LibraryMovie(id: 2, title: "Dune")),
+            LibraryRow(LibrarySeries(id: 3, title: "Dune: Prophecy")),
+            LibraryRow(LibraryBook(author: "Frank Herbert", id: 4, title: "Dune Messiah")),
+        ]
+        let hits = GlobalSearch.hits(rows, authors: [(9, "Frank Herbert")], query: "dune")
+        #expect(hits.map(\.id) == ["\(MediaRef.movie(2))", "\(MediaRef.movie(1))", "\(MediaRef.series(3))", "\(MediaRef.book(4))"])
+        #expect(GlobalSearch.hits(rows, authors: [(9, "Frank Herbert")], query: "herb").map(\.group) == [.authors])
+        #expect(GlobalSearch.hits(rows, authors: [], query: "d").isEmpty, "one letter is too little to search")
+    }
+}

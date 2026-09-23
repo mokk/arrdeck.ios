@@ -6,6 +6,7 @@ import SwiftUI
 public struct LibraryPage: View {
     @State private var model: LibraryListModel
     @State private var adding = false
+    @State private var searchingEverything = false
     @State private var diagnosing: LibraryRow?
     @State private var deleting: LibraryRow?
     @State private var confirmingBulkDelete = false
@@ -143,6 +144,7 @@ public struct LibraryPage: View {
                 if model.selecting {
                     Button("Done") { model.selecting = false }
                 } else {
+                    Button { searchingEverything = true } label: { Label("Search everything", systemImage: "magnifyingglass") }
                     sortMenu
                     Button { adding = true } label: { Label("Add", systemImage: "plus") }
                         .accessibilityIdentifier("library-add")
@@ -162,6 +164,14 @@ public struct LibraryPage: View {
                 adding = false
                 Task { await model.load() }
             }
+        }
+        .sheet(isPresented: $searchingEverything) {
+            GlobalSearchSheet(api: api, apps: ArrApp.allCases.filter { dashboard.has($0.rawValue) }, baseURL: baseURL,
+                              hasPlex: dashboard.has("plex"), onSessionLost: onSessionLost) { searchingEverything = false }
+        }
+        .onChange(of: model.rows.value?.count) { _, _ in
+            // the titles into iOS search, refreshed whenever the library reloads
+            if let rows = model.rows.value { SpotlightIndexer.index(rows, app: app) }
         }
         .sheet(item: $diagnosing) { row in
             DiagnoseSheet(app: app, id: row.id, title: row.title, api: api) { diagnosing = nil }

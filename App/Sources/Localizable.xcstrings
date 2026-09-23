@@ -1556,6 +1556,16 @@
         }
       }
     },
+    "Films, shows, books, authors": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Film, serier, bøger, forfattere"
+          }
+        }
+      }
+    },
     "Filter by name…": {
       "localizations": {
         "da": {
@@ -2413,6 +2423,17 @@
         }
       }
     },
+    "Nothing in your libraries matches.": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intet i dine biblioteker passer."
+          }
+        }
+      }
+    },
     "Nothing is pushed in this window; it follows this device's time zone.": {
       "localizations": {
         "da": {
@@ -3073,6 +3094,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Søg bøger…"
+          }
+        }
+      }
+    },
+    "Search everything": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg i alt"
           }
         }
       }
