@@ -1,16 +1,24 @@
 import ArrdeckData
 import SwiftUI
 
-/// Per-torrent detail: the actions the list's swipe offers plus recheck, and
-/// what the client knows — files and trackers. Limits, queue position,
-/// category and tags follow later.
+/// Per-torrent detail: the actions the list's swipe offers plus recheck,
+/// speed limits, queue position, category and tags, and what the client
+/// knows — files and trackers.
 struct TorrentDetailSheet: View {
     let torrent: Torrent
     let model: DownloadsModel
     let dismiss: () -> Void
+    @State private var extras: TorrentExtrasModel
 
     @State private var details: Loadable<TorrentDetails> = .loading
     @State private var confirmingDelete = false
+
+    init(torrent: Torrent, model: DownloadsModel, api: any ExtrasAPI, onSessionLost: @escaping @MainActor () -> Void, dismiss: @escaping () -> Void) {
+        self.torrent = torrent
+        self.model = model
+        self.dismiss = dismiss
+        _extras = State(initialValue: TorrentExtrasModel(torrent: torrent, api: api, onSessionLost: onSessionLost))
+    }
 
     var subtitle: String {
         var parts = [Services.label(torrent.client.rawValue), Format.bytes(torrent.size)]
@@ -63,6 +71,7 @@ struct TorrentDetailSheet: View {
                 case let .failed(reason):
                     Section { ErrorNote(reason) }
                 case let .loaded(detail):
+                    extrasSections
                     Section("Files (\(detail.files.count))") {
                         ForEach(Array(detail.files.enumerated()), id: \.offset) { _, file in
                             FileRow(file: file)
@@ -87,8 +96,76 @@ struct TorrentDetailSheet: View {
             .navigationTitle("Torrent")
             .toolbar { Button("Done") { dismiss() } }
             .task {
-                do { details = .loaded(try await model.details(for: torrent)) }
-                catch { details = .failed((error as? APIError)?.description ?? error.localizedDescription) }
+                do {
+                    let loaded = try await model.details(for: torrent)
+                    extras.apply(loaded)
+                    details = .loaded(loaded)
+                } catch {
+                    details = .failed((error as? APIError)?.description ?? error.localizedDescription)
+                }
+                await extras.loadTags()
+            }
+            .alert("Action failed", isPresented: Binding(get: { extras.actionError != nil }, set: { if !$0 { extras.actionError = nil } })) {
+                Button("OK") { extras.actionError = nil }
+            } message: {
+                Text(extras.actionError ?? "")
+            }
+        }
+    }
+
+    @ViewBuilder var extrasSections: some View {
+        Section("Speed limits") {
+            HStack {
+                Text("Down (KiB/s, 0 = ∞)").font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                TextField("0", text: $extras.downloadKiB).multilineTextAlignment(.trailing).frame(width: 90)
+            }
+            HStack {
+                Text("Up (KiB/s, 0 = ∞)").font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                TextField("0", text: $extras.uploadKiB).multilineTextAlignment(.trailing).frame(width: 90)
+            }
+            Button("Apply") { Task { await extras.saveLimits() } }
+                .disabled(!extras.limitsDirty || extras.busy)
+        }
+        Section("Queue") {
+            HStack {
+                ForEach(QueuePosition.allCases, id: \.self) { position in
+                    Button(position.label) { Task { await extras.move(position) } }
+                        .buttonStyle(.bordered).controlSize(.small)
+                }
+                if extras.isQbit {
+                    Button("Force start") { Task { await extras.forceStart() } }
+                        .buttonStyle(.bordered).controlSize(.small)
+                }
+            }
+            .disabled(extras.busy)
+        }
+        if extras.isQbit, !extras.categories.isEmpty {
+            Section {
+                Picker("Category", selection: Binding(
+                    get: { extras.category ?? "" },
+                    set: { value in Task { await extras.setCategory(value) } }
+                )) {
+                    Text("(none)").tag("")
+                    ForEach(extras.categories, id: \.self) { Text($0).tag($0) }
+                }
+                .disabled(extras.busy)
+            }
+        }
+        if extras.isQbit, !extras.allTags.isEmpty {
+            Section("Tags") {
+                // One button per tag, flipping between applying and removing.
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(extras.allTags, id: \.self) { tag in
+                            Button(tag) { Task { await extras.toggle(tag: tag) } }
+                                .buttonStyle(.bordered).controlSize(.small)
+                                .tint(extras.tags.contains(tag) ? .accentColor : .secondary)
+                        }
+                    }
+                }
+                .disabled(extras.busy)
             }
         }
     }

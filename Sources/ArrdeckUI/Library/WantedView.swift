@@ -6,13 +6,14 @@ import SwiftUI
 public struct WantedView: View {
     @State private var model: WantedModel
     @State private var diagnosing: WantedItem?
-    let api: any WantedAPI & LibraryAPI
+    @State private var searching: WantedItem?
+    let api: any WantedAPI & LibraryAPI & ExtrasAPI
     let baseURL: URL
     let hasPlex: Bool
     let onSessionLost: @MainActor () -> Void
 
     public init(
-        api: any WantedAPI & LibraryAPI, apps: [ArrApp], baseURL: URL, hasPlex: Bool,
+        api: any WantedAPI & LibraryAPI & ExtrasAPI, apps: [ArrApp], baseURL: URL, hasPlex: Bool,
         onSessionLost: @escaping @MainActor () -> Void
     ) {
         self.api = api
@@ -52,7 +53,7 @@ public struct WantedView: View {
                     EmptyNote("Nothing here — the library is complete")
                 }
                 ForEach(model.items, id: \.id) { item in
-                    WantedRow(item: item, baseURL: baseURL, model: model) { diagnosing = item }
+                    WantedRow(item: item, baseURL: baseURL, model: model, diagnose: { diagnosing = item }, search: { searching = item })
                 }
                 if model.hasMore {
                     Button(model.loading ? "Loading…" : "Load more") { Task { await model.loadMore() } }
@@ -84,6 +85,13 @@ public struct WantedView: View {
         .sheet(item: $diagnosing) { item in
             DiagnoseSheet(item: item, model: model) { diagnosing = nil }
         }
+        .sheet(item: $searching) { item in
+            ReleasesSheet(
+                target: item.app == .radarr ? .movie(item.id) : .episode(series: item.library_id, episode: item.id),
+                title: [item.title, item.subtitle].compactMap { $0 }.joined(separator: " "),
+                api: api, onSessionLost: onSessionLost
+            ) { searching = nil }
+        }
         .alert("Action failed", isPresented: actionFailed) {
             Button("OK") { model.actionError = nil }
         } message: {
@@ -104,6 +112,7 @@ struct WantedRow: View {
     let baseURL: URL
     let model: WantedModel
     let diagnose: () -> Void
+    let search: () -> Void
 
     var subtitle: String {
         [item.subtitle, item.air_date.map { Format.day($0) }].compactMap { $0 }.joined(separator: " · ")
@@ -127,6 +136,9 @@ struct WantedRow: View {
                 .disabled(model.isPending("search-\(item.id)"))
             Button("Why?", action: diagnose)
                 .buttonStyle(.borderless).controlSize(.small)
+            Button(action: search) { Image(systemName: "list.bullet.rectangle") }
+                .buttonStyle(.borderless).controlSize(.small)
+                .accessibilityLabel("Interactive search")
         }
         .accessibilityIdentifier("wanted-row")
     }

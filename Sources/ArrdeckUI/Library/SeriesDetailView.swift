@@ -3,11 +3,22 @@ import SwiftUI
 
 public struct SeriesDetailView: View {
     @State private var model: SeriesDetailModel
+    @State private var searching: ReleaseSearch?
     @Environment(\.dismiss) private var dismiss
     let baseURL: URL
+    let api: any LibraryAPI & ExtrasAPI
+    let onSessionLost: @MainActor () -> Void
 
-    public init(id: Int, api: any LibraryAPI, baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
+    struct ReleaseSearch: Identifiable {
+        let target: ReleaseTarget
+        let title: String
+        var id: ReleaseTarget { target }
+    }
+
+    public init(id: Int, api: any LibraryAPI & ExtrasAPI, baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
         self.baseURL = baseURL
+        self.api = api
+        self.onSessionLost = onSessionLost
         _model = State(initialValue: SeriesDetailModel(id: id, api: api, hasPlex: hasPlex, onSessionLost: onSessionLost))
     }
 
@@ -28,7 +39,8 @@ public struct SeriesDetailView: View {
                         if let certification = series.certification { Text("· \(certification)") }
                     }
                 }
-                DetailActions(model: model, monitored: series.monitored ?? false)
+                RenameCard(ref: .series(series.id), api: api, onSessionLost: onSessionLost)
+                DetailActions(model: model, monitored: series.monitored ?? false) { EmptyView() }
                 // A series has no single file, so the movie page's file card
                 // becomes the ratio of episodes on disk. total_episode_count
                 // includes unaired ones, shown separately rather than as the
@@ -41,7 +53,9 @@ public struct SeriesDetailView: View {
                     }
                 }
                 ForEach(series.seasons, id: \.number) { season in
-                    SeasonSection(season: season, model: model)
+                    SeasonSection(season: season, model: model) { target, label in
+                        searching = ReleaseSearch(target: target, title: "\(series.title ?? "") — \(label)")
+                    }
                 }
             }
         }
@@ -54,6 +68,9 @@ public struct SeriesDetailView: View {
             Button("OK") { model.actionError = nil }
         } message: {
             Text(model.actionError ?? "")
+        }
+        .sheet(item: $searching) { search in
+            ReleasesSheet(target: search.target, title: search.title, api: api, onSessionLost: onSessionLost) { searching = nil }
         }
         .accessibilityIdentifier("series-detail")
     }
@@ -82,6 +99,7 @@ public struct SeriesDetailView: View {
 struct SeasonSection: View {
     let season: Season
     let model: SeriesDetailModel
+    let search: (ReleaseTarget, String) -> Void
 
     var label: String { season.number == 0 ? "Specials" : "Season \(season.number)" }
     var open: Bool { model.expanded.contains(season.number) }
@@ -108,6 +126,13 @@ struct SeasonSection: View {
                     .buttonStyle(.bordered).controlSize(.small)
                     Button("Search") { Task { await model.searchSeason(season) } }
                         .buttonStyle(.bordered).controlSize(.small)
+                    Button {
+                        search(.season(series: model.ref.id, season: season.number), label)
+                    } label: {
+                        Image(systemName: "list.bullet.rectangle")
+                    }
+                    .buttonStyle(.bordered).controlSize(.small)
+                    .accessibilityLabel("Interactive search")
                 }
             }
             .buttonStyle(.plain)
@@ -121,7 +146,10 @@ struct SeasonSection: View {
                     ErrorNote(reason)
                 case let .loaded(episodes):
                     ForEach(episodes, id: \.id) { episode in
-                        EpisodeRow(episode: episode, model: model)
+                        EpisodeRow(episode: episode, model: model) {
+                            search(.episode(series: model.ref.id, episode: episode.id),
+                                   "\(String(format: "E%02d", episode.episode)) \(episode.title ?? "")")
+                        }
                     }
                 }
             }
@@ -132,6 +160,7 @@ struct SeasonSection: View {
 struct EpisodeRow: View {
     let episode: Episode
     let model: SeriesDetailModel
+    let search: () -> Void
 
     var body: some View {
         HStack(spacing: 10) {
@@ -158,6 +187,9 @@ struct EpisodeRow: View {
                 Button("Search") { Task { await model.searchEpisode(episode) } }
                     .buttonStyle(.borderless).controlSize(.small)
             }
+            Button(action: search) { Image(systemName: "chevron.right") }
+                .buttonStyle(.borderless).controlSize(.small)
+                .accessibilityLabel("Interactive search")
         }
         .disabled(model.busy)
     }

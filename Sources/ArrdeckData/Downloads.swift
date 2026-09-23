@@ -97,6 +97,10 @@ public struct TorrentQuery: Equatable, Sendable {
     }
 }
 
+public enum BulkTorrentAction: Sendable, Equatable {
+    case pause, resume, delete(deleteData: Bool)
+}
+
 public enum TorrentSorting {
     /// The backend's comparator, so a server-limited page and the client's
     /// re-sort of the merged lists agree. Missing values sort last in *both*

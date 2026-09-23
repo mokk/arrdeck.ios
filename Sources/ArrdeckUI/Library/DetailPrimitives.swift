@@ -46,9 +46,13 @@ struct DetailHero<Badges: View>: View {
 
 /// Monitor, search, delete — delete behind a confirmation because both
 /// variants are irreversible and one of them removes files.
-struct DetailActions: View {
+struct DetailActions<Extra: View>: View {
     let model: DetailModelBase
     let monitored: Bool
+    /// Interactive search on the movie page; the series page offers it per
+    /// season instead, because Sonarr's release lookup needs a season or an
+    /// episode.
+    @ViewBuilder let extra: () -> Extra
     @State private var confirmingDelete = false
 
     var body: some View {
@@ -60,6 +64,7 @@ struct DetailActions: View {
                 Task { await model.setMonitored(!monitored) }
             }
             Button("Search now") { Task { await model.search() } }
+            extra()
             Button("Delete…", role: .destructive) { confirmingDelete = true }
         }
         .disabled(model.busy)

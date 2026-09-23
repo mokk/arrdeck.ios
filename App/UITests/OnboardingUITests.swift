@@ -117,6 +117,21 @@ final class OnboardingUITests: XCTestCase {
         XCTAssert(counted.waitForExistence(timeout: 20), "torrent list never loaded")
         XCTAssert(app.descendants(matching: .any)["torrent-row"].firstMatch.exists, "no torrent rows rendered")
         snap("downloads")
+
+        // Select mode: the bulk bar appears with nothing selected, a tapped
+        // row counts, Done leaves the mode.
+        app.buttons["select"].tap()
+        XCTAssert(app.staticTexts["0 selected"].waitForExistence(timeout: 5), "bulk bar never appeared")
+        app.descendants(matching: .any)["torrent-row"].firstMatch.tap()
+        XCTAssert(app.staticTexts["1 selected"].waitForExistence(timeout: 5), "tapping a row did not select it")
+        snap("downloads-select")
+        app.buttons["select"].tap()
+        XCTAssertFalse(app.staticTexts["1 selected"].exists, "Done did not leave select mode")
+
+        // The add-torrent sheet opens and cancels.
+        app.buttons["add-torrent"].tap()
+        XCTAssert(app.staticTexts["Add torrent"].waitForExistence(timeout: 5), "add-torrent sheet never appeared")
+        app.buttons["Cancel"].tap()
         app.tabBars.buttons["Home"].tap()
 
         // Into a title: the first recently-added poster opens its detail

@@ -131,6 +131,16 @@
         }
       }
     },
+    "%lld selected": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld valgt"
+          }
+        }
+      }
+    },
     "%lld tasks overdue": {
       "localizations": {
         "da": {
@@ -167,6 +177,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld/%lld aktiveret"
+          }
+        }
+      }
+    },
+    "(none)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(ingen)"
           }
         }
       }
@@ -281,6 +301,26 @@
         }
       }
     },
+    "Add tag": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj tag"
+          }
+        }
+      }
+    },
+    "Add torrent": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj torrent"
+          }
+        }
+      }
+    },
     "Added": {
       "localizations": {
         "da": {
@@ -342,6 +382,16 @@
         }
       }
     },
+    "Apply": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anvend"
+          }
+        }
+      }
+    },
     "Ascending": {
       "localizations": {
         "da": {
@@ -378,6 +428,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Blokér & prøv igen"
+          }
+        }
+      }
+    },
+    "Bottom": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nederst"
           }
         }
       }
@@ -422,6 +482,16 @@
         }
       }
     },
+    "Category": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kategori"
+          }
+        }
+      }
+    },
     "Checking…": {
       "localizations": {
         "da": {
@@ -449,6 +519,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ryd %@"
+          }
+        }
+      }
+    },
+    "Client": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klient"
           }
         }
       }
@@ -564,6 +644,26 @@
         }
       }
     },
+    "Delete %lld titles": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet %lld titler"
+          }
+        }
+      }
+    },
+    "Delete %lld torrents": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet %lld torrents"
+          }
+        }
+      }
+    },
     "Delete from library and disk": {
       "localizations": {
         "da": {
@@ -590,6 +690,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Slet kun torrent"
+          }
+        }
+      }
+    },
+    "Delete torrents and files": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet torrents og filer"
+          }
+        }
+      }
+    },
+    "Delete torrents only": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet kun torrents"
           }
         }
       }
@@ -645,6 +765,26 @@
         }
       }
     },
+    "Down": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ned"
+          }
+        }
+      }
+    },
+    "Down (KiB/s, 0 = ∞)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ned (KiB/s, 0 = ∞)"
+          }
+        }
+      }
+    },
     "Download queue": {
       "localizations": {
         "da": {
@@ -671,6 +811,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Downloadet, venter på at blive importeret."
+          }
+        }
+      }
+    },
+    "Edit": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redigér"
           }
         }
       }
@@ -816,6 +966,16 @@
         }
       }
     },
+    "Force start": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tving start"
+          }
+        }
+      }
+    },
     "Forwarded port %@": {
       "localizations": {
         "da": {
@@ -917,6 +1077,16 @@
         }
       }
     },
+    "Interactive search": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interaktiv søgning"
+          }
+        }
+      }
+    },
     "It is downloading now ({state}).": {
       "localizations": {
         "da": {
@@ -1013,6 +1183,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Log"
+          }
+        }
+      }
+    },
+    "Magnet link or torrent URL": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Magnet-link eller torrent-URL"
           }
         }
       }
@@ -1298,6 +1478,16 @@
         }
       }
     },
+    "Queue": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kø"
+          }
+        }
+      }
+    },
     "RSS sync is {minutes} minutes overdue, so nothing new is being picked up.": {
       "localizations": {
         "da": {
@@ -1395,6 +1585,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fjern kun fra bibliotek"
+          }
+        }
+      }
+    },
+    "Remove tag": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fjern tag"
+          }
+        }
+      }
+    },
+    "Rename %lld file(s)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omdøb %lld fil(er)"
+          }
+        }
+      }
+    },
+    "Rename files": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omdøb filer"
           }
         }
       }
@@ -1529,6 +1749,16 @@
         }
       }
     },
+    "Searching indexers… this can take a while": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søger i indexere… det kan tage lidt tid"
+          }
+        }
+      }
+    },
     "Section": {
       "localizations": {
         "da": {
@@ -1545,6 +1775,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Se alle →"
+          }
+        }
+      }
+    },
+    "Select": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg"
           }
         }
       }
@@ -1739,6 +1979,26 @@
         }
       }
     },
+    "Speed limits": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hastighedsgrænser"
+          }
+        }
+      }
+    },
+    "Start paused": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start pauset"
+          }
+        }
+      }
+    },
     "State": {
       "localizations": {
         "da": {
@@ -1849,6 +2109,16 @@
         }
       }
     },
+    "Top": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Øverst"
+          }
+        }
+      }
+    },
     "Torrent activity": {
       "localizations": {
         "da": {
@@ -1925,6 +2195,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ikke set"
+          }
+        }
+      }
+    },
+    "Up": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Op"
+          }
+        }
+      }
+    },
+    "Up (KiB/s, 0 = ∞)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Op (KiB/s, 0 = ∞)"
           }
         }
       }
@@ -2066,6 +2356,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "År"
+          }
+        }
+      }
+    },
+    "and %lld more": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "og %lld til"
           }
         }
       }
@@ -2363,6 +2663,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "i kø"
+          }
+        }
+      }
+    },
+    "rejected: %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "afvist: %@"
           }
         }
       }

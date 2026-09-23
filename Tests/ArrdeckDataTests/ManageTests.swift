@@ -51,7 +51,7 @@ actor FakeManageAPI: ManageAPI {
     func set(testFails: Bool) { self.testFails = testFails }
     func set(saveConfigured: Bool) { self.saveConfigured = saveConfigured }
     func count(_ c: String) -> Int { calls.filter { $0 == c }.count }
-    private func log(_ c: String) { calls.append(c) }
+    fileprivate func log(_ c: String) { calls.append(c) }
 
     func libraryMovies() async throws -> [LibraryMovie] { log("movies"); return [.init(id: 1, title: "Film")] }
     func librarySeries() async throws -> [LibrarySeries] { log("series"); return [] }
@@ -185,5 +185,55 @@ extension FakeManageAPI: LibraryAPI {
         await model.save(plex)
         #expect(plex.result == "saved (disabled)")
         #expect(!plex.configured)
+    }
+}
+
+/// The library list also needs ExtrasAPI for its bulk actions.
+extension FakeManageAPI: ExtrasAPI {
+    func releases(_ target: ReleaseTarget) async throws -> [ArrRelease] { [] }
+    func grabArrRelease(_ app: ArrApp, guid: String, indexerID: Int) async throws {}
+    func renamePreview(_ ref: MediaRef) async throws -> [RenamePreview] { [] }
+    func renameFiles(_ ref: MediaRef, fileIDs: [Int]) async throws {}
+    func addTorrent(_ client: TorrentClient, url: String, category: String, paused: Bool) async throws {}
+    func qbitCategories() async throws -> [String] { [] }
+    func qbitTags() async throws -> [String] { [] }
+    func setLimits(_ client: TorrentClient, id: String, downloadKiB: Int, uploadKiB: Int) async throws {}
+    func setPriority(_ client: TorrentClient, ids: [String], position: QueuePosition) async throws {}
+    func forceStart(ids: [String]) async throws {}
+    func setTags(ids: [String], tags: [String], remove: Bool) async throws {}
+    func setCategory(id: String, category: String) async throws {}
+    func bulkEdit(_ app: ArrApp, ids: [Int], monitored: Bool?, qualityProfile: Int?, tags: [Int]?, tagChange: TagChange?) async throws {
+        log("bulk-\(ids.map(String.init).joined(separator: ","))-\(monitored.map(String.init) ?? "_")-\(qualityProfile.map(String.init) ?? "_")-\(tags?.first.map(String.init) ?? "_")-\(tagChange?.rawValue ?? "_")")
+    }
+    func bulkDelete(_ app: ArrApp, ids: [Int], deleteFiles: Bool) async throws { log("bulkdelete-\(ids.count)-\(deleteFiles)") }
+    func bulkSearch(_ app: ArrApp, ids: [Int]) async throws { log("bulksearch-\(ids.count)") }
+}
+
+@MainActor
+@Suite struct LibraryBulkTests {
+    @Test func selectionDrivesBulkActionsAndRefetches() async {
+        let api = FakeManageAPI()
+        let model = LibraryListModel(app: .radarr, api: api, hasPlex: false, onSessionLost: {})
+        await model.load()
+        let row = model.shown[0]
+        model.selecting = true
+        model.toggleSelection(row)
+        #expect(model.selected == [1])
+        await model.bulk(.monitor(false))
+        #expect(await api.count("bulk-1-false-_-_-_") == 1)
+        #expect(!model.selecting, "a bulk action leaves select mode")
+        #expect(model.selected.isEmpty)
+        #expect(await api.count("movies") == 2, "and refetches the list")
+
+        model.selecting = true
+        model.toggleSelection(row)
+        await model.bulk(.tag(7, add: true))
+        #expect(await api.count("bulk-1-_-_-7-add") == 1)
+        model.selecting = true
+        model.toggleSelection(row)
+        await model.bulk(.delete(deleteFiles: true))
+        #expect(await api.count("bulkdelete-1-true") == 1)
+        await model.bulk(.search)
+        #expect(await api.count("bulksearch-1") == 0, "nothing selected, nothing sent")
     }
 }

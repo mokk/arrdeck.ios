@@ -338,12 +338,21 @@ public final class LibraryListModel {
     public private(set) var rows: Loadable<[LibraryRow]> = .loading
     public private(set) var tags: [LibraryTag] = []
     public private(set) var watchedMap: WatchedMap?
+    public private(set) var options: Options?
 
-    private let api: any ManageAPI & LibraryAPI
+    /// Select mode: ids chosen for a bulk action.
+    public var selecting = false {
+        didSet { if !selecting { selected = [] } }
+    }
+    public var selected: Set<Int> = []
+    public private(set) var busy = false
+    public var actionError: String?
+
+    private let api: any ManageAPI & LibraryAPI & ExtrasAPI
     private let hasPlex: Bool
     private let onSessionLost: @MainActor () -> Void
 
-    public init(app: ArrApp, api: any ManageAPI & LibraryAPI, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(app: ArrApp, api: any ManageAPI & LibraryAPI & ExtrasAPI, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
         self.app = app
         self.api = api
         self.hasPlex = hasPlex
@@ -362,10 +371,43 @@ public final class LibraryListModel {
         await withDiscardingTaskGroup { group in
             group.addTask { await self.loadRows() }
             group.addTask { await self.loadTags() }
+            group.addTask { await self.loadOptions() }
             if hasPlex { group.addTask { await self.loadWatched() } }
         }
     }
 
+    public func toggleSelection(_ row: LibraryRow) {
+        if selected.contains(row.id) { selected.remove(row.id) } else { selected.insert(row.id) }
+    }
+
+    public enum BulkAction: Sendable, Equatable {
+        case monitor(Bool), profile(Int), search, delete(deleteFiles: Bool), tag(Int, add: Bool)
+    }
+
+    /// Applies to the selection, then refetches and leaves select mode.
+    public func bulk(_ action: BulkAction) async {
+        let ids = Array(selected).sorted()
+        guard !ids.isEmpty else { return }
+        busy = true
+        defer { busy = false }
+        do {
+            switch action {
+            case let .monitor(on): try await api.bulkEdit(app, ids: ids, monitored: on, qualityProfile: nil, tags: nil, tagChange: nil)
+            case let .profile(id): try await api.bulkEdit(app, ids: ids, monitored: nil, qualityProfile: id, tags: nil, tagChange: nil)
+            case let .tag(tag, add): try await api.bulkEdit(app, ids: ids, monitored: nil, qualityProfile: nil, tags: [tag], tagChange: add ? .add : .remove)
+            case .search: try await api.bulkSearch(app, ids: ids)
+            case let .delete(deleteFiles): try await api.bulkDelete(app, ids: ids, deleteFiles: deleteFiles)
+            }
+            selecting = false
+            await loadRows()
+        } catch APIError.unauthorized {
+            onSessionLost()
+        } catch {
+            actionError = (error as? APIError)?.description ?? error.localizedDescription
+        }
+    }
+
+    private func loadOptions() async { options = try? await api.options(app) }
     private func loadTags() async { tags = (try? await api.tags(app)) ?? [] }
     private func loadWatched() async { watchedMap = (try? await api.watched())?.value }
 

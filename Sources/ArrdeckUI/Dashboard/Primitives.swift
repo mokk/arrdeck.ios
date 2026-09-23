@@ -161,6 +161,18 @@ struct Sparkline: View {
     }
 }
 
+extension ToolbarItemPlacement {
+    /// The bulk bar sits at the bottom on iOS; macOS has no bottom bar and
+    /// only needs to compile.
+    static var bulkBar: ToolbarItemPlacement {
+        #if os(iOS)
+        .bottomBar
+        #else
+        .automatic
+        #endif
+    }
+}
+
 extension View {
     /// Inset-grouped is the iOS card look; macOS has no such style and only
     /// needs to compile.

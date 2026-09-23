@@ -6,11 +6,11 @@ import SwiftUI
 /// on iOS a list of destinations reads better and leaves room to grow.
 public struct ManageView: View {
     let model: DashboardModel
-    let api: any ManageAPI & LibraryAPI
+    let api: any ManageAPI & LibraryAPI & ExtrasAPI
     let baseURL: URL
     let onSessionLost: @MainActor () -> Void
 
-    public init(model: DashboardModel, api: any ManageAPI & LibraryAPI, baseURL: URL, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(model: DashboardModel, api: any ManageAPI & LibraryAPI & ExtrasAPI, baseURL: URL, onSessionLost: @escaping @MainActor () -> Void) {
         self.model = model
         self.api = api
         self.baseURL = baseURL
@@ -74,9 +74,10 @@ public struct ManageView: View {
 
 struct LibraryListView: View {
     @State private var model: LibraryListModel
+    @State private var confirmingBulkDelete = false
     let baseURL: URL
 
-    init(app: ArrApp, api: any ManageAPI & LibraryAPI, baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
+    init(app: ArrApp, api: any ManageAPI & LibraryAPI & ExtrasAPI, baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
         self.baseURL = baseURL
         _model = State(initialValue: LibraryListModel(app: app, api: api, hasPlex: hasPlex, onSessionLost: onSessionLost))
     }
@@ -92,23 +93,7 @@ struct LibraryListView: View {
                 Section {
                     if model.shown.isEmpty { EmptyNote("No matches") }
                     ForEach(model.shown) { row in
-                        NavigationLink(value: row.ref) {
-                            HStack(spacing: 10) {
-                                Poster(path: row.poster, baseURL: baseURL, width: 40, cornerRadius: 6)
-                                VStack(alignment: .leading, spacing: 3) {
-                                    HStack(spacing: 4) {
-                                        Text(row.title).font(.subheadline.weight(.medium)).lineLimit(1)
-                                        if let year = row.year { Text(String(year)).font(.subheadline).foregroundStyle(.secondary) }
-                                    }
-                                    HStack(spacing: 6) {
-                                        StateBadge(state: model.app == .radarr ? row.status : (row.monitored ? "ok" : "paused"))
-                                        WatchedDot(watched: model.watched(row))
-                                        Text(stats(row)).font(.caption).foregroundStyle(.secondary)
-                                    }
-                                }
-                            }
-                        }
-                        .accessibilityIdentifier("library-row")
+                        LibraryRowView(row: row, model: model, baseURL: baseURL)
                     }
                 } header: {
                     Text("\(model.shown.count) of \(model.rows.value?.count ?? 0)")
@@ -119,37 +104,137 @@ struct LibraryListView: View {
         .searchable(text: $model.query, prompt: model.app == .radarr ? "Filter movies…" : "Filter series…")
         .navigationTitle(model.app == .radarr ? "Movies" : "Series")
         .toolbar {
-            if !model.tags.isEmpty {
-                Menu {
-                    Picker("Tag", selection: $model.tag) {
-                        Text("All").tag(Int?.none)
-                        ForEach(model.tags, id: \.id) { tag in Text(tag.label).tag(Int?.some(tag.id)) }
-                    }
-                } label: {
-                    Label("Tags", systemImage: model.tag == nil ? "tag" : "tag.fill")
-                }
+            if model.selecting {
+                ToolbarItemGroup(placement: .bulkBar) { LibraryBulkBar(model: model) { confirmingBulkDelete = true } }
             }
-            Menu {
-                Picker("Sort by", selection: $model.sort) {
-                    ForEach(LibrarySort.keys(for: model.app), id: \.self) { Text($0.label).tag($0) }
-                }
-                Picker("Direction", selection: $model.descending) {
-                    Text("Ascending").tag(false)
-                    Text("Descending").tag(true)
-                }
-            } label: {
-                Label("Sort", systemImage: "arrow.up.arrow.down")
+            ToolbarItemGroup(placement: .automatic) {
+                Button(model.selecting ? "Done" : "Select") { model.selecting.toggle() }
+                tagMenu
+                sortMenu
             }
         }
         .task { await model.load() }
         .refreshable { await model.load() }
+        .confirmationDialog("Delete \(model.selected.count) titles", isPresented: $confirmingBulkDelete, titleVisibility: .visible) {
+            Button("Delete from library and disk", role: .destructive) { Task { await model.bulk(.delete(deleteFiles: true)) } }
+            Button("Remove from library only", role: .destructive) { Task { await model.bulk(.delete(deleteFiles: false)) } }
+            Button("Cancel", role: .cancel) {}
+        }
+        .alert("Action failed", isPresented: Binding(get: { model.actionError != nil }, set: { if !$0 { model.actionError = nil } })) {
+            Button("OK") { model.actionError = nil }
+        } message: {
+            Text(model.actionError ?? "")
+        }
     }
 
-    func stats(_ row: LibraryRow) -> String {
+    @ViewBuilder var tagMenu: some View {
+        if !model.tags.isEmpty {
+            Menu {
+                Picker("Tag", selection: $model.tag) {
+                    Text("All").tag(Int?.none)
+                    ForEach(model.tags, id: \.id) { tag in Text(tag.label).tag(Int?.some(tag.id)) }
+                }
+            } label: {
+                Label("Tags", systemImage: model.tag == nil ? "tag" : "tag.fill")
+            }
+        }
+    }
+
+    var sortMenu: some View {
+        Menu {
+            Picker("Sort by", selection: $model.sort) {
+                ForEach(LibrarySort.keys(for: model.app), id: \.self) { key in
+                    Text(key.label).tag(key)
+                }
+            }
+            Picker("Direction", selection: $model.descending) {
+                Text("Ascending").tag(false)
+                Text("Descending").tag(true)
+            }
+        } label: {
+            Label("Sort", systemImage: "arrow.up.arrow.down")
+        }
+    }
+}
+
+struct LibraryRowView: View {
+    let row: LibraryRow
+    let model: LibraryListModel
+    let baseURL: URL
+
+    var badge: String { model.app == .radarr ? row.status : (row.monitored ? "ok" : "paused") }
+
+    var stats: String {
         if model.app == .sonarr {
             return "\(row.episodeFiles ?? 0)/\(row.episodes ?? 0) episodes · \(Format.bytes(row.sizeOnDisk))"
         }
         return Format.bytes(row.sizeOnDisk)
+    }
+
+    var content: some View {
+        HStack(spacing: 10) {
+            if model.selecting {
+                Image(systemName: model.selected.contains(row.id) ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(model.selected.contains(row.id) ? Color.accentColor : Color.secondary)
+            }
+            Poster(path: row.poster, baseURL: baseURL, width: 40, cornerRadius: 6)
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 4) {
+                    Text(row.title).font(.subheadline.weight(.medium)).lineLimit(1)
+                    if let year = row.year { Text(String(year)).font(.subheadline).foregroundStyle(.secondary) }
+                }
+                HStack(spacing: 6) {
+                    StateBadge(state: badge)
+                    WatchedDot(watched: model.watched(row))
+                    Text(stats).font(.caption).foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    var body: some View {
+        if model.selecting {
+            Button { model.toggleSelection(row) } label: { content }
+                .buttonStyle(.plain)
+        } else {
+            NavigationLink(value: row.ref) { content }
+                .accessibilityIdentifier("library-row")
+        }
+    }
+}
+
+/// Monitor, profile, tags, search and delete for the selection.
+struct LibraryBulkBar: View {
+    let model: LibraryListModel
+    let confirmDelete: () -> Void
+
+    var body: some View {
+        Text("\(model.selected.count) selected").font(.caption).foregroundStyle(.secondary)
+        Spacer()
+        Menu("Edit") {
+            Button("Monitor") { Task { await model.bulk(.monitor(true)) } }
+            Button("Unmonitor") { Task { await model.bulk(.monitor(false)) } }
+            if let profiles = model.options?.quality_profiles, !profiles.isEmpty {
+                Menu("Quality profile") {
+                    ForEach(profiles, id: \.id) { profile in
+                        Button(profile.name) { Task { await model.bulk(.profile(profile.id)) } }
+                    }
+                }
+            }
+            if !model.tags.isEmpty {
+                Menu("Add tag") {
+                    ForEach(model.tags, id: \.id) { tag in Button(tag.label) { Task { await model.bulk(.tag(tag.id, add: true)) } } }
+                }
+                Menu("Remove tag") {
+                    ForEach(model.tags, id: \.id) { tag in Button(tag.label) { Task { await model.bulk(.tag(tag.id, add: false)) } } }
+                }
+            }
+        }
+        .disabled(model.selected.isEmpty || model.busy)
+        Button("Search") { Task { await model.bulk(.search) } }
+            .disabled(model.selected.isEmpty || model.busy)
+        Button("Delete", role: .destructive, action: confirmDelete)
+            .disabled(model.selected.isEmpty || model.busy)
     }
 }
 

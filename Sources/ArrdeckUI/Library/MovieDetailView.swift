@@ -3,11 +3,16 @@ import SwiftUI
 
 public struct MovieDetailView: View {
     @State private var model: MovieDetailModel
+    @State private var searching = false
     @Environment(\.dismiss) private var dismiss
     let baseURL: URL
+    let api: any LibraryAPI & ExtrasAPI
+    let onSessionLost: @MainActor () -> Void
 
-    public init(id: Int, api: any LibraryAPI, baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(id: Int, api: any LibraryAPI & ExtrasAPI, baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
         self.baseURL = baseURL
+        self.api = api
+        self.onSessionLost = onSessionLost
         _model = State(initialValue: MovieDetailModel(id: id, api: api, hasPlex: hasPlex, onSessionLost: onSessionLost))
     }
 
@@ -26,7 +31,10 @@ public struct MovieDetailView: View {
                         if let runtime = movie.runtime, runtime > 0 { Text("· \(runtime) min") }
                     }
                 }
-                DetailActions(model: model, monitored: movie.monitored ?? false)
+                RenameCard(ref: .movie(movie.id), api: api, onSessionLost: onSessionLost)
+                DetailActions(model: model, monitored: movie.monitored ?? false) {
+                    Button("Interactive search") { searching = true }
+                }
                 Section("File") {
                     if let file = movie.file {
                         VStack(alignment: .leading, spacing: 3) {
@@ -56,6 +64,9 @@ public struct MovieDetailView: View {
             Button("OK") { model.actionError = nil }
         } message: {
             Text(model.actionError ?? "")
+        }
+        .sheet(isPresented: $searching) {
+            ReleasesSheet(target: .movie(model.ref.id), title: title, api: api, onSessionLost: onSessionLost) { searching = false }
         }
         .accessibilityIdentifier("movie-detail")
     }

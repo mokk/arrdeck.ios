@@ -7,13 +7,19 @@ public struct DownloadsView: View {
     @State private var model: DownloadsModel
     @State private var selected: Torrent?
     @State private var deleting: Torrent?
+    @State private var adding = false
+    @State private var confirmingBulkDelete = false
+    let api: any DownloadsAPI & ExtrasAPI
+    let onSessionLost: @MainActor () -> Void
 
     public init(
-        api: any DownloadsAPI,
+        api: any DownloadsAPI & ExtrasAPI,
         clients: [TorrentClient],
         hasArr: Bool,
         onSessionLost: @escaping @MainActor () -> Void
     ) {
+        self.api = api
+        self.onSessionLost = onSessionLost
         _model = State(initialValue: DownloadsModel(
             api: api, clients: clients, hasArr: hasArr, onSessionLost: onSessionLost
         ))
@@ -41,9 +47,17 @@ public struct DownloadsView: View {
                     ErrorNote(reason)
                 case .loaded:
                     ForEach(model.shown, id: \.key) { torrent in
-                        TorrentRow(torrent: torrent)
+                        HStack(spacing: 10) {
+                            if model.selecting {
+                                Image(systemName: model.selected.contains(torrent.key) ? "checkmark.circle.fill" : "circle")
+                                    .foregroundStyle(model.selected.contains(torrent.key) ? Color.accentColor : Color.secondary)
+                            }
+                            TorrentRow(torrent: torrent)
+                        }
                             .contentShape(Rectangle())
-                            .onTapGesture { selected = torrent }
+                            .onTapGesture {
+                                if model.selecting { model.toggleSelection(torrent) } else { selected = torrent }
+                            }
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button(role: .destructive) {
                                     deleting = torrent
@@ -98,7 +112,16 @@ public struct DownloadsView: View {
         .task { await model.run() }
         .navigationTitle("Downloads")
         .toolbar {
+            if model.selecting {
+                ToolbarItemGroup(placement: .bulkBar) { bulkBar }
+            }
             ToolbarItemGroup(placement: .automatic) {
+                Button(model.selecting ? "Done" : "Select") { model.selecting.toggle() }
+                    .accessibilityIdentifier("select")
+                if !model.clients.isEmpty {
+                    Button { adding = true } label: { Label("Add torrent", systemImage: "plus") }
+                        .accessibilityIdentifier("add-torrent")
+                }
                 if !model.clients.isEmpty {
                     Button {
                         Task { await model.toggleThrottle() }
@@ -115,7 +138,18 @@ public struct DownloadsView: View {
             }
         }
         .sheet(item: $selected) { torrent in
-            TorrentDetailSheet(torrent: torrent, model: model) { selected = nil }
+            TorrentDetailSheet(torrent: torrent, model: model, api: api, onSessionLost: onSessionLost) { selected = nil }
+        }
+        .sheet(isPresented: $adding) {
+            AddTorrentSheet(clients: model.clients, api: api, onSessionLost: onSessionLost) {
+                adding = false
+                Task { await model.refresh() }
+            }
+        }
+        .confirmationDialog("Delete \(model.selected.count) torrents", isPresented: $confirmingBulkDelete, titleVisibility: .visible) {
+            Button("Delete torrents and files", role: .destructive) { Task { await model.bulk(.delete(deleteData: true)) } }
+            Button("Delete torrents only", role: .destructive) { Task { await model.bulk(.delete(deleteData: false)) } }
+            Button("Cancel", role: .cancel) {}
         }
         .confirmationDialog(
             deleting?.name ?? "", isPresented: deletingShown, titleVisibility: .visible
@@ -136,6 +170,18 @@ public struct DownloadsView: View {
             Text(model.actionError ?? "")
         }
         .accessibilityIdentifier("downloads")
+    }
+
+    /// Actions applied to the multi-selection, one call per client.
+    @ViewBuilder var bulkBar: some View {
+        Text("\(model.selected.count) selected").font(.caption).foregroundStyle(.secondary)
+        Spacer()
+        Group {
+            Button("Pause") { Task { await model.bulk(.pause) } }
+            Button("Resume") { Task { await model.bulk(.resume) } }
+            Button("Delete", role: .destructive) { confirmingBulkDelete = true }
+        }
+        .disabled(model.selected.isEmpty || model.isPending("bulk"))
     }
 
     var sortMenu: some View {

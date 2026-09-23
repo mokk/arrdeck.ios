@@ -34,6 +34,12 @@ public final class DownloadsModel {
     public var actionError: String?
     public private(set) var pending: Set<String> = []
 
+    /// Select mode: torrent keys chosen for a bulk action.
+    public var selecting = false {
+        didSet { if !selecting { selected = [] } }
+    }
+    public var selected: Set<String> = []
+
     public let clients: [TorrentClient]
     public let hasArr: Bool
 
@@ -225,6 +231,28 @@ public final class DownloadsModel {
         await perform(torrent.key) {
             try await api.delete(torrent.torrentClient, ids: [torrent.id], deleteData: deleteData)
         }
+        await fetchTorrents()
+    }
+
+    public func toggleSelection(_ torrent: Torrent) {
+        if selected.contains(torrent.key) { selected.remove(torrent.key) } else { selected.insert(torrent.key) }
+    }
+
+    /// One call per client — they do not share ids — then out of select mode.
+    public func bulk(_ action: BulkTorrentAction) async {
+        let chosen = shown.filter { selected.contains($0.key) }
+        let byClient = Dictionary(grouping: chosen, by: \.torrentClient)
+        await perform("bulk") {
+            for (client, torrents) in byClient {
+                let ids = torrents.map(\.id)
+                switch action {
+                case .pause: try await api.pause(client, ids: ids)
+                case .resume: try await api.resume(client, ids: ids)
+                case let .delete(deleteData): try await api.delete(client, ids: ids, deleteData: deleteData)
+                }
+            }
+        }
+        selecting = false
         await fetchTorrents()
     }
 
