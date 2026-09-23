@@ -37,6 +37,15 @@ public struct LibraryPage: View {
         unmonitored == .hide ? model.shown.filter { !$0.isUnmonitored } : model.shown
     }
 
+    /// The order a detail page steps through: the list as it is shown.
+    var sequence: [MediaRef] {
+        if layout == .upNext {
+            let split = LibrarySorting.upNext(visible)
+            return (split.airing + split.idle).map(\.ref)
+        }
+        return visible.map(\.ref)
+    }
+
     /// Letter → the first row filed under it, for the index strip.
     var letters: [(letter: String, id: Int)] {
         guard LibrarySorting.isAlphabetical(model.sort), !layout.ownsOrder else { return [] }
@@ -122,7 +131,8 @@ public struct LibraryPage: View {
             if model.selecting { BulkBarChrome { LibraryBulkBar(model: model) { confirmingBulkDelete = true } } }
         }
         .navigationDestination(for: MediaRef.self) { ref in
-            MediaDestination(ref: ref, api: api, baseURL: baseURL, hasPlex: dashboard.has("plex"), onSessionLost: onSessionLost)
+            MediaDestination(ref: ref, api: api, baseURL: baseURL, hasPlex: dashboard.has("plex"),
+                             sequence: sequence, onSessionLost: onSessionLost)
         }
         .sheet(isPresented: $adding) {
             AddView(configured: dashboard.configured, api: api, baseURL: baseURL, hasPlex: dashboard.has("plex"),

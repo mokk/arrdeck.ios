@@ -142,7 +142,12 @@ struct CreditsSection: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(alignment: .top, spacing: 12) {
                             ForEach(Array(cast.enumerated()), id: \.offset) { _, person in
-                                PersonChip(person: person, baseURL: baseURL)
+                                if let id = person.tmdb_id {
+                                    NavigationLink(value: PersonRef(id)) { PersonChip(person: person, baseURL: baseURL) }
+                                        .buttonStyle(.plain)
+                                } else {
+                                    PersonChip(person: person, baseURL: baseURL)
+                                }
                             }
                         }
                         .padding(.horizontal, 16)
@@ -150,13 +155,23 @@ struct CreditsSection: View {
                     }
                     .listRowInsets(EdgeInsets())
                 }
-                if !crew.isEmpty {
-                    Text(crew.map { "\($0.name) \($0.role ?? "")" }.joined(separator: "  ·  "))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                ForEach(Array(crew.enumerated()), id: \.offset) { _, person in
+                    if let id = person.tmdb_id {
+                        NavigationLink(value: PersonRef(id)) { crewLine(person) }
+                    } else {
+                        crewLine(person)
+                    }
                 }
             }
         }
+    }
+}
+
+private func crewLine(_ person: CreditPerson) -> some View {
+    HStack {
+        Text(person.name).font(.subheadline)
+        Spacer()
+        Text(person.role ?? "").font(.caption).foregroundStyle(.secondary)
     }
 }
 

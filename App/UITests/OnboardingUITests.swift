@@ -80,6 +80,7 @@ final class OnboardingUITests: XCTestCase {
         any["library-card"].firstMatch.tap()
         XCTAssert(any["movie-detail"].waitForExistence(timeout: 10), "card did not open the detail")
         XCTAssert(app.buttons["Search now"].waitForExistence(timeout: 15), "detail never loaded its actions")
+        snap("movie-detail")
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
         // The add sheet, scoped to movies: Overseerr's popular titles fill it.
@@ -98,6 +99,8 @@ final class OnboardingUITests: XCTestCase {
         // Activity: the arr queue and moving torrents, then the full queue.
         any["tab-activity"].tap()
         XCTAssert(any["activity"].waitForExistence(timeout: 10), "activity never appeared")
+        // "New" (since you last looked) opens first; the torrents are under Downloading
+        app.buttons["Downloading"].tap()
         XCTAssert(app.staticTexts["Torrents"].waitForExistence(timeout: 20), "downloading segment never loaded")
         snap("activity")
         app.buttons["Queue"].tap()
@@ -123,7 +126,10 @@ final class OnboardingUITests: XCTestCase {
         XCTAssert(app.navigationBars["Settings"].waitForExistence(timeout: 5), "did not return to Settings from Overview")
         snap("settings-after-overview")
         let connections = app.buttons["manage-connections"]
-        for _ in 0..<4 where !connections.exists { app.swipeUp() }
+        // It is the last row. Under the tab bar it still counts as hittable, so
+        // scroll to the bottom first rather than until it "can" be tapped.
+        app.swipeUp()
+        app.swipeUp()
         XCTAssert(connections.waitForExistence(timeout: 5), "connections row not reachable")
         connections.tap()
         XCTAssert(app.staticTexts["configured"].firstMatch.waitForExistence(timeout: 20), "connections never loaded")

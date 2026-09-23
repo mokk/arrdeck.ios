@@ -29,6 +29,7 @@ public struct BookDetailView: View {
             case let .failed(reason):
                 Section { ErrorNote(reason) }
             case let .loaded(book):
+                BackdropSection(path: book.poster, baseURL: baseURL, blurred: true)
                 Section {
                     DetailHero(poster: book.poster, baseURL: baseURL, overview: book.overview, links: model.links) {
                         StateBadge(state: book.has_file == true ? "downloaded" : (book.monitored == true ? "wanted" : "unmonitored"))

@@ -32,6 +32,7 @@ public struct SeriesDetailView: View {
             case let .failed(reason):
                 Section { ErrorNote(reason) }
             case let .loaded(series):
+                BackdropSection(path: series.fanart, baseURL: baseURL)
                 Section {
                     DetailHero(poster: series.poster, baseURL: baseURL, overview: series.overview, links: model.links) {
                         StateBadge(state: series.monitored == true ? "ok" : "unmonitored")

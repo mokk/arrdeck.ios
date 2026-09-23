@@ -24,6 +24,7 @@ public struct MovieDetailView: View {
             case let .failed(reason):
                 Section { ErrorNote(reason) }
             case let .loaded(movie):
+                BackdropSection(path: movie.fanart, baseURL: baseURL)
                 Section {
                     DetailHero(poster: movie.poster, baseURL: baseURL, overview: movie.overview, links: model.links) {
                         StateBadge(state: movie.has_file == true ? "downloaded" : (movie.monitored == true ? "wanted" : "unmonitored"))
@@ -65,6 +66,11 @@ public struct MovieDetailView: View {
         .dashboardListStyle()
         .navigationTitle(title)
         .toolbar { WatchedDot(watched: model.watched) }
+        .navigationDestination(for: PersonRef.self) { ref in
+            if let people = api as? any PeopleAPI {
+                PersonView(ref: ref, api: people, adder: api as? any DiscoverAPI & LibraryAPI, baseURL: baseURL)
+            }
+        }
         .task { await model.load() }
         .onChange(of: model.deleted) { _, deleted in if deleted { dismiss() } }
         .alert("Action failed", isPresented: actionFailed) {

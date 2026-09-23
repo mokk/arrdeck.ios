@@ -2432,6 +2432,87 @@
         "title": "OptionsOut",
         "type": "object"
       },
+      "PersonMovieOut": {
+        "properties": {
+          "has_file": {
+            "default": false,
+            "title": "Has File",
+            "type": "boolean"
+          },
+          "monitored": {
+            "default": false,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "movie_id": {
+            "title": "Movie Id",
+            "type": "integer"
+          },
+          "poster": {
+            "title": "Poster",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "movie_id"
+        ],
+        "title": "PersonMovieOut",
+        "type": "object"
+      },
+      "PersonOut": {
+        "description": "Someone from a film's credits: what of theirs is in the library, and —\nwhen Overseerr is there to ask — the films of theirs that are not.",
+        "properties": {
+          "elsewhere": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/SearchResultOut"
+            },
+            "title": "Elsewhere",
+            "type": "array"
+          },
+          "image": {
+            "title": "Image",
+            "type": "string"
+          },
+          "known_for": {
+            "title": "Known For",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "owned": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/PersonMovieOut"
+            },
+            "title": "Owned",
+            "type": "array"
+          },
+          "tmdb_id": {
+            "title": "Tmdb Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tmdb_id"
+        ],
+        "title": "PersonOut",
+        "type": "object"
+      },
       "PlaySessionOut": {
         "properties": {
           "kind": {
@@ -7512,6 +7593,48 @@
           }
         },
         "summary": "Movie Detail",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/library/people/{tmdb_id}": {
+      "get": {
+        "operationId": "person_api_v1_library_people__tmdb_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tmdb_id",
+            "required": true,
+            "schema": {
+              "title": "Tmdb Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Person",
         "tags": [
           "library"
         ]

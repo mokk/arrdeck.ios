@@ -4,16 +4,62 @@ import SwiftUI
 /// The API a library tab needs, the per-kind views included.
 public typealias LibraryPageAPI = ManageAPI & LibraryAPI & ExtrasAPI & DiscoverAPI & WantedAPI & BookShelfAPI
 
-/// A title's detail page, from any list that can open one.
+/// A title's detail page, from any list that can open one. Given the list's
+/// order it also steps to the next or previous title — toolbar arrows or a
+/// horizontal swipe — in place, so Back still returns to the list.
 struct MediaDestination: View {
-    let ref: MediaRef
     let api: any LibraryPageAPI
     let baseURL: URL
     let hasPlex: Bool
+    let sequence: [MediaRef]
     let onSessionLost: @MainActor () -> Void
+    @State private var current: MediaRef
+
+    init(ref: MediaRef, api: any LibraryPageAPI, baseURL: URL, hasPlex: Bool, sequence: [MediaRef] = [],
+         onSessionLost: @escaping @MainActor () -> Void) {
+        self.api = api
+        self.baseURL = baseURL
+        self.hasPlex = hasPlex
+        self.sequence = sequence
+        self.onSessionLost = onSessionLost
+        _current = State(initialValue: ref)
+    }
+
+    var neighbours: (previous: MediaRef?, next: MediaRef?) { TitleSequence.neighbours(of: current, in: sequence) }
 
     var body: some View {
-        switch ref {
+        detail
+            .id(current)
+            .toolbar {
+                if neighbours.previous != nil || neighbours.next != nil {
+                    ToolbarItemGroup(placement: .primaryAction) {
+                        Button { step(neighbours.previous) } label: { Image(systemName: "chevron.up") }
+                            .disabled(neighbours.previous == nil)
+                            .accessibilityLabel("Previous title")
+                        Button { step(neighbours.next) } label: { Image(systemName: "chevron.down") }
+                            .disabled(neighbours.next == nil)
+                            .accessibilityLabel("Next title")
+                    }
+                }
+            }
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 40).onEnded { value in
+                    // away from the left edge, which belongs to the back swipe
+                    guard value.startLocation.x > 40,
+                          abs(value.translation.width) > 90,
+                          abs(value.translation.height) < abs(value.translation.width) * 0.6 else { return }
+                    step(value.translation.width < 0 ? neighbours.next : neighbours.previous)
+                }
+            )
+            .sensoryFeedback(.selection, trigger: current)
+    }
+
+    func step(_ ref: MediaRef?) {
+        if let ref { current = ref }
+    }
+
+    @ViewBuilder var detail: some View {
+        switch current {
         case let .movie(id):
             MovieDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
         case let .series(id):

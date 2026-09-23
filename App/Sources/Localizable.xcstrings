@@ -61,6 +61,16 @@
         }
       }
     },
+    "%lld films in your library": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld film i dit bibliotek"
+          }
+        }
+      }
+    },
     "%lld grabs": {
       "localizations": {
         "da": {
@@ -1620,6 +1630,16 @@
         }
       }
     },
+    "In your library": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I dit bibliotek"
+          }
+        }
+      }
+    },
     "Indexers": {
       "localizations": {
         "da": {
@@ -1982,6 +2002,16 @@
         }
       }
     },
+    "Next title": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Næste titel"
+          }
+        }
+      }
+    },
     "No books yet.": {
       "localizations": {
         "da": {
@@ -2062,6 +2092,17 @@
         }
       }
     },
+    "None of their films are in the library yet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen af deres film er i biblioteket endnu."
+          }
+        }
+      }
+    },
     "Not airing (%lld)": {
       "localizations": {
         "da": {
@@ -2078,6 +2119,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ikke en arrdeck: %@"
+          }
+        }
+      }
+    },
+    "Not in your library": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke i dit bibliotek"
           }
         }
       }
@@ -2319,6 +2370,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Forrige"
+          }
+        }
+      }
+    },
+    "Previous title": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forrige titel"
           }
         }
       }

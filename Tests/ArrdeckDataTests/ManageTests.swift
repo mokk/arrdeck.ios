@@ -310,3 +310,12 @@ extension FakeManageAPI: ExtrasAPI {
         #expect(!Format.when(now.addingTimeInterval(-86_400 * 3), style: .absolute, now: now, locale: en).contains("2026"))
     }
 }
+
+@Suite struct TitleSequenceTests {
+    @Test func neighboursFollowTheList() {
+        let refs: [MediaRef] = [.movie(1), .movie(2), .movie(3)]
+        #expect(TitleSequence.neighbours(of: .movie(2), in: refs) == (.movie(1), .movie(3)))
+        #expect(TitleSequence.neighbours(of: .movie(1), in: refs).previous == nil)
+        #expect(TitleSequence.neighbours(of: .movie(9), in: refs) == (nil, nil))
+    }
+}
