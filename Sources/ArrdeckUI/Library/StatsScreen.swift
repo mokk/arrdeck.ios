@@ -29,6 +29,7 @@ public struct StatsScreen: View {
                 if model.series.isEmpty {
                     Section { EmptyNote("Not enough samples yet") }
                 }
+                ForecastSection(forecast: DiskForecast.compute(model.samples.value ?? []))
                 ForEach(model.series) { series in
                     Section {
                         StatsChart(series: series, range: model.range)
@@ -75,5 +76,28 @@ struct StatsChart: View {
             }
         }
         .padding(.vertical, 4)
+    }
+}
+
+/// "Full in about N weeks", at the pace of the window shown.
+struct ForecastSection: View {
+    let forecast: DiskForecast
+
+    var body: some View {
+        switch forecast {
+        case .unknown:
+            EmptyView()
+        case .steady:
+            Section("Disk space") { Text("Free space is not shrinking") }
+        case let .full(days, perDay):
+            Section("Disk space") {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(days < 14 ? "Full in about \(max(1, Int(days.rounded()))) days" : "Full in about \(Int((days / 7).rounded())) weeks")
+                        .font(.headline)
+                    Text("At the pace of this period: \(Format.bytes(Int(perDay))) a day")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            }
+        }
     }
 }

@@ -881,6 +881,11 @@
             "title": "Delete Files",
             "type": "boolean"
           },
+          "exclude": {
+            "default": false,
+            "title": "Exclude",
+            "type": "boolean"
+          },
           "ids": {
             "items": {
               "type": "integer"
@@ -997,6 +1002,103 @@
           "sonarr"
         ],
         "title": "CalendarResponse",
+        "type": "object"
+      },
+      "CleanupItemOut": {
+        "properties": {
+          "added": {
+            "format": "date-time",
+            "title": "Added",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "movie",
+              "series"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "last_viewed_at": {
+            "title": "Last Viewed At",
+            "type": "integer"
+          },
+          "monitored": {
+            "default": false,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "poster": {
+            "title": "Poster",
+            "type": "string"
+          },
+          "size": {
+            "default": 0,
+            "title": "Size",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "CleanupItemOut",
+        "type": "object"
+      },
+      "CleanupOut": {
+        "description": "What could go to free space, in four lists. Nothing here deletes: the\nclient sends the chosen ids to the libraries' bulk delete.",
+        "properties": {
+          "largest": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CleanupItemOut"
+            },
+            "title": "Largest",
+            "type": "array"
+          },
+          "never_watched": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CleanupItemOut"
+            },
+            "title": "Never Watched",
+            "type": "array"
+          },
+          "plex": {
+            "default": false,
+            "title": "Plex",
+            "type": "boolean"
+          },
+          "unmonitored": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CleanupItemOut"
+            },
+            "title": "Unmonitored",
+            "type": "array"
+          },
+          "watched": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CleanupItemOut"
+            },
+            "title": "Watched",
+            "type": "array"
+          }
+        },
+        "title": "CleanupOut",
         "type": "object"
       },
       "CollectionDetailOut": {
@@ -6163,6 +6265,59 @@
         "summary": "Calendar",
         "tags": [
           "dashboard"
+        ]
+      }
+    },
+    "/api/v1/cleanup": {
+      "get": {
+        "operationId": "cleanup_api_v1_cleanup_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "watched_days",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "title": "Watched Days",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "never_days",
+            "required": false,
+            "schema": {
+              "default": 365,
+              "title": "Never Days",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CleanupOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cleanup",
+        "tags": [
+          "library"
         ]
       }
     },

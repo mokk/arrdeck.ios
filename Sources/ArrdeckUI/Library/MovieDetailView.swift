@@ -32,6 +32,7 @@ public struct MovieDetailView: View {
                         if let runtime = movie.runtime, runtime > 0 { Text("· \(runtime) min") }
                     }
                 }
+                RequestBannerSection(api: api, movieTMDB: movie.tmdb_id, showTVDB: nil)
                 RenameCard(ref: .movie(movie.id), api: api, onSessionLost: onSessionLost)
                 DetailActions(model: model, monitored: movie.monitored ?? false) {
                     Button("Interactive search") { searching = true }

@@ -61,6 +61,16 @@
         }
       }
     },
+    "%lld days ago": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld dage siden"
+          }
+        }
+      }
+    },
     "%lld films in your library": {
       "localizations": {
         "da": {
@@ -207,6 +217,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld opgaver, alle til tiden"
+          }
+        }
+      }
+    },
+    "%lld titles · %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld titler · %@"
           }
         }
       }
@@ -491,6 +511,16 @@
         }
       }
     },
+    "Added %@, never played": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføjet %@, aldrig afspillet"
+          }
+        }
+      }
+    },
     "Adding…": {
       "localizations": {
         "da": {
@@ -572,6 +602,16 @@
         }
       }
     },
+    "Approve": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Godkend"
+          }
+        }
+      }
+    },
     "Ascending": {
       "localizations": {
         "da": {
@@ -588,6 +628,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Spørg før"
+          }
+        }
+      }
+    },
+    "At the pace of this period: %@ a day": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I periodens tempo: %@ om dagen"
           }
         }
       }
@@ -803,6 +853,16 @@
         }
       }
     },
+    "Cleanup": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oprydning"
+          }
+        }
+      }
+    },
     "Clear %@": {
       "localizations": {
         "da": {
@@ -954,6 +1014,16 @@
         }
       }
     },
+    "Decline": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afvis"
+          }
+        }
+      }
+    },
     "Default": {
       "localizations": {
         "da": {
@@ -984,12 +1054,32 @@
         }
       }
     },
+    "Delete %lld titles?": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet %lld titler?"
+          }
+        }
+      }
+    },
     "Delete %lld torrents": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Slet %lld torrents"
+          }
+        }
+      }
+    },
+    "Delete and free %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet og frigør %@"
           }
         }
       }
@@ -1132,6 +1222,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Retning"
+          }
+        }
+      }
+    },
+    "Disk space": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diskplads"
           }
         }
       }
@@ -1386,6 +1486,16 @@
         }
       }
     },
+    "Film": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Film"
+          }
+        }
+      }
+    },
     "Filter by name…": {
       "localizations": {
         "da": {
@@ -1488,12 +1598,42 @@
         }
       }
     },
+    "Free space is not shrinking": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den ledige plads bliver ikke mindre"
+          }
+        }
+      }
+    },
     "From": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Fra"
+          }
+        }
+      }
+    },
+    "Full in about %lld days": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuld om cirka %lld dage"
+          }
+        }
+      }
+    },
+    "Full in about %lld weeks": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuld om cirka %lld uger"
           }
         }
       }
@@ -1706,6 +1846,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Type"
+          }
+        }
+      }
+    },
+    "Largest": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Største"
+          }
+        }
+      }
+    },
+    "Last watched %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sidst set %@"
+          }
+        }
+      }
+    },
+    "Last watched more than": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sidst set for mere end"
           }
         }
       }
@@ -1968,6 +2138,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aldrig"
+          }
+        }
+      }
+    },
+    "Never watched": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aldrig set"
           }
         }
       }
@@ -2505,6 +2685,16 @@
         }
       }
     },
+    "Reclaim %@ (%lld titles)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frigør %@ (%lld titler)"
+          }
+        }
+      }
+    },
     "Relative (3 days ago)": {
       "localizations": {
         "da": {
@@ -2582,6 +2772,56 @@
           "stringUnit": {
             "state": "translated",
             "value": "Omdøb filer"
+          }
+        }
+      }
+    },
+    "Request": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ønske"
+          }
+        }
+      }
+    },
+    "Requested": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ønsket"
+          }
+        }
+      }
+    },
+    "Requested and approved, not here yet": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ønsket og godkendt, ikke her endnu"
+          }
+        }
+      }
+    },
+    "Requested by %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ønsket af %@"
+          }
+        }
+      }
+    },
+    "Requested, waiting for approval": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ønsket, venter på godkendelse"
           }
         }
       }
@@ -2813,6 +3053,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vælg"
+          }
+        }
+      }
+    },
+    "Select %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg %@"
           }
         }
       }
@@ -3157,6 +3407,16 @@
         }
       }
     },
+    "Stop import lists adding them back": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forhindr importlister i at tilføje dem igen"
+          }
+        }
+      }
+    },
     "Storage": {
       "localizations": {
         "da": {
@@ -3243,6 +3503,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Downloadet er gået i stå ({state}) — ingen data flytter sig."
+          }
+        }
+      }
+    },
+    "Their files are deleted from disk, freeing about %@. This cannot be undone.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filerne slettes fra disken, hvilket frigør omkring %@. Det kan ikke fortrydes."
           }
         }
       }
@@ -3364,6 +3634,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stop overvågning"
+          }
+        }
+      }
+    },
+    "Unmonitored": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uovervåget"
           }
         }
       }
@@ -3545,6 +3825,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hvad arrdeck sender til de browsere, der abonnerer. Denne app kan ikke selv modtage web push."
+          }
+        }
+      }
+    },
+    "What could go to free space. Tick what to remove; nothing is deleted until you confirm.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvad der kan fjernes for at frigøre plads. Markér det, der skal væk; intet slettes, før du bekræfter."
           }
         }
       }

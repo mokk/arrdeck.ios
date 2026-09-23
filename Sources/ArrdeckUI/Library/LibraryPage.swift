@@ -9,6 +9,7 @@ public struct LibraryPage: View {
     @State private var diagnosing: LibraryRow?
     @State private var deleting: LibraryRow?
     @State private var confirmingBulkDelete = false
+    @State private var requests: [String: RequestState] = [:]
     @AppStorage private var layout: LibraryLayout
     @AppStorage private var unmonitored: UnmonitoredMode
     let app: ArrApp
@@ -95,7 +96,7 @@ public struct LibraryPage: View {
                     } else {
                     LibraryGrid(model: model, rows: visible, layout: layout, dimUnmonitored: unmonitored == .dim,
                                 baseURL: baseURL, progress: dashboard.queueProgress,
-                                webURL: dashboard.webURLs[app.rawValue],
+                                webURL: dashboard.webURLs[app.rawValue], requests: requests,
                                 diagnose: { diagnosing = $0 }, delete: { deleting = $0 })
                         .padding(.leading, 16)
                         .padding(.trailing, letters.count >= LetterStrip.minimum ? 26 : 16)
@@ -161,8 +162,18 @@ public struct LibraryPage: View {
             Text(model.actionError ?? "")
         }
         .task { await model.load() }
-        .refreshable { await model.load() }
+        .task { await loadRequests() }
+        .refreshable {
+            await model.load()
+            await loadRequests()
+        }
         .accessibilityIdentifier("library-\(app.rawValue)")
+    }
+
+    /// Overseerr's open requests, for the badges; only when it is configured.
+    func loadRequests() async {
+        guard app != .readarr, dashboard.has("overseerr"), let source = api as? any RequestsMapAPI else { return }
+        requests = (try? await source.requestMap()) ?? [:]
     }
 
     var addTab: AddTab {
@@ -250,8 +261,17 @@ struct LibraryGrid: View {
     let baseURL: URL
     let progress: [MediaRef: Double]
     let webURL: URL?
+    let requests: [String: RequestState]
     let diagnose: (LibraryRow) -> Void
     let delete: (LibraryRow) -> Void
+
+    func request(_ row: LibraryRow) -> RequestState? {
+        switch row.ref {
+        case .movie: RequestLookup.find(requests, movieTMDB: row.tmdb)
+        case .series: RequestLookup.find(requests, showTVDB: row.tvdb)
+        case .book: nil
+        }
+    }
 
     var body: some View {
         switch layout {
@@ -259,7 +279,8 @@ struct LibraryGrid: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 110, maximum: 110), spacing: 14, alignment: .top)], alignment: .leading, spacing: 18) {
                 ForEach(rows) { row in
                     LibraryCard(row: row, app: model.app, baseURL: baseURL, progress: progress[row.ref],
-                                watched: model.watched(row), selected: model.selecting ? model.selected.contains(row.id) : nil)
+                                watched: model.watched(row), selected: model.selecting ? model.selected.contains(row.id) : nil,
+                                request: request(row))
                         .opacity(dimUnmonitored && row.isUnmonitored ? 0.4 : 1)
                         .modifier(tap(row))
                 }
@@ -269,7 +290,8 @@ struct LibraryGrid: View {
                 ForEach(rows) { row in
                     LibraryListRow(row: row, app: model.app, baseURL: baseURL, details: layout == .details,
                                    progress: progress[row.ref], watched: model.watched(row),
-                                   selected: model.selecting ? model.selected.contains(row.id) : nil)
+                                   selected: model.selecting ? model.selected.contains(row.id) : nil,
+                                   request: request(row))
                         .opacity(dimUnmonitored && row.isUnmonitored ? 0.5 : 1)
                         .modifier(tap(row))
                     if row.id != rows.last?.id { Divider().padding(.leading, 12) }
@@ -357,6 +379,7 @@ struct LibraryListRow: View {
     let progress: Double?
     let watched: Watched?
     let selected: Bool?
+    let request: RequestState?
 
     var subtitle: String {
         switch app {
@@ -391,6 +414,7 @@ struct LibraryListRow: View {
                 HStack(spacing: 4) {
                     Text(row.title).font(.subheadline.weight(.semibold)).lineLimit(1)
                     WatchedDot(watched: watched)
+                    RequestBadge(request: request)
                 }
                 Text(subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(1)
                 if details {
@@ -466,6 +490,7 @@ struct LibraryCard: View {
     let watched: Watched?
     /// nil outside select mode; otherwise whether this card is chosen.
     let selected: Bool?
+    let request: RequestState?
 
     var subtitle: String {
         switch app {
@@ -504,6 +529,9 @@ struct LibraryCard: View {
                             .overlay(Circle().stroke(.white, lineWidth: 2))
                             .padding(8)
                     }
+                }
+                .overlay(alignment: .topLeading) {
+                    RequestBadge(request: request).padding(6)
                 }
                 .overlay(alignment: .bottom) {
                     if let progress {

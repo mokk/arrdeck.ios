@@ -42,6 +42,7 @@ public struct SeriesDetailView: View {
                         if let certification = series.certification { Text("· \(certification)") }
                     }
                 }
+                RequestBannerSection(api: api, movieTMDB: nil, showTVDB: series.tvdb_id)
                 RenameCard(ref: .series(series.id), api: api, onSessionLost: onSessionLost)
                 DetailActions(model: model, monitored: series.monitored ?? false) { EmptyView() }
                 // A series has no single file, so the movie page's file card

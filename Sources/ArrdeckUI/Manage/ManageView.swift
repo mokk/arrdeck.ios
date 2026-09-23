@@ -73,6 +73,11 @@ public struct ManageView: View {
                         .navigationTitle("Overview")
                 } label: { Label("Overview", systemImage: "square.grid.2x2") }
                 .accessibilityIdentifier("overview")
+                if model.hasArr, let cleanup = api as? any CleanupAPI {
+                    NavigationLink {
+                        CleanupView(api: cleanup, baseURL: baseURL)
+                    } label: { Label("Cleanup", systemImage: "eraser") }
+                }
                 if model.hasArr {
                     NavigationLink {
                         WantedView(api: api, apps: ArrApp.allCases.filter { model.has($0.rawValue) },

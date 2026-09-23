@@ -319,3 +319,39 @@ extension FakeManageAPI: ExtrasAPI {
         #expect(TitleSequence.neighbours(of: .movie(9), in: refs) == (nil, nil))
     }
 }
+
+@Suite struct CleanupAndRequestsTests {
+    @Test func forecastProjectsASteadyLoss() {
+        let day = 86_400
+        let losing = (0..<30).map { StatsSample(disk_free_bytes: 1_000_000_000_000 - $0 * 10_000_000_000, ts: 1_790_000_000 + $0 * day) }
+        guard case let .full(days, perDay) = DiskForecast.compute(losing) else { Issue.record("expected a date"); return }
+        #expect(Int(perDay / 1e9) == 10 && Int(days.rounded()) == 71)
+        let flat = (0..<30).map { StatsSample(disk_free_bytes: 500_000_000_000, ts: 1_790_000_000 + $0 * day) }
+        #expect(DiskForecast.compute(flat) == .steady)
+        #expect(DiskForecast.compute(Array(losing.prefix(5))) == .unknown)
+    }
+
+    @Test func requestsAreFoundByKindAndId() {
+        let pending = RequestState(request_id: 1, requested_by: "mokk", status: 1)
+        let map = ["movie:tmdb:5": pending, "tv:tvdb:9": RequestState(request_id: 2, status: 2)]
+        #expect(RequestLookup.find(map, movieTMDB: 5)?.request_id == 1)
+        #expect(RequestLookup.find(map, showTVDB: 9)?.request_id == 2)
+        #expect(RequestLookup.find(map, movieTMDB: 9) == nil, "a film and a show sharing a number stay apart")
+    }
+
+    @MainActor @Test func cleanupSelectionAndTotal() {
+        let model = CleanupModel(api: FakeCleanupAPI())
+        let a = CleanupItem(id: 1, kind: .movie, size: 4_000)
+        let b = CleanupItem(id: 1, kind: .series, size: 6_000)
+        model.toggle(a)
+        model.toggle(b)
+        #expect(CleanupModel.total(model.chosen) == 10_000, "the same id in films and shows is two titles")
+        model.toggle(a)
+        #expect(model.chosen.map(\.key) == ["series:1"])
+    }
+}
+
+struct FakeCleanupAPI: CleanupAPI {
+    func cleanup(watchedDays: Int) async throws -> CleanupLists { CleanupLists() }
+    func deleteForCleanup(_ app: ArrApp, ids: [Int], exclude: Bool) async throws {}
+}
