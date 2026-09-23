@@ -1338,6 +1338,11 @@
       },
       "LibraryBookOut": {
         "properties": {
+          "added": {
+            "format": "date-time",
+            "title": "Added",
+            "type": "string"
+          },
           "author": {
             "title": "Author",
             "type": "string"
@@ -1402,6 +1407,11 @@
       },
       "LibraryMovieOut": {
         "properties": {
+          "added": {
+            "format": "date-time",
+            "title": "Added",
+            "type": "string"
+          },
           "has_file": {
             "default": false,
             "title": "Has File",
@@ -1462,6 +1472,11 @@
       },
       "LibrarySeriesOut": {
         "properties": {
+          "added": {
+            "format": "date-time",
+            "title": "Added",
+            "type": "string"
+          },
           "episode_count": {
             "default": 0,
             "title": "Episode Count",

@@ -41,6 +41,8 @@ public struct LibraryRow: Identifiable, Hashable, Sendable {
     /// Books only: who wrote it, and the series it belongs to.
     public var author: String?
     public var seriesTitle: String?
+    /// When the arr started monitoring it — the default sort, newest first.
+    public var added: Date?
 
     public init(_ book: LibraryBook) {
         id = book.id
@@ -52,6 +54,7 @@ public struct LibraryRow: Identifiable, Hashable, Sendable {
         monitored = book.monitored ?? false
         status = book.has_file == true ? "downloaded" : (book.monitored == true ? "wanted" : "unmonitored")
         sizeOnDisk = book.size_on_disk ?? 0
+        added = book.added
         author = book.author
         seriesTitle = book.series_title
     }
@@ -67,6 +70,7 @@ public struct LibraryRow: Identifiable, Hashable, Sendable {
         // Radarr returns no single field for this, but the list sorts on it.
         status = movie.has_file == true ? "downloaded" : (movie.monitored == true ? "wanted" : "unmonitored")
         sizeOnDisk = movie.size_on_disk ?? 0
+        added = movie.added
         tmdb = movie.tmdb_id
         imdb = movie.imdb_id
     }
@@ -81,6 +85,7 @@ public struct LibraryRow: Identifiable, Hashable, Sendable {
         monitored = series.monitored ?? false
         status = series.status ?? ""
         sizeOnDisk = series.size_on_disk ?? 0
+        added = series.added
         episodeFiles = series.episode_file_count
         episodes = series.episode_count
         tmdb = nil
@@ -90,6 +95,7 @@ public struct LibraryRow: Identifiable, Hashable, Sendable {
 }
 
 public enum LibrarySort: String, CaseIterable, Sendable, Hashable {
+    case added
     case title, year, status
     case size = "size_on_disk"
     case episodes = "episode_file_count"
@@ -97,6 +103,7 @@ public enum LibrarySort: String, CaseIterable, Sendable, Hashable {
 
     public var label: String {
         switch self {
+        case .added: String(localized: "Added")
         case .title: String(localized: "Title")
         case .year: String(localized: "Year")
         case .status: String(localized: "Status")
@@ -108,9 +115,9 @@ public enum LibrarySort: String, CaseIterable, Sendable, Hashable {
 
     public static func keys(for app: ArrApp) -> [LibrarySort] {
         switch app {
-        case .radarr: [.title, .year, .status, .size]
-        case .sonarr: [.title, .year, .status, .episodes, .size]
-        case .readarr: [.author, .title, .year, .status, .size]
+        case .radarr: [.added, .title, .year, .status, .size]
+        case .sonarr: [.added, .title, .year, .status, .episodes, .size]
+        case .readarr: [.added, .author, .title, .year, .status, .size]
         }
     }
 }
@@ -129,6 +136,7 @@ public enum LibrarySorting {
         return filtered.sorted { a, b in
             let less: Bool
             switch sort {
+            case .added: less = (a.added ?? .distantPast) < (b.added ?? .distantPast)
             case .title: less = a.title.lowercased() < b.title.lowercased()
             case .year: less = (a.year ?? 0) < (b.year ?? 0)
             case .status: less = a.status < b.status
@@ -142,6 +150,7 @@ public enum LibrarySorting {
 
     private static func isEqual(_ a: LibraryRow, _ b: LibraryRow, _ sort: LibrarySort) -> Bool {
         switch sort {
+        case .added: a.added == b.added
         case .title: a.title.lowercased() == b.title.lowercased()
         case .year: a.year == b.year
         case .status: a.status == b.status
@@ -369,8 +378,10 @@ public final class LibraryListModel {
     public let app: ArrApp
     public var query = ""
     public var tag: Int?
-    public var sort: LibrarySort = .title
-    public var descending = false
+    /// Newest additions first: what you just started monitoring is what you
+    /// came to check on.
+    public var sort: LibrarySort = .added
+    public var descending = true
     public private(set) var rows: Loadable<[LibraryRow]> = .loading
     public private(set) var tags: [LibraryTag] = []
     public private(set) var watchedMap: WatchedMap?
@@ -390,7 +401,6 @@ public final class LibraryListModel {
 
     public init(app: ArrApp, api: any ManageAPI & LibraryAPI & ExtrasAPI, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
         self.app = app
-        if app == .readarr { sort = .author }
         self.api = api
         self.hasPlex = hasPlex
         self.onSessionLost = onSessionLost
