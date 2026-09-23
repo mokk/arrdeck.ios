@@ -960,6 +960,10 @@
             "title": "Has File",
             "type": "boolean"
           },
+          "item_id": {
+            "title": "Item Id",
+            "type": "integer"
+          },
           "release_type": {
             "title": "Release Type",
             "type": "string"

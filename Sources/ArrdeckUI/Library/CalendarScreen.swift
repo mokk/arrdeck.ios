@@ -5,9 +5,53 @@ import SwiftUI
 /// fortnight's agenda grouped by day. Tapping a day narrows the list below.
 public struct CalendarScreen: View {
     @State private var model: CalendarModel
+    let api: any CalendarAPI & LibraryPageAPI
+    let baseURL: URL
+    let hasPlex: Bool
+    let onSessionLost: @MainActor () -> Void
 
-    public init(api: any CalendarAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(api: any CalendarAPI & LibraryPageAPI, baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
         _model = State(initialValue: CalendarModel(api: api, onSessionLost: onSessionLost))
+        self.api = api
+        self.baseURL = baseURL
+        self.hasPlex = hasPlex
+        self.onSessionLost = onSessionLost
+    }
+
+    /// Movies / Shows / Books to leave out, and whether to hide what is on disk.
+    var filters: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                if model.apps.count > 1 {
+                    ForEach(model.apps, id: \.self) { app in
+                        let on = !model.hiddenApps.contains(app)
+                        FilterChip(label: appLabel(app), on: on) {
+                            if on { model.hiddenApps.insert(app) } else { model.hiddenApps.remove(app) }
+                        }
+                    }
+                }
+                FilterChip(label: String(localized: "Hide downloaded"), on: model.hideDownloaded) {
+                    model.hideDownloaded.toggle()
+                }
+            }
+        }
+    }
+
+    func appLabel(_ app: ArrApp) -> String {
+        switch app {
+        case .radarr: String(localized: "Movies")
+        case .sonarr: String(localized: "Shows")
+        case .readarr: String(localized: "Books")
+        }
+    }
+
+    /// A row that opens its title when the entry carries one.
+    @ViewBuilder func row(_ item: CalendarItem, showDate: Bool) -> some View {
+        if let ref = item.ref {
+            NavigationLink(value: ref) { CalendarRow(item: item, showDate: showDate) }
+        } else {
+            CalendarRow(item: item, showDate: showDate)
+        }
     }
 
     public var body: some View {
@@ -35,6 +79,8 @@ public struct CalendarScreen: View {
                 }
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
+
+                filters.listRowBackground(Color.clear).listRowInsets(EdgeInsets())
 
                 if model.view == .month {
                     monthGrid.listRowBackground(Color.clear).listRowInsets(EdgeInsets())
@@ -64,7 +110,7 @@ public struct CalendarScreen: View {
                     ForEach(model.days, id: \.self) { day in
                         Section {
                             ForEach(Array((model.byDay[day] ?? []).enumerated()), id: \.offset) { _, item in
-                                CalendarRow(item: item, showDate: false)
+                                row(item, showDate: false)
                             }
                         } header: {
                             HStack {
@@ -77,7 +123,7 @@ public struct CalendarScreen: View {
                     Section {
                         if model.listed.isEmpty { EmptyNote("Nothing scheduled") }
                         ForEach(Array(model.listed.enumerated()), id: \.offset) { _, item in
-                            CalendarRow(item: item, showDate: model.selectedDay == nil)
+                            row(item, showDate: model.selectedDay == nil)
                         }
                     }
                 }
@@ -85,6 +131,9 @@ public struct CalendarScreen: View {
         }
         .dashboardListStyle()
         .navigationTitle("Calendar")
+        .navigationDestination(for: MediaRef.self) { ref in
+            MediaDestination(ref: ref, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+        }
         .task { await model.load() }
         .refreshable { await model.load() }
         .accessibilityIdentifier("calendar")
@@ -187,5 +236,22 @@ struct CalendarRow: View {
                 if item.has_file == true { StateBadge(state: "downloaded") }
             }
         }
+    }
+}
+
+struct FilterChip: View {
+    let label: String
+    let on: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(label).font(.caption.weight(.semibold))
+                .padding(.horizontal, 12).padding(.vertical, 6)
+                .background(on ? Color.accentColor : Color.secondary.opacity(0.15), in: Capsule())
+                .foregroundStyle(on ? Color.white : Color.secondary)
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(on ? .isSelected : [])
     }
 }

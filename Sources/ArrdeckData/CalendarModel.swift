@@ -81,6 +81,16 @@ extension LiveAPI: CalendarAPI {
 }
 
 extension CalendarItem {
+    /// The library title an entry opens: the film, the episode's show, the book.
+    public var ref: MediaRef? {
+        guard let item_id else { return nil }
+        return switch app {
+        case .radarr: .movie(item_id)
+        case .sonarr: .series(item_id)
+        case .readarr: .book(item_id)
+        }
+    }
+
     /// The local calendar day an item lands on. A dated item without a
     /// parseable timestamp falls back to its first ten characters.
     public func day(calendar: Calendar = .current) -> String? {
@@ -120,10 +130,28 @@ public final class CalendarModel {
     public var range: CalendarRange { CalendarRange.range(view, offset: offset, now: now(), calendar: calendar) }
     public var today: String { CalendarRange.isoDay(now(), calendar: calendar) }
 
-    /// Every dated item in the window, earliest first.
+    /// Apps left out, and whether what is already on disk is left out too.
+    /// Both persist: a calendar is usually opened for the same question.
+    public var hiddenApps: Set<ArrApp> = CalendarModel.storedHiddenApps() {
+        didSet { UserDefaults.standard.set(hiddenApps.map(\.rawValue), forKey: "calendar.hiddenApps") }
+    }
+    public var hideDownloaded = UserDefaults.standard.bool(forKey: "calendar.hideDownloaded") {
+        didSet { UserDefaults.standard.set(hideDownloaded, forKey: "calendar.hideDownloaded") }
+    }
+
+    static func storedHiddenApps() -> Set<ArrApp> {
+        Set((UserDefaults.standard.stringArray(forKey: "calendar.hiddenApps") ?? []).compactMap(ArrApp.init(rawValue:)))
+    }
+
+    /// The apps the window has an answer from, for the filter chips.
+    public var apps: [ArrApp] { ArrApp.allCases.filter { blocks.value?[$0] != nil } }
+
+    /// Every dated item in the window that passes the filters, earliest first.
     public var items: [CalendarItem] {
-        (blocks.value.map { blocks in ArrApp.allCases.flatMap { blocks[$0]?.value ?? [] } } ?? [])
-            .filter { $0.date != nil }
+        (blocks.value.map { blocks in
+            ArrApp.allCases.filter { !hiddenApps.contains($0) }.flatMap { blocks[$0]?.value ?? [] }
+        } ?? [])
+            .filter { $0.date != nil && !(hideDownloaded && $0.has_file == true) }
             .sorted { ($0.date ?? "") < ($1.date ?? "") }
     }
 

@@ -6,6 +6,9 @@ import OpenAPIRuntime
 public typealias LibraryMovie = Components.Schemas.LibraryMovieOut
 public typealias LibrarySeries = Components.Schemas.LibrarySeriesOut
 public typealias LibraryBook = Components.Schemas.LibraryBookOut
+public typealias NextEpisode = Components.Schemas.NextEpisodeOut
+public typealias SeasonProgress = Components.Schemas.SeasonProgressOut
+public typealias ShelfSeries = Components.Schemas.ShelfSeriesOut
 public typealias LibraryTag = Components.Schemas.TagOut
 public typealias Indexer = Components.Schemas.IndexerOut
 public typealias ServiceStatus = Components.Schemas.ServiceStatus
@@ -50,6 +53,9 @@ public struct LibraryRow: Identifiable, Hashable, Sendable {
     public var network: String?
     /// The arr's own URL segment, for "Open in Radarr".
     public var slug: String?
+    /// Shows only: the next episode on the calendar and the season it is in.
+    public var nextEpisode: NextEpisode?
+    public var currentSeason: SeasonProgress?
 
     /// What "dim" and "hide" apply to. A show is unmonitored by its flag; a film
     /// or a book only when it is neither wanted nor on disk, the way the PWA
@@ -114,6 +120,8 @@ public struct LibraryRow: Identifiable, Hashable, Sendable {
         network = series.network
         rating = series.rating
         slug = series.slug
+        nextEpisode = series.next_episode
+        currentSeason = series.current_season
     }
 }
 
@@ -181,6 +189,16 @@ public enum LibrarySorting {
 
     /// Whether a sort reads alphabetically, so a letter index makes sense.
     public static func isAlphabetical(_ sort: LibrarySort) -> Bool { sort == .title || sort == .author }
+
+    /// "Up next": shows with an episode coming, soonest first, then the rest
+    /// by title.
+    public static func upNext(_ rows: [LibraryRow]) -> (airing: [LibraryRow], idle: [LibraryRow]) {
+        let airing = rows.filter { $0.nextEpisode?.air_date != nil }
+            .sorted { ($0.nextEpisode?.air_date ?? .distantFuture) < ($1.nextEpisode?.air_date ?? .distantFuture) }
+        let idle = rows.filter { $0.nextEpisode?.air_date == nil }
+            .sorted { $0.title.lowercased() < $1.title.lowercased() }
+        return (airing, idle)
+    }
 
     private static func isEqual(_ a: LibraryRow, _ b: LibraryRow, _ sort: LibrarySort) -> Bool {
         switch sort {

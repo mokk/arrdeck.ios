@@ -116,7 +116,7 @@ public struct ServerView: View {
             ActivityView(api: api, feed: feed, clients: model.torrentClients, hasArr: model.hasArr,
                          baseURL: controller.profile.baseURL, hasPlex: model.has("plex"), onSessionLost: sessionLost)
         case .calendar:
-            CalendarScreen(api: api, onSessionLost: sessionLost)
+            CalendarScreen(api: api, baseURL: controller.profile.baseURL, hasPlex: model.has("plex"), onSessionLost: sessionLost)
         case .settings:
             ManageView(
                 model: model, api: api, baseURL: controller.profile.baseURL,

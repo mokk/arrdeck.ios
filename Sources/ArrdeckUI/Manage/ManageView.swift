@@ -6,7 +6,7 @@ import SwiftUI
 /// on iOS a list of destinations reads better and leaves room to grow.
 public struct ManageView: View {
     let model: DashboardModel
-    let api: any ManageAPI & LibraryAPI & ExtrasAPI & IndexerAddAPI & DiscoverAPI & HistoryAPI & DownloadsAPI & WantedAPI & CalendarAPI
+    let api: any LibraryPageAPI & IndexerAddAPI & HistoryAPI & DownloadsAPI & CalendarAPI
     let baseURL: URL
     let serverName: String
     let sessionLabel: String
@@ -16,7 +16,7 @@ public struct ManageView: View {
 
     public init(
         model: DashboardModel,
-        api: any ManageAPI & LibraryAPI & ExtrasAPI & IndexerAddAPI & DiscoverAPI & HistoryAPI & DownloadsAPI & WantedAPI & CalendarAPI,
+        api: any LibraryPageAPI & IndexerAddAPI & HistoryAPI & DownloadsAPI & CalendarAPI,
         baseURL: URL, serverName: String, sessionLabel: String,
         onSessionLost: @escaping @MainActor () -> Void,
         onSwitchServer: @escaping () -> Void, onShowConnection: @escaping () -> Void

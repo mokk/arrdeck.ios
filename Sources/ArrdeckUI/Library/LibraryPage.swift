@@ -13,13 +13,13 @@ public struct LibraryPage: View {
     @AppStorage private var unmonitored: UnmonitoredMode
     let app: ArrApp
     let dashboard: DashboardModel
-    let api: any ManageAPI & LibraryAPI & ExtrasAPI & DiscoverAPI & WantedAPI
+    let api: any LibraryPageAPI
     let baseURL: URL
     let onSessionLost: @MainActor () -> Void
 
     public init(
         app: ArrApp, dashboard: DashboardModel,
-        api: any ManageAPI & LibraryAPI & ExtrasAPI & DiscoverAPI & WantedAPI,
+        api: any LibraryPageAPI,
         baseURL: URL, onSessionLost: @escaping @MainActor () -> Void
     ) {
         self.app = app
@@ -39,7 +39,7 @@ public struct LibraryPage: View {
 
     /// Letter → the first row filed under it, for the index strip.
     var letters: [(letter: String, id: Int)] {
-        guard LibrarySorting.isAlphabetical(model.sort) else { return [] }
+        guard LibrarySorting.isAlphabetical(model.sort), !layout.ownsOrder else { return [] }
         var seen = Set<String>()
         return visible.compactMap { row in
             let letter = LibrarySorting.letter(row, sort: model.sort)
@@ -72,9 +72,18 @@ public struct LibraryPage: View {
                 case let .failed(reason):
                     ErrorNote(reason).padding()
                 case let .loaded(all):
-                    if visible.isEmpty {
+                    if visible.isEmpty, layout != .collections {
                         emptyState(all: all)
                     }
+                    if layout == .upNext {
+                        UpNextList(rows: visible, baseURL: baseURL).padding(.horizontal, 16).padding(.bottom, 16)
+                    } else if layout == .shelf {
+                        ShelfView(rows: visible, query: model.query, api: api, baseURL: baseURL)
+                            .padding(.horizontal, 16).padding(.bottom, 16)
+                    } else if layout == .collections {
+                        CollectionsLibraryList(api: api, baseURL: baseURL, query: model.query)
+                            .padding(.horizontal, 16).padding(.bottom, 16)
+                    } else {
                     LibraryGrid(model: model, rows: visible, layout: layout, dimUnmonitored: unmonitored == .dim,
                                 baseURL: baseURL, progress: dashboard.queueProgress,
                                 webURL: dashboard.webURLs[app.rawValue],
@@ -82,6 +91,7 @@ public struct LibraryPage: View {
                         .padding(.leading, 16)
                         .padding(.trailing, letters.count >= LetterStrip.minimum ? 26 : 16)
                         .padding(.bottom, 16)
+                    }
                 }
             }
             .overlay(alignment: .trailing) {
@@ -112,14 +122,7 @@ public struct LibraryPage: View {
             if model.selecting { BulkBarChrome { LibraryBulkBar(model: model) { confirmingBulkDelete = true } } }
         }
         .navigationDestination(for: MediaRef.self) { ref in
-            switch ref {
-            case let .movie(id):
-                MovieDetailView(id: id, api: api, baseURL: baseURL, hasPlex: dashboard.has("plex"), onSessionLost: onSessionLost)
-            case let .series(id):
-                SeriesDetailView(id: id, api: api, baseURL: baseURL, hasPlex: dashboard.has("plex"), onSessionLost: onSessionLost)
-            case let .book(id):
-                BookDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
-            }
+            MediaDestination(ref: ref, api: api, baseURL: baseURL, hasPlex: dashboard.has("plex"), onSessionLost: onSessionLost)
         }
         .sheet(isPresented: $adding) {
             AddView(configured: dashboard.configured, api: api, baseURL: baseURL, hasPlex: dashboard.has("plex"),
@@ -205,7 +208,7 @@ public struct LibraryPage: View {
     var sortMenu: some View {
         Menu {
             Picker("Layout", selection: $layout) {
-                ForEach(LibraryLayout.allCases, id: \.self) { Text($0.label).tag($0) }
+                ForEach(LibraryLayout.options(for: app), id: \.self) { Text($0.label).tag($0) }
             }
             Picker("Sort by", selection: $model.sort) {
                 ForEach(LibrarySort.keys(for: app), id: \.self) { key in Text(key.label).tag(key) }
@@ -251,7 +254,7 @@ struct LibraryGrid: View {
                         .modifier(tap(row))
                 }
             }
-        case .list, .details:
+        default:
             LazyVStack(spacing: 0) {
                 ForEach(rows) { row in
                     LibraryListRow(row: row, app: model.app, baseURL: baseURL, details: layout == .details,

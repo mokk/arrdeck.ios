@@ -88,6 +88,28 @@ actor FakeCalendarAPI: CalendarAPI {
         #expect(first?.0 == "2026-09-01" && first?.1 == 30, "month view requests the whole month")
     }
 
+    @Test func filtersByAppAndDownloadedAndOpensTheTitle() async {
+        let api = FakeCalendarAPI(items: [
+            .init(app: .sonarr, date: "2026-09-23T04:00:00Z", has_file: true, item_id: 7, title: "Slow Horses"),
+            .init(app: .radarr, date: "2026-09-29T00:00:00Z", item_id: 3, title: "Spider-Man"),
+        ])
+        let model = model(api)
+        defer {
+            model.hiddenApps = []
+            model.hideDownloaded = false
+        }
+        await model.load()
+        #expect(model.apps == [.radarr, .sonarr])
+        model.hiddenApps = [.radarr]
+        #expect(model.items.map(\.title) == ["Slow Horses"])
+        model.hiddenApps = []
+        model.hideDownloaded = true
+        #expect(model.items.map(\.title) == ["Spider-Man"])
+        #expect(model.items.first?.ref == .movie(3))
+        #expect(CalendarItem(app: .sonarr, item_id: 7, title: "x").ref == .series(7))
+        #expect(CalendarItem(app: .readarr, title: "no id").ref == nil)
+    }
+
     @Test func steppingAndSwitchingViewsRefetch() async throws {
         let api = FakeCalendarAPI(items: [])
         let model = model(api)

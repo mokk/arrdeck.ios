@@ -42,7 +42,7 @@ private struct LibraryDisplaySection: View {
     var body: some View {
         Section(title) {
             Picker("Layout", selection: $layout) {
-                ForEach(LibraryLayout.allCases, id: \.self) { Text($0.label).tag($0) }
+                ForEach(LibraryLayout.options(for: app), id: \.self) { Text($0.label).tag($0) }
             }
             Picker("Unmonitored titles", selection: $unmonitored) {
                 ForEach(UnmonitoredMode.allCases, id: \.self) { Text($0.label).tag($0) }

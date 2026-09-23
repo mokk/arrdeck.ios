@@ -8,14 +8,14 @@ import SwiftUI
 public struct DashboardView: View {
     let model: DashboardModel
     let baseURL: URL
-    let api: any DownloadsAPI & LibraryAPI & WantedAPI & CalendarAPI & HistoryAPI & ExtrasAPI
+    let api: any DownloadsAPI & CalendarAPI & HistoryAPI & LibraryPageAPI
     let onSessionLost: @MainActor () -> Void
     /// Pushed programmatically: a NavigationLink nested in the poster strip's
     /// horizontal ScrollView inside a List row never fires, a Button does.
     @State private var opened: MediaRef?
 
     public init(
-        model: DashboardModel, baseURL: URL, api: any DownloadsAPI & LibraryAPI & WantedAPI & CalendarAPI & HistoryAPI & ExtrasAPI,
+        model: DashboardModel, baseURL: URL, api: any DownloadsAPI & CalendarAPI & HistoryAPI & LibraryPageAPI,
         onSessionLost: @escaping @MainActor () -> Void
     ) {
         self.model = model
@@ -42,7 +42,7 @@ public struct DashboardView: View {
             QueueSection(model: model)
             if model.hasArr {
                 CalendarSection(model: model) {
-                    CalendarScreen(api: api, onSessionLost: onSessionLost)
+                    CalendarScreen(api: api, baseURL: baseURL, hasPlex: model.has("plex"), onSessionLost: onSessionLost)
                 }
                 StorageSection(model: model)
             }

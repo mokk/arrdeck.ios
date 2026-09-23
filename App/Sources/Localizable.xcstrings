@@ -51,6 +51,16 @@
         }
       }
     },
+    "%lld books": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld bøger"
+          }
+        }
+      }
+    },
     "%lld grabs": {
       "localizations": {
         "da": {
@@ -572,6 +582,16 @@
         }
       }
     },
+    "Authors": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forfattere"
+          }
+        }
+      }
+    },
     "Back": {
       "localizations": {
         "da": {
@@ -638,6 +658,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bøger (%lld)"
+          }
+        }
+      }
+    },
+    "Bookshelf": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bogreol"
           }
         }
       }
@@ -1166,7 +1196,6 @@
       }
     },
     "Ended": {
-      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -1398,12 +1427,32 @@
         }
       }
     },
+    "Group by": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gruppér efter"
+          }
+        }
+      }
+    },
     "Hide": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Skjul"
+          }
+        }
+      }
+    },
+    "Hide downloaded": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skjul hentede"
           }
         }
       }
@@ -1642,6 +1691,16 @@
         }
       }
     },
+    "Missing: %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mangler: %@"
+          }
+        }
+      }
+    },
     "Monitor": {
       "localizations": {
         "da": {
@@ -1862,6 +1921,16 @@
         }
       }
     },
+    "Not airing (%lld)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sendes ikke (%lld)"
+          }
+        }
+      }
+    },
     "Not an arrdeck: %@": {
       "localizations": {
         "da": {
@@ -1898,6 +1967,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Intet nyt siden du sidst kiggede"
+          }
+        }
+      }
+    },
+    "Nothing scheduled": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intet planlagt"
           }
         }
       }
@@ -3012,6 +3091,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Op (KiB/s, 0 = ∞)"
+          }
+        }
+      }
+    },
+    "Up next": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Næste afsnit"
           }
         }
       }

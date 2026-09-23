@@ -26,6 +26,18 @@ import Testing
         #expect(LibraryRow(LibrarySeries(id: 5, monitored: false, status: "ended")).isUnmonitored)
     }
 
+    @Test func upNextPutsAiringShowsFirstSoonestFirst() {
+        let later = LibraryRow(LibrarySeries(id: 1, next_episode: .init(air_date: Date(timeIntervalSince1970: 2_000), episode: 1, season: 1), title: "Later"))
+        let sooner = LibraryRow(LibrarySeries(id: 2, next_episode: .init(air_date: Date(timeIntervalSince1970: 1_000), episode: 4, season: 3), title: "Sooner"))
+        let idle = LibraryRow(LibrarySeries(id: 3, title: "Idle"))
+        let split = LibrarySorting.upNext([later, idle, sooner])
+        #expect(split.airing.map(\.id) == [2, 1])
+        #expect(split.idle.map(\.id) == [3])
+        #expect(LibraryLayout.options(for: .sonarr).contains(.upNext))
+        #expect(!LibraryLayout.options(for: .radarr).contains(.shelf))
+        #expect(LibraryLayout.shelf.ownsOrder && !LibraryLayout.list.ownsOrder)
+    }
+
     @Test func detailFactsAreCarried() {
         let row = LibraryRow(LibraryMovie(id: 1, quality: "WEBDL-2160p", rating: 7.4, slug: "1078605"))
         #expect(row.quality == "WEBDL-2160p" && row.rating == 7.4 && row.slug == "1078605")
