@@ -281,12 +281,32 @@
         }
       }
     },
+    "Add %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj %@"
+          }
+        }
+      }
+    },
     "Add & search": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Tilføj & søg"
+          }
+        }
+      }
+    },
+    "Add indexer": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj indexer"
           }
         }
       }
@@ -1167,6 +1187,16 @@
         }
       }
     },
+    "Loading definitions…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indlæser definitioner…"
+          }
+        }
+      }
+    },
     "Loading…": {
       "localizations": {
         "da": {
@@ -1327,6 +1357,17 @@
         }
       }
     },
+    "No matches": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen match"
+          }
+        }
+      }
+    },
     "No services configured": {
       "localizations": {
         "da": {
@@ -1424,6 +1465,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fysisk"
+          }
+        }
+      }
+    },
+    "Pick a Prowlarr indexer definition": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg en Prowlarr-indexerdefinition"
           }
         }
       }
@@ -1705,6 +1756,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Søg alle"
+          }
+        }
+      }
+    },
+    "Search indexers…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg efter indexere…"
           }
         }
       }
@@ -2055,6 +2116,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Test den gemte forbindelse"
+          }
+        }
+      }
+    },
+    "Testing…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tester…"
           }
         }
       }
@@ -2610,6 +2681,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "ok: gemt"
+          }
+        }
+      }
+    },
+    "ok: test passed": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ok: test bestået"
           }
         }
       }

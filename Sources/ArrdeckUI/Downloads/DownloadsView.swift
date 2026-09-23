@@ -111,10 +111,11 @@ public struct DownloadsView: View {
         .refreshable { await model.refresh() }
         .task { await model.run() }
         .navigationTitle("Downloads")
+        .safeAreaInset(edge: .bottom) {
+            // Above the tab bar: a bottomBar toolbar item lands behind it.
+            if model.selecting { BulkBarChrome { bulkBar } }
+        }
         .toolbar {
-            if model.selecting {
-                ToolbarItemGroup(placement: .bulkBar) { bulkBar }
-            }
             ToolbarItemGroup(placement: .automatic) {
                 Button(model.selecting ? "Done" : "Select") { model.selecting.toggle() }
                     .accessibilityIdentifier("select")

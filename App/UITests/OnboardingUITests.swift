@@ -167,6 +167,14 @@ final class OnboardingUITests: XCTestCase {
         let manage = app.descendants(matching: .any)["manage"].firstMatch
         XCTAssert(manage.waitForExistence(timeout: 10), "manage hub never appeared")
         snap("manage")
+        // The add-indexer sheet loads Prowlarr's definitions, then cancels.
+        app.buttons["manage-indexers"].tap()
+        XCTAssert(app.buttons["add-indexer"].waitForExistence(timeout: 10), "indexers screen never appeared")
+        app.buttons["add-indexer"].tap()
+        XCTAssert(app.staticTexts["Pick a Prowlarr indexer definition"].waitForExistence(timeout: 30), "definitions never loaded")
+        snap("add-indexer")
+        app.buttons["Cancel"].tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
         app.buttons["manage-system"].tap()
         XCTAssert(app.staticTexts["Scheduled tasks"].waitForExistence(timeout: 20), "system screen never loaded")
         snap("system")

@@ -161,15 +161,19 @@ struct Sparkline: View {
     }
 }
 
-extension ToolbarItemPlacement {
-    /// The bulk bar sits at the bottom on iOS; macOS has no bottom bar and
-    /// only needs to compile.
-    static var bulkBar: ToolbarItemPlacement {
-        #if os(iOS)
-        .bottomBar
-        #else
-        .automatic
-        #endif
+/// The floating bar select mode puts above the tab bar. A `.bottomBar`
+/// toolbar item would render behind the tabs inside a TabView.
+struct BulkBarChrome<Content: View>: View {
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        HStack(spacing: 12) { content() }
+            .font(.subheadline)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(.bar, in: Capsule())
+            .padding(.horizontal, 16)
+            .padding(.bottom, 6)
     }
 }
 

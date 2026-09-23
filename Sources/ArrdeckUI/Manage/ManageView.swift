@@ -6,11 +6,11 @@ import SwiftUI
 /// on iOS a list of destinations reads better and leaves room to grow.
 public struct ManageView: View {
     let model: DashboardModel
-    let api: any ManageAPI & LibraryAPI & ExtrasAPI
+    let api: any ManageAPI & LibraryAPI & ExtrasAPI & IndexerAddAPI
     let baseURL: URL
     let onSessionLost: @MainActor () -> Void
 
-    public init(model: DashboardModel, api: any ManageAPI & LibraryAPI & ExtrasAPI, baseURL: URL, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(model: DashboardModel, api: any ManageAPI & LibraryAPI & ExtrasAPI & IndexerAddAPI, baseURL: URL, onSessionLost: @escaping @MainActor () -> Void) {
         self.model = model
         self.api = api
         self.baseURL = baseURL
@@ -103,10 +103,10 @@ struct LibraryListView: View {
         .dashboardListStyle()
         .searchable(text: $model.query, prompt: model.app == .radarr ? "Filter movies…" : "Filter series…")
         .navigationTitle(model.app == .radarr ? "Movies" : "Series")
+        .safeAreaInset(edge: .bottom) {
+            if model.selecting { BulkBarChrome { LibraryBulkBar(model: model) { confirmingBulkDelete = true } } }
+        }
         .toolbar {
-            if model.selecting {
-                ToolbarItemGroup(placement: .bulkBar) { LibraryBulkBar(model: model) { confirmingBulkDelete = true } }
-            }
             ToolbarItemGroup(placement: .automatic) {
                 Button(model.selecting ? "Done" : "Select") { model.selecting.toggle() }
                 tagMenu
@@ -240,8 +240,13 @@ struct LibraryBulkBar: View {
 
 struct IndexersView: View {
     @State private var model: IndexersModel
+    @State private var adding = false
+    let api: any ManageAPI & IndexerAddAPI
+    let onSessionLost: @MainActor () -> Void
 
-    init(api: any ManageAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    init(api: any ManageAPI & IndexerAddAPI, onSessionLost: @escaping @MainActor () -> Void) {
+        self.api = api
+        self.onSessionLost = onSessionLost
         _model = State(initialValue: IndexersModel(api: api, onSessionLost: onSessionLost))
     }
 
@@ -281,6 +286,16 @@ struct IndexersView: View {
         }
         .dashboardListStyle()
         .navigationTitle("Indexers")
+        .toolbar {
+            Button { adding = true } label: { Label("Add indexer", systemImage: "plus") }
+                .accessibilityIdentifier("add-indexer")
+        }
+        .sheet(isPresented: $adding) {
+            AddIndexerSheet(api: api, onSessionLost: onSessionLost) {
+                adding = false
+                Task { await model.load() }
+            }
+        }
         .task { await model.load() }
         .refreshable { await model.load() }
         .alert("Action failed", isPresented: Binding(get: { model.actionError != nil }, set: { if !$0 { model.actionError = nil } })) {
