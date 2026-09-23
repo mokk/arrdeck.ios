@@ -8,14 +8,14 @@ import SwiftUI
 public struct DashboardView: View {
     let model: DashboardModel
     let baseURL: URL
-    let api: any DownloadsAPI & LibraryAPI
+    let api: any DownloadsAPI & LibraryAPI & WantedAPI
     let onSessionLost: @MainActor () -> Void
     /// Pushed programmatically: a NavigationLink nested in the poster strip's
     /// horizontal ScrollView inside a List row never fires, a Button does.
     @State private var opened: MediaRef?
 
     public init(
-        model: DashboardModel, baseURL: URL, api: any DownloadsAPI & LibraryAPI,
+        model: DashboardModel, baseURL: URL, api: any DownloadsAPI & LibraryAPI & WantedAPI,
         onSessionLost: @escaping @MainActor () -> Void
     ) {
         self.model = model
@@ -58,6 +58,17 @@ public struct DashboardView: View {
         .navigationDestination(for: MediaRef.self) { ref in destination(ref) }
         .navigationDestination(item: $opened) { ref in destination(ref) }
         .toolbar {
+            if model.hasArr {
+                NavigationLink {
+                    WantedView(
+                        api: api, apps: ArrApp.allCases.filter { model.has($0.rawValue) },
+                        baseURL: baseURL, hasPlex: model.has("plex"), onSessionLost: onSessionLost
+                    )
+                } label: {
+                    Label("Wanted", systemImage: "magnifyingglass.circle")
+                }
+                .accessibilityIdentifier("wanted-link")
+            }
             NavigationLink {
                 DownloadsView(
                     api: api, clients: model.torrentClients, hasArr: model.hasArr,

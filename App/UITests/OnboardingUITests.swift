@@ -105,6 +105,17 @@ final class OnboardingUITests: XCTestCase {
         snap("detail")
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
+        // Into Wanted: the missing list for the first arr, with its count.
+        app.buttons["wanted-link"].tap()
+        let wanted = app.descendants(matching: .any)["wanted"].firstMatch
+        XCTAssert(wanted.waitForExistence(timeout: 10), "wanted screen never appeared")
+        let wantedCount = app.staticTexts.matching(
+            NSPredicate(format: "label MATCHES '[0-9]+ items'")
+        ).firstMatch
+        XCTAssert(wantedCount.waitForExistence(timeout: 20), "wanted list never loaded")
+        snap("wanted")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
         // Relaunch: the profile must come back from the Keychain, not from
         // memory — and being the only one, it opens straight to its dashboard.
         // The first version of this test asserted only in-memory state and
