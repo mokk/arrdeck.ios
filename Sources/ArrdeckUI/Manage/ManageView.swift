@@ -97,6 +97,11 @@ public struct ManageView: View {
                         SystemView(configured: model.configured, api: api, onSessionLost: onSessionLost)
                     } label: { Label("System", systemImage: "gearshape.2") }
                     .accessibilityIdentifier("manage-system")
+                    if model.has("readarr"), let opds = api as? any OpdsAPI {
+                        NavigationLink {
+                            OpdsSettingsView(api: opds, baseURL: baseURL)
+                        } label: { Label("Reading apps (OPDS)", systemImage: "books.vertical") }
+                    }
                 }
             }
             Section {

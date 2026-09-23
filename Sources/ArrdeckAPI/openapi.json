@@ -2502,6 +2502,26 @@
         "title": "NextEpisodeOut",
         "type": "object"
       },
+      "OpdsSettingsOut": {
+        "properties": {
+          "available": {
+            "default": false,
+            "title": "Available",
+            "type": "boolean"
+          },
+          "enabled": {
+            "default": false,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "title": "OpdsSettingsOut",
+        "type": "object"
+      },
       "OptionsOut": {
         "properties": {
           "metadata_profiles": {
@@ -3211,6 +3231,48 @@
           "sonarr"
         ],
         "title": "QueueResponse",
+        "type": "object"
+      },
+      "ReadingIn": {
+        "properties": {
+          "status": {
+            "enum": [
+              "to_read",
+              "reading",
+              "read"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "title": "ReadingIn",
+        "type": "object"
+      },
+      "ReadingOut": {
+        "properties": {
+          "finished_at": {
+            "title": "Finished At",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "to_read",
+              "reading",
+              "read"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at": {
+            "default": 0,
+            "title": "Updated At",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "ReadingOut",
         "type": "object"
       },
       "RecentItemOut": {
@@ -7225,6 +7287,31 @@
         ]
       }
     },
+    "/api/v1/library/books/reading": {
+      "get": {
+        "operationId": "reading_api_v1_library_books_reading_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/ReadingOut"
+                  },
+                  "title": "Response Reading Api V1 Library Books Reading Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Reading",
+        "tags": [
+          "library"
+        ]
+      }
+    },
     "/api/v1/library/books/shelf": {
       "get": {
         "operationId": "book_shelf_api_v1_library_books_shelf_get",
@@ -7437,6 +7524,62 @@
           }
         },
         "summary": "Download Book File",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/library/books/{book_id}/reading": {
+      "put": {
+        "operationId": "set_reading_api_v1_library_books__book_id__reading_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "book_id",
+            "required": true,
+            "schema": {
+              "title": "Book Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/ReadingOut"
+                  },
+                  "title": "Response Set Reading Api V1 Library Books  Book Id  Reading Put",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Reading",
         "tags": [
           "library"
         ]
@@ -8545,6 +8688,68 @@
         "summary": "Add Movie",
         "tags": [
           "discover"
+        ]
+      }
+    },
+    "/api/v1/opds/settings": {
+      "get": {
+        "operationId": "opds_settings_api_v1_opds_settings_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpdsSettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Opds Settings",
+        "tags": [
+          "settings"
+        ]
+      }
+    },
+    "/api/v1/opds/settings/token": {
+      "delete": {
+        "operationId": "opds_disable_api_v1_opds_settings_token_delete",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpdsSettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Opds Disable",
+        "tags": [
+          "settings"
+        ]
+      },
+      "post": {
+        "description": "Turns the feed on, or replaces its secret: the old URL stops working.",
+        "operationId": "opds_new_token_api_v1_opds_settings_token_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpdsSettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Opds New Token",
+        "tags": [
+          "settings"
         ]
       }
     },

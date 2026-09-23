@@ -10,6 +10,8 @@ public struct LibraryPage: View {
     @State private var deleting: LibraryRow?
     @State private var confirmingBulkDelete = false
     @State private var requests: [String: RequestState] = [:]
+    @State private var reading: [Int: Reading] = [:]
+    @AppStorage("library.books.reading") private var readingFilter = ""
     @AppStorage private var layout: LibraryLayout
     @AppStorage private var unmonitored: UnmonitoredMode
     let app: ArrApp
@@ -33,9 +35,25 @@ public struct LibraryPage: View {
         _unmonitored = AppStorage(wrappedValue: .show, DisplayKeys.unmonitored(app))
     }
 
-    /// The sorted rows minus the unmonitored ones when those are hidden.
+    /// The sorted rows minus the unmonitored ones when those are hidden, and
+    /// for books those outside the chosen reading status.
     var visible: [LibraryRow] {
-        unmonitored == .hide ? model.shown.filter { !$0.isUnmonitored } : model.shown
+        var rows = unmonitored == .hide ? model.shown.filter { !$0.isUnmonitored } : model.shown
+        if app == .readarr, !readingFilter.isEmpty {
+            rows = rows.filter { reading[$0.id]?.status.rawValue == readingFilter }
+        }
+        return rows
+    }
+
+    /// Books being read now, for the row above the library.
+    var nowReading: [LibraryRow] {
+        guard app == .readarr, model.query.isEmpty, layout != .shelf else { return [] }
+        return model.shown.filter { reading[$0.id]?.readingStatus == .reading }
+    }
+
+    func loadReading() async {
+        guard app == .readarr, let source = api as? any ReadingAPI else { return }
+        reading = (try? await source.reading()) ?? reading
     }
 
     /// The order a detail page steps through: the list as it is shown.
@@ -82,6 +100,9 @@ public struct LibraryPage: View {
                 case let .failed(reason):
                     ErrorNote(reason).padding()
                 case let .loaded(all):
+                    if !nowReading.isEmpty {
+                        NowReadingStrip(rows: nowReading, baseURL: baseURL)
+                    }
                     if visible.isEmpty, layout != .collections {
                         emptyState(all: all)
                     }
@@ -163,6 +184,8 @@ public struct LibraryPage: View {
         }
         .task { await model.load() }
         .task { await loadRequests() }
+        // again on returning from a book, where the status may have changed
+        .onAppear { Task { await loadReading() } }
         .refreshable {
             await model.load()
             await loadRequests()
@@ -230,6 +253,12 @@ public struct LibraryPage: View {
         Menu {
             Picker("Layout", selection: $layout) {
                 ForEach(LibraryLayout.options(for: app), id: \.self) { Text($0.label).tag($0) }
+            }
+            if app == .readarr {
+                Picker("Reading status", selection: $readingFilter) {
+                    Text("Any status").tag("")
+                    ForEach(ReadingStatus.allCases, id: \.self) { Text($0.label).tag($0.rawValue) }
+                }
             }
             Picker("Sort by", selection: $model.sort) {
                 ForEach(LibrarySort.keys(for: app), id: \.self) { key in Text(key.label).tag(key) }
@@ -576,5 +605,32 @@ extension SearchFieldPlacement {
         #else
         .automatic
         #endif
+    }
+}
+
+/// The books being read now, above the Books tab's list.
+struct NowReadingStrip: View {
+    let rows: [LibraryRow]
+    let baseURL: URL
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Currently reading").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(alignment: .top, spacing: 12) {
+                    ForEach(rows) { row in
+                        NavigationLink(value: row.ref) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Poster(path: row.poster, baseURL: baseURL, width: 80, cornerRadius: 8, title: row.title)
+                                Text(row.title).font(.caption2).lineLimit(1).frame(width: 80, alignment: .leading)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 12)
     }
 }

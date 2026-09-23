@@ -52,6 +52,9 @@ public struct BookDetailView: View {
                 DetailActions(model: model, monitored: book.monitored ?? false) {
                     Button("Interactive search") { searching = true }
                 }
+                if let reading = api as? any ReadingAPI {
+                    ReadingSection(bookID: book.id, api: reading)
+                }
                 Section("File") {
                     if let files = book.files, !files.isEmpty {
                         ForEach(files, id: \.id) { file in

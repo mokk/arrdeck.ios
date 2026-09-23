@@ -592,6 +592,26 @@
         }
       }
     },
+    "Any status": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle"
+          }
+        }
+      }
+    },
+    "Anyone with this address can download your books — treat it like a password.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle med adressen kan hente dine bøger — behandl den som en adgangskode."
+          }
+        }
+      }
+    },
     "Apply": {
       "localizations": {
         "da": {
@@ -812,6 +832,16 @@
         }
       }
     },
+    "Catalogue address": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Katalogets adresse"
+          }
+        }
+      }
+    },
     "Category": {
       "localizations": {
         "da": {
@@ -964,6 +994,16 @@
         }
       }
     },
+    "Copy address": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopiér adresse"
+          }
+        }
+      }
+    },
     "Could not reach it: %@": {
       "localizations": {
         "da": {
@@ -980,6 +1020,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kunne ikke opdatere — %@"
+          }
+        }
+      }
+    },
+    "Currently reading": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Læser nu"
           }
         }
       }
@@ -1336,6 +1386,16 @@
         }
       }
     },
+    "E-reader apps such as KOReader, Moon+ Reader or Thorium can browse the books on disk here and download them. Add the address to the app as an OPDS catalogue.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "E-bogsapps som KOReader, Moon+ Reader eller Thorium kan gennemse bøgerne på disken her og hente dem. Tilføj adressen i appen som et OPDS-katalog."
+          }
+        }
+      }
+    },
     "Edit": {
       "localizations": {
         "da": {
@@ -1534,6 +1594,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Filtre"
+          }
+        }
+      }
+    },
+    "Finished %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Færdig %@"
           }
         }
       }
@@ -2162,6 +2232,16 @@
         }
       }
     },
+    "New address": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ny adresse"
+          }
+        }
+      }
+    },
     "New books": {
       "localizations": {
         "da": {
@@ -2644,6 +2724,16 @@
         }
       }
     },
+    "Read": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Læst"
+          }
+        }
+      }
+    },
     "Readarr support is on its way.": {
       "extractionState": "manual",
       "localizations": {
@@ -2651,6 +2741,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Understøttelse af Readarr er på vej."
+          }
+        }
+      }
+    },
+    "Reading": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Læser"
+          }
+        }
+      }
+    },
+    "Reading apps": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Læseapps"
+          }
+        }
+      }
+    },
+    "Reading apps (OPDS)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Læseapps (OPDS)"
+          }
+        }
+      }
+    },
+    "Reading status": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Læsestatus"
           }
         }
       }
@@ -3167,6 +3297,16 @@
         }
       }
     },
+    "Share": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Del"
+          }
+        }
+      }
+    },
     "Show": {
       "localizations": {
         "da": {
@@ -3487,6 +3627,16 @@
         }
       }
     },
+    "The catalogue needs arrdeck's build of Readarr, which can serve book files.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kataloget kræver arrdecks udgave af Readarr, som kan udlevere bogfiler."
+          }
+        }
+      }
+    },
     "The download failed and is stuck in the queue: {reason}": {
       "localizations": {
         "da": {
@@ -3503,6 +3653,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Downloadet er gået i stå ({state}) — ingen data flytter sig."
+          }
+        }
+      }
+    },
+    "The old address stops working; every reading app needs the new one.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den gamle adresse holder op med at virke; alle læseapps skal have den nye."
           }
         }
       }
@@ -3568,6 +3728,16 @@
         }
       }
     },
+    "To read": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skal læses"
+          }
+        }
+      }
+    },
     "Top": {
       "localizations": {
         "da": {
@@ -3614,6 +3784,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Prøv igen"
+          }
+        }
+      }
+    },
+    "Turn off": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slå fra"
+          }
+        }
+      }
+    },
+    "Turn on the catalogue": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slå kataloget til"
           }
         }
       }

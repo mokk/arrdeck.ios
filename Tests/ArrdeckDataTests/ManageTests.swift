@@ -355,3 +355,13 @@ struct FakeCleanupAPI: CleanupAPI {
     func cleanup(watchedDays: Int) async throws -> CleanupLists { CleanupLists() }
     func deleteForCleanup(_ app: ArrApp, ids: [Int], exclude: Bool) async throws {}
 }
+
+@Suite struct ReadingTests {
+    @Test func statusesAndTheCatalogueAddress() {
+        #expect(ReadingStatus(rawValue: "to_read") == .toRead)
+        #expect(Reading(status: .reading, updated_at: 1).readingStatus == .reading)
+        let base = URL(string: "http://10.0.0.154:3500")!
+        #expect(OpdsSettings(enabled: true, token: "abc").url(on: base)?.absoluteString == "http://10.0.0.154:3500/opds/abc")
+        #expect(OpdsSettings(enabled: false).url(on: base) == nil)
+    }
+}
