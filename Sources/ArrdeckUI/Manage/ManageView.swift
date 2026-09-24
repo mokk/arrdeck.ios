@@ -97,6 +97,17 @@ public struct ManageView: View {
                         SystemView(configured: model.configured, api: api, onSessionLost: onSessionLost)
                     } label: { Label("System", systemImage: "gearshape.2") }
                     .accessibilityIdentifier("manage-system")
+                    if let tools = api as? any ToolsAPI {
+                        NavigationLink {
+                            ExclusionsView(api: tools)
+                        } label: { Label("Exclusions", systemImage: "nosign") }
+                        let parseApps = [ArrApp.radarr, .sonarr].filter { model.has($0.rawValue) }
+                        if !parseApps.isEmpty {
+                            NavigationLink {
+                                ParseView(api: tools, apps: parseApps)
+                            } label: { Label("Release name tester", systemImage: "flask") }
+                        }
+                    }
                     if model.has("readarr"), let opds = api as? any OpdsAPI {
                         NavigationLink {
                             OpdsSettingsView(api: opds, baseURL: baseURL)

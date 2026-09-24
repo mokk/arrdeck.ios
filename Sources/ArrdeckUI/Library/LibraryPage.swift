@@ -104,11 +104,14 @@ public struct LibraryPage: View {
                     if !nowReading.isEmpty {
                         NowReadingStrip(rows: nowReading, baseURL: baseURL)
                     }
-                    if visible.isEmpty, layout != .collections {
+                    if visible.isEmpty, layout != .collections, layout != .seasons {
                         emptyState(all: all)
                     }
                     if layout == .upNext {
                         UpNextList(rows: visible, baseURL: baseURL).padding(.horizontal, 16).padding(.bottom, 16)
+                    } else if layout == .seasons {
+                        SeasonGridView(api: api, baseURL: baseURL, query: model.query)
+                            .padding(.horizontal, 16).padding(.bottom, 16)
                     } else if layout == .shelf {
                         ShelfView(rows: visible, query: model.query, api: api, baseURL: baseURL)
                             .padding(.horizontal, 16).padding(.bottom, 16)

@@ -1493,6 +1493,41 @@
         "title": "EpisodeSubtitlesOut",
         "type": "object"
       },
+      "ExclusionOut": {
+        "properties": {
+          "app": {
+            "enum": [
+              "radarr",
+              "sonarr",
+              "readarr"
+            ],
+            "title": "App",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "remote_id": {
+            "title": "Remote Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "app",
+          "id"
+        ],
+        "title": "ExclusionOut",
+        "type": "object"
+      },
       "GrabIn": {
         "properties": {
           "guid": {
@@ -2568,6 +2603,111 @@
           "root_folders"
         ],
         "title": "OptionsOut",
+        "type": "object"
+      },
+      "ParseOut": {
+        "description": "How an arr reads a release name, and what it would do with it.",
+        "properties": {
+          "app": {
+            "enum": [
+              "radarr",
+              "sonarr"
+            ],
+            "title": "App",
+            "type": "string"
+          },
+          "custom_format_score": {
+            "default": 0,
+            "title": "Custom Format Score",
+            "type": "integer"
+          },
+          "custom_formats": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Custom Formats",
+            "type": "array"
+          },
+          "edition": {
+            "title": "Edition",
+            "type": "string"
+          },
+          "episodes": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Episodes",
+            "type": "array"
+          },
+          "full_season": {
+            "default": false,
+            "title": "Full Season",
+            "type": "boolean"
+          },
+          "languages": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Languages",
+            "type": "array"
+          },
+          "match_episodes": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Match Episodes",
+            "type": "array"
+          },
+          "match_id": {
+            "title": "Match Id",
+            "type": "integer"
+          },
+          "match_title": {
+            "title": "Match Title",
+            "type": "string"
+          },
+          "parsed_title": {
+            "title": "Parsed Title",
+            "type": "string"
+          },
+          "quality": {
+            "title": "Quality",
+            "type": "string"
+          },
+          "release_group": {
+            "title": "Release Group",
+            "type": "string"
+          },
+          "resolution": {
+            "title": "Resolution",
+            "type": "integer"
+          },
+          "season": {
+            "title": "Season",
+            "type": "integer"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "app",
+          "title"
+        ],
+        "title": "ParseOut",
         "type": "object"
       },
       "PersonMovieOut": {
@@ -3709,6 +3849,72 @@
           "remote_id"
         ],
         "title": "SearchResultOut",
+        "type": "object"
+      },
+      "SeasonCellOut": {
+        "properties": {
+          "have": {
+            "default": 0,
+            "title": "Have",
+            "type": "integer"
+          },
+          "monitored": {
+            "default": false,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "number"
+        ],
+        "title": "SeasonCellOut",
+        "type": "object"
+      },
+      "SeasonGridOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "monitored": {
+            "default": false,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "poster": {
+            "title": "Poster",
+            "type": "string"
+          },
+          "seasons": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/SeasonCellOut"
+            },
+            "title": "Seasons",
+            "type": "array"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "SeasonGridOut",
         "type": "object"
       },
       "SeasonOut": {
@@ -6782,6 +6988,77 @@
         ]
       }
     },
+    "/api/v1/exclusions": {
+      "get": {
+        "description": "Everything the arrs keep off their lists, newest first.",
+        "operationId": "exclusions_api_v1_exclusions_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ExclusionOut"
+                  },
+                  "title": "Response Exclusions Api V1 Exclusions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Exclusions",
+        "tags": [
+          "tools"
+        ]
+      }
+    },
+    "/api/v1/exclusions/{app}/{exclusion_id}": {
+      "delete": {
+        "description": "Let the lists add it again.",
+        "operationId": "remove_exclusion_api_v1_exclusions__app___exclusion_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app",
+            "required": true,
+            "schema": {
+              "title": "App",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "exclusion_id",
+            "required": true,
+            "schema": {
+              "title": "Exclusion Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Remove Exclusion",
+        "tags": [
+          "tools"
+        ]
+      }
+    },
     "/api/v1/health": {
       "get": {
         "description": "Radarr and Sonarr's own health checks. Prowlarr's are already shown on\nthe indexer card, so they're deliberately left out of this list.",
@@ -8050,6 +8327,32 @@
         ]
       }
     },
+    "/api/v1/library/series/seasons": {
+      "get": {
+        "description": "Every show with its seasons, for monitoring many at once.",
+        "operationId": "season_grid_api_v1_library_series_seasons_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SeasonGridOut"
+                  },
+                  "title": "Response Season Grid Api V1 Library Series Seasons Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Season Grid",
+        "tags": [
+          "tools"
+        ]
+      }
+    },
     "/api/v1/library/series/{series_id}": {
       "delete": {
         "operationId": "delete_series_api_v1_library_series__series_id__delete",
@@ -8879,6 +9182,58 @@
         "summary": "Options",
         "tags": [
           "discover"
+        ]
+      }
+    },
+    "/api/v1/parse/{app}": {
+      "get": {
+        "description": "What Radarr or Sonarr makes of a release name: title, quality, custom\nformats and score, and which library title it would go to.",
+        "operationId": "parse_api_v1_parse__app__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app",
+            "required": true,
+            "schema": {
+              "title": "App",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "required": true,
+            "schema": {
+              "title": "Title",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Parse",
+        "tags": [
+          "tools"
         ]
       }
     },

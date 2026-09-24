@@ -5,7 +5,7 @@ import Foundation
 public enum LibraryLayout: String, CaseIterable, Sendable, Hashable {
     case posters, list, details
     /// Shows in airing order; books as series with their gaps; Radarr's collections.
-    case upNext = "upnext", shelf, collections
+    case upNext = "upnext", seasons, shelf, collections
 
     public var label: String {
         switch self {
@@ -13,6 +13,7 @@ public enum LibraryLayout: String, CaseIterable, Sendable, Hashable {
         case .list: String(localized: "List")
         case .details: String(localized: "Details")
         case .upNext: String(localized: "Up next")
+        case .seasons: String(localized: "Season grid")
         case .shelf: String(localized: "Bookshelf")
         case .collections: String(localized: "Collections")
         }
@@ -22,13 +23,13 @@ public enum LibraryLayout: String, CaseIterable, Sendable, Hashable {
     public static func options(for app: ArrApp) -> [LibraryLayout] {
         switch app {
         case .radarr: [.posters, .list, .details, .collections]
-        case .sonarr: [.posters, .list, .details, .upNext]
+        case .sonarr: [.posters, .list, .details, .upNext, .seasons]
         case .readarr: [.posters, .list, .details, .shelf]
         }
     }
 
     /// The views that bring their own order, so sort and the letter strip do not apply.
-    public var ownsOrder: Bool { self == .upNext || self == .shelf || self == .collections }
+    public var ownsOrder: Bool { self == .upNext || self == .seasons || self == .shelf || self == .collections }
 }
 
 /// What to do with titles nobody is monitoring.

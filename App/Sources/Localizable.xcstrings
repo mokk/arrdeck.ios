@@ -592,6 +592,16 @@
         }
       }
     },
+    "Allow again": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tillad igen"
+          }
+        }
+      }
+    },
     "Announced": {
       "extractionState": "manual",
       "localizations": {
@@ -1065,6 +1075,16 @@
         }
       }
     },
+    "Custom formats": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brugerdefinerede formater"
+          }
+        }
+      }
+    },
     "Custom formats: %@": {
       "localizations": {
         "da": {
@@ -1497,6 +1517,16 @@
         }
       }
     },
+    "Episode": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afsnit"
+          }
+        }
+      }
+    },
     "Episode files": {
       "localizations": {
         "da": {
@@ -1563,6 +1593,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alt her er uovervåget, og uovervågede titler er skjult."
+          }
+        }
+      }
+    },
+    "Exclusions": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Udelukkelser"
           }
         }
       }
@@ -1685,6 +1725,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tving start"
+          }
+        }
+      }
+    },
+    "Format score": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formatscore"
           }
         }
       }
@@ -2001,6 +2051,16 @@
         }
       }
     },
+    "Languages": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprog"
+          }
+        }
+      }
+    },
     "Largest": {
       "localizations": {
         "da": {
@@ -2027,6 +2087,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sidst set for mere end"
+          }
+        }
+      }
+    },
+    "Latest only": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kun seneste"
           }
         }
       }
@@ -2159,6 +2229,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Administrér"
+          }
+        }
+      }
+    },
+    "Matches %@ in the library": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Matcher %@ i biblioteket"
           }
         }
       }
@@ -2546,6 +2626,16 @@
         }
       }
     },
+    "Nothing in the library matches it.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intet i biblioteket matcher."
+          }
+        }
+      }
+    },
     "Nothing in your libraries matches.": {
       "extractionState": "manual",
       "localizations": {
@@ -2717,6 +2807,16 @@
         }
       }
     },
+    "Paste a release name to see how Radarr or Sonarr reads it: the title, quality, custom formats and score, and where it would go.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indsæt et udgivelsesnavn for at se, hvordan Radarr eller Sonarr læser det: titel, kvalitet, brugerdefinerede formater og score, og hvor det ville havne."
+          }
+        }
+      }
+    },
     "Pending requests": {
       "localizations": {
         "da": {
@@ -2805,6 +2905,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fremgang"
+          }
+        }
+      }
+    },
+    "Quality": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kvalitet"
           }
         }
       }
@@ -3016,6 +3126,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Relative (for 3 dage siden)"
+          }
+        }
+      }
+    },
+    "Release group": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Udgivelsesgruppe"
+          }
+        }
+      }
+    },
+    "Release name": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Udgivelsesnavn"
+          }
+        }
+      }
+    },
+    "Release name tester": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test af udgivelsesnavn"
           }
         }
       }
@@ -3362,12 +3502,32 @@
         }
       }
     },
+    "Season %lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sæson %lld"
+          }
+        }
+      }
+    },
     "Season finale": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Sæsonfinale"
+          }
+        }
+      }
+    },
+    "Season grid": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sæsongitter"
           }
         }
       }
@@ -3722,6 +3882,16 @@
         }
       }
     },
+    "Specials": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Specials"
+          }
+        }
+      }
+    },
     "Speed": {
       "localizations": {
         "da": {
@@ -3979,6 +4149,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Titel"
+          }
+        }
+      }
+    },
+    "Titles the arrs' lists and suggestions will not add back — from Cleanup, Not interested, or the arrs themselves.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Titler, som arr-lister og forslag ikke tilføjer igen — fra Oprydning, Ikke interesseret eller arr-apperne selv."
           }
         }
       }
@@ -4501,6 +4681,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "ustabil · %lld forsøg"
+          }
+        }
+      }
+    },
+    "full season": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "hel sæson"
           }
         }
       }
