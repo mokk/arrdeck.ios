@@ -388,6 +388,8 @@ struct PosterGrid: View {
 struct MediaSheet: View {
     @State private var model: MediaSheetModel
     @State private var confirmingDelete = false
+    /// The last monitor choice sticks, so "latest season only" is not picked every time.
+    @AppStorage("add.seriesMonitor") private var storedMonitor: SeriesMonitor = .all
     let baseURL: URL
     let dismiss: () -> Void
 
@@ -398,6 +400,8 @@ struct MediaSheet: View {
     }
 
     var result: SearchResult { model.result }
+
+    static func profileKey(_ result: SearchResult) -> String { "add.qualityProfile.\(result.app.rawValue)" }
 
     var body: some View {
         NavigationStack {
@@ -421,7 +425,21 @@ struct MediaSheet: View {
             }
             .navigationTitle(result.title)
             .toolbar { Button("Cancel") { dismiss() } }
-            .task { await model.load() }
+            .task {
+                model.monitor = storedMonitor
+                model.preferredQualityProfile = UserDefaults.standard.object(forKey: Self.profileKey(result)) as? Int
+                await model.load()
+                await model.loadSeasons()
+            }
+            .onChange(of: model.monitor) { _, monitor in
+                storedMonitor = monitor
+                Task { await model.loadSeasons() }
+            }
+            .onChange(of: model.qualityProfile) { _, profile in
+                // the profile picked for a new title is the default for the next one
+                guard result.in_library != true, let profile else { return }
+                UserDefaults.standard.set(profile, forKey: Self.profileKey(result))
+            }
             .onChange(of: model.done) { _, done in if done { dismiss() } }
         }
     }
@@ -453,8 +471,36 @@ struct MediaSheet: View {
                 }
             }
         }
+        if result.kind == .series {
+            Section("Monitor") {
+                Picker("Monitor", selection: $model.monitor) {
+                    ForEach(SeriesMonitor.allCases, id: \.self) { Text($0.label).tag($0) }
+                }
+                if model.monitor == .pick {
+                    if let seasons = model.seasons {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 84), spacing: 6)], alignment: .leading, spacing: 6) {
+                            ForEach(seasons, id: \.self) { number in
+                                let on = model.picked.contains(number)
+                                Button { model.toggleSeason(number) } label: {
+                                    Text(number == 0 ? String(localized: "Specials") : String(localized: "Season \(number)"))
+                                        .font(.caption.weight(.semibold))
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 6)
+                                        .background(on ? Color.accent.opacity(0.15) : Color.secondary.opacity(0.12), in: Capsule())
+                                        .foregroundStyle(on ? Color.accent : Color.secondary)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityAddTraits(on ? .isSelected : [])
+                            }
+                        }
+                    } else {
+                        LoadingRow()
+                    }
+                }
+            }
+        }
         Section {
-            Button(model.busy ? "Adding…" : "Add & search") { Task { await model.add() } }
+            Button(model.busy ? "Adding…" : model.addSearches ? "Add & search" : "Add") { Task { await model.add() } }
                 .disabled(!model.canAdd)
                 .accessibilityIdentifier("add-and-search")
         }

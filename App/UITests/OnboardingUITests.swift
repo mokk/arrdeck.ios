@@ -86,7 +86,11 @@ final class OnboardingUITests: XCTestCase {
         // The add sheet, scoped to movies: Overseerr's popular titles fill it.
         app.buttons["library-add"].tap()
         XCTAssert(app.staticTexts["Add movie"].waitForExistence(timeout: 5), "add sheet never appeared")
-        XCTAssert(any["search-result"].firstMatch.waitForExistence(timeout: 30), "no popular titles rendered")
+        // The watchlist, Trakt and recommendation rows come first, and a List
+        // only builds the rows on screen: scroll down to the popular grid.
+        let result = any["search-result"].firstMatch
+        for _ in 0..<6 where !result.waitForExistence(timeout: 5) { app.swipeUp() }
+        XCTAssert(result.waitForExistence(timeout: 20), "no popular titles rendered")
         snap("add-movie")
         app.buttons["Cancel"].tap()
 

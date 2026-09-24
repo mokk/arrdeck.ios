@@ -13,6 +13,25 @@ public protocol CleanupAPI: Sendable {
     func deleteForCleanup(_ app: ArrApp, ids: [Int], exclude: Bool) async throws
 }
 
+/// Some seasons of a show instead of all of it: unmonitored, then their files deleted.
+public protocol SeasonRemoveAPI: Sendable {
+    func removeSeasons(series: Int, seasons: [Int]) async throws
+}
+
+extension LiveAPI: SeasonRemoveAPI {
+    public func removeSeasons(series: Int, seasons: [Int]) async throws {
+        try await call {
+            switch try await client.remove_seasons_api_v1_library_series__series_id__seasons_remove_post(
+                path: .init(series_id: series), body: .json(.init(seasons: seasons))
+            ) {
+            case .ok: ()
+            case .unprocessableContent: throw APIError.unexpectedStatus(422)
+            case let .undocumented(code, _): throw APIError.status(code)
+            }
+        }
+    }
+}
+
 /// Open Overseerr requests keyed for the library: "movie:tmdb:1", "tv:tvdb:2".
 public protocol RequestsMapAPI: Sendable {
     func requestMap() async throws -> [String: RequestState]
@@ -86,6 +105,8 @@ public final class CleanupModel {
     }
     public private(set) var lists: Loadable<CleanupLists> = .loading
     public private(set) var picked: [String: CleanupItem] = [:]
+    /// Shows losing only some seasons; absent means the whole show goes.
+    public private(set) var seasonPicks: [String: Set<Int>] = [:]
     public private(set) var busy = false
     public var error: String?
     private let api: any CleanupAPI
@@ -105,8 +126,42 @@ public final class CleanupModel {
     public static func total(_ items: [CleanupItem]) -> Int { items.reduce(0) { $0 + ($1.size ?? 0) } }
     public var chosen: [CleanupItem] { Array(picked.values) }
 
+    /// The seasons that go with a show: all of them until some are kept.
+    public func seasons(of item: CleanupItem) -> Set<Int> {
+        seasonPicks[item.key] ?? Set((item.seasons ?? []).map(\.number))
+    }
+
+    /// Whether only some of this show's seasons go.
+    public func isPartial(_ item: CleanupItem) -> Bool {
+        let all = item.seasons ?? []
+        return item.kind == .series && all.count > 1 && seasons(of: item).count < all.count
+    }
+
+    /// What deleting this frees: the chosen seasons, or the whole title.
+    public func size(of item: CleanupItem) -> Int {
+        guard isPartial(item) else { return item.size ?? 0 }
+        let going = seasons(of: item)
+        return (item.seasons ?? []).filter { going.contains($0.number) }.reduce(0) { $0 + ($1.size ?? 0) }
+    }
+
+    public var reclaim: Int { chosen.reduce(0) { $0 + size(of: $1) } }
+    public var partials: [CleanupItem] { chosen.filter(isPartial).sorted { ($0.title ?? "") < ($1.title ?? "") } }
+
     public func toggle(_ item: CleanupItem) {
         if picked[item.key] == nil { picked[item.key] = item } else { picked[item.key] = nil }
+        seasonPicks[item.key] = nil
+    }
+
+    /// Keeping or dropping one season; keeping the last one unticks the show.
+    public func toggleSeason(_ item: CleanupItem, _ number: Int) {
+        var going = seasons(of: item)
+        if going.contains(number) { going.remove(number) } else { going.insert(number) }
+        if going.isEmpty {
+            picked[item.key] = nil
+            seasonPicks[item.key] = nil
+        } else {
+            seasonPicks[item.key] = going
+        }
     }
 
     public func load() async {
@@ -122,11 +177,17 @@ public final class CleanupModel {
         busy = true
         defer { busy = false }
         do {
+            let partial = (api as? any SeasonRemoveAPI).map { remover in (remover, items.filter(isPartial)) }
+            let partialIDs = Set(partial?.1.map(\.id) ?? [])
             let movies = items.filter { $0.kind == .movie }.map(\.id)
-            let shows = items.filter { $0.kind == .series }.map(\.id)
+            let shows = items.filter { $0.kind == .series && !partialIDs.contains($0.id) }.map(\.id)
+            if let (remover, shows) = partial {
+                for show in shows { try await remover.removeSeasons(series: show.id, seasons: seasons(of: show).sorted()) }
+            }
             if !movies.isEmpty { try await api.deleteForCleanup(.radarr, ids: movies, exclude: exclude) }
             if !shows.isEmpty { try await api.deleteForCleanup(.sonarr, ids: shows, exclude: exclude) }
             picked = [:]
+            seasonPicks = [:]
             await load()
         } catch {
             self.error = (error as? APIError)?.description ?? error.localizedDescription

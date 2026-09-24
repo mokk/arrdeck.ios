@@ -452,6 +452,8 @@ public final class MediaSheetModel {
     public let result: SearchResult
     public private(set) var options: Options?
     public var qualityProfile: Int?
+    /// The profile last picked when adding to this app; the default while it still exists.
+    public var preferredQualityProfile: Int?
     public var rootFolder: String?
     /// Books only: the metadata profile a new author is created with.
     public var metadataProfile: Int?
@@ -459,6 +461,10 @@ public final class MediaSheetModel {
     /// upstream gives just the one the search result had) and the pick.
     public private(set) var editions: [EditionChoice] = []
     public var edition: String?
+    /// Shows only: what Sonarr monitors, and the seasons when they are picked.
+    public var monitor: SeriesMonitor = .all
+    public private(set) var seasons: [Int]?
+    public var picked: Set<Int> = []
     public private(set) var busy = false
     public private(set) var done = false
     public var error: String?
@@ -472,12 +478,39 @@ public final class MediaSheetModel {
         self.onSessionLost = onSessionLost
     }
 
-    public var canAdd: Bool { qualityProfile != nil && rootFolder != nil && !busy }
+    public var canAdd: Bool {
+        qualityProfile != nil && rootFolder != nil && !busy && (monitor != .pick || seasons != nil)
+    }
+
+    /// Whether adding will also search: not when nothing is monitored.
+    public var addSearches: Bool {
+        result.kind != .series || SeriesMonitorPick.searches(monitor: monitor, seasons: monitor == .pick ? Array(picked) : nil)
+    }
+
+    /// The show's seasons, fetched the first time "Pick seasons" is chosen.
+    public func loadSeasons() async {
+        guard monitor == .pick, seasons == nil, let source = api as? any SeriesAddAPI else { return }
+        do {
+            let all = try await source.seriesSeasons(tvdbID: result.remote_id)
+            picked = SeriesMonitorPick.initial(all)
+            seasons = all
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+
+    public func toggleSeason(_ number: Int) {
+        if picked.contains(number) { picked.remove(number) } else { picked.insert(number) }
+    }
 
     public func load() async {
         options = try? await api.options(result.app)
         // The first of each is the default, as the PWA chose.
-        if qualityProfile == nil { qualityProfile = result.quality_profile_id ?? options?.quality_profiles.first?.id }
+        if qualityProfile == nil {
+            let known = Set(options?.quality_profiles.map(\.id) ?? [])
+            let preferred = preferredQualityProfile.flatMap { known.contains($0) ? $0 : nil }
+            qualityProfile = result.quality_profile_id ?? preferred ?? options?.quality_profiles.first?.id
+        }
         if rootFolder == nil { rootFolder = options?.root_folders.first?.path }
         if metadataProfile == nil { metadataProfile = options?.metadata_profiles?.first?.id }
         if result.kind == .book, result.in_library != true {
@@ -493,6 +526,15 @@ public final class MediaSheetModel {
         guard let qualityProfile, let rootFolder else { return }
         let metadataProfile = result.kind == .book ? metadataProfile : nil
         let edition = result.kind == .book ? edition : nil
+        if result.kind == .series, let source = api as? any SeriesAddAPI {
+            let monitor = monitor
+            let seasons = monitor == .pick ? picked.sorted() : nil
+            let result = result
+            await perform {
+                try await source.addSeries(result, qualityProfile: qualityProfile, rootFolder: rootFolder, monitor: monitor, seasons: seasons)
+            }
+            return
+        }
         await perform { try await api.add(result, qualityProfile: qualityProfile, rootFolder: rootFolder, metadataProfile: metadataProfile, edition: edition) }
     }
 

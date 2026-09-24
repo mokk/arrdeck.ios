@@ -42,7 +42,12 @@ struct CleanupView: View {
                     Section { EmptyNote("Nothing here.") }
                 } else {
                     Section {
-                        ForEach(rows, id: \.key) { item in row(item) }
+                        ForEach(rows, id: \.key) { item in
+                            row(item)
+                            if model.picked[item.key] != nil, item.kind == .series, (item.seasons ?? []).count > 1 {
+                                seasonChips(item)
+                            }
+                        }
                     } header: {
                         Text("\(rows.count) titles · \(Format.bytes(CleanupModel.total(rows)))")
                     }
@@ -54,7 +59,7 @@ struct CleanupView: View {
         .safeAreaInset(edge: .bottom) {
             if !model.chosen.isEmpty {
                 Button(role: .destructive) { confirming = true } label: {
-                    Text("Reclaim \(Format.bytes(CleanupModel.total(model.chosen))) (\(model.chosen.count) titles)")
+                    Text("Reclaim \(Format.bytes(model.reclaim)) (\(model.chosen.count) titles)")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent).tint(Color.danger).controlSize(.large)
@@ -87,10 +92,31 @@ struct CleanupView: View {
                         Text(reason(item)).font(.caption).foregroundStyle(.secondary).lineLimit(1)
                     }
                     Spacer(minLength: 0)
-                    Text(Format.bytes(item.size)).font(.subheadline.weight(.semibold))
+                    Text(Format.bytes(model.picked[item.key] != nil ? model.size(of: item) : item.size ?? 0)).font(.subheadline.weight(.semibold))
                 }
             }
         }
+    }
+
+    /// The show's seasons on disk: red goes, struck through stays.
+    func seasonChips(_ item: CleanupItem) -> some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 6)], alignment: .leading, spacing: 6) {
+            ForEach(item.seasons ?? [], id: \.number) { season in
+                let going = model.seasons(of: item).contains(season.number)
+                Button { model.toggleSeason(item, season.number) } label: {
+                    Text(season.number == 0 ? String(localized: "Specials") : "S\(season.number) · \(Format.bytes(season.size ?? 0))")
+                        .font(.caption.weight(.semibold))
+                        .strikethrough(!going)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 6)
+                        .background(going ? Color.danger.opacity(0.15) : Color.secondary.opacity(0.12), in: Capsule())
+                        .foregroundStyle(going ? Color.danger : Color.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(going ? .isSelected : [])
+            }
+        }
+        .padding(.leading, 40)
     }
 
     func reason(_ item: CleanupItem) -> String {
@@ -107,11 +133,20 @@ struct CleanupView: View {
         NavigationStack {
             Form {
                 Section {
-                    Text("Their files are deleted from disk, freeing about \(Format.bytes(CleanupModel.total(model.chosen))). This cannot be undone.")
+                    Text("Their files are deleted from disk, freeing about \(Format.bytes(model.reclaim)). This cannot be undone.")
                     Toggle("Stop import lists adding them back", isOn: $exclude)
                 }
+                if !model.partials.isEmpty {
+                    Section {
+                        ForEach(model.partials, id: \.key) { item in
+                            Text("\(item.title ?? ""): only seasons \(model.seasons(of: item).sorted().map(String.init).joined(separator: ", "))")
+                        }
+                    } footer: {
+                        Text("Those seasons are unmonitored so they are not fetched again; the shows stay.")
+                    }
+                }
                 Section {
-                    Button("Delete and free \(Format.bytes(CleanupModel.total(model.chosen)))", role: .destructive) {
+                    Button("Delete and free \(Format.bytes(model.reclaim))", role: .destructive) {
                         confirming = false
                         Task { await model.deleteChosen(exclude: exclude) }
                     }

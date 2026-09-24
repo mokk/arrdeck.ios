@@ -52,6 +52,16 @@
         }
       }
     },
+    "%@: only seasons %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: kun sæson %@"
+          }
+        }
+      }
+    },
     "%lld active of %lld torrents · Show all": {
       "localizations": {
         "da": {
@@ -1807,6 +1817,16 @@
         }
       }
     },
+    "Existing episodes": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eksisterende afsnit"
+          }
+        }
+      }
+    },
     "Features": {
       "localizations": {
         "da": {
@@ -1905,6 +1925,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Færdig %@"
+          }
+        }
+      }
+    },
+    "First season": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Første sæson"
           }
         }
       }
@@ -2025,6 +2055,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fuld om cirka %lld uger"
+          }
+        }
+      }
+    },
+    "Future episodes": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kommende afsnit"
           }
         }
       }
@@ -2351,6 +2391,16 @@
         }
       }
     },
+    "Latest season": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seneste sæson"
+          }
+        }
+      }
+    },
     "Layout": {
       "localizations": {
         "da": {
@@ -2518,6 +2568,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mangler"
+          }
+        }
+      }
+    },
+    "Missing episodes": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manglende afsnit"
           }
         }
       }
@@ -2830,6 +2890,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ingen ønskede undertekstsprog"
+          }
+        }
+      }
+    },
+    "None": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen"
           }
         }
       }
@@ -3167,6 +3237,26 @@
         }
       }
     },
+    "Pick seasons…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg sæsoner…"
+          }
+        }
+      }
+    },
+    "Pilot episode": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pilotafsnit"
+          }
+        }
+      }
+    },
     "Plays": {
       "localizations": {
         "da": {
@@ -3405,6 +3495,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Læsestatus"
+          }
+        }
+      }
+    },
+    "Recent episodes": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyere afsnit"
           }
         }
       }
@@ -4548,6 +4648,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Valgene gemmes kun på denne enhed. Træk fanerne for at ændre rækkefølgen."
+          }
+        }
+      }
+    },
+    "Those seasons are unmonitored so they are not fetched again; the shows stay.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De sæsoner overvåges ikke længere, så de ikke hentes igen; serierne bliver."
           }
         }
       }

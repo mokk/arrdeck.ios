@@ -197,3 +197,58 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
         #expect(await api.count("popular-24-10") == 1)
     }
 }
+
+extension FakeDiscoverAPI: SeriesAddAPI {
+    func seriesSeasons(tvdbID: Int) async throws -> [Int] {
+        try log("seasons-\(tvdbID)")
+        return [0, 1, 2, 3]
+    }
+
+    func addSeries(_ result: SearchResult, qualityProfile: Int, rootFolder: String,
+                   monitor: SeriesMonitor, seasons: [Int]?) async throws {
+        try log("add-series-\(result.remote_id)-\(monitor.rawValue)-\((seasons ?? []).map(String.init).joined(separator: ","))")
+    }
+}
+
+@Suite struct SeriesMonitorTests {
+    @Test @MainActor func pickedSeasonsStartAtEveryRegularSeasonAndAreSent() async {
+        let api = FakeDiscoverAPI()
+        let sheet = MediaSheetModel(result: SearchResult(kind: .series, remote_id: 5, title: "Show"), api: api, onSessionLost: {})
+        sheet.monitor = .pick
+        #expect(!sheet.canAdd, "not before the seasons are known")
+        await sheet.load()
+        await sheet.loadSeasons()
+        #expect(sheet.seasons == [0, 1, 2, 3])
+        #expect(sheet.picked == [1, 2, 3])
+        sheet.toggleSeason(1)
+        sheet.toggleSeason(2)
+        #expect(sheet.canAdd && sheet.addSearches)
+        await sheet.add()
+        #expect(await api.count("add-series-5-pick-3") == 1)
+    }
+
+    @Test @MainActor func aPresetGoesThroughAndNoneDoesNotSearch() async {
+        let api = FakeDiscoverAPI()
+        let sheet = MediaSheetModel(result: SearchResult(kind: .series, remote_id: 6, title: "Show"), api: api, onSessionLost: {})
+        sheet.monitor = .none
+        await sheet.load()
+        await sheet.loadSeasons()
+        #expect(await api.count("seasons-6") == 0, "seasons are only fetched for a pick")
+        #expect(!sheet.addSearches)
+        await sheet.add()
+        #expect(await api.count("add-series-6-none-") == 1)
+        #expect(!SeriesMonitorPick.searches(monitor: .pick, seasons: []))
+    }
+
+    @Test @MainActor func theLastPickedProfileIsTheDefaultWhileItExists() async {
+        let api = FakeDiscoverAPI()
+        let known = MediaSheetModel(result: SearchResult(kind: .movie, remote_id: 1, title: "x"), api: api, onSessionLost: {})
+        known.preferredQualityProfile = 1
+        await known.load()
+        #expect(known.qualityProfile == 1)
+        let gone = MediaSheetModel(result: SearchResult(kind: .movie, remote_id: 1, title: "x"), api: api, onSessionLost: {})
+        gone.preferredQualityProfile = 99
+        await gone.load()
+        #expect(gone.qualityProfile == 4, "a deleted profile falls back to the first")
+    }
+}

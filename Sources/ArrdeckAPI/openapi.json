@@ -214,6 +214,21 @@
       },
       "AddSeriesIn": {
         "properties": {
+          "monitor": {
+            "enum": [
+              "all",
+              "future",
+              "missing",
+              "existing",
+              "recent",
+              "pilot",
+              "firstSeason",
+              "lastSeason",
+              "none"
+            ],
+            "title": "Monitor",
+            "type": "string"
+          },
           "monitored": {
             "default": true,
             "title": "Monitored",
@@ -236,6 +251,13 @@
             "default": true,
             "title": "Season Folder",
             "type": "boolean"
+          },
+          "seasons": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Seasons",
+            "type": "array"
           },
           "title": {
             "title": "Title",
@@ -1044,6 +1066,14 @@
             "title": "Poster",
             "type": "string"
           },
+          "seasons": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CleanupSeasonOut"
+            },
+            "title": "Seasons",
+            "type": "array"
+          },
           "size": {
             "default": 0,
             "title": "Size",
@@ -1107,6 +1137,34 @@
           }
         },
         "title": "CleanupOut",
+        "type": "object"
+      },
+      "CleanupSeasonOut": {
+        "properties": {
+          "files": {
+            "default": 0,
+            "title": "Files",
+            "type": "integer"
+          },
+          "monitored": {
+            "default": false,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "size": {
+            "default": 0,
+            "title": "Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "number"
+        ],
+        "title": "CleanupSeasonOut",
         "type": "object"
       },
       "CollectionDetailOut": {
@@ -4074,6 +4132,34 @@
           "number"
         ],
         "title": "SeasonProgressOut",
+        "type": "object"
+      },
+      "SeasonRemoveIn": {
+        "properties": {
+          "seasons": {
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "title": "Seasons",
+            "type": "array"
+          }
+        },
+        "required": [
+          "seasons"
+        ],
+        "title": "SeasonRemoveIn",
+        "type": "object"
+      },
+      "SeasonRemoveOut": {
+        "properties": {
+          "deleted_files": {
+            "default": 0,
+            "title": "Deleted Files",
+            "type": "integer"
+          }
+        },
+        "title": "SeasonRemoveOut",
         "type": "object"
       },
       "SeriesBookOut": {
@@ -8987,6 +9073,59 @@
         ]
       }
     },
+    "/api/v1/library/series/{series_id}/seasons/remove": {
+      "post": {
+        "description": "Some seasons of a show instead of all of it: unmonitored first, so an\nRSS sync does not grab them straight back, then their files deleted.",
+        "operationId": "remove_seasons_api_v1_library_series__series_id__seasons_remove_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "series_id",
+            "required": true,
+            "schema": {
+              "title": "Series Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeasonRemoveIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeasonRemoveOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Remove Seasons",
+        "tags": [
+          "library"
+        ]
+      }
+    },
     "/api/v1/library/series/{series_id}/seasons/{season}/monitor": {
       "post": {
         "operationId": "season_monitor_api_v1_library_series__series_id__seasons__season__monitor_post",
@@ -11203,6 +11342,53 @@
           }
         },
         "summary": "Search Series",
+        "tags": [
+          "discover"
+        ]
+      }
+    },
+    "/api/v1/search/series/{tvdb_id}/seasons": {
+      "get": {
+        "description": "The season numbers a show has, for picking which to monitor before adding.",
+        "operationId": "series_seasons_api_v1_search_series__tvdb_id__seasons_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tvdb_id",
+            "required": true,
+            "schema": {
+              "title": "Tvdb Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "integer"
+                  },
+                  "title": "Response Series Seasons Api V1 Search Series  Tvdb Id  Seasons Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Series Seasons",
         "tags": [
           "discover"
         ]
