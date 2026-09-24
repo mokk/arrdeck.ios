@@ -683,6 +683,16 @@
         }
       }
     },
+    "Anticipated": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ventet"
+          }
+        }
+      }
+    },
     "Any event": {
       "localizations": {
         "da": {
@@ -1124,6 +1134,16 @@
         }
       }
     },
+    "Client ID": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Client ID"
+          }
+        }
+      }
+    },
     "Collections": {
       "localizations": {
         "da": {
@@ -1221,6 +1241,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kunne ikke opdatere — %@"
+          }
+        }
+      }
+    },
+    "Create an API app at trakt.tv/oauth/applications (the redirect URI can be urn:ietf:wg:oauth:2.0:oob) and paste its Client ID. arrdeck only reads Trakt's public lists.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opret en API-app på trakt.tv/oauth/applications (redirect-URI kan være urn:ietf:wg:oauth:2.0:oob), og indsæt dens Client ID. arrdeck læser kun Trakts offentlige lister."
           }
         }
       }
@@ -2161,6 +2191,16 @@
         }
       }
     },
+    "In library": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I biblioteket"
+          }
+        }
+      }
+    },
     "In your library": {
       "localizations": {
         "da": {
@@ -2952,6 +2992,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fra"
+          }
+        }
+      }
+    },
+    "On Trakt": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "På Trakt"
           }
         }
       }
@@ -4598,6 +4648,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Trackere"
+          }
+        }
+      }
+    },
+    "Trending": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Populært nu"
           }
         }
       }

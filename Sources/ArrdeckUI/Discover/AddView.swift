@@ -10,9 +10,12 @@ public struct AddView: View {
     @State private var collection: Collection?
     @State private var recommendations: [SearchResult] = []
     @State private var watchlist: [SearchResult] = []
+    @State private var trakt: [SearchResult] = []
+    @AppStorage("add.traktList") private var traktList: TraktList = .trending
     let api: any DiscoverAPI & LibraryAPI
     let baseURL: URL
     let hasPlex: Bool
+    let hasTrakt: Bool
     let onSessionLost: @MainActor () -> Void
     /// Set when the page is scoped to one library: no kind picker, and a
     /// Cancel button because it is presented as a sheet.
@@ -26,6 +29,7 @@ public struct AddView: View {
         self.api = api
         self.baseURL = baseURL
         self.hasPlex = hasPlex
+        hasTrakt = configured.contains("trakt")
         self.fixed = fixed
         self.dismiss = dismiss
         self.onSessionLost = onSessionLost
@@ -105,6 +109,7 @@ public struct AddView: View {
                     let mine = watchlist.filter { $0.kind == kind }
                     let missing = mine.filter { $0.in_library != true }
                     if !missing.isEmpty { watchlistSection(missing, have: mine.count - missing.count, total: mine.count) }
+                    if hasTrakt { traktSection }
                 }
                 if !model.searching, model.tab == .movies, !recommendations.isEmpty {
                     recommendationsSection
@@ -138,6 +143,40 @@ public struct AddView: View {
         .task {
             guard hasPlex, let source = api as? any WatchingAPI else { return }
             watchlist = (try? await source.plexWatchlist()) ?? []
+        }
+        .task(id: "\(model.tab)-\(traktList.rawValue)") {
+            guard hasTrakt, model.tab == .movies || model.tab == .series, let source = api as? any TraktAPI else { return }
+            trakt = (try? await source.traktList(movies: model.tab == .movies, list: traktList)) ?? []
+        }
+    }
+
+    /// Trakt's trending, most anticipated or popular titles: tap to add.
+    var traktSection: some View {
+        Section {
+            Picker("List", selection: $traktList) {
+                ForEach(TraktList.allCases, id: \.self) { Text($0.label).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(alignment: .top, spacing: 12) {
+                    ForEach(trakt, id: \.remote_id) { result in
+                        Button { selected = result } label: {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Poster(path: result.poster, baseURL: baseURL, width: 90, cornerRadius: 10, title: result.title)
+                                Text(result.title).font(.caption.weight(.medium)).lineLimit(1)
+                                Text(result.in_library == true ? String(localized: "In library") : result.year.map(String.init) ?? "")
+                                    .font(.caption2).foregroundStyle(.secondary)
+                            }
+                            .frame(width: 90, alignment: .leading)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 16).padding(.vertical, 8)
+            }
+            .listRowInsets(EdgeInsets())
+        } header: {
+            Text("On Trakt")
         }
     }
 

@@ -4841,7 +4841,8 @@
               "gluetun",
               "bazarr",
               "plex",
-              "prometheus"
+              "prometheus",
+              "trakt"
             ],
             "title": "Service",
             "type": "string"
@@ -7273,6 +7274,71 @@
           }
         },
         "summary": "Discover Series",
+        "tags": [
+          "discover"
+        ]
+      }
+    },
+    "/api/v1/discover/trakt": {
+      "get": {
+        "operationId": "trakt_list_api_v1_discover_trakt_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "enum": [
+                "movie",
+                "series"
+              ],
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "which",
+            "required": false,
+            "schema": {
+              "default": "trending",
+              "enum": [
+                "trending",
+                "anticipated",
+                "popular"
+              ],
+              "title": "Which",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SearchResultOut"
+                  },
+                  "title": "Response Trakt List Api V1 Discover Trakt Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Trakt List",
         "tags": [
           "discover"
         ]

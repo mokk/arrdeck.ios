@@ -41,7 +41,7 @@ struct ServiceFormSection: View {
                         .textContentType(.URL)
                         .autocorrectionDisabled()
                 case .apiKey:
-                    SecureField("API key", text: $form.apiKey)
+                    SecureField(form.name == "trakt" ? "Client ID" : "API key", text: $form.apiKey)
                 case .username:
                     TextField("Username (optional)", text: $form.username)
                         .autocorrectionDisabled()
@@ -70,6 +70,10 @@ struct ServiceFormSection: View {
                 Text(Services.label(form.name))
                 Spacer()
                 Text(form.configured ? "configured" : "not configured").textCase(nil)
+            }
+        } footer: {
+            if form.name == "trakt" {
+                Text("Create an API app at trakt.tv/oauth/applications (the redirect URI can be urn:ietf:wg:oauth:2.0:oob) and paste its Client ID. arrdeck only reads Trakt's public lists.")
             }
         }
         .disabled(form.busy)

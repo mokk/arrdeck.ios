@@ -236,6 +236,7 @@ public enum ServiceField: String, CaseIterable, Sendable {
         switch service {
         case "qbittorrent": [.url, .username, .password]
         case "transmission", "prometheus": [.url]
+        case "trakt": [.apiKey]  // a fixed public address; the client id is all it needs
         default: [.url, .apiKey]
         }
     }
@@ -243,7 +244,7 @@ public enum ServiceField: String, CaseIterable, Sendable {
 
 /// The order the services list in — the arrs first, then the rest as the
 /// backend defines them.
-public let serviceOrder = ["radarr", "sonarr", "prowlarr", "qbittorrent", "transmission", "overseerr", "gluetun", "bazarr", "plex", "prometheus"]
+public let serviceOrder = ["radarr", "sonarr", "prowlarr", "qbittorrent", "transmission", "overseerr", "gluetun", "bazarr", "plex", "prometheus", "trakt"]
 
 public protocol ManageAPI: Sendable {
     func libraryMovies() async throws -> [LibraryMovie]

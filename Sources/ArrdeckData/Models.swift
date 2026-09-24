@@ -56,6 +56,7 @@ public enum Services {
         case "bazarr": "Bazarr"
         case "plex": "Plex"
         case "prometheus": "Prometheus"
+        case "trakt": "Trakt"
         default: service
         }
     }

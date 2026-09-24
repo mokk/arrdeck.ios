@@ -64,6 +64,7 @@ import Testing
         #expect(ServiceField.fields(for: "qbittorrent") == [.url, .username, .password])
         #expect(ServiceField.fields(for: "transmission") == [.url])
         #expect(ServiceField.fields(for: "radarr") == [.url, .apiKey])
+        #expect(ServiceField.fields(for: "trakt") == [.apiKey])
         #expect(ServiceStatus(ok: true, retries: 2, service: .radarr).isFlaky)
         #expect(!ServiceStatus(ok: false, retries: 2, service: .radarr).isFlaky)
         #expect(!ServiceStatus(ok: true, retries: 0, service: .radarr).isFlaky)
