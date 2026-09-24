@@ -111,7 +111,7 @@ final class OnboardingUITests: XCTestCase {
         // Calendar.
         any["tab-calendar"].tap()
         XCTAssert(any["calendar"].waitForExistence(timeout: 10), "calendar never appeared")
-        XCTAssert(app.buttons["Agenda"].waitForExistence(timeout: 5), "calendar view picker missing")
+        XCTAssert(app.buttons["Today"].waitForExistence(timeout: 5), "calendar has no way back to today")
 
         // Settings: the hub, the old dashboard as Overview, connections.
         any["tab-settings"].tap()

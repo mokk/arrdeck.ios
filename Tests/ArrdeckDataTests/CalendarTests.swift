@@ -3,43 +3,6 @@ import ArrdeckData
 import Foundation
 import Testing
 
-@Suite struct CalendarRangeTests {
-    var utc: Calendar {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "UTC")!
-        return calendar
-    }
-    // Wednesday 2026-09-23 05:00 UTC
-    let now = Date(timeIntervalSince1970: 1_790_139_600)
-
-    @Test func monthWindowsStepByMonth() {
-        let this = CalendarRange.range(.month, offset: 0, now: now, calendar: utc)
-        #expect(CalendarRange.isoDay(this.start, calendar: utc) == "2026-09-01")
-        #expect(this.days == 30)
-        let next = CalendarRange.range(.month, offset: 1, now: now, calendar: utc)
-        #expect(CalendarRange.isoDay(next.start, calendar: utc) == "2026-10-01")
-        #expect(next.days == 31)
-        let feb = CalendarRange.range(.month, offset: 5, now: now, calendar: utc)
-        #expect(feb.days == 28)
-    }
-
-    @Test func weeksStartOnMonday() {
-        let week = CalendarRange.range(.week, offset: 0, now: now, calendar: utc)
-        #expect(CalendarRange.isoDay(week.start, calendar: utc) == "2026-09-21")
-        #expect(week.days == 7)
-        #expect(CalendarRange.isoDay(CalendarRange.range(.week, offset: -1, now: now, calendar: utc).start, calendar: utc) == "2026-09-14")
-        // a Sunday belongs to the week that started six days earlier
-        let sunday = Date(timeIntervalSince1970: 1_790_485_200) // 2026-09-27
-        #expect(CalendarRange.isoDay(CalendarRange.weekStart(sunday, calendar: utc), calendar: utc) == "2026-09-21")
-    }
-
-    @Test func agendaIsFromTodayRegardlessOfOffset() {
-        let agenda = CalendarRange.range(.agenda, offset: 3, now: now, calendar: utc)
-        #expect(CalendarRange.isoDay(agenda.start, calendar: utc) == "2026-09-23")
-        #expect(agenda.days == 14)
-    }
-}
-
 actor FakeCalendarAPI: CalendarAPI {
     var items: [CalendarItem]
     var failure: APIError?
@@ -66,26 +29,40 @@ actor FakeCalendarAPI: CalendarAPI {
         CalendarModel(api: api, calendar: utc, now: { now }, onSessionLost: {})
     }
 
-    @Test func groupsByLocalDayAndNarrowsOnSelection() async {
+    @Test func groupsByDayOpensAtTodayAndFoldsASeasonDrop() async {
         let api = FakeCalendarAPI(items: [
-            .init(app: .sonarr, date: "2026-09-23T04:00:00Z", extra: "S06E02", title: "Slow Horses"),
+            .init(app: .sonarr, date: "2026-09-25T04:00:00Z", extra: "S01E01 Pilot", item_id: 5, title: "Neagley"),
+            .init(app: .sonarr, date: "2026-09-25T04:00:00Z", extra: "S01E02 Two", finale_type: nil, item_id: 5, title: "Neagley"),
+            .init(app: .sonarr, date: "2026-09-25T04:00:00Z", extra: "S01E08 Eight", finale_type: "season", has_file: true, item_id: 5, title: "Neagley"),
             .init(app: .radarr, date: "2026-09-29T00:00:00Z", release_type: "digital", title: "Spider-Man"),
-            .init(app: .sonarr, date: "2026-09-23T23:30:00Z", title: "Late"),
             .init(app: .sonarr, date: nil, title: "Undated"),
         ])
         let model = model(api)
         await model.load()
-        #expect(model.items.map(\.title) == ["Slow Horses", "Late", "Spider-Man"], "sorted, undated dropped")
-        #expect(model.days == ["2026-09-23", "2026-09-29"])
-        #expect(model.byDay["2026-09-23"]?.count == 2)
-        #expect(model.today == "2026-09-23")
-
-        model.toggle(day: "2026-09-29")
-        #expect(model.listed.map(\.title) == ["Spider-Man"])
-        model.toggle(day: "2026-09-29")
-        #expect(model.listed.count == 3)
+        #expect(model.days.map(\.day) == ["2026-09-23", "2026-09-25", "2026-09-29"], "today is there even when empty")
+        #expect(model.days[0].entries.isEmpty)
+        let drop = model.days[1].entries
+        #expect(drop.count == 1 && drop[0].count == 3)
+        #expect(drop[0].code == "S01E01–E08")
+        #expect(drop[0].item.finale_type == "season")
+        #expect(drop[0].item.has_file == false, "on disk only when every episode is")
         let first = await api.requests.first
-        #expect(first?.0 == "2026-09-01" && first?.1 == 30, "month view requests the whole month")
+        #expect(first?.0 == "2026-09-09" && first?.1 == 74, "two weeks back, two months ahead")
+    }
+
+    @Test func widensBothWays() async {
+        let api = FakeCalendarAPI(items: [])
+        let model = model(api)
+        await model.load()
+        await model.showEarlier()
+        #expect(await api.requests.last?.0 == "2026-08-10")
+        await model.showLater()
+        #expect(await api.requests.last?.1 == 134)
+    }
+
+    @Test func aSingleEpisodeKeepsItsTitle() {
+        let entry = CalendarEntry.fold([.init(app: .sonarr, date: "2026-09-25T04:00:00Z", extra: "S06E03 Resurrection", item_id: 1, title: "Slow Horses")])
+        #expect(entry.first?.code == "S06E03" && entry.first?.episodeTitle == "Resurrection")
     }
 
     @Test func filtersByAppAndDownloadedAndOpensTheTitle() async {
@@ -108,27 +85,6 @@ actor FakeCalendarAPI: CalendarAPI {
         #expect(model.items.first?.ref == .movie(3))
         #expect(CalendarItem(app: .sonarr, item_id: 7, title: "x").ref == .series(7))
         #expect(CalendarItem(app: .readarr, title: "no id").ref == nil)
-    }
-
-    @Test func steppingAndSwitchingViewsRefetch() async throws {
-        let api = FakeCalendarAPI(items: [])
-        let model = model(api)
-        await model.load()
-        model.step(1)
-        try await Task.sleep(for: .milliseconds(100))
-        #expect(await api.requests.last?.0 == "2026-10-01")
-        #expect(model.offset == 1)
-
-        model.view = .week
-        try await Task.sleep(for: .milliseconds(100))
-        #expect(model.offset == 0, "a view change resets the offset")
-        let last = await api.requests.last
-        #expect(last?.0 == "2026-09-21" && last?.1 == 7)
-
-        model.view = .agenda
-        try await Task.sleep(for: .milliseconds(100))
-        model.step(1)
-        #expect(model.offset == 0, "the agenda does not step")
     }
 
     @Test func failuresAndUnauthorized() async {

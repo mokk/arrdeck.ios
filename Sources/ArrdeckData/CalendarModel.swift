@@ -1,62 +1,17 @@
 import Foundation
 import Observation
 
-public enum CalendarView: String, CaseIterable, Sendable, Hashable {
-    case month, week, agenda
-
-    public var label: String {
-        switch self {
-        case .month: String(localized: "Month")
-        case .week: String(localized: "Week")
-        case .agenda: String(localized: "Agenda")
-        }
-    }
-}
-
-/// The window a calendar view requests. Each view steps by its own unit, so
-/// `offset` means months, weeks or nothing depending on where you are; the
-/// agenda is always "from today".
-public struct CalendarRange: Equatable, Sendable {
-    public var start: Date
-    public var days: Int
-
-    public static let agendaDays = 14
-
-    public static func range(
-        _ view: CalendarView, offset: Int, now: Date = .now, calendar: Calendar = .current
-    ) -> CalendarRange {
-        let today = calendar.startOfDay(for: now)
-        switch view {
-        case .month:
-            let thisMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
-            let first = calendar.date(byAdding: .month, value: offset, to: thisMonth)!
-            let days = calendar.range(of: .day, in: .month, for: first)!.count
-            return CalendarRange(start: first, days: days)
-        case .week:
-            let start = calendar.date(byAdding: .day, value: offset * 7, to: weekStart(today, calendar: calendar))!
-            return CalendarRange(start: start, days: 7)
-        case .agenda:
-            return CalendarRange(start: today, days: agendaDays)
-        }
-    }
-
-    /// Monday-first, matching the month grid's column order.
-    public static func weekStart(_ date: Date, calendar: Calendar) -> Date {
-        let weekday = calendar.component(.weekday, from: date)   // 1 = Sunday
-        let back = (weekday + 5) % 7
-        return calendar.date(byAdding: .day, value: -back, to: calendar.startOfDay(for: date))!
-    }
-
+public enum CalendarDay {
     /// yyyy-MM-dd, as the backend's `start_date` wants it.
-    public static func isoDay(_ date: Date, calendar: Calendar = .current) -> String {
+    public static func iso(_ date: Date, calendar: Calendar = .current) -> String {
         let parts = calendar.dateComponents([.year, .month, .day], from: date)
         return String(format: "%04d-%02d-%02d", parts.year!, parts.month!, parts.day!)
     }
 
-    public var startISO: String { CalendarRange.isoDay(start) }
-
-    public func day(_ index: Int, calendar: Calendar = .current) -> Date {
-        calendar.date(byAdding: .day, value: index, to: start)!
+    public static func date(_ iso: String, calendar: Calendar = .current) -> Date? {
+        let parts = iso.split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3 else { return nil }
+        return calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
     }
 }
 
@@ -91,24 +46,58 @@ extension CalendarItem {
         }
     }
 
-    /// The local calendar day an item lands on. A dated item without a
-    /// parseable timestamp falls back to its first ten characters.
+    /// The local calendar day an item lands on. An episode's air time is a
+    /// moment and can cross midnight here; a film's or a book's release is a
+    /// date and must not move.
     public func day(calendar: Calendar = .current) -> String? {
         guard let date else { return nil }
-        if let parsed = Format.parseDate(date) { return CalendarRange.isoDay(parsed, calendar: calendar) }
+        if app == .sonarr, let parsed = Format.parseDate(date) { return CalendarDay.iso(parsed, calendar: calendar) }
         return String(date.prefix(10))
     }
 }
 
-/// The calendar page: one requested window, grouped by local day so the month
-/// grid, the week strip and the agenda all read from the same map.
+/// One row of the calendar: an entry, or a show's episodes of one day folded
+/// into one ("S01E01–E08 · 8 episodes") when a season drops at once.
+public struct CalendarEntry: Identifiable, Sendable {
+    public var item: CalendarItem
+    public var count = 1
+    /// S01E01 or S01E01–E08
+    public var code: String?
+    public var id: String { "\(item.app.rawValue)-\(item.item_id ?? -1)-\(item.date ?? "")-\(item.title)" }
+
+    /// The episode title after the code, when there is exactly one episode.
+    public var episodeTitle: String? {
+        guard item.app == .sonarr, count == 1, let extra = item.extra else { return nil }
+        let rest = extra.split(separator: " ", maxSplits: 1)
+        return rest.count > 1 ? String(rest[1]) : nil
+    }
+
+    public static func fold(_ items: [CalendarItem]) -> [CalendarEntry] {
+        var out: [CalendarEntry] = []
+        for item in items {
+            let code = item.app == .sonarr ? item.extra.map { String($0.split(separator: " ").first ?? "") } : nil
+            if item.app == .sonarr, let i = out.firstIndex(where: { $0.item.app == .sonarr && $0.item.item_id == item.item_id }) {
+                let first = out[i].code?.split(separator: "–").first.map(String.init) ?? ""
+                let last = code ?? ""
+                out[i].count += 1
+                out[i].code = first + "–" + (last.firstIndex(of: "E").map { String(last[$0...]) } ?? last)
+                out[i].item.has_file = (out[i].item.has_file ?? false) && (item.has_file ?? false)
+                out[i].item.finale_type = out[i].item.finale_type ?? item.finale_type
+            } else {
+                out.append(CalendarEntry(item: item, code: code))
+            }
+        }
+        return out
+    }
+}
+
+/// The calendar page: one list from two weeks back to two months ahead,
+/// widened by "Show earlier" and "Show later", grouped by local day.
 @MainActor @Observable
 public final class CalendarModel {
-    public var view: CalendarView = .month {
-        didSet { if view != oldValue { offset = 0; selectedDay = nil; Task { await load() } } }
-    }
-    public private(set) var offset = 0
-    public var selectedDay: String?
+    public static let step = 30
+    public private(set) var back = 14
+    public private(set) var ahead = 60
     public private(set) var blocks: Loadable<[ArrApp: Block<[CalendarItem]>]> = .loading
 
     let api: any CalendarAPI
@@ -127,8 +116,10 @@ public final class CalendarModel {
         self.onSessionLost = onSessionLost
     }
 
-    public var range: CalendarRange { CalendarRange.range(view, offset: offset, now: now(), calendar: calendar) }
-    public var today: String { CalendarRange.isoDay(now(), calendar: calendar) }
+    public var today: String { CalendarDay.iso(now(), calendar: calendar) }
+    var startISO: String {
+        CalendarDay.iso(calendar.date(byAdding: .day, value: -back, to: calendar.startOfDay(for: now()))!, calendar: calendar)
+    }
 
     /// Apps left out, and whether what is already on disk is left out too.
     /// Both persist: a calendar is usually opened for the same question.
@@ -155,41 +146,34 @@ public final class CalendarModel {
             .sorted { ($0.date ?? "") < ($1.date ?? "") }
     }
 
-    public var byDay: [String: [CalendarItem]] {
+    /// The days with anything on them, in order, and always today — so the
+    /// list has somewhere to open at.
+    public var days: [(day: String, entries: [CalendarEntry])] {
         var map: [String: [CalendarItem]] = [:]
         for item in items {
             if let day = item.day(calendar: calendar) { map[day, default: []].append(item) }
         }
-        return map
-    }
-
-    /// The days that have anything, in order — the agenda's sections.
-    public var days: [String] { byDay.keys.sorted() }
-
-    public var listed: [CalendarItem] {
-        if let selectedDay { return byDay[selectedDay] ?? [] }
-        return items
+        if map[today] == nil { map[today] = [] }
+        return map.keys.sorted().map { ($0, CalendarEntry.fold(map[$0] ?? [])) }
     }
 
     public func offlineReason(_ app: ArrApp) -> String? { blocks.value?[app]?.offlineReason }
 
-    public func step(_ delta: Int) {
-        guard view != .agenda else { return }
-        offset += delta
-        selectedDay = nil
-        Task { await load() }
+    public func showEarlier() async {
+        back += Self.step
+        await load()
     }
 
-    public func toggle(day: String) {
-        selectedDay = selectedDay == day ? nil : day
+    public func showLater() async {
+        ahead += Self.step
+        await load()
     }
 
     public func load() async {
         generation += 1
         let mine = generation
-        let range = range
         do {
-            let result = try await api.calendar(start: range.startISO, days: range.days)
+            let result = try await api.calendar(start: startISO, days: back + ahead)
             guard mine == generation else { return }
             blocks = .loaded(result)
         } catch {

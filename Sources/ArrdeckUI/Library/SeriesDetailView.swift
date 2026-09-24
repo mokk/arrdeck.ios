@@ -200,6 +200,12 @@ struct EpisodeRow: View {
                     } else {
                         Text(episode.title ?? "").font(.subheadline).lineLimit(1)
                     }
+                    if let finale = FinaleLabel.text(episode.finale_type) {
+                        Text(finale).font(.system(size: 10, weight: .bold))
+                            .padding(.horizontal, 5).padding(.vertical, 2)
+                            .background(Color.accent.opacity(0.15), in: RoundedRectangle(cornerRadius: 4))
+                            .foregroundStyle(Color.accent)
+                    }
                 }
                 if !hidden, let overview = episode.overview {
                     Text(overview).font(.caption).foregroundStyle(.secondary)

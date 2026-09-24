@@ -138,8 +138,16 @@ private struct UpNextRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(row.title).font(.subheadline.weight(.semibold)).lineLimit(1)
                 if let code {
-                    (Text(verbatim: code).bold() + Text(verbatim: spoilers == .off ? (row.nextEpisode?.title.map { " · \($0)" } ?? "") : ""))
-                        .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    HStack(spacing: 6) {
+                        (Text(verbatim: code).bold() + Text(verbatim: spoilers == .off ? (row.nextEpisode?.title.map { " · \($0)" } ?? "") : ""))
+                            .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                        if let finale = FinaleLabel.text(row.nextEpisode?.finale_type) {
+                            Text(finale).font(.system(size: 10, weight: .bold))
+                                .padding(.horizontal, 5).padding(.vertical, 2)
+                                .background(Color.accent.opacity(0.15), in: RoundedRectangle(cornerRadius: 4))
+                                .foregroundStyle(Color.accent)
+                        }
+                    }
                 } else {
                     Text(row.status == "ended" ? "Ended" : "Nothing scheduled")
                         .font(.caption).foregroundStyle(.secondary)
@@ -355,5 +363,17 @@ struct CollectionsLibraryList: View {
 
     func load() async {
         do { collections = .loaded(try await api.collections()) } catch { collections = .failed(error.localizedDescription) }
+    }
+}
+
+/// "Season finale", "Series finale", "Midseason finale" for Sonarr's finaleType.
+enum FinaleLabel {
+    static func text(_ type: String?) -> String? {
+        switch type {
+        case "season": String(localized: "Season finale")
+        case "series": String(localized: "Series finale")
+        case "midseason": String(localized: "Midseason finale")
+        default: nil
+        }
     }
 }

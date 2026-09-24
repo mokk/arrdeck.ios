@@ -42,6 +42,7 @@
       }
     },
     "%@ — %lld scheduled": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -77,6 +78,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld dage siden"
+          }
+        }
+      }
+    },
+    "%lld episodes": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld afsnit"
           }
         }
       }
@@ -2142,6 +2153,16 @@
         }
       }
     },
+    "Midseason finale": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Midtsæsonfinale"
+          }
+        }
+      }
+    },
     "Missing": {
       "localizations": {
         "da": {
@@ -2203,6 +2224,7 @@
       }
     },
     "Month": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -2323,6 +2345,7 @@
       }
     },
     "Next": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -2524,6 +2547,16 @@
         }
       }
     },
+    "Nothing today": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intet i dag"
+          }
+        }
+      }
+    },
     "Notifications": {
       "localizations": {
         "da": {
@@ -2706,6 +2739,7 @@
       }
     },
     "Previous": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -3248,6 +3282,16 @@
         }
       }
     },
+    "Season finale": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sæsonfinale"
+          }
+        }
+      }
+    },
     "Section": {
       "localizations": {
         "da": {
@@ -3304,6 +3348,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Serier"
+          }
+        }
+      }
+    },
+    "Series finale": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seriefinale"
           }
         }
       }
@@ -3434,6 +3488,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vis kun accepterede"
+          }
+        }
+      }
+    },
+    "Show earlier": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vis tidligere"
+          }
+        }
+      }
+    },
+    "Show later": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vis senere"
           }
         }
       }
@@ -3839,6 +3913,16 @@
         }
       }
     },
+    "Today": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I dag"
+          }
+        }
+      }
+    },
     "Top": {
       "localizations": {
         "da": {
@@ -4071,6 +4155,7 @@
       }
     },
     "View": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -4101,6 +4186,7 @@
       }
     },
     "Week": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -4572,6 +4658,7 @@
       }
     },
     "today": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {

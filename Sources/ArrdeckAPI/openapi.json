@@ -960,6 +960,10 @@
             "title": "Extra",
             "type": "string"
           },
+          "finale_type": {
+            "title": "Finale Type",
+            "type": "string"
+          },
           "has_file": {
             "default": false,
             "title": "Has File",
@@ -968,6 +972,10 @@
           "item_id": {
             "title": "Item Id",
             "type": "integer"
+          },
+          "poster": {
+            "title": "Poster",
+            "type": "string"
           },
           "release_type": {
             "title": "Release Type",
@@ -1410,6 +1418,10 @@
           "file_id": {
             "title": "File Id",
             "type": "integer"
+          },
+          "finale_type": {
+            "title": "Finale Type",
+            "type": "string"
           },
           "has_file": {
             "default": false,
@@ -2485,6 +2497,10 @@
           "episode": {
             "title": "Episode",
             "type": "integer"
+          },
+          "finale_type": {
+            "title": "Finale Type",
+            "type": "string"
           },
           "season": {
             "title": "Season",
