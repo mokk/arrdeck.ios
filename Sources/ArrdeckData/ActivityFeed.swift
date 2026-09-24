@@ -24,7 +24,7 @@ extension LiveAPI: ActivityAPI {
 }
 
 /// What happened since the Activity tab was last opened. Polled for the badge
-/// on the tab; the "New" list reads the same answer and moves the mark when
+/// on the tab; History marks what is newer than the mark and moves it once
 /// it has been shown.
 @MainActor @Observable
 public final class ActivityFeedModel {
@@ -73,11 +73,12 @@ public final class ActivityFeedModel {
         }
     }
 
-    /// The list has been looked at: the next poll counts from now. The
-    /// current answer is kept so the list does not empty under the reader.
-    public func markSeen() {
-        guard let now = feed?.value?.now, let date = Format.parseDate(now) else { return }
+    /// History has been shown: whatever it listed is no longer new, so the
+    /// badge clears now and the next poll counts from here.
+    public func markSeen(at date: Date) {
+        guard date > lastSeen else { return }
         lastSeen = date
         defaults.set(date, forKey: Self.key)
+        feed = .loaded(ActivitySince(count: 0, items: [], now: date.formatted(.iso8601), since: date.formatted(.iso8601)))
     }
 }

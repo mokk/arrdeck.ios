@@ -2693,6 +2693,16 @@
         }
       }
     },
+    "NEW": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NY"
+          }
+        }
+      }
+    },
     "Name": {
       "localizations": {
         "da": {
@@ -2754,6 +2764,7 @@
       }
     },
     "New": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -3007,6 +3018,7 @@
       }
     },
     "Nothing new since you last looked": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -4312,6 +4324,7 @@
       }
     },
     "Since %@": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {

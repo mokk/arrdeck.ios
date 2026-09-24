@@ -103,14 +103,17 @@ final class OnboardingUITests: XCTestCase {
         // Activity: the arr queue and moving torrents, then the full queue.
         any["tab-activity"].tap()
         XCTAssert(any["activity"].waitForExistence(timeout: 10), "activity never appeared")
-        // "New" (since you last looked) opens first; the torrents are under Downloading
+        // History opens first, with what is new since the last visit marked;
+        // the torrents are under Downloading
+        XCTAssert(app.buttons["Blocklist"].waitForExistence(timeout: 10), "history did not open first")
+        snap("activity-history")
         app.buttons["Downloading"].tap()
         XCTAssert(app.staticTexts["Torrents"].waitForExistence(timeout: 20), "downloading segment never loaded")
         snap("activity")
         app.buttons["Queue"].tap()
         XCTAssert(app.staticTexts.matching(NSPredicate(format: "label MATCHES '[1-9][0-9]* of [0-9]+ torrents'")).firstMatch.waitForExistence(timeout: 20), "queue never loaded")
         app.buttons["History"].tap()
-        XCTAssert(app.buttons["Blocklist"].waitForExistence(timeout: 10), "history never appeared")
+        XCTAssert(app.buttons["Blocklist"].waitForExistence(timeout: 10), "history never came back")
 
         // Calendar.
         any["tab-calendar"].tap()

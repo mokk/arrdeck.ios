@@ -1,16 +1,16 @@
 import ArrdeckData
 import SwiftUI
 
-/// Everything about downloads in one tab. Downloading is what is moving
-/// right now — the arr queue with its import/retry actions, then the
-/// torrents with a live transfer — Queue is the full torrent list, History
-/// is grabs, imports and the blocklist.
+/// Everything about downloads in one tab. History comes first — grabs,
+/// imports and the blocklist, with what arrived since the last visit marked
+/// NEW. Downloading is what is moving right now — the arr queue with its
+/// import/retry actions, then the torrents with a live transfer — and Queue
+/// is the full torrent list.
 public struct ActivityView: View {
     enum Segment: CaseIterable {
-        case new, downloading, queue, history
+        case history, downloading, queue
         var label: String {
             switch self {
-            case .new: String(localized: "New")
             case .downloading: String(localized: "Downloading")
             case .queue: String(localized: "Queue")
             case .history: String(localized: "History")
@@ -18,7 +18,7 @@ public struct ActivityView: View {
         }
     }
 
-    @State private var segment: Segment = .new
+    @State private var segment: Segment = .history
     @State private var model: DownloadsModel
     let feed: ActivityFeedModel
     let api: any DownloadsAPI & ExtrasAPI & HistoryAPI & LibraryAPI
@@ -50,14 +50,13 @@ public struct ActivityView: View {
             .padding(.vertical, 8)
             .background(Color.grouped)
             switch segment {
-            case .new:
-                SinceLastLookList(feed: feed)
             case .downloading:
                 DownloadingList(model: model, api: api, onSessionLost: onSessionLost) { segment = .queue }
             case .queue:
                 DownloadsView(model: model, api: api, onSessionLost: onSessionLost)
             case .history:
-                HistoryScreen(api: api, onSessionLost: onSessionLost)
+                HistoryScreen(api: api, newSince: feed.lastSeen, onShown: { feed.markSeen(at: .now) },
+                              titled: false, onSessionLost: onSessionLost)
             }
         }
         .navigationTitle("Activity")
@@ -188,68 +187,5 @@ struct DownloadingList: View {
             }
         }
         .accessibilityIdentifier("downloading")
-    }
-}
-
-/// Imports, failures, grabs and finished torrents since the tab was last
-/// opened. The mark moves once the list has been shown, so the badge clears
-/// while the list stays put.
-struct SinceLastLookList: View {
-    let feed: ActivityFeedModel
-
-    var body: some View {
-        List {
-            Section {
-                Text("Since \(Format.dayTime(feed.lastSeen.formatted(.iso8601)))").font(.caption).foregroundStyle(.secondary)
-            }
-            Section {
-                switch feed.feed ?? .loading {
-                case .loading: LoadingRow()
-                case let .failed(reason): ErrorNote(reason)
-                case let .loaded(since):
-                    if (since.items ?? []).isEmpty {
-                        EmptyNote(String(localized: "Nothing new since you last looked"))
-                    }
-                    ForEach(Array((since.items ?? []).enumerated()), id: \.offset) { _, event in
-                        ActivityEventRow(event: event)
-                    }
-                }
-            }
-        }
-        .dashboardListStyle()
-        .refreshable { await feed.refresh() }
-        .task {
-            if feed.feed?.value == nil { await feed.refresh() }
-            feed.markSeen()
-        }
-        .accessibilityIdentifier("activity-new")
-    }
-}
-
-struct ActivityEventRow: View {
-    let event: ActivityEvent
-
-    var ref: MediaRef? {
-        if let id = event.movie_id { return .movie(id) }
-        if let id = event.series_id { return .series(id) }
-        if let id = event.book_id { return .book(id) }
-        return nil
-    }
-
-    var body: some View {
-        let content = VStack(alignment: .leading, spacing: 3) {
-            Text(event.title).font(.subheadline).lineLimit(2)
-            HStack(spacing: 6) {
-                StateBadge(state: event.kind.rawValue)
-                Text(Services.label(event.app)).font(.caption).foregroundStyle(.secondary)
-                Spacer()
-                Text(Format.dayTime(event.date)).font(.caption).foregroundStyle(.secondary)
-            }
-        }
-        if let ref {
-            NavigationLink(value: ref) { content }
-        } else {
-            content
-        }
     }
 }

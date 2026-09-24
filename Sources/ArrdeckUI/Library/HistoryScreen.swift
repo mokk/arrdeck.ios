@@ -15,11 +15,27 @@ public struct HistoryScreen: View {
     }
     @State private var model: HistoryModel
     @State private var segment: Segment = .history
+    /// Taken once: rows after it keep their NEW badge while the mark moves on.
+    @State private var newSince: Date?
     let hasDetail: Bool
+    let onShown: (@MainActor () -> Void)?
+    /// Embedded in Activity, the tab keeps its own title.
+    let titled: Bool
 
-    public init(api: any HistoryAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    /// With `newSince`, what happened after it is marked NEW, and `onShown`
+    /// runs once the first page is in — the Activity tab's "seen" mark.
+    public init(api: any HistoryAPI, newSince: Date? = nil, onShown: (@MainActor () -> Void)? = nil,
+                titled: Bool = true, onSessionLost: @escaping @MainActor () -> Void) {
         hasDetail = true
+        self.titled = titled
+        self.onShown = onShown
+        _newSince = State(initialValue: newSince)
         _model = State(initialValue: HistoryModel(api: api, onSessionLost: onSessionLost))
+    }
+
+    func isNew(_ item: HistoryItem) -> Bool {
+        guard let newSince, let date = Format.parseDate(item.date) else { return false }
+        return date > newSince
     }
 
     public var body: some View {
@@ -38,7 +54,7 @@ public struct HistoryScreen: View {
             }
         }
         .dashboardListStyle()
-        .navigationTitle("History")
+        .navigationTitle(titled ? String(localized: "History") : String(localized: "Activity"))
         .toolbar {
             if segment == .history {
                 Menu {
@@ -55,7 +71,10 @@ public struct HistoryScreen: View {
                 }
             }
         }
-        .task { await model.load() }
+        .task {
+            await model.load()
+            if model.error == nil { onShown?() }
+        }
         .task(id: segment) { if segment == .blocklist { await model.loadBlocklist() } }
         .refreshable { await model.load(); await model.loadBlocklist() }
         .alert("Action failed", isPresented: Binding(get: { model.actionError != nil }, set: { if !$0 { model.actionError = nil } })) {
@@ -75,7 +94,15 @@ public struct HistoryScreen: View {
                 NavigationLink(value: item.ref) {
                     HStack(alignment: .top, spacing: 12) {
                         VStack(alignment: .leading, spacing: 3) {
-                            Text(item.title).font(.subheadline.weight(.medium)).lineLimit(1)
+                            HStack(spacing: 6) {
+                                if isNew(item) {
+                                    Text("NEW").font(.system(size: 10, weight: .bold)).tracking(0.5)
+                                        .padding(.horizontal, 5).padding(.vertical, 1)
+                                        .background(Color.accent, in: RoundedRectangle(cornerRadius: 4))
+                                        .foregroundStyle(.white)
+                                }
+                                Text(item.title).font(.subheadline.weight(.medium)).lineLimit(1)
+                            }
                             HStack(spacing: 4) {
                                 StateBadge(state: item.app.rawValue)
                                 ForEach(item.events ?? [], id: \._type) { StateBadge(state: $0._type) }

@@ -545,6 +545,7 @@
   "Pilot episode": "Pilotafsnit",
   "Recent episodes": "Nyere afsnit",
   "Those seasons are unmonitored so they are not fetched again; the shows stay.": "De sæsoner overvåges ikke længere, så de ikke hentes igen; serierne bliver.",
+  "NEW": "NY",
   "_badges": "state badges, looked up dynamically",
   "downloading": "downloader",
   "seeding": "seeder",

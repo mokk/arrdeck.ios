@@ -30,14 +30,18 @@ actor FakeActivityAPI: ActivityAPI {
         #expect(model.items.first?.title == "S03E08")
     }
 
-    @Test @MainActor func markSeenMovesTheMarkToTheServersNowAndPersistsIt() async {
+    @Test @MainActor func showingHistoryMovesTheMarkClearsTheBadgeAndPersists() async {
         let store = defaults()
         let model = ActivityFeedModel(api: FakeActivityAPI(), defaults: store, onSessionLost: {})
         await model.refresh()
-        model.markSeen()
-        #expect(model.lastSeen == Format.parseDate("2026-09-23T12:00:00+00:00"))
-        #expect(model.count == 2, "the list on screen is kept")
+        #expect(model.count == 2)
+        let seen = Date.now
+        model.markSeen(at: seen)
+        #expect(model.lastSeen == seen)
+        #expect(model.count == 0, "the tab badge clears at once")
+        model.markSeen(at: seen.addingTimeInterval(-3600))
+        #expect(model.lastSeen == seen, "an older moment never moves the mark back")
         let again = ActivityFeedModel(api: FakeActivityAPI(), defaults: store, onSessionLost: {})
-        #expect(again.lastSeen == model.lastSeen, "survives a relaunch")
+        #expect(again.lastSeen == seen, "survives a relaunch")
     }
 }
