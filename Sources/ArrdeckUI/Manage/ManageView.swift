@@ -114,6 +114,11 @@ public struct ManageView: View {
                         } label: { Label("Subtitles", systemImage: "captions.bubble") }
                         .accessibilityIdentifier("manage-subtitles")
                     }
+                    if model.hasArr, let ical = api as? any IcalAPI {
+                        NavigationLink {
+                            IcalSettingsView(api: ical, baseURL: baseURL)
+                        } label: { Label("Calendar subscription", systemImage: "calendar.badge.plus") }
+                    }
                     if model.has("readarr"), let opds = api as? any OpdsAPI {
                         NavigationLink {
                             OpdsSettingsView(api: opds, baseURL: baseURL)

@@ -12,7 +12,8 @@ public protocol NotificationsAPI: Sendable {
     func pushEvents() async throws -> PushEvents
     func savePushEvents(_ enabled: [String]) async throws -> PushEvents
     func pushRules() async throws -> PushRules
-    func savePushRules(quietStart: String, quietEnd: String, timezone: String, tags: [String: [Int]]) async throws -> PushRules
+    func savePushRules(quietStart: String, quietEnd: String, timezone: String, tags: [String: [Int]],
+                       digestDay: Int, digestTime: String) async throws -> PushRules
 }
 
 extension LiveAPI: NotificationsAPI {
@@ -45,8 +46,10 @@ extension LiveAPI: NotificationsAPI {
         }
     }
 
-    public func savePushRules(quietStart: String, quietEnd: String, timezone: String, tags: [String: [Int]]) async throws -> PushRules {
+    public func savePushRules(quietStart: String, quietEnd: String, timezone: String, tags: [String: [Int]],
+                              digestDay: Int, digestTime: String) async throws -> PushRules {
         let body = Components.Schemas.PushRulesIn(
+            digest_day: digestDay, digest_time: digestTime,
             quiet_end: quietEnd, quiet_start: quietStart,
             tags: .init(additionalProperties: tags), timezone: timezone
         )
@@ -91,11 +94,25 @@ public final class NotificationSettingsModel {
 
     /// Quiet hours as "HH:MM"; empty strings switch them off.
     public func setQuiet(start: String, end: String) async {
+        await save(start: start, end: end, day: digestDay, time: digestTime)
+    }
+
+    /// Monday = 0, as on the server.
+    public var digestDay: Int { rules?.digest_day ?? 6 }
+    public var digestTime: String { rules?.digest_time ?? "18:00" }
+
+    /// When the weekly digest goes out, "HH:MM" in this device's time zone.
+    public func setDigest(day: Int, time: String) async {
+        await save(start: rules?.quiet_start ?? "", end: rules?.quiet_end ?? "", day: day, time: time)
+    }
+
+    private func save(start: String, end: String, day: Int, time: String) async {
         do {
             rules = try await api.savePushRules(
                 quietStart: start, quietEnd: end,
                 timezone: TimeZone.current.identifier,
-                tags: rules?.tags?.additionalProperties ?? [:]
+                tags: rules?.tags?.additionalProperties ?? [:],
+                digestDay: day, digestTime: time
             )
         } catch { self.error = error.localizedDescription }
     }

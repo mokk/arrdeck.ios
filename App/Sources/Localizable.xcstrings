@@ -663,6 +663,16 @@
         }
       }
     },
+    "Anyone with this address can see what is coming up — treat it like a password.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle med denne adresse kan se, hvad der er på vej — behandl den som en adgangskode."
+          }
+        }
+      }
+    },
     "Appearance": {
       "localizations": {
         "da": {
@@ -899,6 +909,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kalender"
+          }
+        }
+      }
+    },
+    "Calendar address": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kalenderadresse"
+          }
+        }
+      }
+    },
+    "Calendar subscription": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kalenderabonnement"
           }
         }
       }
@@ -1181,6 +1211,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Datoer (20. sep.)"
+          }
+        }
+      }
+    },
+    "Day": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dag"
           }
         }
       }
@@ -2027,6 +2067,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "I dit bibliotek"
+          }
+        }
+      }
+    },
+    "Include": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medtag"
           }
         }
       }
@@ -4112,6 +4162,36 @@
         }
       }
     },
+    "Subscribe": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abonnér"
+          }
+        }
+      }
+    },
+    "Subscribe in Calendar": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abonnér i Kalender"
+          }
+        }
+      }
+    },
+    "Subscribe to what Radarr, Sonarr and Readarr have coming in Calendar, Google Calendar or Outlook — one calendar for all of them.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abonnér på det, Radarr, Sonarr og Readarr har på vej, i Kalender, Google Kalender eller Outlook — én kalender for dem alle."
+          }
+        }
+      }
+    },
     "Subtitles": {
       "localizations": {
         "da": {
@@ -4172,6 +4252,16 @@
         }
       }
     },
+    "The calendar needs Radarr, Sonarr or Readarr.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kalenderen kræver Radarr, Sonarr eller Readarr."
+          }
+        }
+      }
+    },
     "The catalogue needs arrdeck's build of Readarr, which can serve book files.": {
       "localizations": {
         "da": {
@@ -4198,6 +4288,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Downloadet er gået i stå ({state}) — ingen data flytter sig."
+          }
+        }
+      }
+    },
+    "The old address stops working; every calendar app needs the new one.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den gamle adresse holder op med at virke; alle kalenderapps skal have den nye."
           }
         }
       }
@@ -4269,6 +4369,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Begrænset"
+          }
+        }
+      }
+    },
+    "Time": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidspunkt"
           }
         }
       }
@@ -4369,6 +4479,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Slå fra"
+          }
+        }
+      }
+    },
+    "Turn on the calendar": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slå kalenderen til"
           }
         }
       }
@@ -4586,12 +4706,32 @@
         }
       }
     },
+    "Weekly digest": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ugentlig oversigt"
+          }
+        }
+      }
+    },
     "What arrdeck pushes to the browsers subscribed to it. This app cannot receive web push itself.": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Hvad arrdeck sender til de browsere, der abonnerer. Denne app kan ikke selv modtage web push."
+          }
+        }
+      }
+    },
+    "What arrived this week and what is coming up next week. Switch the Weekly digest event off to stop it.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvad der kom i denne uge, og hvad der kommer i næste uge. Slå hændelsen Ugentlig oversigt fra for at stoppe den."
           }
         }
       }

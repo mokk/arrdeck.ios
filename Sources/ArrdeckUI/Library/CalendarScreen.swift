@@ -55,6 +55,13 @@ public struct CalendarScreen: View {
             .background(Color.grouped)
             .navigationTitle("Calendar")
             .toolbar {
+                if let ical = api as? any IcalAPI {
+                    ToolbarItem(placement: .secondaryAction) {
+                        NavigationLink {
+                            IcalSettingsView(api: ical, baseURL: baseURL)
+                        } label: { Label("Subscribe", systemImage: "calendar.badge.plus") }
+                    }
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button("Today") { withAnimation { proxy.scrollTo(model.today, anchor: .top) } }
                 }

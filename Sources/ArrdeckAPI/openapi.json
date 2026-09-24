@@ -1719,6 +1719,29 @@
         "title": "HistoryResponse",
         "type": "object"
       },
+      "IcalSettingsOut": {
+        "properties": {
+          "apps": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Apps",
+            "type": "array"
+          },
+          "enabled": {
+            "default": false,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "title": "IcalSettingsOut",
+        "type": "object"
+      },
       "ImportCandidateOut": {
         "properties": {
           "importable": {
@@ -3082,6 +3105,19 @@
       },
       "PushRulesIn": {
         "properties": {
+          "digest_day": {
+            "default": 6,
+            "maximum": 6.0,
+            "minimum": 0.0,
+            "title": "Digest Day",
+            "type": "integer"
+          },
+          "digest_time": {
+            "default": "18:00",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "title": "Digest Time",
+            "type": "string"
+          },
           "quiet_end": {
             "default": "",
             "title": "Quiet End",
@@ -3114,6 +3150,16 @@
       },
       "PushRulesOut": {
         "properties": {
+          "digest_day": {
+            "default": 6,
+            "title": "Digest Day",
+            "type": "integer"
+          },
+          "digest_time": {
+            "default": "18:00",
+            "title": "Digest Time",
+            "type": "string"
+          },
           "quiet_end": {
             "default": "",
             "title": "Quiet End",
@@ -7257,6 +7303,68 @@
         ]
       }
     },
+    "/api/v1/ical/settings": {
+      "get": {
+        "operationId": "ical_settings_api_v1_ical_settings_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IcalSettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Ical Settings",
+        "tags": [
+          "settings"
+        ]
+      }
+    },
+    "/api/v1/ical/settings/token": {
+      "delete": {
+        "operationId": "ical_disable_api_v1_ical_settings_token_delete",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IcalSettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Ical Disable",
+        "tags": [
+          "settings"
+        ]
+      },
+      "post": {
+        "description": "Turns the feed on, or replaces its secret: the old URL stops working.",
+        "operationId": "ical_new_token_api_v1_ical_settings_token_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IcalSettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Ical New Token",
+        "tags": [
+          "settings"
+        ]
+      }
+    },
     "/api/v1/import-lists": {
       "get": {
         "description": "Trakt lists, TMDB collections and the like — how a library grows without\nanyone adding titles by hand.",
@@ -9399,6 +9507,48 @@
         "summary": "Popular",
         "tags": [
           "popular"
+        ]
+      }
+    },
+    "/api/v1/push/digest/test": {
+      "post": {
+        "description": "This week's digest now, to one device when an endpoint is given.",
+        "operationId": "push_digest_test_api_v1_push_digest_test_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushTestIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushTestOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Push Digest Test",
+        "tags": [
+          "settings"
         ]
       }
     },
