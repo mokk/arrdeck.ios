@@ -4,14 +4,48 @@ import SwiftUI
 /// Eight metrics over 30, 90 or 365 days, as the PWA charts them. Reached
 /// from the dashboard's Trends card.
 public struct StatsScreen: View {
-    @State private var model: StatsModel
+    enum Mode: String { case library, watching }
 
-    public init(api: any HistoryAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    @State private var model: StatsModel
+    @AppStorage("stats.view") private var mode: Mode = .library
+    let watching: (any WatchingAPI)?
+    let baseURL: URL?
+
+    /// With `watching`, a second view of Plex's play history sits beside the library's.
+    public init(api: any HistoryAPI, watching: (any WatchingAPI)? = nil, baseURL: URL? = nil,
+                onSessionLost: @escaping @MainActor () -> Void) {
         _model = State(initialValue: StatsModel(api: api, onSessionLost: onSessionLost))
+        self.watching = watching
+        self.baseURL = baseURL
     }
 
     public var body: some View {
         List {
+            if watching != nil {
+                Section {
+                    Picker("View", selection: $mode) {
+                        Text("Library").tag(Mode.library)
+                        Text("Watching").tag(Mode.watching)
+                    }
+                    .pickerStyle(.segmented)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                }
+            }
+            if let watching, let baseURL, mode == .watching {
+                WatchingSections(api: watching, baseURL: baseURL)
+            } else {
+                librarySections
+            }
+        }
+        .dashboardListStyle()
+        .navigationTitle("Statistics")
+        .task { await model.load() }
+        .refreshable { await model.load() }
+        .accessibilityIdentifier("stats")
+    }
+
+    @ViewBuilder var librarySections: some View {
             Section {
                 Picker("Window", selection: $model.window) {
                     ForEach(StatsWindow.allCases, id: \.self) { Text($0.label).tag($0) }
@@ -36,12 +70,6 @@ public struct StatsScreen: View {
                     }
                 }
             }
-        }
-        .dashboardListStyle()
-        .navigationTitle("Statistics")
-        .task { await model.load() }
-        .refreshable { await model.load() }
-        .accessibilityIdentifier("stats")
     }
 }
 

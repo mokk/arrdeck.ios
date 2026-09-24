@@ -172,6 +172,16 @@
         }
       }
     },
+    "%lld of %lld in the library": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld af %lld i biblioteket"
+          }
+        }
+      }
+    },
     "%lld of %lld movies": {
       "localizations": {
         "da": {
@@ -188,6 +198,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld af %lld torrents"
+          }
+        }
+      }
+    },
+    "%lld plays": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld afspilninger"
+          }
+        }
+      }
+    },
+    "%lld plays · ≈ %@ h": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld afspilninger · ≈ %@ t"
           }
         }
       }
@@ -338,6 +368,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "30 dage"
+          }
+        }
+      }
+    },
+    "7 days": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 dage"
           }
         }
       }
@@ -608,6 +648,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alle tags"
+          }
+        }
+      }
+    },
+    "All time": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Altid"
           }
         }
       }
@@ -899,6 +949,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bygger den første liste — det tager omkring et minut, derefter opdateres den selv hver time."
+          }
+        }
+      }
+    },
+    "Busiest: %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Travlest: %@"
+          }
+        }
+      }
+    },
+    "By time of day": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Efter tidspunkt"
+          }
+        }
+      }
+    },
+    "By weekday": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Efter ugedag"
           }
         }
       }
@@ -1889,6 +1969,16 @@
         }
       }
     },
+    "From Plex's play history. Hours are an estimate: each play counts the movie's runtime or the show's usual episode length.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fra Plex' afspilningshistorik. Timerne er et skøn: hver afspilning tæller filmens længde eller seriens normale afsnitslængde."
+          }
+        }
+      }
+    },
     "Full in about %lld days": {
       "localizations": {
         "da": {
@@ -2046,6 +2136,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hjem"
+          }
+        }
+      }
+    },
+    "Hours": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer"
           }
         }
       }
@@ -2232,7 +2332,6 @@
       }
     },
     "Library": {
-      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -2450,6 +2549,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mere"
+          }
+        }
+      }
+    },
+    "Most watched movies": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mest sete film"
+          }
+        }
+      }
+    },
+    "Most watched shows": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mest sete serier"
           }
         }
       }
@@ -2847,6 +2966,16 @@
         }
       }
     },
+    "On your Plex watchlist": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "På din Plex-watchlist"
+          }
+        }
+      }
+    },
     "Only titles without a profile (%lld)": {
       "localizations": {
         "da": {
@@ -2957,6 +3086,16 @@
         }
       }
     },
+    "Period": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Periode"
+          }
+        }
+      }
+    },
     "Physical": {
       "extractionState": "manual",
       "localizations": {
@@ -2974,6 +3113,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vælg en Prowlarr-indexerdefinition"
+          }
+        }
+      }
+    },
+    "Plays": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afspilninger"
           }
         }
       }
@@ -4665,7 +4814,6 @@
       }
     },
     "View": {
-      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -4691,6 +4839,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Set"
+          }
+        }
+      }
+    },
+    "Watching": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afspilning"
           }
         }
       }
@@ -4752,6 +4910,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hvor arrdeck finder hver tjeneste. Ændringer her påvirker alle skærme."
+          }
+        }
+      }
+    },
+    "Who watched": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvem så"
           }
         }
       }

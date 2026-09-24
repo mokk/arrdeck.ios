@@ -4379,6 +4379,30 @@
         "title": "ServiceBlock[VpnStatusOut]",
         "type": "object"
       },
+      "ServiceBlock_WatchStatsOut_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/WatchStatsOut"
+          },
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "stale_age_seconds": {
+            "title": "Stale Age Seconds",
+            "type": "number"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "title": "ServiceBlock[WatchStatsOut]",
+        "type": "object"
+      },
       "ServiceBlock_WatchedMapOut_": {
         "properties": {
           "data": {
@@ -5904,6 +5928,137 @@
           "items"
         ],
         "title": "WantedPageOut",
+        "type": "object"
+      },
+      "WatchStatsOut": {
+        "properties": {
+          "by_hour": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "title": "By Hour",
+            "type": "array"
+          },
+          "by_weekday": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "title": "By Weekday",
+            "type": "array"
+          },
+          "days": {
+            "title": "Days",
+            "type": "integer"
+          },
+          "episodes": {
+            "default": 0,
+            "title": "Episodes",
+            "type": "integer"
+          },
+          "hours": {
+            "default": 0,
+            "title": "Hours",
+            "type": "number"
+          },
+          "movies": {
+            "default": 0,
+            "title": "Movies",
+            "type": "integer"
+          },
+          "plays": {
+            "default": 0,
+            "title": "Plays",
+            "type": "integer"
+          },
+          "top_movies": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/WatchTitleOut"
+            },
+            "title": "Top Movies",
+            "type": "array"
+          },
+          "top_shows": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/WatchTitleOut"
+            },
+            "title": "Top Shows",
+            "type": "array"
+          },
+          "users": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/WatchUserOut"
+            },
+            "title": "Users",
+            "type": "array"
+          }
+        },
+        "required": [
+          "days"
+        ],
+        "title": "WatchStatsOut",
+        "type": "object"
+      },
+      "WatchTitleOut": {
+        "properties": {
+          "hours": {
+            "default": 0,
+            "title": "Hours",
+            "type": "number"
+          },
+          "movie_id": {
+            "title": "Movie Id",
+            "type": "integer"
+          },
+          "plays": {
+            "default": 0,
+            "title": "Plays",
+            "type": "integer"
+          },
+          "poster": {
+            "title": "Poster",
+            "type": "string"
+          },
+          "series_id": {
+            "title": "Series Id",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "WatchTitleOut",
+        "type": "object"
+      },
+      "WatchUserOut": {
+        "properties": {
+          "hours": {
+            "default": 0,
+            "title": "Hours",
+            "type": "number"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "plays": {
+            "default": 0,
+            "title": "Plays",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "WatchUserOut",
         "type": "object"
       },
       "WatchedEpisodeOut": {
@@ -9453,6 +9608,87 @@
         "summary": "Parse",
         "tags": [
           "tools"
+        ]
+      }
+    },
+    "/api/v1/plex/stats": {
+      "get": {
+        "description": "`days=0` is all time. Hours are estimated from runtimes.",
+        "operationId": "watch_stats_api_v1_plex_stats_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 3650,
+              "minimum": 0,
+              "title": "Days",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tz",
+            "required": false,
+            "schema": {
+              "default": "UTC",
+              "title": "Tz",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceBlock_WatchStatsOut_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Watch Stats",
+        "tags": [
+          "plex"
+        ]
+      }
+    },
+    "/api/v1/plex/watchlist": {
+      "get": {
+        "operationId": "plex_watchlist_api_v1_plex_watchlist_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SearchResultOut"
+                  },
+                  "title": "Response Plex Watchlist Api V1 Plex Watchlist Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Plex Watchlist",
+        "tags": [
+          "plex"
         ]
       }
     },

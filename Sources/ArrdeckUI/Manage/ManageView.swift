@@ -66,8 +66,10 @@ public struct ManageView: View {
                     } label: { Label("Popular releases", systemImage: "flame") }
                 }
                 NavigationLink {
-                    StatsScreen(api: api, onSessionLost: onSessionLost)
+                    StatsScreen(api: api, watching: model.has("plex") ? api as? any WatchingAPI : nil,
+                                baseURL: baseURL, onSessionLost: onSessionLost)
                 } label: { Label("Statistics", systemImage: "chart.line.uptrend.xyaxis") }
+                .accessibilityIdentifier("manage-stats")
                 NavigationLink {
                     DashboardView(model: model, baseURL: baseURL, api: api, onSessionLost: onSessionLost)
                         .navigationTitle("Overview")

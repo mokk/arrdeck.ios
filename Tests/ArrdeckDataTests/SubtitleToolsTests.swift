@@ -46,3 +46,16 @@ import Testing
         #expect(on.webcal(on: base)?.absoluteString == "webcal://10.0.0.154:3500/ical/T/arrdeck.ics")
     }
 }
+
+@Suite struct WatchingTests {
+    @Test func peakIsTheBusiestBucketAndNilWhenNothingWasWatched() {
+        #expect(WatchStats.peak([0, 3, 7, 7, 1]) == 2)
+        #expect(WatchStats.peak([0, 0, 0]) == nil)
+        #expect(WatchStats.peak([]) == nil)
+    }
+
+    @Test func allTimeIsZeroDays() {
+        #expect(WatchWindow.all.rawValue == 0)
+        #expect(WatchWindow.allCases.map(\.rawValue) == [7, 30, 365, 0])
+    }
+}

@@ -125,6 +125,18 @@ final class OnboardingUITests: XCTestCase {
         app.navigationBars.buttons.element(boundBy: 0).tap()
         XCTAssert(app.navigationBars["Settings"].waitForExistence(timeout: 5), "did not return to Settings from Overview")
         snap("settings-after-overview")
+        // Statistics → Watching, when Plex is set up: Plex's play history.
+        app.buttons["manage-stats"].tap()
+        XCTAssert(any["stats"].waitForExistence(timeout: 10), "statistics never appeared")
+        if app.buttons["Watching"].exists {
+            app.buttons["Watching"].tap()
+            XCTAssert(app.staticTexts["Plays"].waitForExistence(timeout: 20)
+                || app.staticTexts["Nothing watched in this period."].exists, "watch stats never loaded")
+            snap("stats-watching")
+            app.buttons["Library"].tap()
+        }
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssert(app.navigationBars["Settings"].waitForExistence(timeout: 5), "did not return to Settings from Statistics")
         let connections = app.buttons["manage-connections"]
         // It is the last row. Under the tab bar it still counts as hittable, so
         // scroll to the bottom first rather than until it "can" be tapped.

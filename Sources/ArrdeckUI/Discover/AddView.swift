@@ -9,6 +9,7 @@ public struct AddView: View {
     @State private var selected: SearchResult?
     @State private var collection: Collection?
     @State private var recommendations: [SearchResult] = []
+    @State private var watchlist: [SearchResult] = []
     let api: any DiscoverAPI & LibraryAPI
     let baseURL: URL
     let hasPlex: Bool
@@ -99,6 +100,12 @@ public struct AddView: View {
             }
             switch model.tab {
             case .movies, .series:
+                if !model.searching {
+                    let kind: SearchResult.kindPayload = model.tab == .movies ? .movie : .series
+                    let mine = watchlist.filter { $0.kind == kind }
+                    let missing = mine.filter { $0.in_library != true }
+                    if !missing.isEmpty { watchlistSection(missing, have: mine.count - missing.count, total: mine.count) }
+                }
                 if !model.searching, model.tab == .movies, !recommendations.isEmpty {
                     recommendationsSection
                 }
@@ -127,6 +134,39 @@ public struct AddView: View {
             // Radarr's own suggestions, when there is a Radarr to ask
             guard model.tabs.contains(.movies), let source = api as? any RecommendationsAPI else { return }
             recommendations = (try? await source.recommendations()) ?? []
+        }
+        .task {
+            guard hasPlex, let source = api as? any WatchingAPI else { return }
+            watchlist = (try? await source.plexWatchlist()) ?? []
+        }
+    }
+
+    /// What is on the Plex watchlist and not in the library yet: tap to add.
+    func watchlistSection(_ rows: [SearchResult], have: Int, total: Int) -> some View {
+        Section {
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(alignment: .top, spacing: 12) {
+                    ForEach(rows, id: \.remote_id) { result in
+                        Button { selected = result } label: {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Poster(path: result.poster, baseURL: baseURL, width: 90, cornerRadius: 10, title: result.title)
+                                Text(result.title).font(.caption.weight(.medium)).lineLimit(1)
+                                Text(result.year.map(String.init) ?? "").font(.caption2).foregroundStyle(.secondary)
+                            }
+                            .frame(width: 90, alignment: .leading)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 16).padding(.vertical, 8)
+            }
+            .listRowInsets(EdgeInsets())
+        } header: {
+            HStack {
+                Text("On your Plex watchlist")
+                Spacer()
+                Text("\(have) of \(total) in the library").textCase(nil)
+            }
         }
     }
 
