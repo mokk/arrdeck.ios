@@ -131,6 +131,19 @@ final class OnboardingUITests: XCTestCase {
         app.swipeUp()
         app.swipeUp()
         XCTAssert(connections.waitForExistence(timeout: 5), "connections row not reachable")
+        // Subtitles, when Bazarr is set up: the missing list, then the profile editor.
+        let subtitles = app.buttons["manage-subtitles"]
+        if subtitles.exists {
+            subtitles.tap()
+            XCTAssert(app.buttons["Search all"].waitForExistence(timeout: 20)
+                || app.staticTexts["Nothing is missing subtitles."].exists, "missing subtitles never loaded")
+            snap("subtitles-missing")
+            app.buttons["Language profiles"].tap()
+            XCTAssert(app.buttons["Select all shown"].waitForExistence(timeout: 20), "profile editor never loaded")
+            snap("subtitles-profiles")
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+            app.swipeUp()
+        }
         connections.tap()
         XCTAssert(app.staticTexts["configured"].firstMatch.waitForExistence(timeout: 20), "connections never loaded")
         app.navigationBars.buttons.element(boundBy: 0).tap()

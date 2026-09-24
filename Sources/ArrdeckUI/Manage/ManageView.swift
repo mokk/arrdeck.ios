@@ -85,7 +85,7 @@ public struct ManageView: View {
                     } label: { Label("Wanted", systemImage: "magnifyingglass.circle") }
                 }
             }
-            if model.has("prowlarr") || model.hasArr {
+            if model.has("prowlarr") || model.hasArr || model.has("bazarr") {
                 Section("Services") {
                     if model.has("prowlarr") {
                         NavigationLink {
@@ -107,6 +107,12 @@ public struct ManageView: View {
                                 ParseView(api: tools, apps: parseApps)
                             } label: { Label("Release name tester", systemImage: "flask") }
                         }
+                    }
+                    if model.has("bazarr"), let subtitles = api as? any SubtitleToolsAPI {
+                        NavigationLink {
+                            SubtitleToolsView(api: subtitles)
+                        } label: { Label("Subtitles", systemImage: "captions.bubble") }
+                        .accessibilityIdentifier("manage-subtitles")
                     }
                     if model.has("readarr"), let opds = api as? any OpdsAPI {
                         NavigationLink {

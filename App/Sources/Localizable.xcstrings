@@ -122,6 +122,16 @@
         }
       }
     },
+    "%lld missing subtitles": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld mangler undertekster"
+          }
+        }
+      }
+    },
     "%lld movies, %lld episodes missing subtitles": {
       "localizations": {
         "da": {
@@ -238,6 +248,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld opgaver, alle til tiden"
+          }
+        }
+      }
+    },
+    "%lld titles": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld titler"
           }
         }
       }
@@ -663,6 +683,16 @@
         }
       }
     },
+    "Apply to %lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anvend på %lld"
+          }
+        }
+      }
+    },
     "Approve": {
       "localizations": {
         "da": {
@@ -749,6 +779,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bazarr følger ikke denne titel"
+          }
+        }
+      }
+    },
+    "Bazarr is searching for all of them": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bazarr søger efter dem alle"
+          }
+        }
+      }
+    },
+    "Bazarr only fetches subtitles for titles with a language profile. Pick titles and give them one.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bazarr henter kun undertekster til titler med en sprogprofil. Vælg titler og giv dem en."
           }
         }
       }
@@ -2051,6 +2101,16 @@
         }
       }
     },
+    "Language profiles": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprogprofiler"
+          }
+        }
+      }
+    },
     "Languages": {
       "localizations": {
         "da": {
@@ -2525,6 +2585,16 @@
         }
       }
     },
+    "No profile": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen profil"
+          }
+        }
+      }
+    },
     "No services configured": {
       "localizations": {
         "da": {
@@ -2727,6 +2797,16 @@
         }
       }
     },
+    "Only titles without a profile (%lld)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kun titler uden profil (%lld)"
+          }
+        }
+      }
+    },
     "Open in %@": {
       "localizations": {
         "da": {
@@ -2895,6 +2975,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Forrige titel"
+          }
+        }
+      }
+    },
+    "Profile": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profil"
           }
         }
       }
@@ -3572,6 +3662,26 @@
         }
       }
     },
+    "Select all shown": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg alle viste"
+          }
+        }
+      }
+    },
+    "Select none": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg ingen"
+          }
+        }
+      }
+    },
     "Select…": {
       "localizations": {
         "da": {
@@ -3662,6 +3772,16 @@
         }
       }
     },
+    "Set profile to %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sæt profil til %@"
+          }
+        }
+      }
+    },
     "Set up Radarr, Sonarr or Prowlarr under Manage → Connections.": {
       "localizations": {
         "da": {
@@ -3748,6 +3868,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vis senere"
+          }
+        }
+      }
+    },
+    "Show more": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vis flere"
           }
         }
       }
