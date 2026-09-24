@@ -64,6 +64,8 @@ public enum DiagnosisText {
         "delay_profile": String(localized: "A delay profile is holding grabs on purpose — usenet {usenet}m, torrent {torrent}m."),
         "no_indexers": String(localized: "No indexers are enabled, so there is nowhere to search."),
         "indexers_failing": String(localized: "{count} indexer problem reported: {message}"),
+        "last_searched": String(localized: "Radarr last searched for it {when}."),
+        "never_searched": String(localized: "Radarr has not searched for it yet."),
     ] }
 
     public static var nothingFound: String { String(localized: "Everything checks out — the indexers simply have not offered a matching release yet.") }
@@ -76,7 +78,9 @@ public enum DiagnosisText {
             ? "not_yet_available_dated" : finding.code
         guard var text = templates[code] else { return finding.code }
         for (key, value) in params {
-            text = text.replacingOccurrences(of: "{\(key)}", with: value)
+            // a moment arrives raw, so the date style chosen in Display applies
+            let shown = key == "when" ? (Format.parseDate(value).map { Format.when($0) } ?? value) : value
+            text = text.replacingOccurrences(of: "{\(key)}", with: shown)
         }
         return text
     }

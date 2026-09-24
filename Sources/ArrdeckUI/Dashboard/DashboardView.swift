@@ -348,6 +348,13 @@ struct QueueRow: View {
     let forceImport: () -> Void
     let retry: () -> Void
     var remove: (() -> Void)? = nil
+    var grab: (() -> Void)? = nil
+
+    /// A release a delay profile is holding, and when it goes on its own.
+    var heldUntil: String? {
+        guard item.status == "delay", let raw = item.estimated_completion, let date = Format.parseDate(raw) else { return nil }
+        return String(localized: "Held by a delay profile, grabbed \(date.formatted(.relative(presentation: .named)))")
+    }
 
     var troubled: Bool {
         !(item.errors ?? []).isEmpty || item.tracked_status == "warning" || item.tracked_status == "error"
@@ -372,9 +379,13 @@ struct QueueRow: View {
                 if let first = item.errors?.first {
                     Text(first).font(.caption).foregroundStyle(.secondary).lineLimit(2)
                 }
+                if let heldUntil { Text(heldUntil).font(.caption).foregroundStyle(.secondary).lineLimit(2) }
             }
             Spacer(minLength: 0)
             VStack(spacing: 6) {
+                if item.status == "delay", let grab {
+                    Button("Grab now", action: grab).buttonStyle(.bordered).controlSize(.small)
+                }
                 if let state = item.tracked_state, state.hasPrefix("import"), state != "imported" {
                     Button("Force import", action: forceImport)
                         .buttonStyle(.bordered).controlSize(.small)

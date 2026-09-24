@@ -288,6 +288,13 @@ public final class DownloadsModel {
         await fetchQueue()
     }
 
+    /// Skip a delay profile's wait for this release.
+    public func grabNow(_ item: QueueItem) async {
+        guard let app = ArrApp(rawValue: item.app.rawValue), let grabber = api as? any QueueGrabAPI else { return }
+        await perform("queue-\(item.app.rawValue)-\(item.id)") { try await grabber.grabNow(app: app, id: item.id) }
+        await fetchQueue()
+    }
+
     public func removeFromQueue(_ item: QueueItem) async {
         guard let app = ArrApp(rawValue: item.app.rawValue) else { return }
         await perform("queue-\(item.app.rawValue)-\(item.id)") { try await api.removeFromQueue(app: app, id: item.id) }

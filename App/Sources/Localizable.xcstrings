@@ -1799,6 +1799,16 @@
         }
       }
     },
+    "Grab now": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hent nu"
+          }
+        }
+      }
+    },
     "Grabbed": {
       "localizations": {
         "da": {
@@ -1825,6 +1835,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gruppér efter"
+          }
+        }
+      }
+    },
+    "Held by a delay profile, grabbed %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Holdt tilbage af en forsinkelsesprofil, hentes %@"
           }
         }
       }
@@ -2304,6 +2324,16 @@
         }
       }
     },
+    "Never searched": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aldrig søgt"
+          }
+        }
+      }
+    },
     "Never watched": {
       "localizations": {
         "da": {
@@ -2482,6 +2512,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ikke i dit bibliotek"
+          }
+        }
+      }
+    },
+    "Not interested in %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke interesseret i %@"
           }
         }
       }
@@ -2839,6 +2879,26 @@
         }
       }
     },
+    "Radarr has not searched for it yet.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Radarr har ikke søgt efter den endnu."
+          }
+        }
+      }
+    },
+    "Radarr last searched for it {when}.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Radarr søgte sidst efter den {when}."
+          }
+        }
+      }
+    },
     "Read": {
       "localizations": {
         "da": {
@@ -2936,6 +2996,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Frigør %@ (%lld titler)"
+          }
+        }
+      }
+    },
+    "Recommended for you": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anbefalet til dig"
           }
         }
       }
@@ -3268,6 +3338,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Søg efter serier"
+          }
+        }
+      }
+    },
+    "Searched %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søgt %@"
           }
         }
       }

@@ -8,6 +8,7 @@ public struct AddView: View {
     @State private var model: AddModel
     @State private var selected: SearchResult?
     @State private var collection: Collection?
+    @State private var recommendations: [SearchResult] = []
     let api: any DiscoverAPI & LibraryAPI
     let baseURL: URL
     let hasPlex: Bool
@@ -98,6 +99,9 @@ public struct AddView: View {
             }
             switch model.tab {
             case .movies, .series:
+                if !model.searching, model.tab == .movies, !recommendations.isEmpty {
+                    recommendationsSection
+                }
                 if model.searching {
                     resultsSection(model.results, title: nil)
                 } else if model.canDiscover {
@@ -119,6 +123,48 @@ public struct AddView: View {
             }
         }
         .dashboardListStyle()
+        .task {
+            // Radarr's own suggestions, when there is a Radarr to ask
+            guard model.tabs.contains(.movies), let source = api as? any RecommendationsAPI else { return }
+            recommendations = (try? await source.recommendations()) ?? []
+        }
+    }
+
+    /// Radarr's suggestions from the library: tap to add, the cross for "not
+    /// interested", which becomes a Radarr exclusion.
+    var recommendationsSection: some View {
+        Section("Recommended for you") {
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(alignment: .top, spacing: 12) {
+                    ForEach(recommendations.prefix(20), id: \.remote_id) { result in
+                        Button { selected = result } label: {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Poster(path: result.poster, baseURL: baseURL, width: 90, cornerRadius: 10, title: result.title)
+                                Text(result.title).font(.caption.weight(.medium)).lineLimit(1)
+                                Text(result.year.map(String.init) ?? "").font(.caption2).foregroundStyle(.secondary)
+                            }
+                            .frame(width: 90, alignment: .leading)
+                        }
+                        .buttonStyle(.plain)
+                        .overlay(alignment: .topTrailing) {
+                            Button {
+                                let id = result.remote_id
+                                recommendations.removeAll { $0.remote_id == id }
+                                Task { try? await (api as? any RecommendationsAPI)?.dismissRecommendation(id) }
+                            } label: {
+                                Image(systemName: "xmark").font(.caption2.bold()).foregroundStyle(.white)
+                                    .frame(width: 22, height: 22).background(.black.opacity(0.6), in: Circle())
+                            }
+                            .buttonStyle(.plain)
+                            .padding(4)
+                            .accessibilityLabel(Text("Not interested in \(result.title)"))
+                        }
+                    }
+                }
+                .padding(.horizontal, 16).padding(.vertical, 8)
+            }
+            .listRowInsets(EdgeInsets())
+        }
     }
 
     @ViewBuilder func resultsSection(_ state: Loadable<[SearchResult]>?, title: String?) -> some View {

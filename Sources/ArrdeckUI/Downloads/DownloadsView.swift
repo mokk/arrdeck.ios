@@ -111,7 +111,8 @@ public struct DownloadsView: View {
                             pending: model.isPending("queue-\(item.app.rawValue)-\(item.id)"),
                             forceImport: { Task { await model.forceImport(item) } },
                             retry: { Task { await model.blocklistRetry(item) } },
-                            remove: { Task { await model.removeFromQueue(item) } }
+                            remove: { Task { await model.removeFromQueue(item) } },
+                            grab: { Task { await model.grabNow(item) } }
                         )
                     }
                 }

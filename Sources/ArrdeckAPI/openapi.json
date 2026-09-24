@@ -3178,6 +3178,10 @@
             "title": "Errors",
             "type": "array"
           },
+          "estimated_completion": {
+            "title": "Estimated Completion",
+            "type": "string"
+          },
           "id": {
             "title": "Id",
             "type": "integer"
@@ -5482,6 +5486,11 @@
             "title": "Id",
             "type": "integer"
           },
+          "last_search": {
+            "format": "date-time",
+            "title": "Last Search",
+            "type": "string"
+          },
           "library_id": {
             "title": "Library Id",
             "type": "integer"
@@ -6637,6 +6646,68 @@
           }
         },
         "summary": "Discover Movies",
+        "tags": [
+          "discover"
+        ]
+      }
+    },
+    "/api/v1/discover/recommendations": {
+      "get": {
+        "description": "Films Radarr recommends from your library, no Overseerr needed.",
+        "operationId": "recommendations_api_v1_discover_recommendations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SearchResultOut"
+                  },
+                  "title": "Response Recommendations Api V1 Discover Recommendations Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Recommendations",
+        "tags": [
+          "discover"
+        ]
+      }
+    },
+    "/api/v1/discover/recommendations/{tmdb_id}/dismiss": {
+      "post": {
+        "description": "Not interested: a Radarr exclusion, so no list or suggestion brings it back.",
+        "operationId": "dismiss_recommendation_api_v1_discover_recommendations__tmdb_id__dismiss_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tmdb_id",
+            "required": true,
+            "schema": {
+              "title": "Tmdb Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Dismiss Recommendation",
         "tags": [
           "discover"
         ]
@@ -9444,6 +9515,51 @@
         "summary": "Force Import",
         "tags": [
           "importing"
+        ]
+      }
+    },
+    "/api/v1/queue/{app}/{item_id}/grab": {
+      "post": {
+        "description": "Send a release a delay profile is holding to the download client now,\nrather than when the delay runs out.",
+        "operationId": "grab_now_api_v1_queue__app___item_id__grab_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app",
+            "required": true,
+            "schema": {
+              "title": "App",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Grab Now",
+        "tags": [
+          "queue"
         ]
       }
     },

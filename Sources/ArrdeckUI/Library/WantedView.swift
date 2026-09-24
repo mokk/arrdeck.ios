@@ -121,6 +121,11 @@ struct WantedRow: View {
         [item.subtitle, item.air_date.map { Format.day($0) }].compactMap { $0 }.joined(separator: " · ")
     }
 
+    var searched: String {
+        guard let last = item.last_search else { return String(localized: "Never searched") }
+        return String(localized: "Searched \(Format.when(last))")
+    }
+
     var body: some View {
         HStack(spacing: 10) {
             NavigationLink(value: item.ref) {
@@ -129,6 +134,7 @@ struct WantedRow: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text(item.title).font(.subheadline.weight(.medium)).lineLimit(1)
                         Text(subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                        Text(searched).font(.caption2).foregroundStyle(.tertiary).lineLimit(1)
                     }
                 }
             }
