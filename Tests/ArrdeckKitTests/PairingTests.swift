@@ -2,34 +2,69 @@ import Foundation
 import Testing
 @testable import ArrdeckKit
 
-struct PairingWatcherTests {
+struct PairingRequestTests {
     let base = URL(string: "https://deck.example.com")!
 
-    func cookie(_ name: String, _ domain: String) -> HTTPCookie {
-        HTTPCookie(properties: [.name: name, .value: "tok", .domain: domain, .path: "/"])!
+    @Test func theChallengeIsTheBackendsPKCEForm() {
+        // computed with Python's hashlib, as the backend's _pkce does
+        let request = PairingRequest(verifier: "arrdeck-pairing-verifier")
+        #expect(request.challenge == "8YtYP9AZEQjZ0-UDJPnlBfd7JJzxgLUrD8Yugsu90GY")
     }
 
-    @Test func firesOnTheSessionCookieForTheRightHost() {
-        let watcher = PairingWatcher(for: base)
-        let match = watcher.observe([cookie("arrdeck_session", "deck.example.com")])
-        #expect(match?.domain == "deck.example.com")
+    @Test func eachAttemptGetsItsOwnVerifier() {
+        let a = PairingRequest(), b = PairingRequest()
+        #expect(a.verifier != b.verifier)
+        #expect(a.verifier.count == 43)
+        #expect(a.challenge.count == 43)  // the length the backend insists on
     }
 
-    @Test func firesExactlyOnce() {
-        // The caller tears the web view down on the signal; a second fire would
-        // tear down whatever replaced it.
-        let watcher = PairingWatcher(for: base)
-        let hit = [cookie("arrdeck_session", "deck.example.com")]
-        #expect(watcher.observe(hit) != nil)
-        #expect(watcher.observe(hit) == nil)
+    @Test func theLinkOpensThePairPageWithTheChallenge() {
+        let request = PairingRequest(verifier: "v")
+        let url = request.url(for: base)
+        #expect(url.absoluteString == "https://deck.example.com/pair?challenge=\(request.challenge)")
     }
 
-    @Test func staysQuietForOtherHostsAndOtherCookies() {
-        let watcher = PairingWatcher(for: base)
-        #expect(watcher.observe([cookie("arrdeck_session", "10.0.0.154")]) == nil)
-        #expect(watcher.observe([cookie("grafana_session", "deck.example.com")]) == nil)
-        // And still fires later — the misses above must not consume the shot.
-        #expect(watcher.observe([cookie("arrdeck_session", "deck.example.com")]) != nil)
+    @Test func theCodeIsReadFromTheRedirect() {
+        #expect(PairingRequest.code(from: URL(string: "arrdeck://paired?code=abc-_1")!) == "abc-_1")
+    }
+
+    @Test func anythingElseYieldsNoCode() {
+        #expect(PairingRequest.code(from: URL(string: "arrdeck://paired")!) == nil)
+        #expect(PairingRequest.code(from: URL(string: "arrdeck://paired?code=")!) == nil)
+        #expect(PairingRequest.code(from: URL(string: "arrdeck://other?code=abc")!) == nil)
+        #expect(PairingRequest.code(from: URL(string: "https://paired?code=abc")!) == nil)
+    }
+}
+
+struct PairingExchangeTests {
+    let base = URL(string: "https://deck.example.com")!
+
+    final class Poster: HTTPPoster, @unchecked Sendable {
+        var status: Int
+        var sent: (URL, [String: String])?
+        init(status: Int) { self.status = status }
+        func post(_ url: URL, json: Data) async throws -> (Data, Int) {
+            sent = (url, try JSONDecoder().decode([String: String].self, from: json))
+            return (Data(), status)
+        }
+    }
+
+    @Test func sendsTheCodeWithThisAttemptsVerifier() async throws {
+        let poster = Poster(status: 200)
+        let request = PairingRequest(verifier: "the-verifier")
+        try await Pairing.exchange(code: "c0de", request: request, baseURL: base, transport: poster)
+        #expect(poster.sent?.0.absoluteString == "https://deck.example.com/api/v1/auth/pair/exchange")
+        #expect(poster.sent?.1 == ["code": "c0de", "verifier": "the-verifier"])
+    }
+
+    @Test func refusalsAndThrottlingAreTold() async {
+        for (status, expected) in [(401, PairingError.refused), (429, .throttled), (500, .unexpected(status: 500))] {
+            await #expect(throws: expected) {
+                try await Pairing.exchange(
+                    code: "c", request: PairingRequest(), baseURL: base, transport: Poster(status: status)
+                )
+            }
+        }
     }
 }
 

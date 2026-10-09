@@ -2712,6 +2712,37 @@
         "title": "OptionsOut",
         "type": "object"
       },
+      "PairCodeIn": {
+        "properties": {
+          "challenge": {
+            "title": "Challenge",
+            "type": "string"
+          }
+        },
+        "required": [
+          "challenge"
+        ],
+        "title": "PairCodeIn",
+        "type": "object"
+      },
+      "PairExchangeIn": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "verifier": {
+            "title": "Verifier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "verifier"
+        ],
+        "title": "PairExchangeIn",
+        "type": "object"
+      },
       "ParseOut": {
         "description": "How an arr reads a release name, and what it would do with it.",
         "properties": {
@@ -6505,6 +6536,92 @@
           }
         },
         "summary": "Logout",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/pair/code": {
+      "post": {
+        "operationId": "pair_code_api_v1_auth_pair_code_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PairCodeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Pair Code Api V1 Auth Pair Code Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Pair Code",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/pair/exchange": {
+      "post": {
+        "operationId": "pair_exchange_api_v1_auth_pair_exchange_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PairExchangeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Pair Exchange Api V1 Auth Pair Exchange Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Pair Exchange",
         "tags": [
           "auth"
         ]

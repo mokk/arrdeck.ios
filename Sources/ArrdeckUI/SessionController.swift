@@ -4,7 +4,7 @@ import Observation
 
 /// One profile's standing with its backend, owned above both the dashboard
 /// and the connection screen so a 401 discovered by a card and a sign-in
-/// completed in the web view land in the same place.
+/// completed in the browser sheet land in the same place.
 @MainActor @Observable
 public final class SessionController {
     public private(set) var profile: ServerProfile
@@ -57,6 +57,16 @@ public final class SessionController {
             profile = updated
             onUpdate(updated)
         }
+    }
+
+    /// Redeems the code the browser sheet came back with, then reads the
+    /// backend as a signed-in client.
+    public func pair(code: String, request: PairingRequest) async throws {
+        guard let poster = transport as? any HTTPPoster else {
+            throw PairingError.unexpected(status: 0)
+        }
+        try await Pairing.exchange(code: code, request: request, baseURL: profile.baseURL, transport: poster)
+        await completePairing()
     }
 
     /// A request that used to work answered 401: the session was revoked or

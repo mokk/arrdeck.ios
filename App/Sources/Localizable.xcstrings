@@ -3158,12 +3158,12 @@
         }
       }
     },
-    "Opens the server's own sign-in page. Passkeys work there.": {
+    "Opens the server's sign-in page in Safari, where passkeys work, then asks you to pair this phone.": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Åbner serverens egen indlogningsside. Adgangsnøgler virker der."
+            "value": "Åbner serverens indlogningsside i Safari, hvor adgangsnøgler virker, og beder dig derefter parre telefonen."
           }
         }
       }
@@ -3184,6 +3184,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Overblik"
+          }
+        }
+      }
+    },
+    "Pairing failed (HTTP %lld).": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parring mislykkedes (HTTP %lld)."
           }
         }
       }
@@ -4624,6 +4634,26 @@
         }
       }
     },
+    "The pairing code was refused or expired. Sign in again.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parringskoden blev afvist eller er udløbet. Log ind igen."
+          }
+        }
+      }
+    },
+    "The sign-in page did not hand back a pairing code.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indlogningssiden sendte ingen parringskode tilbage."
+          }
+        }
+      }
+    },
     "Their files are deleted from disk, freeing about %@. This cannot be undone.": {
       "localizations": {
         "da": {
@@ -4741,6 +4771,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "I dag"
+          }
+        }
+      }
+    },
+    "Too many failed attempts. Wait a few minutes and try again.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For mange mislykkede forsøg. Vent et par minutter, og prøv igen."
           }
         }
       }

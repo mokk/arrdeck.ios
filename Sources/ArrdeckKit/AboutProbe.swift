@@ -102,7 +102,7 @@ public struct URLSessionTransport: HTTPTransport {
     /// Ten seconds of spinner is the difference between "denied" and "broken".
     ///
     /// Ephemeral for cache but wired to the shared cookie jar: the session
-    /// cookie the pairing web view captures lands in HTTPCookieStorage.shared,
+    /// cookie the pairing exchange sets lands in HTTPCookieStorage.shared,
     /// and every subsequent call must carry it or a paired backend answers 401.
     public init(timeout: TimeInterval = 10, cookies: HTTPCookieStorage? = .shared) {
         let config = URLSessionConfiguration.ephemeral

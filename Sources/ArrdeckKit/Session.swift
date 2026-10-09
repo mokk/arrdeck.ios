@@ -51,7 +51,7 @@ public enum SessionFlow {
     }
 }
 
-/// The backend's session cookie, as the pairing web view hands it over.
+/// The backend's session cookie, as the pairing exchange sets it.
 public enum SessionCookie {
     /// The name the backend sets. Contract with backend/app/api/v1/auth.py.
     public static let name = "arrdeck_session"
@@ -59,7 +59,7 @@ public enum SessionCookie {
     /// Picks the session cookie for a profile out of a cookie-store dump.
     ///
     /// Matched on name and host, not on the store being clean: the shared
-    /// WKWebsiteDataStore accumulates cookies from every profile ever paired,
+    /// cookie jar accumulates cookies from every profile ever paired,
     /// and handing profile A's cookie to profile B would "work" until the
     /// backend rejected it in a way the UI reads as a dead session on A.
     public static func match(in cookies: [HTTPCookie], for baseURL: URL) -> HTTPCookie? {
