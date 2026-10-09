@@ -118,7 +118,7 @@ struct DisplaySettingsView: View {
         .alwaysEditing()
         .themedList()
         .navigationTitle("Display")
-        .largeTitle()
+        .pageTitle()
     }
 }
 
@@ -221,7 +221,7 @@ struct NotificationSettingsView: View {
         }
         .themedList()
         .navigationTitle("Notifications")
-        .largeTitle()
+        .pageTitle()
         .task {
             await model.load()
             if let rules = model.rules, let start = rules.quiet_start, !start.isEmpty,

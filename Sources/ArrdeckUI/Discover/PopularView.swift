@@ -45,7 +45,7 @@ public struct PopularView: View {
         }
         .dashboardListStyle()
         .navigationTitle("Popular")
-        .largeTitle()
+        .pageTitle()
         .task { await model.load() }
         .refreshable { await model.load() }
         .alert("Action failed", isPresented: Binding(get: { model.actionError != nil }, set: { if !$0 { model.actionError = nil } })) {

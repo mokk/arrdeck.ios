@@ -49,12 +49,12 @@ public struct CalendarScreen: View {
                             .font(.subheadline).frame(maxWidth: .infinity).padding(.vertical, 8)
                     }
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, .pageMargin)
                 .padding(.bottom, 16)
             }
             .background(Color.grouped)
             .navigationTitle("Calendar")
-            .largeTitle()
+            .pageTitle()
             .toolbar {
                 if let ical = api as? any IcalAPI {
                     ToolbarItem(placement: .secondaryAction) {

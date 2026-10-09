@@ -56,7 +56,7 @@ struct CleanupView: View {
         }
         .dashboardListStyle()
         .navigationTitle("Cleanup")
-        .largeTitle()
+        .pageTitle()
         .safeAreaInset(edge: .bottom) {
             if !model.chosen.isEmpty {
                 Button(role: .destructive) { confirming = true } label: {

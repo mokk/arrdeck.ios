@@ -140,14 +140,23 @@ extension EnvironmentValues {
     @Entry var themedRowBackground = false
 }
 
+extension CGFloat {
+    /// How far a page's content sits from the screen edge: where an inset
+    /// grouped list puts its cards, so pages built on a plain scroll view
+    /// (the library grids, the calendar) line up with every list page.
+    static let pageMargin: CGFloat = 20
+}
+
 extension View {
     /// Every tab's first screen and every Settings page puts its heading in
-    /// the same place: large, top left, under the toolbar buttons. Stated
-    /// rather than left to .automatic, which drops to the small inline title
-    /// whenever iOS cannot find a full-width scroll view to collapse it with.
-    func largeTitle() -> some View {
+    /// the same place: large, on the toolbar's own line, level with the
+    /// button capsule on the right. Inline-large rather than the classic
+    /// large title, which sits on a line of its own under the buttons and
+    /// collapses on scroll — so a page opened scrolled (Calendar opens at
+    /// today) showed a different heading from one opened at the top.
+    func pageTitle() -> some View {
         #if os(iOS)
-        navigationBarTitleDisplayMode(.large)
+        toolbarTitleDisplayMode(.inlineLarge)
         #else
         self
         #endif

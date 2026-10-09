@@ -79,7 +79,7 @@ struct OpdsSettingsView: View {
         }
         .themedList()
         .navigationTitle("Reading apps")
-        .largeTitle()
+        .pageTitle()
         .confirmationDialog("New address", isPresented: $confirmingNew, titleVisibility: .visible) {
             Button("New address", role: .destructive) { Task { await set(true) } }
             Button("Cancel", role: .cancel) {}

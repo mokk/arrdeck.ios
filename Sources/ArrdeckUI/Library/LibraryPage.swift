@@ -112,23 +112,23 @@ public struct LibraryPage: View {
                             emptyState(all: all)
                         }
                         if layout == .upNext {
-                            UpNextList(rows: visible, baseURL: baseURL).padding(.horizontal, 16).padding(.bottom, 16)
+                            UpNextList(rows: visible, baseURL: baseURL).padding(.horizontal, .pageMargin).padding(.bottom, 16)
                         } else if layout == .seasons {
                             SeasonGridView(api: api, baseURL: baseURL, query: model.query)
-                                .padding(.horizontal, 16).padding(.bottom, 16)
+                                .padding(.horizontal, .pageMargin).padding(.bottom, 16)
                         } else if layout == .shelf {
                             ShelfView(rows: visible, query: model.query, api: api, baseURL: baseURL)
-                                .padding(.horizontal, 16).padding(.bottom, 16)
+                                .padding(.horizontal, .pageMargin).padding(.bottom, 16)
                         } else if layout == .collections {
                             CollectionsLibraryList(api: api, baseURL: baseURL, query: model.query)
-                                .padding(.horizontal, 16).padding(.bottom, 16)
+                                .padding(.horizontal, .pageMargin).padding(.bottom, 16)
                         } else {
                             LibraryGrid(model: model, rows: visible, layout: layout, dimUnmonitored: unmonitored == .dim,
                                         baseURL: baseURL, progress: dashboard.queueProgress,
                                         webURL: dashboard.webURLs[app.rawValue], requests: requests,
                                         diagnose: { diagnosing = $0 }, delete: { deleting = $0 })
-                                .padding(.leading, 16)
-                                .padding(.trailing, letters.count >= LetterStrip.minimum ? 26 : 16)
+                                .padding(.leading, .pageMargin)
+                                .padding(.trailing, letters.count >= LetterStrip.minimum ? 26 : .pageMargin)
                                 .padding(.bottom, 16)
                         }
                     }
@@ -148,7 +148,7 @@ public struct LibraryPage: View {
         }
         .background(Color.grouped)
         .navigationTitle(title)
-        .largeTitle()
+        .pageTitle()
         .searchable(text: $model.query, placement: .underTitle, prompt: Text(prompt))
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
@@ -314,6 +314,8 @@ struct LibraryGrid: View {
     let requests: [String: RequestState]
     let diagnose: (LibraryRow) -> Void
     let delete: (LibraryRow) -> Void
+    /// The grid's width, measured: the posters are sized to it.
+    @State private var width: CGFloat = 0
 
     func request(_ row: LibraryRow) -> RequestState? {
         switch row.ref {
@@ -326,15 +328,20 @@ struct LibraryGrid: View {
     var body: some View {
         switch layout {
         case .posters:
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 110, maximum: 110), spacing: 14, alignment: .top)], alignment: .leading, spacing: 18) {
+            let fit = PosterColumns(width: width)
+            LazyVGrid(columns: Array(repeating: GridItem(.fixed(fit.poster), spacing: PosterColumns.gap, alignment: .top),
+                                     count: fit.count),
+                      spacing: 18) {
                 ForEach(rows) { row in
-                    LibraryCard(row: row, app: model.app, baseURL: baseURL, progress: progress[row.ref],
+                    LibraryCard(row: row, app: model.app, baseURL: baseURL, posterWidth: fit.poster, progress: progress[row.ref],
                                 watched: model.watched(row), selected: model.selecting ? model.selected.contains(row.id) : nil,
                                 request: request(row))
                         .opacity(dimUnmonitored && row.isUnmonitored ? 0.4 : 1)
                         .modifier(tap(row))
                 }
             }
+            .frame(maxWidth: .infinity)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
         default:
             LazyVStack(spacing: 0) {
                 ForEach(rows) { row in
@@ -536,6 +543,7 @@ struct LibraryCard: View {
     let row: LibraryRow
     let app: ArrApp
     let baseURL: URL
+    var posterWidth: CGFloat = PosterColumns.target
     let progress: Double?
     let watched: Watched?
     /// nil outside select mode; otherwise whether this card is chosen.
@@ -566,7 +574,7 @@ struct LibraryCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Poster(path: row.poster, baseURL: baseURL, width: 110, cornerRadius: 12, title: row.title, subtitle: subtitle)
+            Poster(path: row.poster, baseURL: baseURL, width: posterWidth, cornerRadius: 12, title: row.title, subtitle: subtitle)
                 .frame(maxWidth: .infinity)
                 .overlay(alignment: .topTrailing) {
                     if let selected {
@@ -644,7 +652,7 @@ struct NowReadingStrip: View {
                 }
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, .pageMargin)
         .padding(.bottom, 12)
     }
 }

@@ -24,7 +24,7 @@ struct SystemView: View {
         }
         .dashboardListStyle()
         .navigationTitle("System")
-        .largeTitle()
+        .pageTitle()
         .task { await model.load() }
         .refreshable { await model.load() }
     }

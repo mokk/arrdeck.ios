@@ -126,7 +126,7 @@ public struct DownloadsView: View {
         .refreshable { await model.refresh() }
         .task { if !embedded { await model.run() } }
         .navigationTitle(embedded ? "Activity" : "Downloads")
-        .largeTitle()
+        .pageTitle()
         .safeAreaInset(edge: .bottom) {
             // Above the tab bar: a bottomBar toolbar item lands behind it.
             if model.selecting { BulkBarChrome { bulkBar } }

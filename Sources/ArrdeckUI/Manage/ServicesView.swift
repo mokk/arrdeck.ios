@@ -22,7 +22,7 @@ struct ServicesView: View {
         }
         .dashboardListStyle()
         .navigationTitle("Connections")
-        .largeTitle()
+        .pageTitle()
         .task { await model.load() }
         .refreshable { await model.load() }
     }

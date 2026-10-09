@@ -63,7 +63,7 @@ public struct ActivityView: View {
             }
         }
         .navigationTitle("Activity")
-        .largeTitle()
+        .pageTitle()
         .navigationDestination(for: MediaRef.self) { ref in
             switch ref {
             case let .movie(id):
