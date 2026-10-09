@@ -1204,6 +1204,16 @@
         }
       }
     },
+    "Close arrdeck and open it again to switch language.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luk arrdeck og åbn den igen for at skifte sprog."
+          }
+        }
+      }
+    },
     "Collections": {
       "localizations": {
         "da": {
@@ -2377,6 +2387,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Type"
+          }
+        }
+      }
+    },
+    "Language": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprog"
           }
         }
       }

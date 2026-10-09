@@ -574,6 +574,8 @@
   "Opens arrdeck on Activity, Calendar, Add or Search.": "Åbner arrdeck på Aktivitet, Kalender, Tilføj eller Søg.",
   "Screen": "Skærm",
   "Open": "Åbn",
+  "Close arrdeck and open it again to switch language.": "Luk arrdeck og åbn den igen for at skifte sprog.",
+  "Language": "Sprog",
   "_badges": "state badges, looked up dynamically",
   "downloading": "downloader",
   "seeding": "seeder",

@@ -20,9 +20,21 @@ struct DisplaySettingsView: View {
     var hidden: Set<AppTab> { Set(AppTab.list(hiddenTabs)) }
 
     @State private var theme = ThemeStore.shared
+    @State private var language = AppLanguage.stored()
 
     var body: some View {
         Form {
+            Section {
+                Picker("Language", selection: $language) {
+                    ForEach(AppLanguage.allCases, id: \.self) { Text(verbatim: $0.label).tag($0) }
+                }
+                .onChange(of: language) { _, chosen in AppLanguage.choose(chosen) }
+            } footer: {
+                // iOS fixes an app's language at launch
+                if language != AppLanguage.atLaunch {
+                    Text("Close arrdeck and open it again to switch language.")
+                }
+            }
             Section {
                 ForEach(Palette.allCases, id: \.self) { palette in
                     Button { theme.palette = palette } label: { PaletteRow(palette: palette, selected: theme.palette == palette) }
