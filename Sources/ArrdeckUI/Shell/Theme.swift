@@ -139,3 +139,17 @@ extension EnvironmentValues {
     /// Set inside a themed list; rows read it to take the palette's card colour.
     @Entry var themedRowBackground = false
 }
+
+extension View {
+    /// Every tab's first screen and every Settings page puts its heading in
+    /// the same place: large, top left, under the toolbar buttons. Stated
+    /// rather than left to .automatic, which drops to the small inline title
+    /// whenever iOS cannot find a full-width scroll view to collapse it with.
+    func largeTitle() -> some View {
+        #if os(iOS)
+        navigationBarTitleDisplayMode(.large)
+        #else
+        self
+        #endif
+    }
+}

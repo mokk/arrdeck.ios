@@ -86,6 +86,7 @@ public struct ManageView: View {
                 NavigationLink {
                     DashboardView(model: model, baseURL: baseURL, api: api, onSessionLost: onSessionLost)
                         .navigationTitle("Overview")
+                        .largeTitle()
                 } label: { Label("Overview", systemImage: "square.grid.2x2") }
                 .accessibilityIdentifier("overview")
                 if model.hasArr, let cleanup = api as? any CleanupAPI {
@@ -152,6 +153,7 @@ public struct ManageView: View {
         }
         .dashboardListStyle()
         .navigationTitle("Settings")
+        .largeTitle()
         .navigationDestination(for: MediaRef.self) { ref in
             switch ref {
             case let .movie(id):
@@ -249,6 +251,7 @@ struct IndexersView: View {
         }
         .dashboardListStyle()
         .navigationTitle("Indexers")
+        .largeTitle()
         .toolbar {
             Button { adding = true } label: { Label("Add indexer", systemImage: "plus") }
                 .accessibilityIdentifier("add-indexer")

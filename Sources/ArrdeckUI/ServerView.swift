@@ -100,6 +100,10 @@ public struct ServerView: View {
     @State private var launchSearch = false
     /// When this build stops opening; nil outside a development install.
     static let expiry = SigningExpiry.current()
+    /// Bumped to rebuild a tab's stack, which pops it to its first screen.
+    @State private var stackGeneration: [AppTab: Int] = [:]
+    /// Tabs with a screen pushed over their first one.
+    @State private var pushed: Set<AppTab> = []
 
     /// Every tab's stack stays mounted in a ZStack and only the selected one
     /// is visible, so switching tabs keeps scroll position and pushed screens.
@@ -122,16 +126,26 @@ public struct ServerView: View {
                         NavigationStack {
                             tabContent(tab)
                                 .accessibilityHidden(tab != selectedTab)
+                                // the first screen leaves view exactly when another is pushed over it;
+                                // switching tabs only changes opacity, so it does not count
+                                .onAppear { pushed.remove(tab) }
+                                .onDisappear { pushed.insert(tab) }
                         }
+                        .id(stackGeneration[tab, default: 0])
                         .opacity(tab == selectedTab ? 1 : 0)
                         .allowsHitTesting(tab == selectedTab)
                         .zIndex(tab == selectedTab ? 1 : 0)
                     }
                 }
                 .safeAreaInset(edge: .bottom, spacing: 0) {
-                    VStack(spacing: 0) {
+                    // no background: the content scrolls on under the floating glass
+                    VStack(spacing: 8) {
                         if let expiry = Self.expiry, SigningExpiry.isClose(expiry) { ExpiryStrip(expiry: expiry) }
-                        AppTabBar(tabs: available, selected: $selectedTab, badges: [.activity: feed.count])
+                        AppTabBar(tabs: available, selected: $selectedTab, badges: [.activity: feed.count]) { tab in
+                            // as in the PWA and the system tab bar: tapping the tab you are in
+                            // returns it to its first screen
+                            if pushed.contains(tab) { stackGeneration[tab, default: 0] += 1 }
+                        }
                     }
                 }
                 .onAppear {

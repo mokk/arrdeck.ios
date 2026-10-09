@@ -95,40 +95,47 @@ public struct LibraryPage: View {
     public var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                switch model.rows {
-                case .loading:
-                    LoadingRow().padding()
-                case let .failed(reason):
-                    ErrorNote(reason).padding()
-                case let .loaded(all):
-                    if !nowReading.isEmpty {
-                        NowReadingStrip(rows: nowReading, baseURL: baseURL)
-                    }
-                    if visible.isEmpty, layout != .collections, layout != .seasons {
-                        emptyState(all: all)
-                    }
-                    if layout == .upNext {
-                        UpNextList(rows: visible, baseURL: baseURL).padding(.horizontal, 16).padding(.bottom, 16)
-                    } else if layout == .seasons {
-                        SeasonGridView(api: api, baseURL: baseURL, query: model.query)
-                            .padding(.horizontal, 16).padding(.bottom, 16)
-                    } else if layout == .shelf {
-                        ShelfView(rows: visible, query: model.query, api: api, baseURL: baseURL)
-                            .padding(.horizontal, 16).padding(.bottom, 16)
-                    } else if layout == .collections {
-                        CollectionsLibraryList(api: api, baseURL: baseURL, query: model.query)
-                            .padding(.horizontal, 16).padding(.bottom, 16)
-                    } else {
-                    LibraryGrid(model: model, rows: visible, layout: layout, dimUnmonitored: unmonitored == .dim,
-                                baseURL: baseURL, progress: dashboard.queueProgress,
-                                webURL: dashboard.webURLs[app.rawValue], requests: requests,
-                                diagnose: { diagnosing = $0 }, delete: { deleting = $0 })
-                        .padding(.leading, 16)
-                        .padding(.trailing, letters.count >= LetterStrip.minimum ? 26 : 16)
-                        .padding(.bottom, 16)
+                // full width whatever the content: a lone error or spinner left
+                // the scroll view as narrow as itself — a grey stripe down the
+                // page, and no full-width scroll view for the large heading
+                VStack {
+                    switch model.rows {
+                    case .loading:
+                        LoadingRow().padding()
+                    case let .failed(reason):
+                        ErrorNote(reason).padding()
+                    case let .loaded(all):
+                        if !nowReading.isEmpty {
+                            NowReadingStrip(rows: nowReading, baseURL: baseURL)
+                        }
+                        if visible.isEmpty, layout != .collections, layout != .seasons {
+                            emptyState(all: all)
+                        }
+                        if layout == .upNext {
+                            UpNextList(rows: visible, baseURL: baseURL).padding(.horizontal, 16).padding(.bottom, 16)
+                        } else if layout == .seasons {
+                            SeasonGridView(api: api, baseURL: baseURL, query: model.query)
+                                .padding(.horizontal, 16).padding(.bottom, 16)
+                        } else if layout == .shelf {
+                            ShelfView(rows: visible, query: model.query, api: api, baseURL: baseURL)
+                                .padding(.horizontal, 16).padding(.bottom, 16)
+                        } else if layout == .collections {
+                            CollectionsLibraryList(api: api, baseURL: baseURL, query: model.query)
+                                .padding(.horizontal, 16).padding(.bottom, 16)
+                        } else {
+                            LibraryGrid(model: model, rows: visible, layout: layout, dimUnmonitored: unmonitored == .dim,
+                                        baseURL: baseURL, progress: dashboard.queueProgress,
+                                        webURL: dashboard.webURLs[app.rawValue], requests: requests,
+                                        diagnose: { diagnosing = $0 }, delete: { deleting = $0 })
+                                .padding(.leading, 16)
+                                .padding(.trailing, letters.count >= LetterStrip.minimum ? 26 : 16)
+                                .padding(.bottom, 16)
+                        }
                     }
                 }
+                .frame(maxWidth: .infinity)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .overlay(alignment: .trailing) {
                 if !model.selecting {
                     LetterStrip(letters: letters.map(\.letter)) { letter in
@@ -141,7 +148,8 @@ public struct LibraryPage: View {
         }
         .background(Color.grouped)
         .navigationTitle(title)
-        .searchable(text: $model.query, placement: .alwaysVisible, prompt: Text(prompt))
+        .largeTitle()
+        .searchable(text: $model.query, placement: .underTitle, prompt: Text(prompt))
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 if model.selecting {
@@ -593,9 +601,21 @@ struct LibraryCard: View {
 
 extension SearchFieldPlacement {
     /// The field always shown under the title on iOS; macOS keeps its default.
+    /// For sheets: pinned like this, iOS gives the bar only the small title.
     static var alwaysVisible: SearchFieldPlacement {
         #if os(iOS)
         .navigationBarDrawer(displayMode: .always)
+        #else
+        .automatic
+        #endif
+    }
+
+    /// Under the large heading at the top of the page, tucked away on scroll —
+    /// as in Mail. A tab's first screen uses this so its heading matches the
+    /// rest of the app.
+    static var underTitle: SearchFieldPlacement {
+        #if os(iOS)
+        .navigationBarDrawer(displayMode: .automatic)
         #else
         .automatic
         #endif

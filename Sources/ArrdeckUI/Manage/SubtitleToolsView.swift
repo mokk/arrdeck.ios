@@ -24,6 +24,7 @@ struct SubtitleToolsView: View {
             }
         }
         .navigationTitle("Subtitles")
+        .largeTitle()
     }
 }
 

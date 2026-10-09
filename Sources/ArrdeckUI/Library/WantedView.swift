@@ -72,6 +72,7 @@ public struct WantedView: View {
         }
         .dashboardListStyle()
         .navigationTitle("Wanted")
+        .largeTitle()
         .navigationDestination(for: MediaRef.self) { ref in
             switch ref {
             case let .movie(id):

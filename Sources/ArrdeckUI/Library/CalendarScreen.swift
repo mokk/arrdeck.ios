@@ -54,6 +54,7 @@ public struct CalendarScreen: View {
             }
             .background(Color.grouped)
             .navigationTitle("Calendar")
+            .largeTitle()
             .toolbar {
                 if let ical = api as? any IcalAPI {
                     ToolbarItem(placement: .secondaryAction) {

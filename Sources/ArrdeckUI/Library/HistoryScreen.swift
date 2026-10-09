@@ -55,6 +55,7 @@ public struct HistoryScreen: View {
         }
         .dashboardListStyle()
         .navigationTitle(titled ? String(localized: "History") : String(localized: "Activity"))
+        .largeTitle()
         .toolbar {
             if segment == .history {
                 Menu {

@@ -1,50 +1,79 @@
 import ArrdeckData
 import SwiftUI
 
-/// The full-width bottom bar. The system tab bar on iOS 26 is a floating
-/// capsule with no switch to change that, so the chrome is ours; the
-/// TabView underneath still keeps each tab's navigation stack alive.
+/// A floating Liquid Glass capsule of icons. Our own rather than the system
+/// TabView's bar: that one folds a sixth tab into "More" on iPhone, and popping
+/// a screen pushed in the sixth tab landed there instead of on the tab's root.
+/// The names stay as accessibility labels, since only the icons show.
 struct AppTabBar: View {
     let tabs: [AppTab]
     @Binding var selected: AppTab
     var badges: [AppTab: Int] = [:]
+    /// The tab that was already showing was tapped again.
+    var reselect: (AppTab) -> Void = { _ in }
+    @Namespace private var selection
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(tabs, id: \.self) { tab in
                 Button {
-                    selected = tab
-                } label: {
-                    VStack(spacing: 3) {
-                        Image(systemName: tab.symbol)
-                            .font(.system(size: 21, weight: .regular))
-                            .symbolVariant(selected == tab ? .fill : .none)
-                            .overlay(alignment: .topTrailing) {
-                                if let count = badges[tab], count > 0 {
-                                    Text(count > 99 ? "99+" : String(count))
-                                        .font(.system(size: 10, weight: .bold))
-                                        .foregroundStyle(.white)
-                                        .padding(.horizontal, 4).padding(.vertical, 1)
-                                        .background(Color.accent, in: Capsule())
-                                        .offset(x: 10, y: -6)
-                                        .accessibilityLabel("\(count) new")
-                                }
-                            }
-                        Text(tab.label).font(.system(size: 10, weight: selected == tab ? .semibold : .regular))
+                    if selected == tab {
+                        reselect(tab)
+                    } else {
+                        withAnimation(.snappy(duration: 0.25)) { selected = tab }
                     }
-                    .foregroundStyle(selected == tab ? Color.accent : Color.secondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 8)
-                    .contentShape(Rectangle())
+                } label: {
+                    Image(systemName: tab.symbol)
+                        .font(.system(size: 19, weight: .medium))
+                        .symbolVariant(selected == tab ? .fill : .none)
+                        .foregroundStyle(selected == tab ? Color.accent : Color.primary)
+                        .overlay(alignment: .topTrailing) { badge(tab) }
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .background {
+                            // the selected tab's pill, sliding between tabs
+                            if selected == tab {
+                                Capsule().fill(Color.accent.opacity(0.14))
+                                    .padding(.vertical, 5)
+                                    .matchedGeometryEffect(id: "selected", in: selection)
+                            }
+                        }
+                        .contentShape(Capsule())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(tab.label)
                 .accessibilityIdentifier("tab-\(tab.rawValue)")
                 .accessibilityAddTraits(selected == tab ? [.isSelected] : [])
             }
         }
-        .frame(maxWidth: .infinity)
-        .background(.bar)
-        .overlay(alignment: .top) { Divider() }
+        .padding(.horizontal, 5)
+        .liquidGlassCapsule()
+        .padding(.horizontal, 20)
+        .padding(.bottom, 2)
+    }
+
+    @ViewBuilder func badge(_ tab: AppTab) -> some View {
+        if let count = badges[tab], count > 0 {
+            Text(count > 99 ? "99+" : String(count))
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 4).padding(.vertical, 1)
+                .background(Color.accent, in: Capsule())
+                .offset(x: 11, y: -7)
+                .accessibilityLabel("\(count) new")
+        }
+    }
+}
+
+extension View {
+    /// Liquid Glass where the OS has it (26 and later); a material capsule
+    /// with a soft shadow before that.
+    @ViewBuilder func liquidGlassCapsule() -> some View {
+        if #available(iOS 26, macOS 26, *) {
+            glassEffect(.regular.interactive(), in: .capsule)
+        } else {
+            background(.regularMaterial, in: Capsule())
+                .shadow(color: .black.opacity(0.12), radius: 12, y: 4)
+        }
     }
 }
 

@@ -40,6 +40,7 @@ struct ExclusionsView: View {
         }
         .dashboardListStyle()
         .navigationTitle("Exclusions")
+        .largeTitle()
         .task { await load() }
         .refreshable { await load() }
     }
@@ -118,6 +119,7 @@ struct ParseView: View {
         }
         .themedList()
         .navigationTitle("Release name tester")
+        .largeTitle()
     }
 
     @ViewBuilder func fact(_ label: LocalizedStringKey, _ value: String?) -> some View {

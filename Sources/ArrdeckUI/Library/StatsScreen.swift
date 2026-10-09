@@ -40,6 +40,7 @@ public struct StatsScreen: View {
         }
         .dashboardListStyle()
         .navigationTitle("Statistics")
+        .largeTitle()
         .task { await model.load() }
         .refreshable { await model.load() }
         .accessibilityIdentifier("stats")

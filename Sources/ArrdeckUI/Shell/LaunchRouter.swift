@@ -106,7 +106,7 @@ enum ExpiryReminder {
     }
 }
 
-/// Above the tab bar in the signature's last two days.
+/// Floating above the tab bar in the signature's last two days.
 struct ExpiryStrip: View {
     let expiry: Date
 
@@ -118,10 +118,10 @@ struct ExpiryStrip: View {
         }
         .font(.caption)
         .foregroundStyle(Color.warning)
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 6)
-        .background(Color.grouped)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .liquidGlassCapsule()
+        .padding(.horizontal, 20)
         .accessibilityIdentifier("expiry-strip")
     }
 }
