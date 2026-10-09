@@ -74,6 +74,10 @@ public struct ServerView: View {
             }
         }
         .task { await controller.refresh() }
+        .task {
+            LastProfile.record(controller.profile)
+            if let expiry = Self.expiry { await ExpiryReminder.schedule(expiry) }
+        }
         .sheet(isPresented: $showingConnection) {
             NavigationStack {
                 ProfileView(controller: controller)
@@ -90,6 +94,12 @@ public struct ServerView: View {
     @State private var confirmCenter = ConfirmCenter()
     /// A title opened from iOS search.
     @State private var spotlit: SpotlightTarget?
+    /// Quick actions and Siri's "open" requests, taken once the tabs exist.
+    @State private var router = LaunchRouter.shared
+    @State private var launchAdd = false
+    @State private var launchSearch = false
+    /// When this build stops opening; nil outside a development install.
+    static let expiry = SigningExpiry.current()
 
     /// Every tab's stack stays mounted in a ZStack and only the selected one
     /// is visible, so switching tabs keeps scroll position and pushed screens.
@@ -119,7 +129,10 @@ public struct ServerView: View {
                     }
                 }
                 .safeAreaInset(edge: .bottom, spacing: 0) {
-                    AppTabBar(tabs: available, selected: $selectedTab, badges: [.activity: feed.count])
+                    VStack(spacing: 0) {
+                        if let expiry = Self.expiry, SigningExpiry.isClose(expiry) { ExpiryStrip(expiry: expiry) }
+                        AppTabBar(tabs: available, selected: $selectedTab, badges: [.activity: feed.count])
+                    }
                 }
                 .onAppear {
                     // the chosen start tab once per launch; after that the
@@ -129,11 +142,41 @@ public struct ServerView: View {
                     }
                     openedOnStartTab = true
                     if !available.contains(selectedTab) { selectedTab = available.first ?? .settings }
+                    QuickActions.update(LaunchAction.available(tabs: available, hasArr: model.hasArr))
+                    // after the start tab, so a quick action overrides it
+                    takeLaunch(available)
                 }
                 .onChange(of: available) { _, tabs in
                     if !tabs.contains(selectedTab) { selectedTab = tabs.first ?? .settings }
+                    QuickActions.update(LaunchAction.available(tabs: tabs, hasArr: model.hasArr))
+                }
+                .onChange(of: router.pending) { _, action in
+                    if action != nil { takeLaunch(available) }
+                }
+                .sheet(isPresented: $launchAdd) {
+                    AddView(configured: model.configured, api: api, baseURL: controller.profile.baseURL,
+                            hasPlex: model.has("plex"), onSessionLost: sessionLost) { launchAdd = false }
+                }
+                .sheet(isPresented: $launchSearch) {
+                    GlobalSearchSheet(api: api, apps: ArrApp.allCases.filter { model.has($0.rawValue) },
+                                      baseURL: controller.profile.baseURL, hasPlex: model.has("plex"),
+                                      onSessionLost: sessionLost) { launchSearch = false }
                 }
             }
+        }
+    }
+
+    /// Acts on a waiting quick action or "open" intent. A sheet already up
+    /// (a Spotlight title, the connection screen) keeps the screen: stacking
+    /// another over it would hide what was just asked for.
+    func takeLaunch(_ available: [AppTab]) {
+        guard spotlit == nil, !showingConnection, !launchAdd, !launchSearch, let action = router.take() else { return }
+        switch action {
+        case .activity where available.contains(.activity): selectedTab = .activity
+        case .calendar where available.contains(.calendar): selectedTab = .calendar
+        case .add where model.hasArr: launchAdd = true
+        case .search where model.hasArr: launchSearch = true
+        default: break
         }
     }
 

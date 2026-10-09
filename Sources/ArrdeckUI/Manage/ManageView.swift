@@ -1,4 +1,5 @@
 import ArrdeckData
+import ArrdeckKit
 import SwiftUI
 
 /// The Manage tab: a settings-style hub into the two libraries, the indexers,
@@ -52,6 +53,18 @@ public struct ManageView: View {
                     }
                 }
                 .accessibilityIdentifier("connection")
+            }
+            if let expiry = ServerView.expiry {
+                Section {
+                    HStack {
+                        Label("Signature expires", systemImage: "clock.badge.exclamationmark")
+                        Spacer()
+                        Text(expiry, format: .dateTime.weekday(.abbreviated).day().month().hour().minute())
+                            .foregroundStyle(SigningExpiry.isClose(expiry) ? Color.warning : .secondary)
+                    }
+                } footer: {
+                    Text("A free developer signature lasts seven days from when it was made. Reinstalling before then does not extend it.")
+                }
             }
             Section {
                 NavigationLink {

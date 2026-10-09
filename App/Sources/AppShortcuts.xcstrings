@@ -1,0 +1,66 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "What's downloading in ${applicationName}": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvad downloader ${applicationName}"
+          }
+        }
+      }
+    },
+    "${applicationName} downloads": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloads i ${applicationName}"
+          }
+        }
+      }
+    },
+    "What's on today in ${applicationName}": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvad kommer der i dag i ${applicationName}"
+          }
+        }
+      }
+    },
+    "${applicationName} today": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${applicationName} i dag"
+          }
+        }
+      }
+    },
+    "Open ${screen} in ${applicationName}": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åbn ${screen} i ${applicationName}"
+          }
+        }
+      }
+    },
+    "Show ${applicationName} ${screen}": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vis ${screen} i ${applicationName}"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

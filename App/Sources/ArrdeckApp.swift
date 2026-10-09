@@ -6,6 +6,9 @@ import SwiftUI
 /// with behaviour lives in the package, where `./test.sh` reaches it.
 @main
 struct ArrdeckApp: App {
+    // only for home-screen quick actions, which SwiftUI does not deliver
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
     init() {
         // UI tests start from a clean slate. The Keychain outlives an uninstall
         // on the simulator, and with one saved server the app would open

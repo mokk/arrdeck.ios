@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ at %lld percent": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ på %lld procent"
+          }
+        }
+      }
+    },
     "%@ free": {
       "localizations": {
         "da": {
@@ -52,6 +62,16 @@
         }
       }
     },
+    "%@, %lld episodes": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %lld afsnit"
+          }
+        }
+      }
+    },
     "%@: only seasons %@": {
       "localizations": {
         "da": {
@@ -88,6 +108,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld dage siden"
+          }
+        }
+      }
+    },
+    "%lld downloads: %@.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld downloads: %@."
           }
         }
       }
@@ -138,6 +168,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld mangler undertekster"
+          }
+        }
+      }
+    },
+    "%lld more": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld til"
           }
         }
       }
@@ -408,6 +448,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "En forsinkelsesprofil holder bevidst hentninger tilbage — usenet {usenet} min, torrent {torrent} min."
+          }
+        }
+      }
+    },
+    "A free developer signature lasts seven days from when it was made. Reinstalling before then does not extend it.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En gratis udviklersignatur holder i syv dage fra den blev lavet. En geninstallation før da forlænger den ikke."
           }
         }
       }
@@ -3007,6 +3057,26 @@
         }
       }
     },
+    "Nothing is downloading.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der downloades ikke noget."
+          }
+        }
+      }
+    },
+    "Nothing is out today.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der udkommer ikke noget i dag."
+          }
+        }
+      }
+    },
     "Nothing is pushed in this window; it follows this device's time zone.": {
       "localizations": {
         "da": {
@@ -3108,12 +3178,43 @@
         }
       }
     },
+    "One download: %@.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Én download: %@."
+          }
+        }
+      }
+    },
     "Only titles without a profile (%lld)": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Kun titler uden profil (%lld)"
+          }
+        }
+      }
+    },
+    "Open": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åbn"
+          }
+        }
+      }
+    },
+    "Open arrdeck and choose a server first.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åbn arrdeck og vælg en server først."
           }
         }
       }
@@ -3138,6 +3239,17 @@
         }
       }
     },
+    "Open in arrdeck": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åbn i arrdeck"
+          }
+        }
+      }
+    },
     "Open in…": {
       "localizations": {
         "da": {
@@ -3154,6 +3266,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Åbn på"
+          }
+        }
+      }
+    },
+    "Opens arrdeck on Activity, Calendar, Add or Search.": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åbner arrdeck på Aktivitet, Kalender, Tilføj eller Søg."
           }
         }
       }
@@ -3581,6 +3704,16 @@
         }
       }
     },
+    "Reinstall it from your Mac to keep it opening.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geninstallér den fra din Mac, så den bliver ved med at åbne."
+          }
+        }
+      }
+    },
     "Relative (3 days ago)": {
       "localizations": {
         "da": {
@@ -3792,6 +3925,28 @@
         }
       }
     },
+    "Says what arrdeck is downloading right now.": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fortæller hvad arrdeck downloader lige nu."
+          }
+        }
+      }
+    },
+    "Says which episodes, films and books come out today.": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fortæller hvilke afsnit, film og bøger der udkommer i dag."
+          }
+        }
+      }
+    },
     "Scheduled tasks": {
       "localizations": {
         "da": {
@@ -3808,6 +3963,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Omfang"
+          }
+        }
+      }
+    },
+    "Screen": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skærm"
           }
         }
       }
@@ -4303,6 +4469,16 @@
         }
       }
     },
+    "Signature expires": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signaturen udløber"
+          }
+        }
+      }
+    },
     "Signed in — arrdeck %@": {
       "localizations": {
         "da": {
@@ -4775,6 +4951,16 @@
         }
       }
     },
+    "Today: %@.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I dag: %@."
+          }
+        }
+      }
+    },
     "Too many failed attempts. Wait a few minutes and try again.": {
       "localizations": {
         "da": {
@@ -5127,6 +5313,28 @@
         }
       }
     },
+    "What's downloading": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvad downloades"
+          }
+        }
+      }
+    },
+    "What's on today": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvad kommer der i dag"
+          }
+        }
+      }
+    },
     "Where arrdeck finds each service. Changing these affects every screen.": {
       "localizations": {
         "da": {
@@ -5203,6 +5411,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "arrdeck %@ — ingen indlogning nødvendig herfra"
+          }
+        }
+      }
+    },
+    "arrdeck could not reach the server.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "arrdeck kunne ikke nå serveren."
+          }
+        }
+      }
+    },
+    "arrdeck expires tomorrow": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "arrdeck udløber i morgen"
+          }
+        }
+      }
+    },
+    "arrdeck is signed out. Open the app and sign in again.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "arrdeck er logget ud. Åbn appen og log ind igen."
+          }
+        }
+      }
+    },
+    "arrdeck stops opening %@. Reinstall it from your Mac.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "arrdeck holder op med at åbne %@. Geninstallér den fra din Mac."
           }
         }
       }
