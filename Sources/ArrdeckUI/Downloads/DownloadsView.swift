@@ -13,6 +13,7 @@ public struct DownloadsView: View {
     let onSessionLost: @MainActor () -> Void
     /// Inside the Activity tab the model is shared and already polling.
     private var embedded = false
+    private var newSince: Date?
 
     public init(
         api: any DownloadsAPI & ExtrasAPI,
@@ -28,11 +29,13 @@ public struct DownloadsView: View {
     }
 
     /// Embedded in the Activity tab, sharing its model with the Downloading
-    /// segment.
-    init(model: DownloadsModel, api: any DownloadsAPI & ExtrasAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    /// segment, and marking what finished since the visit's cutoff NEW.
+    init(model: DownloadsModel, api: any DownloadsAPI & ExtrasAPI, newSince: Date?,
+         onSessionLost: @escaping @MainActor () -> Void) {
         self.api = api
         self.onSessionLost = onSessionLost
         self.embedded = true
+        self.newSince = newSince
         _model = State(initialValue: model)
     }
 
@@ -63,7 +66,7 @@ public struct DownloadsView: View {
                                 Image(systemName: model.selected.contains(torrent.key) ? "checkmark.circle.fill" : "circle")
                                     .foregroundStyle(model.selected.contains(torrent.key) ? Color.accent : Color.secondary)
                             }
-                            TorrentRow(torrent: torrent)
+                            TorrentRow(torrent: torrent, newSince: newSince)
                         }
                             .contentShape(Rectangle())
                             .onTapGesture {
@@ -250,6 +253,8 @@ extension Torrent: Identifiable {}
 
 struct TorrentRow: View {
     let torrent: Torrent
+    /// The Activity visit's cutoff; torrents that finished after it are NEW.
+    var newSince: Date?
 
     var details: String {
         var parts: [String] = []
@@ -271,7 +276,12 @@ struct TorrentRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 3) {
-                Text(torrent.name).font(.subheadline.weight(.medium)).lineLimit(1)
+                HStack(spacing: 6) {
+                    if let newSince, ActivityFeedModel.finished(torrent.completed_on, since: newSince) {
+                        NewBadge()
+                    }
+                    Text(torrent.name).font(.subheadline.weight(.medium)).lineLimit(1)
+                }
                 HStack(spacing: 6) {
                     StateBadge(state: torrent.state)
                     StateBadge(state: Services.label(torrent.client.rawValue))

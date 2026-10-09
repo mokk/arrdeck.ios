@@ -44,4 +44,14 @@ actor FakeActivityAPI: ActivityAPI {
         let again = ActivityFeedModel(api: FakeActivityAPI(), defaults: store, onSessionLost: {})
         #expect(again.lastSeen == seen, "survives a relaunch")
     }
+
+    @Test func aTorrentIsNewOnlyIfItFinishedAfterTheCutoff() {
+        let since = Date(timeIntervalSince1970: 1_000_000)
+        #expect(ActivityFeedModel.finished(1_000_001, since: since))
+        #expect(!ActivityFeedModel.finished(999_999, since: since))
+        // unfinished, however the client says so
+        #expect(!ActivityFeedModel.finished(nil, since: since))
+        #expect(!ActivityFeedModel.finished(0, since: since))
+        #expect(!ActivityFeedModel.finished(-1, since: since))
+    }
 }

@@ -73,6 +73,13 @@ public final class ActivityFeedModel {
         }
     }
 
+    /// Whether a torrent finished after the visit's cutoff. Clients report
+    /// completion in unix seconds; unfinished ones have none, 0 or -1.
+    public nonisolated static func finished(_ completedOn: Int?, since: Date) -> Bool {
+        guard let completedOn, completedOn > 0 else { return false }
+        return Date(timeIntervalSince1970: TimeInterval(completedOn)) > since
+    }
+
     /// History has been shown: whatever it listed is no longer new, so the
     /// badge clears now and the next poll counts from here.
     public func markSeen(at date: Date) {

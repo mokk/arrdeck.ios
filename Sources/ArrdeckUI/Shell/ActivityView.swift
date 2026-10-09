@@ -2,8 +2,9 @@ import ArrdeckData
 import SwiftUI
 
 /// Everything about downloads in one tab. History comes first — grabs,
-/// imports and the blocklist, with what arrived since the last visit marked
-/// NEW. Downloading is what is moving right now — the arr queue with its
+/// imports and the blocklist. What arrived since the last visit is marked NEW
+/// there and on finished torrents, against one cutoff taken here: History
+/// moves the mark once shown, and the torrent lists must still see the old one. Downloading is what is moving right now — the arr queue with its
 /// import/retry actions, then the torrents with a live transfer — and Queue
 /// is the full torrent list.
 public struct ActivityView: View {
@@ -20,6 +21,7 @@ public struct ActivityView: View {
 
     @State private var segment: Segment = .history
     @State private var model: DownloadsModel
+    @State private var newSince: Date
     let feed: ActivityFeedModel
     let api: any DownloadsAPI & ExtrasAPI & HistoryAPI & LibraryAPI
     let hasArr: Bool
@@ -38,6 +40,7 @@ public struct ActivityView: View {
         self.hasPlex = hasPlex
         self.onSessionLost = onSessionLost
         _model = State(initialValue: DownloadsModel(api: api, clients: clients, hasArr: hasArr, onSessionLost: onSessionLost))
+        _newSince = State(initialValue: feed.lastSeen)
     }
 
     public var body: some View {
@@ -51,11 +54,11 @@ public struct ActivityView: View {
             .background(Color.grouped)
             switch segment {
             case .downloading:
-                DownloadingList(model: model, api: api, onSessionLost: onSessionLost) { segment = .queue }
+                DownloadingList(model: model, api: api, newSince: newSince, onSessionLost: onSessionLost) { segment = .queue }
             case .queue:
-                DownloadsView(model: model, api: api, onSessionLost: onSessionLost)
+                DownloadsView(model: model, api: api, newSince: newSince, onSessionLost: onSessionLost)
             case .history:
-                HistoryScreen(api: api, newSince: feed.lastSeen, onShown: { feed.markSeen(at: .now) },
+                HistoryScreen(api: api, newSince: newSince, onShown: { feed.markSeen(at: .now) },
                               titled: false, onSessionLost: onSessionLost)
             }
         }
@@ -80,6 +83,7 @@ public struct ActivityView: View {
 struct DownloadingList: View {
     let model: DownloadsModel
     let api: any DownloadsAPI & ExtrasAPI
+    let newSince: Date?
     let onSessionLost: @MainActor () -> Void
     let showAll: () -> Void
     @State private var adding = false
@@ -132,7 +136,7 @@ struct DownloadingList: View {
                     case .loaded:
                         if active.isEmpty { EmptyNote("Nothing is transferring") }
                         ForEach(active, id: \.key) { torrent in
-                            TorrentRow(torrent: torrent)
+                            TorrentRow(torrent: torrent, newSince: newSince)
                                 .contentShape(Rectangle())
                                 .onTapGesture { selected = torrent }
                                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {

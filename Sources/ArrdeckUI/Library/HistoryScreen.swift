@@ -96,10 +96,7 @@ public struct HistoryScreen: View {
                         VStack(alignment: .leading, spacing: 3) {
                             HStack(spacing: 6) {
                                 if isNew(item) {
-                                    Text("NEW").font(.system(size: 10, weight: .bold)).tracking(0.5)
-                                        .padding(.horizontal, 5).padding(.vertical, 1)
-                                        .background(Color.accent, in: RoundedRectangle(cornerRadius: 4))
-                                        .foregroundStyle(.white)
+                                    NewBadge()
                                 }
                                 Text(item.title).font(.subheadline.weight(.medium)).lineLimit(1)
                             }
@@ -162,5 +159,15 @@ public struct HistoryScreen: View {
                 .disabled(model.busy)
             }
         }
+    }
+}
+
+/// Marks what arrived since the Activity tab was last looked at.
+struct NewBadge: View {
+    var body: some View {
+        Text("NEW").font(.system(size: 10, weight: .bold)).tracking(0.5)
+            .padding(.horizontal, 5).padding(.vertical, 1)
+            .background(Color.accent, in: RoundedRectangle(cornerRadius: 4))
+            .foregroundStyle(.white)
     }
 }
