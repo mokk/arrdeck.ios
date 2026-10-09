@@ -39,6 +39,10 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dk.thrawn.arrdeck
         SWIFT_VERSION: "6.0"
+        # Personal (free) team: device installs are signed automatically and
+        # expire after 7 days. Swap in a paid team ID for 1-year profiles.
+        DEVELOPMENT_TEAM: CF87P9CCK2
+        CODE_SIGN_STYLE: Automatic
   ArrdeckUITests:
     type: bundle.ui-testing
     platform: iOS
