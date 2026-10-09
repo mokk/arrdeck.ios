@@ -554,7 +554,7 @@
   "%@, %lld episodes": "%@, %lld afsnit",
   "%lld downloads: %@.": "%lld downloads: %@.",
   "%lld more": "%lld til",
-  "A free developer signature lasts seven days from when it was made. Reinstalling before then does not extend it.": "En gratis udviklersignatur holder i syv dage fra den blev lavet. En geninstallation før da forlænger den ikke.",
+  "A free developer signature lasts seven days. In its last two days, reinstalling from your Mac renews it for another seven.": "En gratis udviklersignatur holder i syv dage. I de sidste to dage fornyer en geninstallation fra din Mac den med syv dage mere.",
   "Nothing is downloading.": "Der downloades ikke noget.",
   "Nothing is out today.": "Der udkommer ikke noget i dag.",
   "One download: %@.": "Én download: %@.",

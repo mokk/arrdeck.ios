@@ -63,7 +63,7 @@ public struct ManageView: View {
                             .foregroundStyle(SigningExpiry.isClose(expiry) ? Color.warning : .secondary)
                     }
                 } footer: {
-                    Text("A free developer signature lasts seven days from when it was made. Reinstalling before then does not extend it.")
+                    Text("A free developer signature lasts seven days. In its last two days, reinstalling from your Mac renews it for another seven.")
                 }
             }
             Section {
