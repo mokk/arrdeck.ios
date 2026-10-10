@@ -8,7 +8,17 @@ public struct ServerProfile: Identifiable, Codable, Hashable, Sendable {
     /// so a different URL is a different identity — an "edit URL" affordance
     /// would silently invalidate both and present it as the same server.
     /// Changing the address means creating a new profile and pairing again.
+    ///
+    /// With a home address set, this is the away address: the one that works
+    /// from anywhere and the one the session cookie and passkey belong to.
     public let baseURL: URL
+
+    /// The same backend's address on the home network, where it trusts the
+    /// caller and needs no sign-in. Optional and editable, unlike `baseURL`:
+    /// it carries no identity — nothing is paired against it and no cookie is
+    /// scoped to it — so changing it cannot strand a session. The app uses it
+    /// whenever it answers and `baseURL` otherwise (see `ConnectionChoice`).
+    public var homeURL: URL?
 
     public var name: String
 
@@ -17,11 +27,14 @@ public struct ServerProfile: Identifiable, Codable, Hashable, Sendable {
     /// off with connectivity.
     public var lastKnown: BackendInfo?
 
-    public init(id: UUID = UUID(), baseURL: URL, name: String, lastKnown: BackendInfo? = nil) {
+    public init(
+        id: UUID = UUID(), baseURL: URL, name: String, lastKnown: BackendInfo? = nil, homeURL: URL? = nil
+    ) {
         self.id = id
         self.baseURL = baseURL
         self.name = name
         self.lastKnown = lastKnown
+        self.homeURL = homeURL
     }
 }
 

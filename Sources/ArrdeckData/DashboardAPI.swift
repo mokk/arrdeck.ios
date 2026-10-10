@@ -62,14 +62,17 @@ public protocol DashboardAPI: Sendable {
 /// value or an `APIError`.
 public struct LiveAPI: DashboardAPI {
     let client: ArrdeckAPI.Client
-    /// For the few calls the generated client cannot make (multipart uploads);
-    /// nil when built around a bare client, as the tests do.
-    let baseURL: URL?
+    /// Where requests go; nil when built around a bare client, as the tests do.
+    let router: AddressRouter?
     let session: URLSession?
+
+    /// For the few calls the generated client cannot make (multipart uploads):
+    /// the address everything else is using right now.
+    var baseURL: URL? { router?.current }
 
     public init(client: ArrdeckAPI.Client) {
         self.client = client
-        baseURL = nil
+        router = nil
         session = nil
     }
 
@@ -77,14 +80,31 @@ public struct LiveAPI: DashboardAPI {
     /// `HTTPCookieStorage.shared`; on a LAN profile there is none and the
     /// backend answers anyway.
     public init(baseURL: URL, cookies: HTTPCookieStorage? = .shared, timeout: TimeInterval = 15) {
+        self.init(router: AddressRouter(primary: baseURL), cookies: cookies, timeout: timeout)
+    }
+
+    /// The same, sending each request wherever `router` points at the time —
+    /// a profile's home address while it answers, its primary otherwise.
+    public init(router: AddressRouter, cookies: HTTPCookieStorage? = .shared, timeout: TimeInterval = 15) {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = timeout
         config.httpCookieStorage = cookies
         let session = URLSession(configuration: config)
         let transport = OpenAPIURLSession.URLSessionTransport(configuration: .init(session: session))
-        client = ArrdeckAPI.Client(serverURL: baseURL, transport: transport)
-        self.baseURL = baseURL
+        client = ArrdeckAPI.Client(
+            serverURL: router.current, transport: RoutingTransport(base: transport, router: router)
+        )
+        self.router = router
         self.session = session
+    }
+
+    /// For tests: the routing over a stand-in transport.
+    init(router: AddressRouter, transport: any ClientTransport) {
+        client = ArrdeckAPI.Client(
+            serverURL: router.current, transport: RoutingTransport(base: transport, router: router)
+        )
+        self.router = router
+        session = nil
     }
 
     public func services() async throws -> [ServiceInfo] {

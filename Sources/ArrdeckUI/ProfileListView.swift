@@ -5,6 +5,8 @@ import SwiftUI
 /// you are in. Deliberately no edit-URL affordance: the address is the
 /// profile's identity (sessions are cookies, passkeys are host-scoped), so a
 /// changed address is a new profile — delete and re-add, pairing again.
+/// The home address is the exception, editable on the connection screen,
+/// because nothing is paired against it.
 ///
 /// With exactly one server saved the app opens straight into it: the list is
 /// for choosing, and there is nothing to choose. The server takes over the
@@ -51,6 +53,11 @@ public struct ProfileListView: View {
                             Text(profile.baseURL.absoluteString)
                                 .font(.caption.monospaced())
                                 .foregroundStyle(.secondary)
+                            if let home = profile.homeURL {
+                                Label(home.absoluteString, systemImage: "house")
+                                    .font(.caption.monospaced())
+                                    .foregroundStyle(.secondary)
+                            }
                             if let info = profile.lastKnown {
                                 Text(info.version.isEmpty ? "older backend" : "arrdeck \(info.version)")
                                     .font(.caption2)

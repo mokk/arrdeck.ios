@@ -8,6 +8,8 @@ import SwiftUI
 public struct DashboardView: View {
     let model: DashboardModel
     let baseURL: URL
+    /// The calendar feed's address: see ManageView.shareURL.
+    let shareURL: URL
     let api: any DownloadsAPI & CalendarAPI & HistoryAPI & LibraryPageAPI
     let onSessionLost: @MainActor () -> Void
     /// Pushed programmatically: a NavigationLink nested in the poster strip's
@@ -15,11 +17,13 @@ public struct DashboardView: View {
     @State private var opened: MediaRef?
 
     public init(
-        model: DashboardModel, baseURL: URL, api: any DownloadsAPI & CalendarAPI & HistoryAPI & LibraryPageAPI,
+        model: DashboardModel, baseURL: URL, shareURL: URL? = nil,
+        api: any DownloadsAPI & CalendarAPI & HistoryAPI & LibraryPageAPI,
         onSessionLost: @escaping @MainActor () -> Void
     ) {
         self.model = model
         self.baseURL = baseURL
+        self.shareURL = shareURL ?? baseURL
         self.api = api
         self.onSessionLost = onSessionLost
     }
@@ -42,7 +46,8 @@ public struct DashboardView: View {
             QueueSection(model: model)
             if model.hasArr {
                 CalendarSection(model: model) {
-                    CalendarScreen(api: api, baseURL: baseURL, hasPlex: model.has("plex"), onSessionLost: onSessionLost)
+                    CalendarScreen(api: api, baseURL: baseURL, shareURL: shareURL, hasPlex: model.has("plex"),
+                                   onSessionLost: onSessionLost)
                 }
                 StorageSection(model: model)
             }

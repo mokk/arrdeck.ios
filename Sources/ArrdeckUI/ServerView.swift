@@ -12,7 +12,10 @@ public struct ServerView: View {
     @State private var controller: SessionController
     @State private var model: DashboardModel
     @State private var showingConnection = false
-    private let api: LiveAPI
+    /// State, not a plain let: SwiftUI re-runs init whenever the server list
+    /// re-renders (every profile update does), and a fresh client would be
+    /// bound to that throwaway init's router rather than the controller's.
+    @State private var api: LiveAPI
     private let onSwitch: () -> Void
 
     public init(
@@ -22,8 +25,9 @@ public struct ServerView: View {
         onSwitch: @escaping () -> Void
     ) {
         let controller = SessionController(profile: profile, transport: transport, onUpdate: onUpdate)
-        let api = LiveAPI(baseURL: profile.baseURL)
-        self.api = api
+        // routed: the home address while it answers, the primary otherwise
+        let api = LiveAPI(router: controller.router)
+        _api = State(initialValue: api)
         self.onSwitch = onSwitch
         _controller = State(initialValue: controller)
         _model = State(initialValue: DashboardModel(
@@ -55,7 +59,7 @@ public struct ServerView: View {
                     }
                     .sheet(item: $spotlit) { target in
                         NavigationStack {
-                            MediaDestination(ref: target.ref, api: api, baseURL: controller.profile.baseURL,
+                            MediaDestination(ref: target.ref, api: api, baseURL: controller.activeURL,
                                              hasPlex: model.has("plex"), onSessionLost: sessionLost)
                                 .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Done") { spotlit = nil } } }
                         }
@@ -84,7 +88,14 @@ public struct ServerView: View {
                     .navigationTitle("Connection")
             }
         }
+        .task { await controller.watchNetwork() }
+        .onChange(of: scenePhase) { _, phase in
+            // back from the background, perhaps somewhere else
+            if phase == .active { controller.reroute() }
+        }
     }
+
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var selectedTab: AppTab = .movies
     @AppStorage(DisplayKeys.startTab) private var startTab = ""
@@ -168,12 +179,12 @@ public struct ServerView: View {
                     if action != nil { takeLaunch(available) }
                 }
                 .sheet(isPresented: $launchAdd) {
-                    AddView(configured: model.configured, api: api, baseURL: controller.profile.baseURL,
+                    AddView(configured: model.configured, api: api, baseURL: controller.activeURL,
                             hasPlex: model.has("plex"), onSessionLost: sessionLost) { launchAdd = false }
                 }
                 .sheet(isPresented: $launchSearch) {
                     GlobalSearchSheet(api: api, apps: ArrApp.allCases.filter { model.has($0.rawValue) },
-                                      baseURL: controller.profile.baseURL, hasPlex: model.has("plex"),
+                                      baseURL: controller.activeURL, hasPlex: model.has("plex"),
                                       onSessionLost: sessionLost) { launchSearch = false }
                 }
             }
@@ -197,19 +208,20 @@ public struct ServerView: View {
     @ViewBuilder func tabContent(_ tab: AppTab) -> some View {
         switch tab {
         case .books:
-            LibraryPage(app: .readarr, dashboard: model, api: api, baseURL: controller.profile.baseURL, onSessionLost: sessionLost)
+            LibraryPage(app: .readarr, dashboard: model, api: api, baseURL: controller.activeURL, onSessionLost: sessionLost)
         case .movies:
-            LibraryPage(app: .radarr, dashboard: model, api: api, baseURL: controller.profile.baseURL, onSessionLost: sessionLost)
+            LibraryPage(app: .radarr, dashboard: model, api: api, baseURL: controller.activeURL, onSessionLost: sessionLost)
         case .shows:
-            LibraryPage(app: .sonarr, dashboard: model, api: api, baseURL: controller.profile.baseURL, onSessionLost: sessionLost)
+            LibraryPage(app: .sonarr, dashboard: model, api: api, baseURL: controller.activeURL, onSessionLost: sessionLost)
         case .activity:
             ActivityView(api: api, feed: feed, clients: model.torrentClients, hasArr: model.hasArr,
-                         baseURL: controller.profile.baseURL, hasPlex: model.has("plex"), onSessionLost: sessionLost)
+                         baseURL: controller.activeURL, hasPlex: model.has("plex"), onSessionLost: sessionLost)
         case .calendar:
-            CalendarScreen(api: api, baseURL: controller.profile.baseURL, hasPlex: model.has("plex"), onSessionLost: sessionLost)
+            CalendarScreen(api: api, baseURL: controller.activeURL, shareURL: controller.profile.baseURL,
+                           hasPlex: model.has("plex"), onSessionLost: sessionLost)
         case .settings:
             ManageView(
-                model: model, api: api, baseURL: controller.profile.baseURL,
+                model: model, api: api, baseURL: controller.activeURL, shareURL: controller.profile.baseURL,
                 serverName: controller.profile.name, sessionLabel: sessionLabel,
                 onSessionLost: sessionLost, onSwitchServer: onSwitch, onShowConnection: { showingConnection = true }
             )

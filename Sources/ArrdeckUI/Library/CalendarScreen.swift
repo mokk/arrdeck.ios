@@ -10,13 +10,19 @@ public struct CalendarScreen: View {
     @AppStorage(DisplayKeys.spoilers) private var spoilers: Spoilers = .off
     let api: any CalendarAPI & LibraryPageAPI
     let baseURL: URL
+    /// The calendar feed's address: see ManageView.shareURL.
+    let shareURL: URL
     let hasPlex: Bool
     let onSessionLost: @MainActor () -> Void
 
-    public init(api: any CalendarAPI & LibraryPageAPI, baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(
+        api: any CalendarAPI & LibraryPageAPI, baseURL: URL, shareURL: URL? = nil, hasPlex: Bool,
+        onSessionLost: @escaping @MainActor () -> Void
+    ) {
         _model = State(initialValue: CalendarModel(api: api, onSessionLost: onSessionLost))
         self.api = api
         self.baseURL = baseURL
+        self.shareURL = shareURL ?? baseURL
         self.hasPlex = hasPlex
         self.onSessionLost = onSessionLost
     }
@@ -59,7 +65,7 @@ public struct CalendarScreen: View {
                 if let ical = api as? any IcalAPI {
                     ToolbarItem(placement: .secondaryAction) {
                         NavigationLink {
-                            IcalSettingsView(api: ical, baseURL: baseURL)
+                            IcalSettingsView(api: ical, baseURL: shareURL)
                         } label: { Label("Subscribe", systemImage: "calendar.badge.plus") }
                     }
                 }

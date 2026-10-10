@@ -25,7 +25,8 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0"),
-        // Only for the tests' stub transport; the runtime already depends on it.
+        // For the routing transport and the tests' stub; the runtime already
+        // depends on it.
         .package(url: "https://github.com/apple/swift-http-types", from: "1.0.0"),
         // Transitive via the OpenAPI runtime, pinned here on purpose: 1.7.0's
         // ContainersPreview needs a Swift runtime (swift_initBorrow) newer than
@@ -53,6 +54,8 @@ let package = Package(
                 "ArrdeckAPI",
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
                 .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
+                // the routing transport's request type
+                .product(name: "HTTPTypes", package: "swift-http-types"),
             ]
         ),
         // Views compile against the macOS SDK too, so type errors surface from

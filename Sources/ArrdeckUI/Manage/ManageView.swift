@@ -9,6 +9,10 @@ public struct ManageView: View {
     let model: DashboardModel
     let api: any LibraryPageAPI & IndexerAddAPI & HistoryAPI & DownloadsAPI & CalendarAPI
     let baseURL: URL
+    /// For addresses handed to other apps (calendar feeds, the book
+    /// catalogue): the profile's primary, which works away from home too,
+    /// where `baseURL` may be the home address in use right now.
+    let shareURL: URL
     let serverName: String
     let sessionLabel: String
     let onSessionLost: @MainActor () -> Void
@@ -18,13 +22,14 @@ public struct ManageView: View {
     public init(
         model: DashboardModel,
         api: any LibraryPageAPI & IndexerAddAPI & HistoryAPI & DownloadsAPI & CalendarAPI,
-        baseURL: URL, serverName: String, sessionLabel: String,
+        baseURL: URL, shareURL: URL? = nil, serverName: String, sessionLabel: String,
         onSessionLost: @escaping @MainActor () -> Void,
         onSwitchServer: @escaping () -> Void, onShowConnection: @escaping () -> Void
     ) {
         self.model = model
         self.api = api
         self.baseURL = baseURL
+        self.shareURL = shareURL ?? baseURL
         self.serverName = serverName
         self.sessionLabel = sessionLabel
         self.onSessionLost = onSessionLost
@@ -84,7 +89,7 @@ public struct ManageView: View {
                 } label: { Label("Statistics", systemImage: "chart.line.uptrend.xyaxis") }
                 .accessibilityIdentifier("manage-stats")
                 NavigationLink {
-                    DashboardView(model: model, baseURL: baseURL, api: api, onSessionLost: onSessionLost)
+                    DashboardView(model: model, baseURL: baseURL, shareURL: shareURL, api: api, onSessionLost: onSessionLost)
                         .navigationTitle("Overview")
                         .pageTitle()
                 } label: { Label("Overview", systemImage: "square.grid.2x2") }
@@ -132,12 +137,12 @@ public struct ManageView: View {
                     }
                     if model.hasArr, let ical = api as? any IcalAPI {
                         NavigationLink {
-                            IcalSettingsView(api: ical, baseURL: baseURL)
+                            IcalSettingsView(api: ical, baseURL: shareURL)
                         } label: { Label("Calendar subscription", systemImage: "calendar.badge.plus") }
                     }
                     if model.has("readarr"), let opds = api as? any OpdsAPI {
                         NavigationLink {
-                            OpdsSettingsView(api: opds, baseURL: baseURL)
+                            OpdsSettingsView(api: opds, baseURL: shareURL)
                         } label: { Label("Reading apps (OPDS)", systemImage: "books.vertical") }
                     }
                 }
