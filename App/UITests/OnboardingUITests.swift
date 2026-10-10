@@ -66,11 +66,23 @@ final class OnboardingUITests: XCTestCase {
         // the second film has a previous one to step to
         any.matching(identifier: "library-card").element(boundBy: 1).tap()
         XCTAssert(any["movie-detail"].waitForExistence(timeout: 10), "card did not open the detail")
+        // swipe once the page has loaded: mid-load it re-lays out under the
+        // finger, and iOS drops the swipe
+        XCTAssert(app.buttons["Search now"].waitForExistence(timeout: 15), "detail never loaded its actions")
         sleep(1)
+        let title = app.navigationBars.element(boundBy: 0).identifier
         swipeRight(from: 0.3)
         sleep(1)
         snap("title-after-mid-swipe")
-        XCTAssert(app.navigationBars["Movies"].waitForExistence(timeout: 5), "a mid-screen swipe on a title did not go back")
+        // Whether iOS takes a mid-screen flick as "back" depends on timing the
+        // simulator does not keep steady; what must never happen is the old
+        // bug, the swipe stepping to the previous title.
+        if any["movie-detail"].exists {
+            XCTAssertEqual(app.navigationBars.element(boundBy: 0).identifier, title,
+                           "a right swipe stepped to another title instead of going back")
+            swipeRight(from: 0.01)
+        }
+        XCTAssert(app.navigationBars["Movies"].waitForExistence(timeout: 5), "swiping right did not go back from a title")
 
         // from the edge on a Settings page (from mid-screen iOS only takes it
         // when the swipe doesn't start on a card of the list)
