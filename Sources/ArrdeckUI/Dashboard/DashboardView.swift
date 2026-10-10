@@ -663,15 +663,14 @@ struct TrendsSection<Destination: View>: View {
     @ViewBuilder let destination: () -> Destination
 
     var body: some View {
-        if let samples = model.trends.value, samples.count >= 2, let last = samples.last {
-            // ?? 0 throughout: these fields are optional, and a snapshot taken
-            // while an arr was down must not blank the tile.
-            let tiles: [(String, String, [Double])] = [
-                ("Library size", Format.bytes(last.library_bytes), samples.map { Double($0.library_bytes ?? 0) }),
-                ("Movies", String(last.movies ?? 0), samples.map { Double($0.movies ?? 0) }),
-                ("Series", String(last.series ?? 0), samples.map { Double($0.series ?? 0) }),
-                ("Grabs", String(last.indexer_grabs ?? 0), samples.map { Double($0.indexer_grabs ?? 0) }),
-            ]
+        if let samples = model.trends.value, samples.count >= 2 {
+            // Each tile from the samples where its value is known: a sample
+            // taken while an arr was down has a gap there, not an empty library.
+            let all = Dictionary(uniqueKeysWithValues: StatsSeriesBuilder.series(from: samples).map { ($0.id, $0) })
+            let tiles: [(String, String, [Double])] = ["library", "movies", "series", "grabs"].compactMap { id in
+                guard let series = all[id] else { return nil }
+                return (series.label, series.values.isEmpty ? "–" : series.format(series.last), series.values)
+            }
             Section {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                     ForEach(tiles, id: \.0) { label, value, values in

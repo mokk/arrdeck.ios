@@ -5105,47 +5105,38 @@
       "StatsSampleOut": {
         "properties": {
           "disk_free_bytes": {
-            "default": 0,
             "title": "Disk Free Bytes",
             "type": "integer"
           },
           "episode_files": {
-            "default": 0,
             "title": "Episode Files",
             "type": "integer"
           },
           "indexer_grabs": {
-            "default": 0,
             "title": "Indexer Grabs",
             "type": "integer"
           },
           "indexer_queries": {
-            "default": 0,
             "title": "Indexer Queries",
             "type": "integer"
           },
           "library_bytes": {
-            "default": 0,
             "title": "Library Bytes",
             "type": "integer"
           },
           "movies": {
-            "default": 0,
             "title": "Movies",
             "type": "integer"
           },
           "series": {
-            "default": 0,
             "title": "Series",
             "type": "integer"
           },
           "torrents_qbit": {
-            "default": 0,
             "title": "Torrents Qbit",
             "type": "integer"
           },
           "torrents_tm": {
-            "default": 0,
             "title": "Torrents Tm",
             "type": "integer"
           },

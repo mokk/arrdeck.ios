@@ -87,8 +87,10 @@ actor FakeHistoryAPI: HistoryAPI {
         await model.load()
         #expect(await api.count("stats-30") == 1)
         let series = model.series
-        #expect(series.map(\.id) == ["library", "free", "movies", "series", "episodes", "torrents", "grabs", "queries"])
-        let torrents = series[5]
+        // series, episode files and queries are in no sample: unknown, so not
+        // charted (they once showed as flat lines at zero)
+        #expect(series.map(\.id) == ["library", "free", "movies", "torrents", "grabs"])
+        let torrents = series[3]
         #expect(torrents.values == [7, 8], "both clients summed")
         #expect(torrents.delta == 1)
         #expect(series[1].delta == -10)
@@ -99,5 +101,23 @@ actor FakeHistoryAPI: HistoryAPI {
         try await Task.sleep(for: .milliseconds(100))
         #expect(await api.count("stats-365") == 1)
         #expect(StatsSeriesBuilder.series(from: [], locale: .current).allSatisfy { $0.values.isEmpty })
+    }
+}
+
+@Suite struct StatsGapTests {
+    @Test func aSampleWithAServiceDownIsSkippedNotDrawnAsZero() {
+        let samples = [
+            StatsSample(library_bytes: 2_000, movies: 130, torrents_qbit: 5, ts: 1_000),
+            StatsSample(library_bytes: nil, movies: nil, torrents_qbit: 6, ts: 2_000),
+            StatsSample(library_bytes: 2_100, movies: 0, torrents_qbit: nil, torrents_tm: nil, ts: 3_000),
+        ]
+        let all = Dictionary(uniqueKeysWithValues: StatsSeriesBuilder.series(from: samples).map { ($0.id, $0) })
+        #expect(all["library"]?.values == [2_000, 2_100])
+        #expect(all["library"]?.delta == 100)
+        #expect(all["movies"]?.values == [130, 0], "a real zero stays")
+        #expect(all["torrents"]?.values == [5, 6], "unknown only when neither client answered")
+        #expect(all["library"]?.range?.1 == Date(timeIntervalSince1970: 3_000))
+        #expect(all["torrents"]?.range?.1 == Date(timeIntervalSince1970: 2_000), "each chart spans its own known samples")
+        #expect(all["free"]?.values.isEmpty == true)
     }
 }

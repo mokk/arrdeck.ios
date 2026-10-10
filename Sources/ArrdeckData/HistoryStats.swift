@@ -167,11 +167,14 @@ public enum StatsWindow: Int, CaseIterable, Sendable, Hashable {
     }
 }
 
-/// One chart on the stats page: a metric over the sampled window.
+/// One chart on the stats page: a metric over the sampled window, from the
+/// samples where it is known.
 public struct StatsSeries: Identifiable, Sendable {
     public let id: String
     public let label: String
     public let values: [Double]
+    /// When the first and last known values were sampled.
+    public let range: (Date, Date)?
     public let format: @Sendable (Double) -> String
 
     public var first: Double { values.first ?? 0 }
@@ -183,21 +186,35 @@ public struct StatsSeries: Identifiable, Sendable {
 
 public enum StatsSeriesBuilder {
     /// The eight metrics the PWA charts, in its order. Torrents sums both
-    /// clients; every field is optional and a snapshot taken while an arr was
-    /// down reads as zero rather than a hole.
+    /// clients. A sample taken while a service was down has nil for its
+    /// values: that is a gap, skipped, not a drop to zero.
     public static func series(from samples: [StatsSample], locale: Locale = .current) -> [StatsSeries] {
         let bytes: @Sendable (Double) -> String = { Format.bytes(Int($0), locale: locale) }
         let count: @Sendable (Double) -> String = { String(Int($0.rounded())) }
+        func metric(_ id: String, _ label: String, _ format: @escaping @Sendable (Double) -> String,
+                    _ pick: (StatsSample) -> Int?) -> StatsSeries {
+            let known = samples.compactMap { sample in pick(sample).map { (sample.ts, Double($0)) } }
+            let range = known.first.flatMap { first in known.last.map { last in
+                (Date(timeIntervalSince1970: TimeInterval(first.0)), Date(timeIntervalSince1970: TimeInterval(last.0)))
+            } }
+            return StatsSeries(id: id, label: label, values: known.map(\.1), range: range, format: format)
+        }
         return [
-            StatsSeries(id: "library", label: String(localized: "Library size"), values: samples.map { Double($0.library_bytes ?? 0) }, format: bytes),
-            StatsSeries(id: "free", label: String(localized: "Free space"), values: samples.map { Double($0.disk_free_bytes ?? 0) }, format: bytes),
-            StatsSeries(id: "movies", label: String(localized: "Movies"), values: samples.map { Double($0.movies ?? 0) }, format: count),
-            StatsSeries(id: "series", label: String(localized: "Series"), values: samples.map { Double($0.series ?? 0) }, format: count),
-            StatsSeries(id: "episodes", label: String(localized: "Episode files"), values: samples.map { Double($0.episode_files ?? 0) }, format: count),
-            StatsSeries(id: "torrents", label: String(localized: "Torrents"), values: samples.map { Double(($0.torrents_qbit ?? 0) + ($0.torrents_tm ?? 0)) }, format: count),
-            StatsSeries(id: "grabs", label: String(localized: "Grabs"), values: samples.map { Double($0.indexer_grabs ?? 0) }, format: count),
-            StatsSeries(id: "queries", label: String(localized: "Queries"), values: samples.map { Double($0.indexer_queries ?? 0) }, format: count),
+            metric("library", String(localized: "Library size"), bytes) { $0.library_bytes },
+            metric("free", String(localized: "Free space"), bytes) { $0.disk_free_bytes },
+            metric("movies", String(localized: "Movies"), count) { $0.movies },
+            metric("series", String(localized: "Series"), count) { $0.series },
+            metric("episodes", String(localized: "Episode files"), count) { $0.episode_files },
+            metric("torrents", String(localized: "Torrents"), count) { torrentCount($0) },
+            metric("grabs", String(localized: "Grabs"), count) { $0.indexer_grabs },
+            metric("queries", String(localized: "Queries"), count) { $0.indexer_queries },
         ]
+    }
+
+    /// Both clients together; unknown only when neither answered.
+    public static func torrentCount(_ sample: StatsSample) -> Int? {
+        if sample.torrents_qbit == nil, sample.torrents_tm == nil { return nil }
+        return (sample.torrents_qbit ?? 0) + (sample.torrents_tm ?? 0)
     }
 }
 
@@ -217,9 +234,10 @@ public final class StatsModel {
         self.onSessionLost = onSessionLost
     }
 
+    /// The charts with enough known values to draw a line.
     public var series: [StatsSeries] {
         guard let samples = samples.value, samples.count >= 2 else { return [] }
-        return StatsSeriesBuilder.series(from: samples)
+        return StatsSeriesBuilder.series(from: samples).filter { $0.values.count >= 2 }
     }
 
     public var range: (Date, Date)? {

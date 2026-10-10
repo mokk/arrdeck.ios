@@ -67,7 +67,7 @@ public struct StatsScreen: View {
                 ForecastSection(forecast: DiskForecast.compute(model.samples.value ?? []))
                 ForEach(model.series) { series in
                     Section {
-                        StatsChart(series: series, range: model.range)
+                        StatsChart(series: series, range: series.range)
                     }
                 }
             }
