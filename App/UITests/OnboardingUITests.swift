@@ -16,6 +16,72 @@ final class OnboardingUITests: XCTestCase {
         try? XCUIScreen.main.screenshot().pngRepresentation.write(to: url)
     }
 
+    /// Opens Movies on the live backend, the way the end-to-end test does.
+    func openMovies(_ app: XCUIApplication, live: String) {
+        app.launchArguments = ["--reset-profiles"]
+        app.launch()
+        addUIInterruptionMonitor(withDescription: "local network") { alert in
+            for label in ["Allow", "Tillad"] where alert.buttons[label].exists {
+                alert.buttons[label].tap()
+                return true
+            }
+            return false
+        }
+        app.buttons["add-server"].tap()
+        let field = app.textFields["server-address"]
+        XCTAssert(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText(live.replacingOccurrences(of: "http://", with: ""))
+        app.buttons["connect"].tap()
+        app.tap()
+        let outcome = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'no sign-in needed'")).firstMatch
+        XCTAssert(outcome.waitForExistence(timeout: 15), "probe never reported reachable")
+        app.buttons["save-server"].tap()
+        let row = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'arrdeck '")).firstMatch
+        XCTAssert(row.waitForExistence(timeout: 5))
+        row.tap()
+        let any = app.descendants(matching: .any)
+        XCTAssert(any["tab-movies"].waitForExistence(timeout: 15), "tab bar never appeared")
+        any["tab-movies"].tap()
+        XCTAssert(any["library-card"].firstMatch.waitForExistence(timeout: 20), "no movie cards rendered")
+    }
+
+    /// iOS 26 goes back on a swipe from anywhere in the page, not only the
+    /// edge; on a title page that swipe must not step to the previous title.
+    func testSwipingRightGoesBack() throws {
+        guard let live = ProcessInfo.processInfo.environment["ARRDECK_LIVE_URL"] else {
+            throw XCTSkip("set TEST_RUNNER_ARRDECK_LIVE_URL to run against a real backend")
+        }
+        let app = XCUIApplication()
+        openMovies(app, live: live)
+        let any = app.descendants(matching: .any)
+        let window = app.windows.firstMatch
+        func swipeRight(from x: CGFloat) {
+            // a quick flick, as a thumb does: a slow drag from mid-screen is
+            // not taken as "back"
+            window.coordinate(withNormalizedOffset: CGVector(dx: x, dy: 0.55))
+                .press(forDuration: 0.05, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.55)),
+                       withVelocity: .fast, thenHoldForDuration: 0)
+        }
+        // the second film has a previous one to step to
+        any.matching(identifier: "library-card").element(boundBy: 1).tap()
+        XCTAssert(any["movie-detail"].waitForExistence(timeout: 10), "card did not open the detail")
+        sleep(1)
+        swipeRight(from: 0.3)
+        sleep(1)
+        snap("title-after-mid-swipe")
+        XCTAssert(app.navigationBars["Movies"].waitForExistence(timeout: 5), "a mid-screen swipe on a title did not go back")
+
+        // from the edge on a Settings page (from mid-screen iOS only takes it
+        // when the swipe doesn't start on a card of the list)
+        any["tab-settings"].tap()
+        app.buttons["manage-stats"].tap()
+        XCTAssert(any["stats"].waitForExistence(timeout: 10))
+        sleep(1)
+        swipeRight(from: 0.01)
+        XCTAssert(app.navigationBars["Settings"].waitForExistence(timeout: 5), "an edge swipe did not go back from Statistics")
+    }
+
     func testAddingTheLANServerEndToEnd() throws {
         guard let live = ProcessInfo.processInfo.environment["ARRDECK_LIVE_URL"] else {
             throw XCTSkip("set TEST_RUNNER_ARRDECK_LIVE_URL to run against a real backend")

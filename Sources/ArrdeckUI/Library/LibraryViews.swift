@@ -42,15 +42,8 @@ struct MediaDestination: View {
                     }
                 }
             }
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 40).onEnded { value in
-                    // away from the left edge, which belongs to the back swipe
-                    guard value.startLocation.x > 40,
-                          abs(value.translation.width) > 90,
-                          abs(value.translation.height) < abs(value.translation.width) * 0.6 else { return }
-                    step(value.translation.width < 0 ? neighbours.next : neighbours.previous)
-                }
-            )
+            // No swipe to step between titles: any drag gesture on the page
+            // keeps iOS 26 from taking a swipe anywhere as "back".
             .sensoryFeedback(.selection, trigger: current)
     }
 
