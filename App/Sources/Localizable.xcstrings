@@ -412,6 +412,16 @@
         }
       }
     },
+    "10.0.0.154:3500": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "10.0.0.154:3500"
+          }
+        }
+      }
+    },
     "30 days": {
       "localizations": {
         "da": {
@@ -853,6 +863,16 @@
         }
       }
     },
+    "At home · %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hjemme · %@"
+          }
+        }
+      }
+    },
     "At the pace of this period: %@ a day": {
       "localizations": {
         "da": {
@@ -889,6 +909,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Forfattere"
+          }
+        }
+      }
+    },
+    "Away · %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ude · %@"
           }
         }
       }
@@ -1119,6 +1149,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kategori"
+          }
+        }
+      }
+    },
+    "Change": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skift"
+          }
+        }
+      }
+    },
+    "Check and save": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tjek og gem"
           }
         }
       }
@@ -2270,6 +2320,16 @@
         }
       }
     },
+    "Home address": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hjemmeadresse"
+          }
+        }
+      }
+    },
     "Hours": {
       "localizations": {
         "da": {
@@ -2965,6 +3025,16 @@
         }
       }
     },
+    "No sign-in is needed at home, but %@ asks for one. Sign in now and the app keeps working when you leave.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hjemme skal du ikke logge ind, men %@ kræver det. Log ind nu, så virker appen også, når du går hjemmefra."
+          }
+        }
+      }
+    },
     "No subtitle languages wanted": {
       "localizations": {
         "da": {
@@ -3194,6 +3264,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "På din Plex-watchlist"
+          }
+        }
+      }
+    },
+    "On your home network the app talks to this address directly, with no sign-in, and uses %@ everywhere else. Add it while you are at home.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "På dit hjemmenetværk bruger appen denne adresse direkte uden login og %@ alle andre steder. Tilføj den, mens du er hjemme."
           }
         }
       }
@@ -4479,6 +4559,16 @@
         }
       }
     },
+    "Sign in for away from home": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log ind til brug ude"
+          }
+        }
+      }
+    },
     "Sign-in required": {
       "localizations": {
         "da": {
@@ -4887,6 +4977,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Valgene gemmes kun på denne enhed. Træk fanerne for at ændre rækkefølgen."
+          }
+        }
+      }
+    },
+    "This address asks for sign-in, so it is not a home address the app can use": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne adresse kræver login, så appen kan ikke bruge den som hjemmeadresse"
           }
         }
       }

@@ -5,3 +5,4 @@ xcuserdata/
 .DS_Store
 App/Sources/Info.plist
 App/build/
+.derived/
