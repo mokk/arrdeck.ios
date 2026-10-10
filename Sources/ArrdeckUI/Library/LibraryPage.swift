@@ -328,8 +328,11 @@ struct LibraryGrid: View {
     var body: some View {
         switch layout {
         case .posters:
+            // Flexible columns can't be wider than the space offered, so the
+            // width read back is the screen's, not last layout's: fixed ones
+            // sized in landscape kept the grid that wide back in portrait.
             let fit = PosterColumns(width: width)
-            LazyVGrid(columns: Array(repeating: GridItem(.fixed(fit.poster), spacing: PosterColumns.gap, alignment: .top),
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: PosterColumns.gap, alignment: .top),
                                      count: fit.count),
                       spacing: 18) {
                 ForEach(rows) { row in
@@ -340,7 +343,6 @@ struct LibraryGrid: View {
                         .modifier(tap(row))
                 }
             }
-            .frame(maxWidth: .infinity)
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
         default:
             LazyVStack(spacing: 0) {

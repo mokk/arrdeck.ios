@@ -77,6 +77,20 @@ final class OnboardingUITests: XCTestCase {
         XCTAssert(app.navigationBars["Movies"].waitForExistence(timeout: 10), "movies page never appeared")
         XCTAssert(any["library-card"].firstMatch.waitForExistence(timeout: 20), "no movie cards rendered")
         snap("movies")
+        // Back from landscape the grid must fit the portrait width again: it
+        // once kept the landscape columns and ran off the right edge.
+        XCUIDevice.shared.orientation = .landscapeLeft
+        sleep(2)
+        XCUIDevice.shared.orientation = .portrait
+        sleep(2)
+        let screen = app.windows.firstMatch.frame
+        let cards = any.matching(identifier: "library-card")
+        XCTAssert(cards.firstMatch.waitForExistence(timeout: 10), "cards gone after rotating")
+        for index in 0..<min(cards.count, 6) {
+            let frame = cards.element(boundBy: index).frame
+            XCTAssertLessThanOrEqual(frame.maxX, screen.maxX + 0.5, "card \(index) runs off the screen after rotating")
+        }
+        snap("movies-after-rotation")
         any["library-card"].firstMatch.tap()
         XCTAssert(any["movie-detail"].waitForExistence(timeout: 10), "card did not open the detail")
         XCTAssert(app.buttons["Search now"].waitForExistence(timeout: 15), "detail never loaded its actions")
