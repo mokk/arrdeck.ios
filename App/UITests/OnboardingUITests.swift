@@ -94,6 +94,38 @@ final class OnboardingUITests: XCTestCase {
         XCTAssert(app.navigationBars["Settings"].waitForExistence(timeout: 5), "an edge swipe did not go back from Statistics")
     }
 
+    /// The import sheet opens over a finished torrent's sheet and shows what the
+    /// arr finds in its folder. Read-only: it never taps Import.
+    func testImportSheetOpensFromAFinishedTorrent() throws {
+        guard let live = ProcessInfo.processInfo.environment["ARRDECK_LIVE_URL"] else {
+            throw XCTSkip("set TEST_RUNNER_ARRDECK_LIVE_URL to run against a real backend")
+        }
+        let app = XCUIApplication()
+        openMovies(app, live: live)
+        let any = app.descendants(matching: .any)
+        any["tab-activity"].tap()
+        app.buttons["Queue"].tap()
+        let rows = any.matching(identifier: "torrent-row")
+        XCTAssert(rows.firstMatch.waitForExistence(timeout: 20), "no torrents listed")
+        var opened = false
+        for index in 0..<min(rows.count, 6) {
+            rows.element(boundBy: index).tap()
+            if any["import-into-radarr"].waitForExistence(timeout: 5) {
+                opened = true
+                break
+            }
+            app.swipeDown(velocity: .fast) // not finished: close and try the next
+            sleep(1)
+        }
+        XCTAssert(opened, "no finished torrent offered Import into Radarr")
+        any["import-into-radarr"].tap()
+        // the folder scan answers with files, nothing to import, or the server's reason
+        let answer = app.staticTexts.matching(NSPredicate(format:
+            "label CONTAINS 'Files (' OR label CONTAINS 'found nothing to import' OR label CONTAINS 'arr' OR label CONTAINS 'folder'")).firstMatch
+        XCTAssert(answer.waitForExistence(timeout: 30), "the import sheet never showed the scan")
+        snap("import-sheet-from-torrent")
+    }
+
     func testAddingTheLANServerEndToEnd() throws {
         guard let live = ProcessInfo.processInfo.environment["ARRDECK_LIVE_URL"] else {
             throw XCTSkip("set TEST_RUNNER_ARRDECK_LIVE_URL to run against a real backend")

@@ -11,6 +11,26 @@
         }
       }
     },
+    "%@ could not import the files": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kunne ikke importere filerne"
+          }
+        }
+      }
+    },
+    "%@ finished the import": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ er færdig med importen"
+          }
+        }
+      }
+    },
     "%@ free": {
       "localizations": {
         "da": {
@@ -37,6 +57,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ forsinket"
+          }
+        }
+      }
+    },
+    "%@ processed %lld files": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ behandlede %lld filer"
+          }
+        }
+      }
+    },
+    "%@ processed 1 file": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ behandlede 1 fil"
           }
         }
       }
@@ -823,6 +863,16 @@
         }
       }
     },
+    "Anything it still turned down shows in History.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Det, den alligevel afviste, står i Historik."
+          }
+        }
+      }
+    },
     "Appearance": {
       "localizations": {
         "da": {
@@ -939,6 +989,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Forfattere"
+          }
+        }
+      }
+    },
+    "Auto": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto"
           }
         }
       }
@@ -1223,12 +1283,52 @@
         }
       }
     },
+    "Choose a book": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg en bog"
+          }
+        }
+      }
+    },
+    "Choose a movie": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg en film"
+          }
+        }
+      }
+    },
+    "Choose a show": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg en serie"
+          }
+        }
+      }
+    },
     "Choose file…": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Vælg fil…"
+          }
+        }
+      }
+    },
+    "Choose where this goes…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg, hvor den skal hen…"
           }
         }
       }
@@ -1381,6 +1481,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fortsætter"
+          }
+        }
+      }
+    },
+    "Copied; the torrent keeps its files and keeps seeding.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopieres; torrenten beholder sine filer og bliver ved med at seede."
+          }
+        }
+      }
+    },
+    "Copy": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopiér"
           }
         }
       }
@@ -2077,6 +2197,16 @@
         }
       }
     },
+    "Filter languages": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrér sprog"
+          }
+        }
+      }
+    },
     "Filter movies…": {
       "extractionState": "manual",
       "localizations": {
@@ -2095,6 +2225,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Filtrér serier…"
+          }
+        }
+      }
+    },
+    "Filter the library": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrér biblioteket"
           }
         }
       }
@@ -2125,6 +2265,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Første sæson"
+          }
+        }
+      }
+    },
+    "Fix": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ret"
           }
         }
       }
@@ -2329,6 +2479,16 @@
         }
       }
     },
+    "Hardlinked or copied, so the torrent keeps seeding.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hardlinkes eller kopieres, så torrenten bliver ved med at seede."
+          }
+        }
+      }
+    },
     "Held by a delay profile, grabbed %@": {
       "localizations": {
         "da": {
@@ -2416,6 +2576,56 @@
           "stringUnit": {
             "state": "translated",
             "value": "Timer"
+          }
+        }
+      }
+    },
+    "How": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvordan"
+          }
+        }
+      }
+    },
+    "Import %lld files": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importér %lld filer"
+          }
+        }
+      }
+    },
+    "Import 1 file": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importér 1 fil"
+          }
+        }
+      }
+    },
+    "Import into %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importér i %@"
+          }
+        }
+      }
+    },
+    "Importing…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importerer…"
           }
         }
       }
@@ -2742,6 +2952,26 @@
         }
       }
     },
+    "Manual import": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manuel import"
+          }
+        }
+      }
+    },
+    "Manual import…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manuel import…"
+          }
+        }
+      }
+    },
     "Matches %@ in the library": {
       "localizations": {
         "da": {
@@ -2818,6 +3048,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mangler: %@"
+          }
+        }
+      }
+    },
+    "Mode": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Måde"
           }
         }
       }
@@ -2899,6 +3139,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mest sete serier"
+          }
+        }
+      }
+    },
+    "Move": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flyt"
+          }
+        }
+      }
+    },
+    "Move %lld files": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flyt %lld filer"
+          }
+        }
+      }
+    },
+    "Move 1 file": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flyt 1 fil"
+          }
+        }
+      }
+    },
+    "Moved out of the download folder: the torrent loses its files and stops seeding.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flyttes ud af downloadmappen: torrenten mister sine filer og holder op med at seede."
           }
         }
       }
@@ -3075,6 +3355,16 @@
         }
       }
     },
+    "No episodes": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen afsnit"
+          }
+        }
+      }
+    },
     "No indexers are enabled, so there is nowhere to search.": {
       "localizations": {
         "da": {
@@ -3196,6 +3486,16 @@
         }
       }
     },
+    "Not checked: %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke tjekket: %@"
+          }
+        }
+      }
+    },
     "Not in your library": {
       "localizations": {
         "da": {
@@ -3232,6 +3532,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ikke udkommet endnu — der ventes til den er {availability}."
+          }
+        }
+      }
+    },
+    "Not selected": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke valgt"
           }
         }
       }
@@ -3602,6 +3912,16 @@
         }
       }
     },
+    "Pick the files to import. A file the arr couldn't place needs a target first.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg de filer, der skal importeres. En fil, som arr'en ikke kunne placere, skal først have et mål."
+          }
+        }
+      }
+    },
     "Pilot episode": {
       "localizations": {
         "da": {
@@ -3699,6 +4019,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kvalitet"
+          }
+        }
+      }
+    },
+    "Quality & languages": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kvalitet og sprog"
           }
         }
       }
@@ -4349,6 +4679,16 @@
         }
       }
     },
+    "Season": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sæson"
+          }
+        }
+      }
+    },
     "Season %lld": {
       "localizations": {
         "da": {
@@ -4439,6 +4779,16 @@
         }
       }
     },
+    "Select all": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg alle"
+          }
+        }
+      }
+    },
     "Select all shown": {
       "localizations": {
         "da": {
@@ -4455,6 +4805,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vælg ingen"
+          }
+        }
+      }
+    },
+    "Selected": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valgt"
           }
         }
       }
@@ -4685,6 +5045,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Serier"
+          }
+        }
+      }
+    },
+    "Shows what the arr finds in the folder before anything is imported.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viser, hvad arr'en finder i mappen, før noget importeres."
           }
         }
       }
@@ -5000,6 +5370,16 @@
         }
       }
     },
+    "The arr found nothing to import here.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arr'en fandt intet at importere her."
+          }
+        }
+      }
+    },
     "The calendar needs Radarr, Sonarr or Readarr.": {
       "localizations": {
         "da": {
@@ -5036,6 +5416,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Downloadet er gået i stå ({state}) — ingen data flytter sig."
+          }
+        }
+      }
+    },
+    "The library isn't available.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biblioteket er ikke tilgængeligt."
           }
         }
       }
@@ -5138,6 +5528,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Denne adresse kræver login, så appen kan ikke bruge den som hjemmeadresse"
+          }
+        }
+      }
+    },
+    "This server can't import files by hand.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne server kan ikke importere filer manuelt."
           }
         }
       }
@@ -5342,6 +5742,16 @@
         }
       }
     },
+    "Unknown quality": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukendt kvalitet"
+          }
+        }
+      }
+    },
     "Unmonitor": {
       "localizations": {
         "da": {
@@ -5479,6 +5889,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uploadet"
+          }
+        }
+      }
+    },
+    "Use %lld episodes": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brug %lld afsnit"
+          }
+        }
+      }
+    },
+    "Use the arr's match": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brug arr'ens match"
+          }
+        }
+      }
+    },
+    "Use this episode": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brug dette afsnit"
+          }
+        }
+      }
+    },
+    "Use what the arr detected": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brug det, arr'en registrerede"
           }
         }
       }
@@ -5765,6 +6215,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "slettet"
+          }
+        }
+      }
+    },
+    "detected": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "registreret"
           }
         }
       }
