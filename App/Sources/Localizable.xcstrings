@@ -442,6 +442,16 @@
         }
       }
     },
+    "%lld of %lld tracks on disk": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld af %lld numre på disken"
+          }
+        }
+      }
+    },
     "%lld per run": {
       "localizations": {
         "da": {
@@ -872,6 +882,16 @@
         }
       }
     },
+    "Add an artist": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj en kunstner"
+          }
+        }
+      }
+    },
     "Add book": {
       "localizations": {
         "da": {
@@ -898,6 +918,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tilføj film"
+          }
+        }
+      }
+    },
+    "Add music": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj musik"
           }
         }
       }
@@ -1003,7 +1033,16 @@
       }
     },
     "Album": {
-      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Album"
+          }
+        }
+      }
+    },
+    "Albums": {
       "localizations": {
         "da": {
           "stringUnit": {
@@ -1029,6 +1068,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alle (%lld)"
+          }
+        }
+      }
+    },
+    "All albums": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle album"
+          }
+        }
+      }
+    },
+    "All artists": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle kunstnere"
           }
         }
       }
@@ -1220,6 +1279,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kun godkendte"
+          }
+        }
+      }
+    },
+    "Artist": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunstner"
+          }
+        }
+      }
+    },
+    "Artists": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunstnere"
           }
         }
       }
@@ -1470,6 +1549,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nederst"
+          }
+        }
+      }
+    },
+    "Broadcasts": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Udsendelser"
           }
         }
       }
@@ -2157,6 +2246,26 @@
         }
       }
     },
+    "Delete the album's files": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet albummets filer"
+          }
+        }
+      }
+    },
+    "Delete the file of %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slet filen til %@"
+          }
+        }
+      }
+    },
     "Delete torrent and files": {
       "localizations": {
         "da": {
@@ -2284,6 +2393,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Retning"
+          }
+        }
+      }
+    },
+    "Disc %lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disk %lld"
+          }
+        }
+      }
+    },
+    "Disc %lld · %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disk %lld · %@"
           }
         }
       }
@@ -2430,6 +2559,16 @@
         }
       }
     },
+    "EPs": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EP'er"
+          }
+        }
+      }
+    },
     "Each run may delete more titles.": {
       "localizations": {
         "da": {
@@ -2446,6 +2585,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Redigér"
+          }
+        }
+      }
+    },
+    "Edit %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redigér %@"
           }
         }
       }
@@ -2476,6 +2625,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Udgaver"
+          }
+        }
+      }
+    },
+    "Edit…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redigér…"
           }
         }
       }
@@ -2600,6 +2759,16 @@
         }
       }
     },
+    "Existing albums": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eksisterende album"
+          }
+        }
+      }
+    },
     "Existing episodes": {
       "localizations": {
         "da": {
@@ -2640,6 +2809,16 @@
         }
       }
     },
+    "Files deleted": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filer slettet"
+          }
+        }
+      }
+    },
     "Film": {
       "localizations": {
         "da": {
@@ -2666,6 +2845,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Film, serier, bøger, forfattere"
+          }
+        }
+      }
+    },
+    "Films, shows, books, authors, artists": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Film, serier, bøger, forfattere, kunstnere"
           }
         }
       }
@@ -2772,6 +2961,16 @@
         }
       }
     },
+    "First album": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Første album"
+          }
+        }
+      }
+    },
     "First season": {
       "localizations": {
         "da": {
@@ -2788,6 +2987,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ret"
+          }
+        }
+      }
+    },
+    "Folder": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mappe"
           }
         }
       }
@@ -2908,6 +3117,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fuld om cirka %lld uger"
+          }
+        }
+      }
+    },
+    "Future albums": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kommende album"
           }
         }
       }
@@ -3119,6 +3338,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hvordan"
+          }
+        }
+      }
+    },
+    "If Lidarr does not have the artist yet, they are added with these settings and only this album monitored.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Har Lidarr ikke kunstneren endnu, bliver de tilføjet med disse indstillinger, og kun dette album overvåges."
           }
         }
       }
@@ -3414,6 +3643,16 @@
         }
       }
     },
+    "Latest album": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seneste album"
+          }
+        }
+      }
+    },
     "Latest only": {
       "localizations": {
         "da": {
@@ -3510,6 +3749,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Biblioteksstørrelse"
+          }
+        }
+      }
+    },
+    "Lidarr has no albums for this artist under its metadata profile.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lidarr har ingen album for denne kunstner med den metadataprofil."
+          }
+        }
+      }
+    },
+    "Lidarr is refreshing the artist": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lidarr opdaterer kunstneren"
           }
         }
       }
@@ -3725,6 +3984,16 @@
         }
       }
     },
+    "Missing albums": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manglende album"
+          }
+        }
+      }
+    },
     "Missing episodes": {
       "localizations": {
         "da": {
@@ -3862,6 +4131,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Flyt 1 fil"
+          }
+        }
+      }
+    },
+    "Move the files to the new folder": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flyt filerne til den nye mappe"
           }
         }
       }
@@ -4027,6 +4306,16 @@
         }
       }
     },
+    "New albums": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nye album"
+          }
+        }
+      }
+    },
     "New books": {
       "localizations": {
         "da": {
@@ -4134,6 +4423,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ingen film endnu."
+          }
+        }
+      }
+    },
+    "No music yet.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen musik endnu."
           }
         }
       }
@@ -4432,6 +4731,16 @@
         }
       }
     },
+    "Nothing on disk": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intet på disken"
+          }
+        }
+      }
+    },
     "Nothing out today": {
       "extractionState": "manual",
       "localizations": {
@@ -4714,6 +5023,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Eller en .torrent-fil"
+          }
+        }
+      }
+    },
+    "Other": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andet"
           }
         }
       }
@@ -5161,6 +5480,16 @@
         }
       }
     },
+    "Refresh and rescan": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opdatér og scan igen"
+          }
+        }
+      }
+    },
     "Reinstall it from your Mac to keep it opening.": {
       "localizations": {
         "da": {
@@ -5577,6 +5906,26 @@
         }
       }
     },
+    "Search artists": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg kunstnere"
+          }
+        }
+      }
+    },
+    "Search artists and albums…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg kunstnere og album…"
+          }
+        }
+      }
+    },
     "Search books": {
       "localizations": {
         "da": {
@@ -5603,6 +5952,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Søg i alt"
+          }
+        }
+      }
+    },
+    "Search for an artist or an album in Lidarr to add it": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg efter en kunstner eller et album i Lidarr for at tilføje det"
           }
         }
       }
@@ -5673,6 +6032,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Søg efter serier"
+          }
+        }
+      }
+    },
+    "Search started": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søgning startet"
           }
         }
       }
@@ -6164,6 +6533,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Siden %@"
+          }
+        }
+      }
+    },
+    "Singles": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Singler"
           }
         }
       }
@@ -6907,6 +7286,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Trackere"
+          }
+        }
+      }
+    },
+    "Tracks on disk": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numre på disken"
+          }
+        }
+      }
+    },
+    "Tracks · %lld of %lld on disk": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numre · %lld af %lld på disken"
           }
         }
       }

@@ -141,7 +141,7 @@ struct WantedRow: View {
             Button("Search") { Task { await model.search(item) } }
                 .buttonStyle(.bordered).controlSize(.small)
                 .disabled(model.isPending("search-\(item.id)"))
-            // an album has neither a diagnosis nor releases to offer yet
+            // a row from an arr this build cannot name has neither
             if item.ref != nil {
                 Button("Why?", action: diagnose)
                     .buttonStyle(.borderless).controlSize(.small)

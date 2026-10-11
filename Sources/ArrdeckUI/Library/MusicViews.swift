@@ -38,7 +38,7 @@ public struct ArtistDetailView: View {
                 }
                 actions(artist)
                 if (artist.albums ?? []).isEmpty {
-                    Section { EmptyNote("Lidarr has no albums for this artist under its metadata profile.") }
+                    Section { EmptyNote(String(localized: "Lidarr has no albums for this artist under its metadata profile.")) }
                 }
                 ForEach(model.groups, id: \.type) { group in
                     Section("\(group.label) (\(group.albums.count))") {

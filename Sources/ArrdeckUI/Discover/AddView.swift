@@ -140,7 +140,7 @@ public struct AddView: View {
                 if model.searching {
                     resultsSection(model.results, title: nil)
                 } else {
-                    Section { EmptyNote("Search for an artist or an album in Lidarr to add it") }
+                    Section { EmptyNote(String(localized: "Search for an artist or an album in Lidarr to add it")) }
                 }
             case .collections:
                 collectionsSection
