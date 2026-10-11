@@ -1,6 +1,9 @@
 import ArrdeckData
 import ArrdeckKit
 import SwiftUI
+#if os(iOS)
+import UIKit
+#endif
 
 /// Everything behind a saved server: its tabs whenever the session works, the
 /// connection screen whenever it does not. One controller decides which, so a
@@ -116,46 +119,84 @@ public struct ServerView: View {
     /// Tabs with a screen pushed over their first one.
     @State private var pushed: Set<AppTab> = []
 
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    #endif
+
+    /// The sidebar on an iPad at regular width, the floating capsule anywhere
+    /// else; it follows Split View and Slide Over as their width changes.
+    var layout: ShellLayout {
+        #if os(iOS)
+        ShellLayout(regularWidth: sizeClass == .regular, isPad: UIDevice.current.userInterfaceIdiom == .pad)
+        #else
+        .tabBar
+        #endif
+    }
+
+    /// A tab tapped in the capsule or the sidebar.
+    func tap(_ tab: AppTab) {
+        switch TabTap(tab, selected: selectedTab, pushed: pushed) {
+        case let .show(tab): withAnimation(.snappy(duration: 0.25)) { selectedTab = tab }
+        // as in the PWA and the system tab bar: tapping the tab you are in
+        // returns it to its first screen
+        case let .popToRoot(tab): stackGeneration[tab, default: 0] += 1
+        case .nothing: break
+        }
+    }
+
     /// Every tab's stack stays mounted in a ZStack and only the selected one
     /// is visible, so switching tabs keeps scroll position and pushed screens.
     /// Not a TabView: with six tabs UIKit folds the last ones into a "More"
     /// list, and popping a pushed screen in the sixth tab landed there instead
     /// of on the tab's root. Tabs appear only for configured services, so the
     /// bar waits for /services before it knows what to show.
+    ///
+    /// On a wide iPad the same ZStack sits beside a sidebar instead of over the
+    /// capsule. Only the chrome around it changes with the width, never the
+    /// stacks' place in the view tree, so moving between Split View sizes keeps
+    /// every tab's pushed screens and scroll position, not just the selection.
     var tabs: some View {
         let available = AppTab.arrange(AppTab.available(configured: model.configured),
                                        order: AppTab.list(tabOrder), hidden: Set(AppTab.list(hiddenTabs)))
+        let layout = layout
+        let expiry = Self.expiry.flatMap { SigningExpiry.isClose($0) ? $0 : nil }
         return Group {
             if !model.servicesKnown {
                 ProgressView("Connecting…")
             } else {
-                ZStack {
-                    ForEach(available, id: \.self) { tab in
-                        // accessibilityHidden has to sit inside the stack:
-                        // applied to the NavigationStack itself it is ignored
-                        // and the hidden tabs stay visible to VoiceOver.
-                        NavigationStack {
-                            tabContent(tab)
-                                .accessibilityHidden(tab != selectedTab)
-                                // the first screen leaves view exactly when another is pushed over it;
-                                // switching tabs only changes opacity, so it does not count
-                                .onAppear { pushed.remove(tab) }
-                                .onDisappear { pushed.insert(tab) }
-                        }
-                        .id(stackGeneration[tab, default: 0])
-                        .opacity(tab == selectedTab ? 1 : 0)
-                        .allowsHitTesting(tab == selectedTab)
-                        .zIndex(tab == selectedTab ? 1 : 0)
+                HStack(spacing: 0) {
+                    if layout == .sidebar {
+                        AppSidebar(title: controller.profile.name, tabs: available, selected: selectedTab,
+                                   badges: [.activity: feed.count], tap: tap, expiry: expiry)
+                        Divider().ignoresSafeArea()
                     }
-                }
-                .safeAreaInset(edge: .bottom, spacing: 0) {
-                    // no background: the content scrolls on under the floating glass
-                    VStack(spacing: 8) {
-                        if let expiry = Self.expiry, SigningExpiry.isClose(expiry) { ExpiryStrip(expiry: expiry) }
-                        AppTabBar(tabs: available, selected: $selectedTab, badges: [.activity: feed.count]) { tab in
-                            // as in the PWA and the system tab bar: tapping the tab you are in
-                            // returns it to its first screen
-                            if pushed.contains(tab) { stackGeneration[tab, default: 0] += 1 }
+                    ZStack {
+                        ForEach(available, id: \.self) { tab in
+                            // accessibilityHidden has to sit inside the stack:
+                            // applied to the NavigationStack itself it is ignored
+                            // and the hidden tabs stay visible to VoiceOver.
+                            NavigationStack {
+                                tabContent(tab)
+                                    .accessibilityHidden(tab != selectedTab)
+                                    // the first screen leaves view exactly when another is pushed over it;
+                                    // switching tabs only changes opacity, so it does not count
+                                    .onAppear { pushed.remove(tab) }
+                                    .onDisappear { pushed.insert(tab) }
+                            }
+                            .id(stackGeneration[tab, default: 0])
+                            .opacity(tab == selectedTab ? 1 : 0)
+                            .allowsHitTesting(tab == selectedTab)
+                            .zIndex(tab == selectedTab ? 1 : 0)
+                        }
+                    }
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
+                        // no background: the content scrolls on under the floating glass
+                        if layout == .tabBar {
+                            VStack(spacing: 8) {
+                                if let expiry { ExpiryStrip(expiry: expiry) }
+                                // the bar switches tabs itself and asks only when the current one is tapped again
+                                AppTabBar(tabs: available, selected: $selectedTab, badges: [.activity: feed.count], reselect: tap)
+                            }
                         }
                     }
                 }
@@ -166,13 +207,13 @@ public struct ServerView: View {
                         selectedTab = start
                     }
                     openedOnStartTab = true
-                    if !available.contains(selectedTab) { selectedTab = available.first ?? .settings }
+                    if !available.contains(selectedTab) { selectedTab = AppTab.keeping(selectedTab, in: available) }
                     QuickActions.update(LaunchAction.available(tabs: available, hasArr: model.hasArr))
                     // after the start tab, so a quick action overrides it
                     takeLaunch(available)
                 }
                 .onChange(of: available) { _, tabs in
-                    if !tabs.contains(selectedTab) { selectedTab = tabs.first ?? .settings }
+                    if !tabs.contains(selectedTab) { selectedTab = AppTab.keeping(selectedTab, in: tabs) }
                     QuickActions.update(LaunchAction.available(tabs: tabs, hasArr: model.hasArr))
                 }
                 .onChange(of: router.pending) { _, action in
