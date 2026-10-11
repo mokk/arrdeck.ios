@@ -193,7 +193,8 @@ private struct ImportList: View {
             if let error = model.actionError {
                 ErrorNote(error)
             }
-            if let outcome = model.outcome {
+            // after three failed polls the wait is over; a spinner would lie
+            if let outcome = model.outcome, model.actionError == nil {
                 ImportOutcomeRow(outcome: outcome)
             }
         } footer: {

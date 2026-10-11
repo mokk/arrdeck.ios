@@ -477,10 +477,12 @@ public final class ImportModel {
         guard !started, let request else { return }
         starting = true
         actionError = nil
-        defer { starting = false }
         do {
             command = try await api.startImport(request)
+            // the command is what holds the sheet now; the list stays readable
+            starting = false
         } catch {
+            starting = false
             if lostSession(error) { return }
             actionError = describe(error)
             return
