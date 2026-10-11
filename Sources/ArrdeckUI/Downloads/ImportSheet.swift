@@ -16,6 +16,7 @@ struct ImportSheet: View {
     let job: ImportJob
     let library: (any ManageAPI)?
     let details: (any LibraryAPI)?
+    let music: (any MusicLibraryAPI)?
     /// Called once the arr says the import is done, to refresh what opened it.
     let onFinished: () -> Void
     let dismiss: () -> Void
@@ -26,12 +27,13 @@ struct ImportSheet: View {
     @State private var confirm = ConfirmCenter()
 
     /// `api` is whatever the presenting screen holds; the live client does
-    /// all three, a server without manual import shows a note instead.
+    /// all of them, a server without manual import shows a note instead.
     init(job: ImportJob, api: any Sendable, onSessionLost: @escaping @MainActor () -> Void,
          onFinished: @escaping () -> Void = {}, dismiss: @escaping () -> Void) {
         self.job = job
         library = api as? any ManageAPI
         details = api as? any LibraryAPI
+        music = api as? any MusicLibraryAPI
         self.onFinished = onFinished
         self.dismiss = dismiss
         _model = State(initialValue: (api as? any ManualImportAPI).map {
@@ -69,13 +71,18 @@ struct ImportSheet: View {
     @ViewBuilder func destination(_ route: ImportRoute, model: ImportModel) -> some View {
         switch route {
         case let .target(candidate):
-            ImportTargetPicker(app: model.app, candidate: candidate, library: library) { target in
-                model.picks.assign(target, to: candidate)
+            ImportTargetPicker(app: model.app, candidate: candidate, library: library, music: music) { target in
+                model.assign(target, to: candidate)
                 path.removeAll()
             }
         case let .episodes(candidate, series, name):
             ImportEpisodePicker(candidate: candidate, series: series, name: name, details: details) { target in
-                model.picks.assign(target, to: candidate)
+                model.assign(target, to: candidate)
+                path.removeAll()
+            }
+        case let .albums(candidate, artist, name):
+            ImportAlbumPicker(candidate: candidate, artist: artist, name: name, music: music) { target in
+                model.assign(target, to: candidate)
                 path.removeAll()
             }
         case let .quality(candidate):
@@ -88,6 +95,7 @@ struct ImportSheet: View {
 enum ImportRoute: Hashable {
     case target(ImportCandidate)
     case episodes(ImportCandidate, series: Int, name: String)
+    case albums(ImportCandidate, artist: Int, name: String)
     case quality(ImportCandidate)
 }
 
@@ -142,6 +150,10 @@ private struct ImportList: View {
                     }
                     .font(.caption).textCase(nil)
                 }
+            }
+        } footer: {
+            if model.albumForAll, !model.started {
+                Text("The album you choose goes to every file that has none yet, and Lidarr works out which track each one is.")
             }
         }
     }
@@ -335,7 +347,7 @@ private struct ImportOverrideView: View {
                         }
                     }
                 }
-                // Readarr's files carry no language: nothing to offer
+                // Readarr's and Lidarr's files carry no language: nothing to offer
                 if !(options.languages ?? []).isEmpty {
                     Section("Languages") {
                         TextField(String(localized: "Filter languages"), text: $filter)
@@ -366,28 +378,37 @@ private struct ImportOverrideView: View {
             }
         }
         .dashboardListStyle()
-        .navigationTitle("Quality & languages")
+        // Readarr's and Lidarr's files carry no language
+        .navigationTitle((model.options?.languages ?? []).isEmpty ? String(localized: "Quality") : String(localized: "Quality & languages"))
     }
 }
 
 /// Points one file the arr couldn't place at a library entry. Movies and
-/// books are a single choice; a show drills into its seasons and episodes.
+/// books are a single choice; a show drills into its seasons and episodes,
+/// an artist into their albums.
 private struct ImportTargetPicker: View {
     let app: ArrApp
     let candidate: ImportCandidate
     let library: (any ManageAPI)?
+    let music: (any MusicLibraryAPI)?
     let onPick: (ImportTarget) -> Void
     @State private var query = ""
     @State private var movies: Loadable<[LibraryMovie]> = .loading
     @State private var series: Loadable<[LibrarySeries]> = .loading
     @State private var books: Loadable<[LibraryBook]> = .loading
+    @State private var artists: Loadable<[LibraryArtist]> = .loading
 
     var title: String {
         switch app {
         case .radarr: String(localized: "Choose a movie")
         case .sonarr: String(localized: "Choose a show")
         case .readarr: String(localized: "Choose a book")
+        case .lidarr: String(localized: "Choose an artist")
         }
+    }
+
+    var prompt: String {
+        app == .lidarr ? String(localized: "Filter artists") : String(localized: "Filter the library")
     }
 
     var body: some View {
@@ -398,11 +419,12 @@ private struct ImportTargetPicker: View {
                 case .radarr: movieRows
                 case .sonarr: seriesRows
                 case .readarr: bookRows
+                case .lidarr: artistRows
                 }
             }
         }
         .dashboardListStyle()
-        .searchable(text: $query, prompt: String(localized: "Filter the library"))
+        .searchable(text: $query, prompt: prompt)
         .navigationTitle(title)
         .task { await load() }
     }
@@ -458,13 +480,34 @@ private struct ImportTargetPicker: View {
         }
     }
 
+    @ViewBuilder var artistRows: some View {
+        switch artists {
+        case .loading: LoadingRow()
+        case let .failed(reason): ErrorNote(reason)
+        case let .loaded(all):
+            let shown = ImportTargetSearch.artists(all, query: query)
+            if shown.isEmpty { EmptyNote(String(localized: "No matches")) }
+            ForEach(shown, id: \.id) { artist in
+                let count = artist.album_count ?? 0
+                NavigationLink(value: ImportRoute.albums(candidate, artist: artist.id, name: artist.name ?? "")) {
+                    PickRow(title: artist.name ?? "", detail: count == 1 ? String(localized: "1 album") : String(localized: "\(count) albums"))
+                }
+            }
+        }
+    }
+
     func load() async {
-        guard let library else {
-            let reason = String(localized: "The library isn't available.")
-            movies = .failed(reason); series = .failed(reason); books = .failed(reason)
+        func describe(_ error: any Error) -> String { (error as? APIError)?.description ?? error.localizedDescription }
+        let unavailable = String(localized: "The library isn't available.")
+        if app == .lidarr {
+            guard let music else { artists = .failed(unavailable); return }
+            do { artists = .loaded(try await music.libraryArtists()) } catch { artists = .failed(describe(error)) }
             return
         }
-        func describe(_ error: any Error) -> String { (error as? APIError)?.description ?? error.localizedDescription }
+        guard let library else {
+            movies = .failed(unavailable); series = .failed(unavailable); books = .failed(unavailable)
+            return
+        }
         switch app {
         case .radarr:
             do { movies = .loaded(try await library.libraryMovies()) } catch { movies = .failed(describe(error)) }
@@ -472,6 +515,65 @@ private struct ImportTargetPicker: View {
             do { series = .loaded(try await library.librarySeries()) } catch { series = .failed(describe(error)) }
         case .readarr:
             do { books = .loaded(try await library.libraryBooks()) } catch { books = .failed(describe(error)) }
+        case .lidarr: ()   // asked of the music library above
+        }
+    }
+}
+
+/// One artist's albums, newest first. Which track each file is, Lidarr
+/// works out itself once it knows the album.
+private struct ImportAlbumPicker: View {
+    let candidate: ImportCandidate
+    let artist: Int
+    let name: String
+    let music: (any MusicLibraryAPI)?
+    let onPick: (ImportTarget) -> Void
+    @State private var query = ""
+    @State private var albums: Loadable<[LibraryAlbum]> = .loading
+
+    func detail(_ album: LibraryAlbum) -> String {
+        let tracks = album.track_count ?? 0
+        let count = tracks == 1 ? String(localized: "1 track") : String(localized: "\(tracks) tracks")
+        return [album.year.map(String.init), album.album_type, count].compactMap { $0 }.joined(separator: " · ")
+    }
+
+    var body: some View {
+        List {
+            Section { Text(candidate.name ?? candidate.path).font(.caption).foregroundStyle(.secondary) }
+            Section {
+                switch albums {
+                case .loading: LoadingRow()
+                case let .failed(reason): ErrorNote(reason)
+                case let .loaded(all):
+                    let shown = ImportTargetSearch.albums(all, query: query)
+                    if shown.isEmpty { EmptyNote(String(localized: "No matches")) }
+                    ForEach(shown, id: \.id) { album in
+                        Button {
+                            onPick(.album(album.id, label: ImportTargetSearch.albumLabel(artist: name, album: album)))
+                        } label: {
+                            PickRow(title: album.title ?? "", detail: detail(album))
+                        }
+                    }
+                }
+            } header: {
+                Text("Choose an album")
+            }
+        }
+        .dashboardListStyle()
+        .searchable(text: $query, prompt: String(localized: "Filter albums"))
+        .navigationTitle(name)
+        .task { await load() }
+    }
+
+    func load() async {
+        guard let music else {
+            albums = .failed(String(localized: "The library isn't available."))
+            return
+        }
+        do {
+            albums = .loaded(try await music.artistAlbums(artist))
+        } catch {
+            albums = .failed((error as? APIError)?.description ?? error.localizedDescription)
         }
     }
 }

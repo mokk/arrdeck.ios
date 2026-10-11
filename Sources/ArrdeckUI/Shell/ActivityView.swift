@@ -67,7 +67,7 @@ public struct ActivityView: View {
             case .queue:
                 DownloadsView(model: model, api: api, newSince: newSince, onSessionLost: onSessionLost)
             case .history:
-                HistoryScreen(api: api, newSince: newSince, onShown: { feed.markSeen(at: .now) },
+                HistoryScreen(api: api, apps: model.arrs, newSince: newSince, onShown: { feed.markSeen(at: .now) },
                               titled: false, onSessionLost: onSessionLost)
             }
         }

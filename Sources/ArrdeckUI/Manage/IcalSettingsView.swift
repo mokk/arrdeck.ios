@@ -2,7 +2,7 @@ import ArrdeckData
 import SwiftUI
 
 /// Settings → Calendar subscription: one address Calendar, Google Calendar or
-/// Outlook subscribes to, with Radarr, Sonarr and Readarr merged. Like the OPDS
+/// Outlook subscribes to, with Radarr, Sonarr, Readarr and Lidarr merged. Like the OPDS
 /// feed it carries a secret, since calendar apps cannot sign in.
 struct IcalSettingsView: View {
     let api: any IcalAPI
@@ -21,7 +21,7 @@ struct IcalSettingsView: View {
                 let apps = current.apps ?? []
                 let chosen = apps.filter { !left.contains($0) }
                 if apps.isEmpty {
-                    Section { Text("The calendar needs Radarr, Sonarr or Readarr.") }
+                    Section { Text("The calendar needs Radarr, Sonarr, Readarr or Lidarr.") }
                 } else if let url = current.url(on: baseURL, apps: chosen) {
                     if apps.count > 1 {
                         Section("Include") {
@@ -57,7 +57,7 @@ struct IcalSettingsView: View {
             }
             Section {
             } footer: {
-                Text("Subscribe to what Radarr, Sonarr and Readarr have coming in Calendar, Google Calendar or Outlook — one calendar for all of them.")
+                Text("Subscribe to what Radarr, Sonarr, Readarr and Lidarr have coming in Calendar, Google Calendar or Outlook — one calendar for all of them.")
             }
         }
         .themedList()

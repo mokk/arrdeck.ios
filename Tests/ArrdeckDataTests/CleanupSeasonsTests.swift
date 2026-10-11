@@ -5,7 +5,7 @@ actor RecordingCleanupAPI: CleanupAPI, SeasonRemoveAPI {
     private(set) var calls: [String] = []
 
     func cleanup(watchedDays: Int) async throws -> CleanupLists { CleanupLists() }
-    func deleteForCleanup(_ app: ArrApp, ids: [Int], exclude: Bool) async throws {
+    func deleteForCleanup(_ app: LibraryApp, ids: [Int], exclude: Bool) async throws {
         calls.append("delete-\(app.rawValue)-\(ids.map(String.init).joined(separator: ","))")
     }
     func removeSeasons(series: Int, seasons: [Int]) async throws {

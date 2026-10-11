@@ -58,9 +58,9 @@ public final class GlobalSearchModel {
     public private(set) var authors: [(id: Int, name: String)] = []
     public private(set) var loaded = false
     private let api: any ManageAPI
-    private let apps: [ArrApp]
+    private let apps: [LibraryApp]
 
-    public init(api: any ManageAPI, apps: [ArrApp]) {
+    public init(api: any ManageAPI, apps: [LibraryApp]) {
         self.api = api
         self.apps = apps
     }

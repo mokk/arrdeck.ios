@@ -245,7 +245,7 @@ public struct ServerView: View {
                             hasPlex: model.has("plex"), onSessionLost: sessionLost) { launchAdd = false }
                 }
                 .sheet(isPresented: $launchSearch) {
-                    GlobalSearchSheet(api: api, apps: ArrApp.allCases.filter { model.has($0.rawValue) },
+                    GlobalSearchSheet(api: api, apps: LibraryApp.allCases.filter { model.has($0.rawValue) },
                                       baseURL: controller.activeURL, hasPlex: model.has("plex"),
                                       onSessionLost: sessionLost) { launchSearch = false }
                 }

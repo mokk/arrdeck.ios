@@ -62,6 +62,8 @@ public struct ImportTarget: Hashable, Sendable {
     public var seriesID: Int?
     public var episodeIDs: [Int] = []
     public var bookID: Int?
+    /// Lidarr: the album, and Lidarr works out which track each file is.
+    public var albumID: Int?
     public var label: String
 
     public static func movie(_ id: Int, label: String) -> ImportTarget {
@@ -74,6 +76,10 @@ public struct ImportTarget: Hashable, Sendable {
 
     public static func book(_ id: Int, label: String) -> ImportTarget {
         ImportTarget(bookID: id, label: label)
+    }
+
+    public static func album(_ id: Int, label: String) -> ImportTarget {
+        ImportTarget(albumID: id, label: label)
     }
 }
 
@@ -115,7 +121,8 @@ public protocol ManualImportAPI: Sendable {
     func attention() async throws -> Attention
     /// Everything the arr found, including the files it refused and why.
     func importCandidates(_ source: ImportSource) async throws -> [ImportCandidate]
-    /// What a file's quality and languages can be set to (Readarr: no languages).
+    /// What a file's quality and languages can be set to (Readarr and
+    /// Lidarr: no languages).
     func importOptions(_ app: ArrApp) async throws -> ImportOptions
     /// Starts the arr's ManualImport command.
     func startImport(_ request: ImportRequest) async throws -> ImportCommand
@@ -309,6 +316,18 @@ public struct ImportPicks: Hashable, Sendable {
         if ready(candidate) { picked.insert(candidate.path) }
     }
 
+    /// The same, except that an album arrives as many files: an album picked
+    /// for one goes to every file the arr could not place and nobody has
+    /// pointed anywhere yet, so a whole folder takes one pick. Files the arr
+    /// placed, and files already given a target, are left alone.
+    public mutating func assign(_ target: ImportTarget, to candidate: ImportCandidate, among candidates: [ImportCandidate]) {
+        assign(target, to: candidate)
+        guard target.albumID != nil else { return }
+        for other in candidates where other.path != candidate.path && other.importable != true && targets[other.path] == nil {
+            assign(target, to: other)
+        }
+    }
+
     /// Back to the arr's own match, which for a file it could not place is
     /// none: such a file drops out of the pick.
     public mutating func clearTarget(_ candidate: ImportCandidate) {
@@ -391,6 +410,7 @@ public struct ImportPicks: Hashable, Sendable {
         let target = targets[candidate.path]
         let override = overrides[candidate.path]
         return ImportFile(
+            album_id: target?.albumID,
             book_id: target?.bookID,
             episode_ids: target.flatMap { $0.episodeIDs.isEmpty ? nil : $0.episodeIDs },
             language_ids: override?.languageIDs,
@@ -442,6 +462,16 @@ public final class ImportModel {
 
     public var app: ArrApp { source.app }
     public var list: [ImportCandidate] { candidates.value ?? [] }
+
+    /// Lidarr's files are tracks of one album, so one album pick goes to
+    /// every unplaced file; the sheet says so when there is more than one.
+    public var albumForAll: Bool { app == .lidarr && list.filter { $0.importable != true }.count > 1 }
+
+    /// Points a file at a library entry; an album goes to every file still
+    /// without one.
+    public func assign(_ target: ImportTarget, to candidate: ImportCandidate) {
+        picks.assign(target, to: candidate, among: list)
+    }
     public var request: ImportRequest? { picks.request(for: source, candidates: list) }
     public var chosenCount: Int { picks.chosen(list).count }
     /// One import per sheet: the files it took are gone from the folder.

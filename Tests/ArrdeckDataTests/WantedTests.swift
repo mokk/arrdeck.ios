@@ -36,6 +36,15 @@ import Testing
         #expect(WantedItem(app: "sonarr", id: 4404, library_id: 63, title: "x").ref == .series(63))
         #expect(WantedItem(app: "radarr", id: 180, library_id: 180, title: "x").ref == .movie(180))
     }
+
+    @Test func anAlbumOpensNothingAndOffersNoReleasesYet() {
+        let album = WantedItem(app: "lidarr", id: 12, library_id: 12, subtitle: "Boards of Canada", title: "Geogaddi")
+        #expect(album.arr == .lidarr)
+        #expect(album.ref == nil, "no album page yet, and so no diagnosis")
+        #expect(album.releaseTarget == nil)
+        #expect(WantedItem(app: "sonarr", id: 4404, library_id: 63, title: "x").releaseTarget == .episode(series: 63, episode: 4404))
+        #expect(WantedItem(app: "readarr", id: 5, library_id: 5, title: "x").releaseTarget == .book(5))
+    }
 }
 
 actor FakeWantedAPI: WantedAPI {
@@ -62,6 +71,7 @@ actor FakeWantedAPI: WantedAPI {
     }
     func triggerSearch(_ ref: MediaRef) async throws { try log("search-movie-\(ref.id)") }
     func searchEpisodes(_ ids: [Int]) async throws { try log("search-episodes-\(ids.first ?? 0)") }
+    func searchAlbum(_ id: Int) async throws { try log("search-album-\(id)") }
 }
 
 @MainActor
@@ -106,9 +116,28 @@ actor FakeWantedAPI: WantedAPI {
         #expect(await api.count("search-movie-180") == 1)
         await model.searchAll()
         #expect(await api.count("search-all-sonarr-missing") == 1)
+        await model.search(item(12, app: .lidarr))
+        #expect(await api.count("search-album-12") == 1, "Lidarr's wanted rows are albums")
         let diagnosis = try? await model.diagnose(item(7))
         #expect(diagnosis?.findings?.first?.code == "not_monitored")
         #expect(await api.count("diagnose-1") == 1, "diagnosed by library id, not episode id")
+    }
+
+    @Test func lidarrListsMissingAndCutoffAlbumsAndSearchesThemAll() async throws {
+        let api = FakeWantedAPI(pages: [1: .init(has_more: false, items: [item(12, app: .lidarr)], total: 1)])
+        let model = WantedModel(api: api, apps: [.lidarr], onSessionLost: {})
+        #expect(model.app == .lidarr)
+        await model.load(reset: true)
+        #expect(model.items.map(\.arr) == [.lidarr])
+        await model.searchAll()
+        #expect(await api.count("search-all-lidarr-missing") == 1)
+        model.kind = .cutoff
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(await api.count("wanted-lidarr-cutoff-1") == 1)
+        await model.searchAll()
+        #expect(await api.count("search-all-lidarr-cutoff") == 1)
+        await #expect(throws: APIError.self) { _ = try await model.diagnose(item(12, app: .lidarr)) }
+        #expect(await api.count("diagnose-12") == 0, "an album is never sent to the diagnosis")
     }
 
     @Test func failuresReportAndUnauthorizedEndsTheSession() async {

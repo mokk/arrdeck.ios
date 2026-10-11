@@ -51,7 +51,7 @@ public enum DisplaySync {
         .activity: "/activity", .calendar: "/calendar", .settings: "/settings",
     ]
 
-    static func wireName(_ app: ArrApp) -> String {
+    static func wireName(_ app: LibraryApp) -> String {
         switch app {
         case .radarr: "movies"
         case .sonarr: "series"
@@ -66,7 +66,7 @@ public enum DisplaySync {
     /// Every key this app reads and writes.
     public static let keys: Set<String> = {
         var keys: Set<String> = ["startTab", "tabOrder", "hiddenTabs", "dates", "sizes", "spoilers", "confirm", "theme", "palette"]
-        for app in ArrApp.allCases { keys.insert("layout.\(wireName(app))"); keys.insert("unmonitored.\(wireName(app))") }
+        for app in LibraryApp.allCases { keys.insert("layout.\(wireName(app))"); keys.insert("unmonitored.\(wireName(app))") }
         return keys
     }()
 
@@ -75,7 +75,7 @@ public enum DisplaySync {
     static var storageKeys: [String] {
         var keys = [DisplayKeys.startTab, DisplayKeys.tabOrder, DisplayKeys.hiddenTabs, DisplayKeys.dates, DisplayKeys.sizes,
                     DisplayKeys.spoilers, DisplayKeys.confirm, DisplayKeys.appearance, DisplayKeys.palette]
-        for app in ArrApp.allCases { keys.append(DisplayKeys.layout(app)); keys.append(DisplayKeys.unmonitored(app)) }
+        for app in LibraryApp.allCases { keys.append(DisplayKeys.layout(app)); keys.append(DisplayKeys.unmonitored(app)) }
         return keys
     }
 
@@ -88,7 +88,7 @@ public enum DisplaySync {
     /// so a reset travels too.
     public static func collect(_ defaults: UserDefaults) -> [String: PrefValue] {
         var values: [String: PrefValue] = [:]
-        for app in ArrApp.allCases {
+        for app in LibraryApp.allCases {
             let layout = defaults.pref(DisplayKeys.layout(app), default: LibraryLayout.posters)
             values["layout.\(wireName(app))"] = .string(LibraryLayout.options(for: app).contains(layout) ? layout.rawValue : LibraryLayout.posters.rawValue)
             values["unmonitored.\(wireName(app))"] = .string(defaults.pref(DisplayKeys.unmonitored(app), default: UnmonitoredMode.show).rawValue)
@@ -118,7 +118,7 @@ public enum DisplaySync {
             guard let raw = values[wire]?.string, let value = T(rawValue: raw), allowed(value) else { return }
             store(key, value.rawValue)
         }
-        for app in ArrApp.allCases {
+        for app in LibraryApp.allCases {
             choice("layout.\(wireName(app))", DisplayKeys.layout(app), as: LibraryLayout.self) { LibraryLayout.options(for: app).contains($0) }
             choice("unmonitored.\(wireName(app))", DisplayKeys.unmonitored(app), as: UnmonitoredMode.self)
         }

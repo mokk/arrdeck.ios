@@ -51,7 +51,7 @@ extension Services {
     /// Every service this build can name. A status row or a /services entry
     /// for anything else is skipped rather than shown under a raw name.
     public static let known: Set<String> = [
-        "radarr", "sonarr", "readarr", "prowlarr", "qbittorrent", "transmission",
+        "radarr", "sonarr", "readarr", "lidarr", "prowlarr", "qbittorrent", "transmission",
         "overseerr", "gluetun", "bazarr", "plex", "prometheus", "trakt", "helper",
     ]
 }

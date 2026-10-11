@@ -144,7 +144,7 @@ public enum LibrarySort: String, CaseIterable, Sendable, Hashable {
         }
     }
 
-    public static func keys(for app: ArrApp) -> [LibrarySort] {
+    public static func keys(for app: LibraryApp) -> [LibrarySort] {
         switch app {
         case .radarr: [.added, .title, .year, .status, .size]
         case .sonarr: [.added, .title, .year, .status, .episodes, .size]
@@ -244,7 +244,7 @@ public enum ServiceField: String, CaseIterable, Sendable {
 
 /// The order the services list in — the arrs first, then the rest as the
 /// backend defines them.
-public let serviceOrder = ["radarr", "sonarr", "prowlarr", "qbittorrent", "transmission", "overseerr", "gluetun", "bazarr", "plex", "prometheus", "trakt"]
+public let serviceOrder = ["radarr", "sonarr", "readarr", "lidarr", "prowlarr", "qbittorrent", "transmission", "overseerr", "gluetun", "bazarr", "plex", "prometheus", "trakt"]
 
 public protocol ManageAPI: Sendable {
     func libraryMovies() async throws -> [LibraryMovie]
@@ -429,7 +429,7 @@ extension LiveAPI: ManageAPI {
 /// hundred rows, and the PWA did the same.
 @MainActor @Observable
 public final class LibraryListModel {
-    public let app: ArrApp
+    public let app: LibraryApp
     public var query = ""
     public var tag: Int?
     /// Newest additions first: what you just started monitoring is what you
@@ -453,7 +453,7 @@ public final class LibraryListModel {
     private let hasPlex: Bool
     private let onSessionLost: @MainActor () -> Void
 
-    public init(app: ArrApp, api: any ManageAPI & LibraryAPI & ExtrasAPI, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(app: LibraryApp, api: any ManageAPI & LibraryAPI & ExtrasAPI, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
         self.app = app
         self.api = api
         self.hasPlex = hasPlex
@@ -534,8 +534,8 @@ public final class LibraryListModel {
         }
     }
 
-    private func loadOptions() async { options = try? await api.options(app) }
-    private func loadTags() async { tags = app == .readarr ? [] : ((try? await api.tags(app)) ?? []) }
+    private func loadOptions() async { options = try? await api.options(app.arr) }
+    private func loadTags() async { tags = app == .readarr ? [] : ((try? await api.tags(app.arr)) ?? []) }
     private func loadWatched() async { watchedMap = (try? await api.watched())?.value }
 
     private func loadRows() async {
@@ -636,7 +636,7 @@ public final class SystemModel {
     public let logApps: [String]
 
     public init(configured: Set<String>, api: any ManageAPI, onSessionLost: @escaping @MainActor () -> Void) {
-        apps = ArrApp.allCases.filter { configured.contains($0.rawValue) }
+        apps = [ArrApp.radarr, .sonarr].filter { configured.contains($0.rawValue) }
         logApps = ["radarr", "sonarr", "prowlarr"].filter { configured.contains($0) }
         logApp = logApps.first ?? "radarr"
         self.api = api

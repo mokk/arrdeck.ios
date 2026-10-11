@@ -33,7 +33,7 @@ public enum LibraryLayout: String, CaseIterable, Sendable, Hashable {
     }
 
     /// Each tab's views: the three shared layouts, then the one only that kind has.
-    public static func options(for app: ArrApp) -> [LibraryLayout] {
+    public static func options(for app: LibraryApp) -> [LibraryLayout] {
         switch app {
         case .radarr: [.posters, .list, .details, .collections]
         case .sonarr: [.posters, .list, .details, .upNext, .seasons]
@@ -119,8 +119,8 @@ public enum ConfirmPolicy: String, CaseIterable, Sendable {
 
 /// The UserDefaults keys the views bind with @AppStorage.
 public enum DisplayKeys {
-    public static func layout(_ app: ArrApp) -> String { "display.layout.\(app.rawValue)" }
-    public static func unmonitored(_ app: ArrApp) -> String { "display.unmonitored.\(app.rawValue)" }
+    public static func layout(_ app: LibraryApp) -> String { "display.layout.\(app.rawValue)" }
+    public static func unmonitored(_ app: LibraryApp) -> String { "display.unmonitored.\(app.rawValue)" }
     public static let startTab = "display.startTab"
     /// comma-separated AppTab raw values
     public static let tabOrder = "display.tabOrder"

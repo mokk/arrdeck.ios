@@ -43,7 +43,7 @@ public enum AppTab: String, CaseIterable, Sendable, Hashable {
 
     /// Which tabs a backend with these services configured shows, in order.
     public static func available(configured: Set<String>) -> [AppTab] {
-        let hasArr = configured.contains("radarr") || configured.contains("sonarr") || configured.contains("readarr")
+        let hasArr = ArrApp.allCases.contains { configured.contains($0.rawValue) }
         let hasClient = configured.contains("qbittorrent") || configured.contains("transmission")
         return allCases.filter { tab in
             switch tab {

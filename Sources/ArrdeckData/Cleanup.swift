@@ -10,7 +10,7 @@ public typealias RequestState = Components.Schemas.RequestStateOut
 /// removes the files and can keep the arrs' import lists from re-adding them.
 public protocol CleanupAPI: Sendable {
     func cleanup(watchedDays: Int) async throws -> CleanupLists
-    func deleteForCleanup(_ app: ArrApp, ids: [Int], exclude: Bool) async throws
+    func deleteForCleanup(_ app: LibraryApp, ids: [Int], exclude: Bool) async throws
 }
 
 /// Some seasons of a show instead of all of it: unmonitored, then their files deleted.
@@ -48,7 +48,7 @@ extension LiveAPI: CleanupAPI, RequestsMapAPI {
         }
     }
 
-    public func deleteForCleanup(_ app: ArrApp, ids: [Int], exclude: Bool) async throws {
+    public func deleteForCleanup(_ app: LibraryApp, ids: [Int], exclude: Bool) async throws {
         try await call {
             switch try await client.library_bulk_delete_api_v1_library__kind__bulk_delete_post(
                 path: .init(kind: app.libraryKind), body: .json(.init(delete_files: true, exclude: exclude, ids: ids))

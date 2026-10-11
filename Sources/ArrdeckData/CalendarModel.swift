@@ -27,6 +27,7 @@ extension LiveAPI: CalendarAPI {
                 let body = try ok.body.json
                 var out: [ArrApp: Block<[CalendarItem]>] = [.radarr: Block(body.radarr), .sonarr: Block(body.sonarr)]
                 if let readarr = body.readarr { out[.readarr] = Block(readarr) }
+                if let lidarr = body.lidarr { out[.lidarr] = Block(lidarr) }
                 return out.mapValues { $0.fromKnownArrs() }
             case .unprocessableContent: throw APIError.unexpectedStatus(422)
             case let .undocumented(code, _): throw APIError.status(code)
@@ -36,14 +37,16 @@ extension LiveAPI: CalendarAPI {
 }
 
 extension CalendarItem {
-    /// The library title an entry opens: the film, the episode's show, the book.
+    /// The library title an entry opens: the film, the episode's show, the
+    /// book. An album opens nothing yet.
     public var ref: MediaRef? {
         guard let item_id else { return nil }
         return switch arr {
         case .radarr: .movie(item_id)
         case .sonarr: .series(item_id)
         case .readarr: .book(item_id)
-        case nil: nil
+        // an album has no page to open yet
+        case .lidarr, nil: nil
         }
     }
 

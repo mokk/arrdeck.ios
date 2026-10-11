@@ -53,12 +53,12 @@ public protocol ExtrasAPI: Sendable {
     func forceStart(ids: [String]) async throws
     func setTags(ids: [String], tags: [String], remove: Bool) async throws
     func setCategory(id: String, category: String) async throws
-    func bulkEdit(_ app: ArrApp, ids: [Int], monitored: Bool?, qualityProfile: Int?, tags: [Int]?, tagChange: TagChange?) async throws
-    func bulkDelete(_ app: ArrApp, ids: [Int], deleteFiles: Bool) async throws
-    func bulkSearch(_ app: ArrApp, ids: [Int]) async throws
+    func bulkEdit(_ app: LibraryApp, ids: [Int], monitored: Bool?, qualityProfile: Int?, tags: [Int]?, tagChange: TagChange?) async throws
+    func bulkDelete(_ app: LibraryApp, ids: [Int], deleteFiles: Bool) async throws
+    func bulkSearch(_ app: LibraryApp, ids: [Int]) async throws
 }
 
-extension ArrApp {
+extension LibraryApp {
     /// The library kind the bulk endpoints are keyed by.
     var libraryKind: String {
         switch self {
@@ -243,7 +243,7 @@ extension LiveAPI: ExtrasAPI {
         }
     }
 
-    public func bulkEdit(_ app: ArrApp, ids: [Int], monitored: Bool?, qualityProfile: Int?, tags: [Int]?, tagChange: TagChange?) async throws {
+    public func bulkEdit(_ app: LibraryApp, ids: [Int], monitored: Bool?, qualityProfile: Int?, tags: [Int]?, tagChange: TagChange?) async throws {
         try await call {
             let apply = tagChange.flatMap { Components.Schemas.BulkEditIn.apply_tagsPayload(rawValue: $0.rawValue) }
             switch try await client.library_bulk_edit_api_v1_library__kind__bulk_post(
@@ -257,7 +257,7 @@ extension LiveAPI: ExtrasAPI {
         }
     }
 
-    public func bulkDelete(_ app: ArrApp, ids: [Int], deleteFiles: Bool) async throws {
+    public func bulkDelete(_ app: LibraryApp, ids: [Int], deleteFiles: Bool) async throws {
         try await call {
             switch try await client.library_bulk_delete_api_v1_library__kind__bulk_delete_post(
                 path: .init(kind: app.libraryKind), body: .json(.init(delete_files: deleteFiles, ids: ids))
@@ -269,7 +269,7 @@ extension LiveAPI: ExtrasAPI {
         }
     }
 
-    public func bulkSearch(_ app: ArrApp, ids: [Int]) async throws {
+    public func bulkSearch(_ app: LibraryApp, ids: [Int]) async throws {
         try await call {
             switch try await client.library_bulk_search_api_v1_library__kind__bulk_search_post(
                 path: .init(kind: app.libraryKind), body: .json(.init(delete_files: false, ids: ids))

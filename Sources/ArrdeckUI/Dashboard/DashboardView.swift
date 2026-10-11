@@ -54,7 +54,7 @@ public struct DashboardView: View {
             if model.has("gluetun") { VpnSection(model: model) }
             if model.has("bazarr") { SubtitlesSection(model: model) }
             if model.hasArr {
-                HistorySection(model: model) { HistoryScreen(api: api, onSessionLost: onSessionLost) }
+                HistorySection(model: model) { HistoryScreen(api: api, apps: ArrApp.allCases.filter { model.has($0.rawValue) }, onSessionLost: onSessionLost) }
             }
             if model.has("prowlarr") { IndexerSection(model: model) }
             TrendsSection(model: model) { StatsScreen(api: api, onSessionLost: onSessionLost) }

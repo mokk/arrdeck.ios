@@ -21,13 +21,16 @@ public struct HistoryScreen: View {
     let onShown: (@MainActor () -> Void)?
     /// Embedded in Activity, the tab keeps its own title.
     let titled: Bool
+    /// The arrs the filter offers: the configured ones.
+    let apps: [ArrApp]
 
     /// With `newSince`, what happened after it is marked NEW, and `onShown`
     /// runs once the first page is in — the Activity tab's "seen" mark.
-    public init(api: any HistoryAPI, newSince: Date? = nil, onShown: (@MainActor () -> Void)? = nil,
+    public init(api: any HistoryAPI, apps: [ArrApp], newSince: Date? = nil, onShown: (@MainActor () -> Void)? = nil,
                 titled: Bool = true, onSessionLost: @escaping @MainActor () -> Void) {
         hasDetail = true
         self.titled = titled
+        self.apps = apps
         self.onShown = onShown
         _newSince = State(initialValue: newSince)
         _model = State(initialValue: HistoryModel(api: api, onSessionLost: onSessionLost))
@@ -61,7 +64,7 @@ public struct HistoryScreen: View {
                 Menu {
                     Picker("Service", selection: $model.appFilter) {
                         Text("All").tag(ArrApp?.none)
-                        ForEach(ArrApp.allCases, id: \.self) { Text(Services.label($0.rawValue)).tag(ArrApp?.some($0)) }
+                        ForEach(apps, id: \.self) { Text(Services.label($0.rawValue)).tag(ArrApp?.some($0)) }
                     }
                     Picker("Event", selection: $model.eventFilter) {
                         Text("Any event").tag(String?.none)

@@ -115,12 +115,12 @@ extension GlanceSnapshot {
         }
 
         public struct Entry: Codable, Sendable, Equatable, Hashable {
-            public enum Kind: String, Codable, Sendable { case episode, movie, book }
+            public enum Kind: String, Codable, Sendable { case episode, movie, book, album }
             public var kind: Kind
             public var title: String
             /// S01E05, or S01E01–E08 when a season drops at once.
             public var code: String?
-            /// The moment an episode airs; nil for a film's or a book's release day.
+            /// The moment an episode airs; nil for a film's, a book's or an album's release day.
             public var time: Date?
             public var downloaded: Bool
 

@@ -13,7 +13,7 @@ struct GlobalSearchSheet: View {
     let onSessionLost: @MainActor () -> Void
     let dismiss: () -> Void
 
-    init(api: any LibraryPageAPI, apps: [ArrApp], baseURL: URL, hasPlex: Bool,
+    init(api: any LibraryPageAPI, apps: [LibraryApp], baseURL: URL, hasPlex: Bool,
          onSessionLost: @escaping @MainActor () -> Void, dismiss: @escaping () -> Void) {
         _model = State(initialValue: GlobalSearchModel(api: api, apps: apps))
         self.api = api
@@ -89,7 +89,7 @@ struct AuthorRef: Hashable {
 /// Puts the library's titles into iOS search, so a film or book can be found
 /// from the home screen and opens here.
 enum SpotlightIndexer {
-    static func domain(_ app: ArrApp) -> String { "arrdeck.library.\(app.rawValue)" }
+    static func domain(_ app: LibraryApp) -> String { "arrdeck.library.\(app.rawValue)" }
 
     static func identifier(_ ref: MediaRef) -> String {
         switch ref {
@@ -111,7 +111,7 @@ enum SpotlightIndexer {
     }
 
     /// Replaces one library's entries with the rows just loaded.
-    static func index(_ rows: [LibraryRow], app: ArrApp) {
+    static func index(_ rows: [LibraryRow], app: LibraryApp) {
         #if canImport(CoreSpotlight)
         let items = rows.map { row in
             let attributes = CSSearchableItemAttributeSet(contentType: .content)

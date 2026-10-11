@@ -73,7 +73,7 @@ extension GlanceSnapshot {
             entries: entries.prefix(Today.shown).map { entry in
                 let item = entry.item
                 return Today.Entry(
-                    kind: item.arr == .sonarr ? .episode : item.arr == .radarr ? .movie : .book,
+                    kind: kind(item.arr),
                     title: item.title,
                     code: entry.code.flatMap { $0.isEmpty ? nil : $0 },
                     // an episode airs at a moment; a release day has no time worth showing
@@ -83,6 +83,17 @@ extension GlanceSnapshot {
             },
             count: entries.count
         )
+    }
+
+    static func kind(_ arr: ArrApp?) -> Today.Entry.Kind {
+        switch arr {
+        case .radarr: .movie
+        case .sonarr: .episode
+        case .readarr: .book
+        case .lidarr: .album
+        // LiveAPI drops rows from arrs this build does not know
+        case nil: .movie
+        }
     }
 
     /// The root folder with the least room left — what fills up first. Paths

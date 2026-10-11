@@ -92,7 +92,7 @@ public struct CalendarScreen: View {
         CalendarDay.date(iso).map { $0.formatted(.dateTime.month(.wide).year()) } ?? ""
     }
 
-    /// Movies / Shows / Books to leave out, and whether to hide what is on disk.
+    /// Movies / Shows / Books / Music to leave out, and whether to hide what is on disk.
     var filters: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
@@ -116,6 +116,7 @@ public struct CalendarScreen: View {
         case .radarr: String(localized: "Movies")
         case .sonarr: String(localized: "Shows")
         case .readarr: String(localized: "Books")
+        case .lidarr: String(localized: "Music")
         }
     }
 }
@@ -127,6 +128,8 @@ enum CalendarColors {
         case .radarr: Color.warning
         case .sonarr: Color.accent
         case .readarr: Color.success
+        // as the web app has it: music is the quiet one
+        case .lidarr: Color.secondary
         }
     }
 }

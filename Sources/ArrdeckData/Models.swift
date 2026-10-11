@@ -32,9 +32,35 @@ extension Components.Schemas.ServiceBlock_SubtitlesOut_: ServiceBlockShape {}
 extension Components.Schemas.ServiceBlock_list_HistoryItemOut__: ServiceBlockShape {}
 extension Components.Schemas.ServiceBlock_IndexerStatsOut_: ServiceBlockShape {}
 
-/// The two arrs every paired endpoint answers for.
+/// The arrs: what queue, calendar, history, wanted and import endpoints
+/// answer for.
 public enum ArrApp: String, CaseIterable, Sendable, Hashable {
+    case radarr, sonarr, readarr, lidarr
+}
+
+/// The arrs with a library tab of their own: its layouts, sort keys, bulk
+/// actions and global search. Lidarr is an ArrApp but has no library tab
+/// yet, and the server's library routes do not take it, so it is not one
+/// of these.
+public enum LibraryApp: String, CaseIterable, Sendable, Hashable {
     case radarr, sonarr, readarr
+
+    public var arr: ArrApp {
+        switch self {
+        case .radarr: .radarr
+        case .sonarr: .sonarr
+        case .readarr: .readarr
+        }
+    }
+
+    public init?(_ arr: ArrApp) {
+        switch arr {
+        case .radarr: self = .radarr
+        case .sonarr: self = .sonarr
+        case .readarr: self = .readarr
+        case .lidarr: return nil
+        }
+    }
 }
 
 public enum TorrentClient: String, CaseIterable, Sendable, Hashable {
@@ -48,6 +74,7 @@ public enum Services {
         case "radarr": "Radarr"
         case "sonarr": "Sonarr"
         case "readarr": "Readarr"
+        case "lidarr": "Lidarr"
         case "prowlarr": "Prowlarr"
         case "qbittorrent": "qBittorrent"
         case "transmission": "Transmission"

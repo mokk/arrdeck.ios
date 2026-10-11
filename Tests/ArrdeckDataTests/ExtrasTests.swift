@@ -37,11 +37,11 @@ actor FakeExtrasAPI: ExtrasAPI {
     func forceStart(ids: [String]) async throws { try log("force-\(ids.joined())") }
     func setTags(ids: [String], tags: [String], remove: Bool) async throws { try log("tag-\(tags.joined())-\(remove)") }
     func setCategory(id: String, category: String) async throws { try log("category-\(category)") }
-    func bulkEdit(_ app: ArrApp, ids: [Int], monitored: Bool?, qualityProfile: Int?, tags: [Int]?, tagChange: TagChange?) async throws {
+    func bulkEdit(_ app: LibraryApp, ids: [Int], monitored: Bool?, qualityProfile: Int?, tags: [Int]?, tagChange: TagChange?) async throws {
         try log("bulk-\(app.rawValue)-\(ids.map(String.init).joined(separator: ","))-\(monitored.map(String.init) ?? "_")-\(qualityProfile.map(String.init) ?? "_")-\(tagChange?.rawValue ?? "_")")
     }
-    func bulkDelete(_ app: ArrApp, ids: [Int], deleteFiles: Bool) async throws { try log("bulkdelete-\(ids.count)-\(deleteFiles)") }
-    func bulkSearch(_ app: ArrApp, ids: [Int]) async throws { try log("bulksearch-\(ids.count)") }
+    func bulkDelete(_ app: LibraryApp, ids: [Int], deleteFiles: Bool) async throws { try log("bulkdelete-\(ids.count)-\(deleteFiles)") }
+    func bulkSearch(_ app: LibraryApp, ids: [Int]) async throws { try log("bulksearch-\(ids.count)") }
 }
 
 @MainActor

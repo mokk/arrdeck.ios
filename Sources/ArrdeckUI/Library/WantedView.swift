@@ -86,15 +86,19 @@ public struct WantedView: View {
         .task { await model.load(reset: true) }
         .refreshable { await model.load(reset: true) }
         .sheet(item: $diagnosing) { item in
-            DiagnoseSheet(app: item.ref?.app ?? .radarr, id: item.library_id,
-                          title: [item.title, item.subtitle].compactMap { $0 }.joined(separator: " "), api: api) { diagnosing = nil }
+            if let ref = item.ref {
+                DiagnoseSheet(app: ref.app, id: ref.id,
+                              title: [item.title, item.subtitle].compactMap { $0 }.joined(separator: " "), api: api) { diagnosing = nil }
+            }
         }
         .sheet(item: $searching) { item in
-            ReleasesSheet(
-                target: item.arr == .radarr ? .movie(item.id) : item.arr == .readarr ? .book(item.id) : .episode(series: item.library_id, episode: item.id),
-                title: [item.title, item.subtitle].compactMap { $0 }.joined(separator: " "),
-                api: api, onSessionLost: onSessionLost
-            ) { searching = nil }
+            if let target = item.releaseTarget {
+                ReleasesSheet(
+                    target: target,
+                    title: [item.title, item.subtitle].compactMap { $0 }.joined(separator: " "),
+                    api: api, onSessionLost: onSessionLost
+                ) { searching = nil }
+            }
         }
         .alert("Action failed", isPresented: actionFailed) {
             Button("OK") { model.actionError = nil }
@@ -144,11 +148,16 @@ struct WantedRow: View {
             Button("Search") { Task { await model.search(item) } }
                 .buttonStyle(.bordered).controlSize(.small)
                 .disabled(model.isPending("search-\(item.id)"))
-            Button("Why?", action: diagnose)
-                .buttonStyle(.borderless).controlSize(.small)
-            Button(action: search) { Image(systemName: "list.bullet.rectangle") }
-                .buttonStyle(.borderless).controlSize(.small)
-                .accessibilityLabel("Interactive search")
+            // an album has neither a diagnosis nor releases to offer yet
+            if item.ref != nil {
+                Button("Why?", action: diagnose)
+                    .buttonStyle(.borderless).controlSize(.small)
+            }
+            if item.releaseTarget != nil {
+                Button(action: search) { Image(systemName: "list.bullet.rectangle") }
+                    .buttonStyle(.borderless).controlSize(.small)
+                    .accessibilityLabel("Interactive search")
+            }
         }
         .accessibilityIdentifier("wanted-row")
     }

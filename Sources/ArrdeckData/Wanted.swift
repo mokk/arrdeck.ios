@@ -21,8 +21,20 @@ public enum WantedKind: String, CaseIterable, Sendable, Hashable {
 
 extension WantedItem {
     /// The library title this wanted row belongs to — the movie itself, or the
-    /// series an episode is part of.
+    /// series an episode is part of. An album has no page yet, so nil, and
+    /// with it no diagnosis either: that is per library title.
     public var ref: MediaRef? { MediaRef(app: app, id: library_id) }
+
+    /// What an interactive search for this row asks for; nil for an album,
+    /// whose releases are not offered yet.
+    public var releaseTarget: ReleaseTarget? {
+        switch arr {
+        case .radarr: .movie(id)
+        case .sonarr: .episode(series: library_id, episode: id)
+        case .readarr: .book(id)
+        case .lidarr, nil: nil
+        }
+    }
 }
 
 extension DiagnosisFinding {
@@ -92,6 +104,8 @@ public protocol WantedAPI: Sendable {
     func diagnose(_ app: ArrApp, id: Int) async throws -> Diagnosis
     func triggerSearch(_ ref: MediaRef) async throws
     func searchEpisodes(_ ids: [Int]) async throws
+    /// Lidarr's AlbumSearch for one album; its wanted rows are albums.
+    func searchAlbum(_ id: Int) async throws
 }
 
 extension LiveAPI: WantedAPI {
@@ -114,6 +128,18 @@ extension LiveAPI: WantedAPI {
         try await call {
             switch try await client.wanted_search_all_api_v1_wanted__app__search_all_post(
                 path: .init(app: app.rawValue), query: .init(kind: kind.rawValue)
+            ) {
+            case .noContent: ()
+            case .unprocessableContent: throw APIError.unexpectedStatus(422)
+            case let .undocumented(code, _): throw APIError.status(code)
+            }
+        }
+    }
+
+    public func searchAlbum(_ id: Int) async throws {
+        try await call {
+            switch try await client.trigger_search_api_v1_library__app___item_id__search_post(
+                path: .init(app: ArrApp.lidarr.rawValue, item_id: id)
             ) {
             case .noContent: ()
             case .unprocessableContent: throw APIError.unexpectedStatus(422)
@@ -206,13 +232,15 @@ public final class WantedModel {
         await perform("search-all") { try await api.searchAllWanted(app, kind: kind) }
     }
 
-    /// Radarr wants the movie searched; Sonarr wants the episode.
+    /// Radarr wants the movie searched, Sonarr the episode, Readarr the
+    /// book and Lidarr the album.
     public func search(_ item: WantedItem) async {
         await perform("search-\(item.id)") {
             switch item.arr {
             case .radarr: try await api.triggerSearch(.movie(item.id))
             case .sonarr: try await api.searchEpisodes([item.id])
             case .readarr: try await api.triggerSearch(.book(item.id))
+            case .lidarr: try await api.searchAlbum(item.id)
             // LiveAPI drops rows from arrs this build does not know
             case nil: ()
             }
@@ -223,7 +251,8 @@ public final class WantedModel {
     /// movie_id / series_id and 404s for an episode id. (The PWA passed the
     /// episode id for Sonarr rows, which is how this was found.)
     public func diagnose(_ item: WantedItem) async throws -> Diagnosis {
-        try await api.diagnose(item.ref?.app ?? .radarr, id: item.library_id)
+        guard let ref = item.ref else { throw APIError.unexpectedStatus(404) }
+        return try await api.diagnose(ref.app, id: ref.id)
     }
 
     private func perform(_ key: String, _ work: @Sendable () async throws -> Void) async {

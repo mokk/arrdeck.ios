@@ -15,14 +15,14 @@ public struct LibraryPage: View {
     @AppStorage("library.books.reading") private var readingFilter = ""
     @AppStorage private var layout: LibraryLayout
     @AppStorage private var unmonitored: UnmonitoredMode
-    let app: ArrApp
+    let app: LibraryApp
     let dashboard: DashboardModel
     let api: any LibraryPageAPI
     let baseURL: URL
     let onSessionLost: @MainActor () -> Void
 
     public init(
-        app: ArrApp, dashboard: DashboardModel,
+        app: LibraryApp, dashboard: DashboardModel,
         api: any LibraryPageAPI,
         baseURL: URL, onSessionLost: @escaping @MainActor () -> Void
     ) {
@@ -177,7 +177,7 @@ public struct LibraryPage: View {
             }
         }
         .sheet(isPresented: $searchingEverything) {
-            GlobalSearchSheet(api: api, apps: ArrApp.allCases.filter { dashboard.has($0.rawValue) }, baseURL: baseURL,
+            GlobalSearchSheet(api: api, apps: LibraryApp.allCases.filter { dashboard.has($0.rawValue) }, baseURL: baseURL,
                               hasPlex: dashboard.has("plex"), onSessionLost: onSessionLost) { searchingEverything = false }
         }
         .onChange(of: model.rows.value?.count) { _, _ in
@@ -185,7 +185,7 @@ public struct LibraryPage: View {
             if let rows = model.rows.value { SpotlightIndexer.index(rows, app: app) }
         }
         .sheet(item: $diagnosing) { row in
-            DiagnoseSheet(app: app, id: row.id, title: row.title, api: api) { diagnosing = nil }
+            DiagnoseSheet(app: app.arr, id: row.id, title: row.title, api: api) { diagnosing = nil }
         }
         .confirmationDialog("Delete \(model.selected.count) titles", isPresented: $confirmingBulkDelete, titleVisibility: .visible) {
             Button("Delete from library and disk", role: .destructive) { Task { await model.bulk(.delete(deleteFiles: true)) } }
@@ -432,7 +432,7 @@ struct CardTap: ViewModifier {
 /// A row of the list and details layouts.
 struct LibraryListRow: View {
     let row: LibraryRow
-    let app: ArrApp
+    let app: LibraryApp
     let baseURL: URL
     let details: Bool
     let progress: Double?
@@ -543,7 +543,7 @@ struct LetterStrip: View {
 
 struct LibraryCard: View {
     let row: LibraryRow
-    let app: ArrApp
+    let app: LibraryApp
     let baseURL: URL
     var posterWidth: CGFloat = PosterColumns.target
     let progress: Double?

@@ -95,6 +95,7 @@ struct TodayView: View {
         switch kind {
         case .movie: "Film"
         case .book: "Book"
+        case .album: "Album"
         case .episode: "Episode"
         }
     }

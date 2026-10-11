@@ -16,7 +16,7 @@ struct DisplaySettingsView: View {
     @AppStorage(DisplayKeys.confirm) private var confirm: ConfirmPolicy = .deletes
     @AppStorage(DisplayKeys.liveActivity) private var liveActivity = true
 
-    var apps: [ArrApp] { [.readarr, .radarr, .sonarr].filter { configured.contains($0.rawValue) } }
+    var apps: [LibraryApp] { [.readarr, .radarr, .sonarr].filter { configured.contains($0.rawValue) } }
     var allTabs: [AppTab] { AppTab.arrange(AppTab.available(configured: configured), order: AppTab.list(tabOrder), hidden: []) }
     var hidden: Set<AppTab> { Set(AppTab.list(hiddenTabs)) }
 
@@ -131,11 +131,11 @@ struct DisplaySettingsView: View {
 }
 
 private struct LibraryDisplaySection: View {
-    let app: ArrApp
+    let app: LibraryApp
     @AppStorage private var layout: LibraryLayout
     @AppStorage private var unmonitored: UnmonitoredMode
 
-    init(app: ArrApp) {
+    init(app: LibraryApp) {
         self.app = app
         _layout = AppStorage(wrappedValue: .posters, DisplayKeys.layout(app))
         _unmonitored = AppStorage(wrappedValue: .show, DisplayKeys.unmonitored(app))
