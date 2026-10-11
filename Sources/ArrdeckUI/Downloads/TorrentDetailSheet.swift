@@ -75,11 +75,13 @@ struct TorrentDetailSheet: View {
                 if torrent.progress >= 1, !model.arrs.isEmpty {
                     Section {
                         ForEach(model.arrs, id: \.self) { app in
-                            Button("Import into \(Services.label(app.rawValue))") {
+                            Button {
                                 importing = ImportJob(
                                     source: .torrent(app: app, client: torrent.torrentClient, torrentID: torrent.id),
                                     title: torrent.name
                                 )
+                            } label: {
+                                Label("Import into \(Services.label(app.rawValue))", systemImage: app.symbol)
                             }
                             .accessibilityIdentifier("import-into-\(app.rawValue)")
                         }

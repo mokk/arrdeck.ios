@@ -49,6 +49,8 @@ struct OpenNamesContractTests {
     @Test func lidarrIsAnArrButNotALibraryTab() {
         #expect(ArrApp(rawValue: "lidarr") == .lidarr)
         #expect(Services.label("lidarr") == "Lidarr")
+        #expect(ArrApp.lidarr.symbol == "music.note")
+        #expect(ArrApp.radarr.symbol == AppTab.movies.symbol && ArrApp.readarr.symbol == AppTab.books.symbol)
         #expect(LibraryApp(.lidarr) == nil)
         #expect(LibraryApp.allCases.map(\.arr) == [.radarr, .sonarr, .readarr])
         #expect(!DisplaySync.keys.contains { $0.hasSuffix(".music") || $0.hasSuffix(".lidarr") },

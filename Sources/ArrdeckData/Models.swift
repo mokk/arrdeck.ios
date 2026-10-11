@@ -36,6 +36,16 @@ extension Components.Schemas.ServiceBlock_IndexerStatsOut_: ServiceBlockShape {}
 /// answer for.
 public enum ArrApp: String, CaseIterable, Sendable, Hashable {
     case radarr, sonarr, readarr, lidarr
+
+    /// The SF Symbol for what the arr keeps, as the tab bar draws it.
+    public var symbol: String {
+        switch self {
+        case .radarr: "film"
+        case .sonarr: "tv"
+        case .readarr: "books.vertical"
+        case .lidarr: "music.note"
+        }
+    }
 }
 
 /// The arrs with a library tab of their own: its layouts, sort keys, bulk
