@@ -3,19 +3,64 @@ import SwiftUI
 
 /// Settings → Cleanup: what could go to free disk space. Tick titles, see the
 /// total, and delete them with their files — always behind a confirmation.
+/// On a server with cleanup rules, a second mode sets up rules that do the
+/// same on their own, after a grace period.
 struct CleanupView: View {
+    enum Mode: String, CaseIterable {
+        case lists, rules
+
+        var label: String {
+            switch self {
+            case .lists: String(localized: "Lists")
+            case .rules: String(localized: "Rules")
+            }
+        }
+    }
+
     @State private var model: CleanupModel
+    /// Nil on a server without cleanup rules: then there is no switch.
+    @State private var rules: CleanupRulesModel?
+    @State private var mode: Mode = .lists
     @State private var confirming = false
     @State private var exclude = true
+    let tags: (any ManageAPI)?
     let baseURL: URL
 
-    init(api: any CleanupAPI, baseURL: URL) {
+    init(api: any CleanupAPI, rules: (any CleanupRulesAPI)? = nil, tags: (any ManageAPI)? = nil, baseURL: URL) {
         _model = State(initialValue: CleanupModel(api: api))
+        _rules = State(initialValue: rules.map { CleanupRulesModel(api: $0) })
+        self.tags = tags
         self.baseURL = baseURL
     }
 
     var body: some View {
+        Group {
+            if mode == .rules, let rules {
+                CleanupRulesView(model: rules, tags: tags, baseURL: baseURL) { modePicker }
+            } else {
+                lists
+            }
+        }
+        .navigationTitle("Cleanup")
+        .pageTitle()
+    }
+
+    @ViewBuilder var modePicker: some View {
+        if rules != nil {
+            Section {
+                Picker("Mode", selection: $mode) {
+                    ForEach(Mode.allCases, id: \.self) { Text($0.label).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
+            }
+        }
+    }
+
+    var lists: some View {
         List {
+            modePicker
             Section {
                 Picker("List", selection: $model.list) {
                     ForEach(CleanupModel.List.allCases, id: \.self) { Text($0.label).tag($0) }
@@ -55,8 +100,6 @@ struct CleanupView: View {
             }
         }
         .dashboardListStyle()
-        .navigationTitle("Cleanup")
-        .pageTitle()
         .safeAreaInset(edge: .bottom) {
             if !model.chosen.isEmpty {
                 Button(role: .destructive) { confirming = true } label: {

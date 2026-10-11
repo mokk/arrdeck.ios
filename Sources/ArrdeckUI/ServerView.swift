@@ -284,6 +284,7 @@ public struct ServerView: View {
             ManageView(
                 model: model, api: api, baseURL: controller.activeURL, shareURL: controller.profile.baseURL,
                 serverName: controller.profile.name, sessionLabel: sessionLabel,
+                backend: controller.profile.lastKnown,
                 onSessionLost: sessionLost, onSwitchServer: onSwitch, onShowConnection: { showingConnection = true }
             )
         }

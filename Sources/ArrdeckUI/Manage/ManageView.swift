@@ -18,14 +18,19 @@ public struct ManageView: View {
     let onSessionLost: @MainActor () -> Void
     let onSwitchServer: () -> Void
     let onShowConnection: () -> Void
+    /// What the backend said it can do, for screens whose endpoints older
+    /// servers lack; nil until it has said.
+    let backend: BackendInfo?
 
     public init(
         model: DashboardModel,
         api: any LibraryPageAPI & IndexerAddAPI & HistoryAPI & DownloadsAPI & CalendarAPI,
         baseURL: URL, shareURL: URL? = nil, serverName: String, sessionLabel: String,
+        backend: BackendInfo? = nil,
         onSessionLost: @escaping @MainActor () -> Void,
         onSwitchServer: @escaping () -> Void, onShowConnection: @escaping () -> Void
     ) {
+        self.backend = backend
         self.model = model
         self.api = api
         self.baseURL = baseURL
@@ -96,7 +101,11 @@ public struct ManageView: View {
                 .accessibilityIdentifier("overview")
                 if model.hasArr, let cleanup = api as? any CleanupAPI {
                     NavigationLink {
-                        CleanupView(api: cleanup, baseURL: baseURL)
+                        CleanupView(
+                            api: cleanup,
+                            rules: backend?.supports(.cleanupRules) == true ? api as? any CleanupRulesAPI : nil,
+                            tags: api, baseURL: baseURL
+                        )
                     } label: { Label("Cleanup", systemImage: "eraser") }
                 }
                 if model.hasArr {
