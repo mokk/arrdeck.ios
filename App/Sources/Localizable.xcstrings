@@ -773,6 +773,26 @@
         }
       }
     },
+    "Any group": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle grupper"
+          }
+        }
+      }
+    },
+    "Any quality": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle kvaliteter"
+          }
+        }
+      }
+    },
     "Any status": {
       "localizations": {
         "da": {
@@ -839,6 +859,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Godkend"
+          }
+        }
+      }
+    },
+    "Approved only": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kun godkendte"
           }
         }
       }
@@ -969,6 +999,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Adfærd"
+          }
+        }
+      }
+    },
+    "Best match": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bedste match"
           }
         }
       }
@@ -1224,6 +1264,16 @@
         }
       }
     },
+    "Clear filters": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ryd filtre"
+          }
+        }
+      }
+    },
     "Clear search": {
       "localizations": {
         "da": {
@@ -1401,6 +1451,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Brugerdefinerede formater: %@"
+          }
+        }
+      }
+    },
+    "Custom-format score": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brugerdefineret formatscore"
+          }
+        }
+      }
+    },
+    "Custom-format score %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brugerdefineret formatscore %@"
           }
         }
       }
@@ -1993,6 +2063,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Filtrér efter navn…"
+          }
+        }
+      }
+    },
+    "Filter by title": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrér efter titel"
           }
         }
       }
@@ -2672,6 +2752,16 @@
         }
       }
     },
+    "Max": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maks"
+          }
+        }
+      }
+    },
     "Metadata profile": {
       "localizations": {
         "da": {
@@ -2688,6 +2778,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Midtsæsonfinale"
+          }
+        }
+      }
+    },
+    "Min": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Min"
           }
         }
       }
@@ -2920,6 +3020,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nye bøger"
+          }
+        }
+      }
+    },
+    "Newest": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nyeste"
           }
         }
       }
@@ -3814,6 +3924,16 @@
         }
       }
     },
+    "Rejected": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afvist"
+          }
+        }
+      }
+    },
     "Relative (3 days ago)": {
       "localizations": {
         "da": {
@@ -4259,6 +4379,16 @@
         }
       }
     },
+    "Season pack": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sæsonpakke"
+          }
+        }
+      }
+    },
     "Section": {
       "localizations": {
         "da": {
@@ -4275,6 +4405,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Se alle →"
+          }
+        }
+      }
+    },
+    "Seeders": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seedere"
           }
         }
       }
@@ -4972,11 +5112,22 @@
       }
     },
     "These choices are kept on this device only. Drag the tabs to reorder them.": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Valgene gemmes kun på denne enhed. Træk fanerne for at ændre rækkefølgen."
+          }
+        }
+      }
+    },
+    "These choices follow you to your other devices on this server, except the language, which is set per device. Drag the tabs to reorder them.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disse valg følger dig til dine andre enheder på denne server, undtagen sproget, som vælges på hver enhed. Træk fanerne for at ændre rækkefølgen."
           }
         }
       }
@@ -5893,6 +6044,7 @@
       }
     },
     "rejected: %@": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
