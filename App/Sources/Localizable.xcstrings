@@ -2257,6 +2257,17 @@
         }
       }
     },
+    "Done by %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Færdig kl. %@"
+          }
+        }
+      }
+    },
     "Down": {
       "localizations": {
         "da": {
@@ -2323,6 +2334,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Downloader"
+          }
+        }
+      }
+    },
+    "Downloading: %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloader: %lld"
           }
         }
       }
@@ -3441,6 +3463,16 @@
         }
       }
     },
+    "Live Activity": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live-aktivitet"
+          }
+        }
+      }
+    },
     "Load more": {
       "localizations": {
         "da": {
@@ -4196,6 +4228,17 @@
         }
       }
     },
+    "Nothing downloading": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intet downloader"
+          }
+        }
+      }
+    },
     "Nothing in the library matches it.": {
       "localizations": {
         "da": {
@@ -4284,6 +4327,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Intet nyt siden du sidst kiggede"
+          }
+        }
+      }
+    },
+    "Nothing out today": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intet udkommer i dag"
           }
         }
       }
@@ -4455,6 +4509,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Åbn arrdeck og vælg en server først."
+          }
+        }
+      }
+    },
+    "Open arrdeck to load": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åbn arrdeck for at indlæse"
+          }
+        }
+      }
+    },
+    "Open arrdeck to update": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åbn arrdeck for at opdatere"
           }
         }
       }
@@ -5211,6 +5287,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Genoptag"
+          }
+        }
+      }
+    },
+    "Room left where the arrs store your library.": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ledig plads der, hvor arr’erne gemmer dit bibliotek."
           }
         }
       }
@@ -6390,6 +6477,17 @@
         }
       }
     },
+    "The episodes, films and books that come out today.": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De afsnit, film og bøger, der udkommer i dag."
+          }
+        }
+      }
+    },
     "The host helper could not be reached.": {
       "localizations": {
         "da": {
@@ -6913,6 +7011,17 @@
         }
       }
     },
+    "Updated %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opdateret %@"
+          }
+        }
+      }
+    },
     "Upgrades": {
       "localizations": {
         "da": {
@@ -7084,6 +7193,17 @@
         }
       }
     },
+    "What the torrent clients are downloading, as of arrdeck's last refresh.": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvad torrentklienterne downloader, ifølge arrdecks seneste opdatering."
+          }
+        }
+      }
+    },
     "What's downloading": {
       "extractionState": "manual",
       "localizations": {
@@ -7122,6 +7242,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hvor arrdeck finder hver tjeneste. Ændringer her påvirker alle skærme."
+          }
+        }
+      }
+    },
+    "While arrdeck is open and something is downloading, its progress shows on the Lock Screen and in the Dynamic Island. Set on this device only.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mens arrdeck er åben, og noget downloader, vises fremskridtet på låseskærmen og i Dynamic Island. Gælder kun denne enhed."
           }
         }
       }
@@ -7595,6 +7725,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "ikke i biblioteket"
+          }
+        }
+      }
+    },
+    "of %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "af %@"
           }
         }
       }
