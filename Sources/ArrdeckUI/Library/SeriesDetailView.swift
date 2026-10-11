@@ -34,7 +34,8 @@ public struct SeriesDetailView: View {
             case let .loaded(series):
                 BackdropSection(path: series.fanart, baseURL: baseURL)
                 Section {
-                    DetailHero(poster: series.poster, baseURL: baseURL, overview: series.overview, links: model.links) {
+                    DetailHero(poster: series.poster, baseURL: baseURL, overview: series.overview, links: model.links,
+                               ratings: series.ratings ?? []) {
                         StateBadge(state: series.monitored == true ? "ok" : "unmonitored")
                         if let status = series.status { Text(status.capitalized) }
                         if let network = series.network { Text("· \(network)") }

@@ -26,7 +26,8 @@ public struct MovieDetailView: View {
             case let .loaded(movie):
                 BackdropSection(path: movie.fanart, baseURL: baseURL)
                 Section {
-                    DetailHero(poster: movie.poster, baseURL: baseURL, overview: movie.overview, links: model.links) {
+                    DetailHero(poster: movie.poster, baseURL: baseURL, overview: movie.overview, links: model.links,
+                               ratings: movie.ratings ?? []) {
                         StateBadge(state: movie.has_file == true ? "downloaded" : (movie.monitored == true ? "wanted" : "unmonitored"))
                         if let status = movie.status { Text(status.capitalized) }
                         if let runtime = movie.runtime, runtime > 0 { Text("· \(runtime) min") }

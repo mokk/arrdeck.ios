@@ -9,6 +9,8 @@ struct DetailHero<Badges: View>: View {
     let baseURL: URL
     let overview: String?
     let links: [ExternalLink]
+    /// Every source's score, as chips under the metadata line.
+    var ratings: [Rating] = []
     @ViewBuilder let badges: () -> Badges
 
     var body: some View {
@@ -26,6 +28,7 @@ struct DetailHero<Badges: View>: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
+            if !ratings.isEmpty { RatingChips(ratings: ratings) }
             if !links.isEmpty {
                 HStack(spacing: 6) {
                     ForEach(links, id: \.self) { link in
@@ -41,6 +44,27 @@ struct DetailHero<Badges: View>: View {
             }
         }
         .padding(.vertical, 4)
+    }
+}
+
+/// "IMDb 7.1  TMDB 6.4  RT 82%": one chip per source the title has a score from.
+/// Wraps rather than scrolls, so every score is in view at once.
+struct RatingChips: View {
+    let ratings: [Rating]
+
+    var body: some View {
+        FlowLayout(spacing: 6) {
+            ForEach(Array(ratings.enumerated()), id: \.offset) { _, rating in
+                let chip = Format.rating(rating)
+                Text(verbatim: chip.display)
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(.quaternary, in: Capsule())
+                    .accessibilityLabel(Text(verbatim: "\(chip.name) \(chip.text)"))
+            }
+        }
+        .accessibilityElement(children: .contain)
     }
 }
 
@@ -219,5 +243,43 @@ struct WatchedDot: View {
                 .frame(width: 8, height: 8)
                 .accessibilityLabel(watched.watched ? "Watched" : "Unwatched")
         }
+    }
+}
+
+/// Lays its children left to right and starts a new line when one no longer
+/// fits — what a row of chips does when the screen is narrower than the row.
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 6
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        arrange(width: proposal.width ?? .infinity, subviews: subviews).size
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let placed = arrange(width: bounds.width, subviews: subviews)
+        for (subview, origin) in zip(subviews, placed.origins) {
+            subview.place(at: CGPoint(x: bounds.minX + origin.x, y: bounds.minY + origin.y), proposal: .unspecified)
+        }
+    }
+
+    private func arrange(width: CGFloat, subviews: Subviews) -> (size: CGSize, origins: [CGPoint]) {
+        var origins: [CGPoint] = []
+        var x: CGFloat = 0
+        var y: CGFloat = 0
+        var rowHeight: CGFloat = 0
+        var widest: CGFloat = 0
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if x > 0, x + size.width > width {
+                x = 0
+                y += rowHeight + spacing
+                rowHeight = 0
+            }
+            origins.append(CGPoint(x: x, y: y))
+            x += size.width + spacing
+            widest = max(widest, x - spacing)
+            rowHeight = max(rowHeight, size.height)
+        }
+        return (CGSize(width: widest, height: y + rowHeight), origins)
     }
 }
