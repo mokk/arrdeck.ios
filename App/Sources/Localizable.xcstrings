@@ -232,6 +232,16 @@
         }
       }
     },
+    "%lld albums": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld album"
+          }
+        }
+      }
+    },
     "%lld books": {
       "localizations": {
         "da": {
@@ -562,6 +572,16 @@
         }
       }
     },
+    "%lld tracks": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld numre"
+          }
+        }
+      }
+    },
     "%lld/%lld enabled": {
       "localizations": {
         "da": {
@@ -592,6 +612,16 @@
         }
       }
     },
+    "1 album": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 album"
+          }
+        }
+      }
+    },
     "1 task overdue": {
       "localizations": {
         "da": {
@@ -608,6 +638,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "1 titel · %@"
+          }
+        }
+      }
+    },
+    "1 track": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 nummer"
           }
         }
       }
@@ -958,6 +998,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Efter %lld min uden svar"
+          }
+        }
+      }
+    },
+    "Album": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Album"
           }
         }
       }
@@ -1589,6 +1640,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vælg en serie"
+          }
+        }
+      }
+    },
+    "Choose an album": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg et album"
+          }
+        }
+      }
+    },
+    "Choose an artist": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg en kunstner"
           }
         }
       }
@@ -2595,6 +2666,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Film, serier, bøger, forfattere"
+          }
+        }
+      }
+    },
+    "Filter albums": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrér album"
+          }
+        }
+      }
+    },
+    "Filter artists": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrér kunstnere"
           }
         }
       }
@@ -3801,6 +3892,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Film"
+          }
+        }
+      }
+    },
+    "Music": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Musik"
           }
         }
       }
@@ -6277,12 +6378,12 @@
         }
       }
     },
-    "Subscribe to what Radarr, Sonarr and Readarr have coming in Calendar, Google Calendar or Outlook — one calendar for all of them.": {
+    "Subscribe to what Radarr, Sonarr, Readarr and Lidarr have coming in Calendar, Google Calendar or Outlook — one calendar for all of them.": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Abonnér på det, Radarr, Sonarr og Readarr har på vej, i Kalender, Google Kalender eller Outlook — én kalender for dem alle."
+            "value": "Abonnér på det, Radarr, Sonarr, Readarr og Lidarr har på vej, i Kalender, Google Kalender eller Outlook — én kalender for dem alle."
           }
         }
       }
@@ -6427,6 +6528,16 @@
         }
       }
     },
+    "The album you choose goes to every file that has none yet, and Lidarr works out which track each one is.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Det album, du vælger, gælder for alle filer, der ikke har et endnu, og Lidarr finder selv ud af, hvilket nummer hver fil er."
+          }
+        }
+      }
+    },
     "The arr found nothing to import here.": {
       "localizations": {
         "da": {
@@ -6437,12 +6548,12 @@
         }
       }
     },
-    "The calendar needs Radarr, Sonarr or Readarr.": {
+    "The calendar needs Radarr, Sonarr, Readarr or Lidarr.": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kalenderen kræver Radarr, Sonarr eller Readarr."
+            "value": "Kalenderen kræver Radarr, Sonarr, Readarr eller Lidarr."
           }
         }
       }
