@@ -19,12 +19,16 @@ public enum APIError: Error, Equatable, Sendable, CustomStringConvertible {
     case unauthorized
     case unexpectedStatus(Int)
     case transport(String)
+    /// arrdeck answered, and said in words why not: "the torrent has not
+    /// finished downloading". Shown as is; a status code would hide it.
+    case refused(String)
 
     public var description: String {
         switch self {
         case .unauthorized: "signed out"
         case let .unexpectedStatus(code): "HTTP \(code)"
         case let .transport(reason): reason
+        case let .refused(reason): reason
         }
     }
 

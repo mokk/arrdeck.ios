@@ -28,6 +28,9 @@ public final class DownloadsModel {
     public private(set) var limit = DownloadsModel.page
     public private(set) var torrents: Loadable<[TorrentClient: Block<TorrentGroup>]> = .loading
     public private(set) var queue: Loadable<[ArrApp: Block<[QueueItem]>]> = .loading
+    /// Stuck downloads the arrs will not import on their own; nil until the
+    /// server answers, and always nil on a server without the endpoint.
+    public private(set) var attention: Attention?
     public private(set) var throttled: [TorrentClient: Bool] = [:]
     public private(set) var connectionError: String?
     public private(set) var refreshError: String?
@@ -42,6 +45,9 @@ public final class DownloadsModel {
 
     public let clients: [TorrentClient]
     public let hasArr: Bool
+    /// The arrs configured on this server: what a finished torrent can be
+    /// imported into.
+    public let arrs: [ArrApp]
 
     private let api: any DownloadsAPI
     private let cadence: Cadence
@@ -54,12 +60,14 @@ public final class DownloadsModel {
         api: any DownloadsAPI,
         clients: [TorrentClient],
         hasArr: Bool,
+        arrs: [ArrApp] = [],
         cadence: Cadence = .standard,
         onSessionLost: @escaping @MainActor () -> Void
     ) {
         self.api = api
         self.clients = clients
         self.hasArr = hasArr
+        self.arrs = arrs
         self.cadence = cadence
         self.onSessionLost = onSessionLost
         enabledClients = Set(clients)
@@ -105,6 +113,11 @@ public final class DownloadsModel {
     }
 
     public func isPending(_ key: String) -> Bool { pending.contains(key) }
+
+    public var attentionItems: [QueueItem] { attention?.items ?? [] }
+
+    /// The server's count, which can include items it did not list.
+    public var attentionCount: Int { attention?.count ?? attentionItems.count }
 
     // MARK: Lifecycle
 
@@ -181,13 +194,31 @@ public final class DownloadsModel {
         }
     }
 
-    private func fetchQueue() async {
+    func fetchQueue() async {
         do {
             queue = .loaded(try await api.queue())
             connectionError = nil
         } catch {
             handle(error, keeping: queue.value != nil) { queue = .failed($0) }
         }
+        await fetchAttention()
+    }
+
+    /// Alongside the queue, at its pace. Any other failure keeps the last
+    /// answer quietly: the queue's own fetch already reports an unreachable
+    /// server, and an older one without the endpoint has nothing to say.
+    private func fetchAttention() async {
+        guard let importer = api as? any ManualImportAPI else { return }
+        do {
+            attention = try await importer.attention()
+        } catch APIError.unauthorized {
+            handle(APIError.unauthorized, keeping: true) { _ in }
+        } catch {}
+    }
+
+    /// After an import, so the fixed item leaves Needs attention promptly.
+    public func refreshQueue() async {
+        await fetchQueue()
     }
 
     private func fetchThrottle() async {
