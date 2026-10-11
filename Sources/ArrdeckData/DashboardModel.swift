@@ -233,14 +233,14 @@ public final class DashboardModel {
     }
 
     public func forceImport(_ item: QueueItem) async {
-        guard let app = ArrApp(rawValue: item.app.rawValue) else { return }
-        await perform("queue-\(item.app.rawValue)-\(item.id)") { try await api.forceImport(app: app, id: item.id) }
+        guard let app = item.arr else { return }
+        await perform("queue-\(item.app)-\(item.id)") { try await api.forceImport(app: app, id: item.id) }
         await step([.queue])
     }
 
     public func blocklistRetry(_ item: QueueItem) async {
-        guard let app = ArrApp(rawValue: item.app.rawValue) else { return }
-        await perform("queue-\(item.app.rawValue)-\(item.id)") { try await api.blocklistRetry(app: app, id: item.id) }
+        guard let app = item.arr else { return }
+        await perform("queue-\(item.app)-\(item.id)") { try await api.blocklistRetry(app: app, id: item.id) }
         await step([.queue])
     }
 

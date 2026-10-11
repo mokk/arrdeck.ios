@@ -17,7 +17,7 @@ struct ServicesView: View {
                 Section { LoadingRow() }
             }
             ForEach(model.forms) { form in
-                ServiceFormSection(form: form, status: model.status.first { $0.service.rawValue == form.name }, model: model)
+                ServiceFormSection(form: form, status: model.status.first { $0.service == form.name }, model: model)
             }
         }
         .dashboardListStyle()

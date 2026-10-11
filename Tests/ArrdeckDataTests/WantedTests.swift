@@ -33,8 +33,8 @@ import Testing
     }
 
     @Test func wantedRowsLinkToTheirTitle() {
-        #expect(WantedItem(app: .sonarr, id: 4404, library_id: 63, title: "x").ref == .series(63))
-        #expect(WantedItem(app: .radarr, id: 180, library_id: 180, title: "x").ref == .movie(180))
+        #expect(WantedItem(app: "sonarr", id: 4404, library_id: 63, title: "x").ref == .series(63))
+        #expect(WantedItem(app: "radarr", id: 180, library_id: 180, title: "x").ref == .movie(180))
     }
 }
 
@@ -66,8 +66,8 @@ actor FakeWantedAPI: WantedAPI {
 
 @MainActor
 @Suite struct WantedModelTests {
-    func item(_ id: Int, app: Components.Schemas.WantedItemOut.appPayload = .sonarr) -> WantedItem {
-        .init(app: app, id: id, library_id: 1, title: "t\(id)")
+    func item(_ id: Int, app: ArrApp = .sonarr) -> WantedItem {
+        .init(app: app.rawValue, id: id, library_id: 1, title: "t\(id)")
     }
 
     @Test func pagesAppendAndFiltersReset() async throws {

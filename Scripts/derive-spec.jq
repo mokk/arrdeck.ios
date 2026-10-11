@@ -26,4 +26,19 @@ def strip_null:
     | if (.anyOf | length) == 1 then (.anyOf[0] + del(.anyOf)) else . end
   else . end;
 
-walk(relax_required) | walk(strip_null)
+# 3. The names of services and arrs in answers are open: a server that knows
+#    a service this build does not (Lidarr was the first) sends a value
+#    outside the enum, and a generated Swift enum fails the whole list over
+#    it — every queue item, every status row. So each schema property called
+#    `app` or `service` loses its enum and stays a plain string; ArrdeckData
+#    reads it into ArrApp or Services.known and drops the rows it cannot name.
+#    No request body (`*In`) carries such an enum, so only answers change, and
+#    path parameters such as `{app}` were never enums.
+def open_names:
+  if type == "object" and has("properties") then
+    .properties |= with_entries(
+      if (.key == "app" or .key == "service") and (.value | type == "object" and has("enum"))
+      then .value |= del(.enum) else . end)
+  else . end;
+
+walk(relax_required) | walk(strip_null) | .components.schemas |= map_values(open_names)

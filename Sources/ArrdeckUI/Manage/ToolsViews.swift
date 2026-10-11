@@ -15,7 +15,7 @@ struct ExclusionsView: View {
             case let .loaded(all):
                 if all.isEmpty { EmptyNote("Nothing is excluded.") }
                 ForEach(["radarr", "sonarr", "readarr"], id: \.self) { app in
-                    let mine = all.filter { $0.app.rawValue == app }
+                    let mine = all.filter { $0.app == app }
                     if !mine.isEmpty {
                         Section(Services.label(app)) {
                             ForEach(mine, id: \.id) { exclusion in
@@ -50,7 +50,7 @@ struct ExclusionsView: View {
     }
 
     func remove(_ exclusion: Exclusion) async {
-        try? await api.removeExclusion(app: exclusion.app.rawValue, id: exclusion.id)
+        try? await api.removeExclusion(app: exclusion.app, id: exclusion.id)
         await load()
     }
 }

@@ -5,10 +5,10 @@ import Testing
 
 @Suite struct LibraryTests {
     @Test func refsComeFromTheRightIds() {
-        #expect(RecentItem(app: .sonarr, date: "", library_id: 63, title: "x").ref == .series(63))
-        #expect(RecentItem(app: .radarr, date: "", library_id: nil, title: "x").ref == nil)
-        #expect(HistoryItem(app: .radarr, date: "", movie_id: 180, title: "x").ref == .movie(180))
-        #expect(HistoryItem(app: .sonarr, date: "", series_id: 7, title: "x").ref == .series(7))
+        #expect(RecentItem(app: "sonarr", date: "", library_id: 63, title: "x").ref == .series(63))
+        #expect(RecentItem(app: "radarr", date: "", library_id: nil, title: "x").ref == nil)
+        #expect(HistoryItem(app: "radarr", date: "", movie_id: 180, title: "x").ref == .movie(180))
+        #expect(HistoryItem(app: "sonarr", date: "", series_id: 7, title: "x").ref == .series(7))
         #expect(MediaRef.movie(1).app == .radarr)
         #expect(MediaRef.series(2).id == 2)
     }

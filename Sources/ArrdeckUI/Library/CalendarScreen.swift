@@ -205,7 +205,7 @@ private struct EntryRow: View {
     var item: CalendarItem { entry.item }
 
     var subtitle: String? {
-        guard item.app == .sonarr else { return item.extra }
+        guard item.arr == .sonarr else { return item.extra }
         var parts = [entry.code].compactMap { $0 }
         if entry.count > 1 {
             parts.append(String(localized: "\(entry.count) episodes"))
@@ -216,7 +216,7 @@ private struct EntryRow: View {
     }
 
     var time: String? {
-        guard item.app == .sonarr, let raw = item.date, let date = Format.parseDate(raw) else { return nil }
+        guard item.arr == .sonarr, let raw = item.date, let date = Format.parseDate(raw) else { return nil }
         return date.formatted(date: .omitted, time: .shortened)
     }
 
@@ -224,7 +224,7 @@ private struct EntryRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Rectangle().fill(CalendarColors.stripe(ArrApp(rawValue: item.app.rawValue) ?? .sonarr)).frame(width: 4)
+            Rectangle().fill(CalendarColors.stripe(item.arr ?? .sonarr)).frame(width: 4)
             Poster(path: item.poster, baseURL: baseURL, width: 34, cornerRadius: 5, title: item.title)
                 .padding(.vertical, 8)
             VStack(alignment: .leading, spacing: 2) {

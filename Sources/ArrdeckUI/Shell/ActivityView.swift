@@ -131,7 +131,7 @@ struct DownloadingList: View {
                         ForEach(items, id: \.id) { item in
                             QueueRow(
                                 item: item,
-                                pending: model.isPending("queue-\(item.app.rawValue)-\(item.id)"),
+                                pending: model.isPending("queue-\(item.app)-\(item.id)"),
                                 forceImport: { Task { await model.forceImport(item) } },
                                 retry: { Task { await model.blocklistRetry(item) } },
                                 remove: { Task { await model.removeFromQueue(item) } },
@@ -216,7 +216,7 @@ struct DownloadingList: View {
 extension ImportJob {
     /// A stuck queue item; its title is the release, as the arr names it.
     init?(_ item: QueueItem) {
-        guard let app = ArrApp(rawValue: item.app.rawValue) else { return nil }
+        guard let app = item.arr else { return nil }
         self.init(source: .queue(app: app, itemID: item.id), title: item.title)
     }
 }
@@ -234,7 +234,7 @@ struct NeedsAttentionSection: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text(item.title).font(.subheadline.weight(.medium)).lineLimit(2)
                         HStack(spacing: 6) {
-                            StateBadge(state: item.app.rawValue)
+                            StateBadge(state: item.app)
                             if let state = item.tracked_state { StateBadge(state: state) }
                         }
                         ForEach(item.attentionReasons, id: \.self) { reason in
@@ -271,5 +271,5 @@ struct NeedsAttentionSection: View {
 
 extension QueueItem {
     /// Queue ids are per arr; Radarr's 12 and Sonarr's 12 are different rows.
-    var attentionKey: String { "\(app.rawValue)-\(id)" }
+    var attentionKey: String { "\(app)-\(id)" }
 }

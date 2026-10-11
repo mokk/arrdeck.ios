@@ -6,7 +6,7 @@ import Testing
 actor FakeHistoryAPI: HistoryAPI {
     var pages: [Int: HistoryPage]
     var blocked: [BlocklistItem] = [
-        .init(app: .radarr, id: 1, title: "A"), .init(app: .radarr, id: 2, title: "B"),
+        .init(app: "radarr", id: 1, title: "A"), .init(app: "radarr", id: 2, title: "B"),
     ]
     private(set) var calls: [String] = []
     init(pages: [Int: HistoryPage]) { self.pages = pages }
@@ -24,7 +24,7 @@ actor FakeHistoryAPI: HistoryAPI {
     }
     func clearBlocklist(_ app: ArrApp) async throws {
         log("clear-\(app.rawValue)")
-        blocked.removeAll { $0.app.rawValue == app.rawValue }
+        blocked.removeAll { $0.arr == app }
     }
     func statsHistory(days: Int) async throws -> [StatsSample] {
         log("stats-\(days)")
@@ -37,8 +37,8 @@ actor FakeHistoryAPI: HistoryAPI {
 
 @MainActor
 @Suite struct HistoryStatsTests {
-    func item(_ app: Components.Schemas.HistoryItemOut.appPayload, _ events: [String], date: String = "2026-09-20T00:00:00Z") -> HistoryItem {
-        .init(app: app, date: date, events: events.map { .init(date: date, _type: $0) }, title: "t")
+    func item(_ app: ArrApp, _ events: [String], date: String = "2026-09-20T00:00:00Z") -> HistoryItem {
+        .init(app: app.rawValue, date: date, events: events.map { .init(date: date, _type: $0) }, title: "t")
     }
 
     @Test func historyPagesAppendAndFilterLocally() async {

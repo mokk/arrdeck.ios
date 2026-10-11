@@ -65,9 +65,9 @@ import Testing
         #expect(ServiceField.fields(for: "transmission") == [.url])
         #expect(ServiceField.fields(for: "radarr") == [.url, .apiKey])
         #expect(ServiceField.fields(for: "trakt") == [.apiKey])
-        #expect(ServiceStatus(ok: true, retries: 2, service: .radarr).isFlaky)
-        #expect(!ServiceStatus(ok: false, retries: 2, service: .radarr).isFlaky)
-        #expect(!ServiceStatus(ok: true, retries: 0, service: .radarr).isFlaky)
+        #expect(ServiceStatus(ok: true, retries: 2, service: "radarr").isFlaky)
+        #expect(!ServiceStatus(ok: false, retries: 2, service: "radarr").isFlaky)
+        #expect(!ServiceStatus(ok: true, retries: 0, service: "radarr").isFlaky)
     }
 }
 
@@ -95,7 +95,7 @@ actor FakeManageAPI: ManageAPI {
         indexerList = indexerList.map { var i = $0; if i.id == id { i.enable = enable }; return i }
     }
     func testIndexer(_ id: Int) async throws { log("test-\(id)"); if testFails { throw APIError.unexpectedStatus(502) } }
-    func status() async throws -> [ServiceStatus] { log("status"); return [.init(ok: true, service: .radarr, version: "6")] }
+    func status() async throws -> [ServiceStatus] { log("status"); return [.init(ok: true, service: "radarr", version: "6")] }
     func tasks() async throws -> Block<[ScheduledTask]> {
         log("tasks")
         return .healthy([

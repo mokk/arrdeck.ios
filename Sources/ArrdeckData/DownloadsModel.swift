@@ -308,27 +308,27 @@ public final class DownloadsModel {
     }
 
     public func forceImport(_ item: QueueItem) async {
-        guard let app = ArrApp(rawValue: item.app.rawValue) else { return }
-        await perform("queue-\(item.app.rawValue)-\(item.id)") { try await api.forceImport(app: app, id: item.id) }
+        guard let app = item.arr else { return }
+        await perform("queue-\(item.app)-\(item.id)") { try await api.forceImport(app: app, id: item.id) }
         await fetchQueue()
     }
 
     public func blocklistRetry(_ item: QueueItem) async {
-        guard let app = ArrApp(rawValue: item.app.rawValue) else { return }
-        await perform("queue-\(item.app.rawValue)-\(item.id)") { try await api.blocklistRetry(app: app, id: item.id) }
+        guard let app = item.arr else { return }
+        await perform("queue-\(item.app)-\(item.id)") { try await api.blocklistRetry(app: app, id: item.id) }
         await fetchQueue()
     }
 
     /// Skip a delay profile's wait for this release.
     public func grabNow(_ item: QueueItem) async {
-        guard let app = ArrApp(rawValue: item.app.rawValue), let grabber = api as? any QueueGrabAPI else { return }
-        await perform("queue-\(item.app.rawValue)-\(item.id)") { try await grabber.grabNow(app: app, id: item.id) }
+        guard let app = item.arr, let grabber = api as? any QueueGrabAPI else { return }
+        await perform("queue-\(item.app)-\(item.id)") { try await grabber.grabNow(app: app, id: item.id) }
         await fetchQueue()
     }
 
     public func removeFromQueue(_ item: QueueItem) async {
-        guard let app = ArrApp(rawValue: item.app.rawValue) else { return }
-        await perform("queue-\(item.app.rawValue)-\(item.id)") { try await api.removeFromQueue(app: app, id: item.id) }
+        guard let app = item.arr else { return }
+        await perform("queue-\(item.app)-\(item.id)") { try await api.removeFromQueue(app: app, id: item.id) }
         await fetchQueue()
     }
 

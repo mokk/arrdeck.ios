@@ -91,7 +91,7 @@ public struct WantedView: View {
         }
         .sheet(item: $searching) { item in
             ReleasesSheet(
-                target: item.app == .radarr ? .movie(item.id) : item.app == .readarr ? .book(item.id) : .episode(series: item.library_id, episode: item.id),
+                target: item.arr == .radarr ? .movie(item.id) : item.arr == .readarr ? .book(item.id) : .episode(series: item.library_id, episode: item.id),
                 title: [item.title, item.subtitle].compactMap { $0 }.joined(separator: " "),
                 api: api, onSessionLost: onSessionLost
             ) { searching = nil }

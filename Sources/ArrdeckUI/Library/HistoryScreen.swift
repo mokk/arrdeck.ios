@@ -102,7 +102,7 @@ public struct HistoryScreen: View {
                                 Text(item.title).font(.subheadline.weight(.medium)).lineLimit(1)
                             }
                             HStack(spacing: 4) {
-                                StateBadge(state: item.app.rawValue)
+                                StateBadge(state: item.app)
                                 ForEach(item.events ?? [], id: \._type) { StateBadge(state: $0._type) }
                                 if let quality = item.quality { Text(quality).font(.caption).foregroundStyle(.secondary) }
                             }
@@ -145,7 +145,7 @@ public struct HistoryScreen: View {
                                 Text(item.title ?? item.source_title ?? "").font(.subheadline.weight(.medium)).lineLimit(1)
                                 if let source = item.source_title { Text(source).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
                                 HStack(spacing: 6) {
-                                    StateBadge(state: item.app.rawValue)
+                                    StateBadge(state: item.app)
                                     Text(([item.quality, item.indexer].compactMap { $0 } + [item.date.map { Format.dayTime($0) }].compactMap { $0 })
                                         .joined(separator: " · "))
                                         .font(.caption).foregroundStyle(.secondary).lineLimit(1)

@@ -61,7 +61,7 @@ struct SystemView: View {
                         Circle()
                             .fill(!status.ok ? Color.danger : (status.isFlaky ? Color.warning : Color.success))
                             .frame(width: 8, height: 8)
-                        Text(Services.label(status.service.rawValue)).font(.subheadline.weight(.medium))
+                        Text(Services.label(status.service)).font(.subheadline.weight(.medium))
                         Spacer()
                         // An available update is worth knowing but is not a fault:
                         // flaky wins the dot, since a service that keeps dropping
@@ -78,13 +78,13 @@ struct SystemView: View {
                                 Text("↑ \(update)").font(.caption).foregroundStyle(Color.warning)
                             }
                         }
-                        if let project = control?.project(for: status.service.rawValue) {
+                        if let project = control?.project(for: status.service) {
                             restartButton(project)
                         }
                     }
                 }
                 if let control {
-                    ForEach(control.unmatched(services: Set(list.map(\.service.rawValue))), id: \.name) { project in
+                    ForEach(control.unmatched(services: Set(list.map(\.service))), id: \.name) { project in
                         HStack(spacing: 8) {
                             Circle()
                                 .fill(project.running == true ? Color.success : Color.danger)

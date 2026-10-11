@@ -86,6 +86,82 @@ struct StubTransport: ClientTransport {
         #expect(recent[1].library_id == nil)
     }
 
+    // A newer server names services and arrs this build has never heard of
+    // ("mylar" below). Each such row is dropped; everything else still shows.
+
+    @Test func anUnknownServiceIsSkippedInStatusAndServices() async throws {
+        let api = api([
+            "/api/v1/status": .init(body: """
+            [{"service": "radarr", "ok": true, "version": "6.0"},
+             {"service": "mylar", "ok": true, "version": "0.8"},
+             {"service": "plex", "ok": false, "error": "refused"}]
+            """),
+            "/api/v1/services": .init(body: """
+            [{"service": "radarr", "configured": true},
+             {"service": "mylar", "configured": true, "web_url": "http://mylar.local"},
+             {"service": "sonarr", "configured": false}]
+            """),
+        ])
+        #expect(try await api.status().map(\.service) == ["radarr", "plex"])
+        #expect(try await api.services().map(\.service) == ["radarr", "sonarr"])
+    }
+
+    @Test func aRowFromAnUnknownArrIsDroppedFromItsList() async throws {
+        let api = api([
+            "/api/v1/queue": .init(body: """
+            {"radarr": {"ok": true, "data": [
+               {"app": "radarr", "id": 1, "title": "A Film", "status": "downloading", "size": 1, "size_left": 1},
+               {"app": "mylar", "id": 2, "title": "A Comic", "status": "downloading", "size": 1, "size_left": 1}]},
+             "sonarr": {"ok": false, "data": [
+               {"app": "mylar", "id": 3, "title": "Another", "status": "queued", "size": 1, "size_left": 1}],
+               "error": "sonarr: 502", "stale_age_seconds": 30},
+             "mylar": {"ok": true, "data": []}}
+            """),
+            "/api/v1/queue/attention": .init(body: """
+            {"count": 2, "unavailable": [], "items": [
+               {"app": "mylar", "id": 9, "title": "Stuck comic", "status": "completed", "size": 1, "size_left": 0},
+               {"app": "sonarr", "id": 7, "title": "Show.S01", "status": "completed", "size": 1, "size_left": 0}]}
+            """),
+            "/api/v1/calendar": .init(body: """
+            {"radarr": {"ok": true, "data": [
+               {"app": "mylar", "title": "Issue 4", "date": "2026-10-12"},
+               {"app": "radarr", "title": "A Film", "date": "2026-10-12", "item_id": 3}]},
+             "sonarr": {"ok": true, "data": []}}
+            """),
+            "/api/v1/history": .init(body: """
+            {"radarr": {"ok": true, "data": [
+               {"app": "radarr", "title": "A Film", "date": "2026-10-01T00:00:00Z", "events": []},
+               {"app": "mylar", "title": "A Comic", "date": "2026-10-01T00:00:00Z", "events": []}]},
+             "sonarr": {"ok": true, "data": []}}
+            """),
+            "/api/v1/history/all": .init(body: """
+            {"has_more": false, "items": [
+               {"app": "mylar", "title": "A Comic", "date": "2026-10-01T00:00:00Z", "events": []},
+               {"app": "sonarr", "title": "A Show", "date": "2026-10-01T00:00:00Z", "events": []}]}
+            """),
+            "/api/v1/wanted/radarr": .init(body: """
+            {"total": 2, "has_more": false, "items": [
+               {"app": "mylar", "id": 1, "library_id": 1, "title": "A Comic"},
+               {"app": "radarr", "id": 2, "library_id": 2, "title": "A Film"}]}
+            """),
+            "/api/v1/dashboard/recent": .init(body: """
+            [{"app": "mylar", "title": "A Comic", "date": "2026-10-01T00:00:00Z"},
+             {"app": "radarr", "title": "A Film", "date": "2026-10-01T00:00:00Z"}]
+            """),
+        ])
+        let queue = try await api.queue()
+        #expect(queue[.radarr]?.value?.map(\.title) == ["A Film"])
+        #expect(queue[.sonarr] == .stale([], age: 30), "a stale slice stays stale, minus the row")
+        let attention = try await api.attention()
+        #expect(attention.items?.map(\.title) == ["Show.S01"])
+        #expect(attention.count == 1)
+        #expect(try await api.calendar()[.radarr]?.value?.map(\.title) == ["A Film"])
+        #expect(try await api.history()[.radarr]?.value?.map(\.title) == ["A Film"])
+        #expect(try await api.historyPage(1).items.map(\.title) == ["A Show"])
+        #expect(try await api.wanted(.radarr, kind: .missing, page: 1).items.map(\.title) == ["A Film"])
+        #expect(try await api.recent().map(\.title) == ["A Film"])
+    }
+
     @Test func unauthorizedIsItsOwnError() async {
         let api = api(["/api/v1/services": .init(status: 401, body: #"{"detail": "Not authenticated"}"#)])
         await #expect(throws: APIError.unauthorized) { try await api.services() }

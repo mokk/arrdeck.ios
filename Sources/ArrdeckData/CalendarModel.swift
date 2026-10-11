@@ -27,7 +27,7 @@ extension LiveAPI: CalendarAPI {
                 let body = try ok.body.json
                 var out: [ArrApp: Block<[CalendarItem]>] = [.radarr: Block(body.radarr), .sonarr: Block(body.sonarr)]
                 if let readarr = body.readarr { out[.readarr] = Block(readarr) }
-                return out
+                return out.mapValues { $0.fromKnownArrs() }
             case .unprocessableContent: throw APIError.unexpectedStatus(422)
             case let .undocumented(code, _): throw APIError.status(code)
             }
@@ -39,10 +39,11 @@ extension CalendarItem {
     /// The library title an entry opens: the film, the episode's show, the book.
     public var ref: MediaRef? {
         guard let item_id else { return nil }
-        return switch app {
+        return switch arr {
         case .radarr: .movie(item_id)
         case .sonarr: .series(item_id)
         case .readarr: .book(item_id)
+        case nil: nil
         }
     }
 
@@ -51,7 +52,7 @@ extension CalendarItem {
     /// date and must not move.
     public func day(calendar: Calendar = .current) -> String? {
         guard let date else { return nil }
-        if app == .sonarr, let parsed = Format.parseDate(date) { return CalendarDay.iso(parsed, calendar: calendar) }
+        if arr == .sonarr, let parsed = Format.parseDate(date) { return CalendarDay.iso(parsed, calendar: calendar) }
         return String(date.prefix(10))
     }
 }
@@ -63,11 +64,11 @@ public struct CalendarEntry: Identifiable, Sendable {
     public var count = 1
     /// S01E01 or S01E01–E08
     public var code: String?
-    public var id: String { "\(item.app.rawValue)-\(item.item_id ?? -1)-\(item.date ?? "")-\(item.title)" }
+    public var id: String { "\(item.app)-\(item.item_id ?? -1)-\(item.date ?? "")-\(item.title)" }
 
     /// The episode title after the code, when there is exactly one episode.
     public var episodeTitle: String? {
-        guard item.app == .sonarr, count == 1, let extra = item.extra else { return nil }
+        guard item.arr == .sonarr, count == 1, let extra = item.extra else { return nil }
         let rest = extra.split(separator: " ", maxSplits: 1)
         return rest.count > 1 ? String(rest[1]) : nil
     }
@@ -75,8 +76,8 @@ public struct CalendarEntry: Identifiable, Sendable {
     public static func fold(_ items: [CalendarItem]) -> [CalendarEntry] {
         var out: [CalendarEntry] = []
         for item in items {
-            let code = item.app == .sonarr ? item.extra.map { String($0.split(separator: " ").first ?? "") } : nil
-            if item.app == .sonarr, let i = out.firstIndex(where: { $0.item.app == .sonarr && $0.item.item_id == item.item_id }) {
+            let code = item.arr == .sonarr ? item.extra.map { String($0.split(separator: " ").first ?? "") } : nil
+            if item.arr == .sonarr, let i = out.firstIndex(where: { $0.item.arr == .sonarr && $0.item.item_id == item.item_id }) {
                 let first = out[i].code?.split(separator: "–").first.map(String.init) ?? ""
                 let last = code ?? ""
                 out[i].count += 1

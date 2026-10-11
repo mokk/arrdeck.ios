@@ -27,8 +27,8 @@ import Testing
     }
 
     @Test func queueMovesWhileBytesRemain() {
-        let done = QueueItem(app: .radarr, id: 1, size: 10, size_left: 0, status: "completed", title: "a")
-        let going = QueueItem(app: .sonarr, id: 2, size: 10, size_left: 3, status: "downloading", title: "b")
+        let done = QueueItem(app: "radarr", id: 1, size: 10, size_left: 0, status: "completed", title: "a")
+        let going = QueueItem(app: "sonarr", id: 2, size: 10, size_left: 3, status: "downloading", title: "b")
         #expect(!Motion.queueMoving([.radarr: .healthy([done]), .sonarr: .healthy([])]))
         #expect(Motion.queueMoving([.radarr: .healthy([done]), .sonarr: .healthy([going])]))
     }

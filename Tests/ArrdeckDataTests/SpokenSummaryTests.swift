@@ -38,10 +38,10 @@ struct SpokenSummaryTests {
 
     @Test func todayListsWhatLandsTodayWithSeasonDropsFolded() {
         let items = [
-            CalendarItem(app: .radarr, date: "2026-10-09", item_id: 1, title: "A Film"),
-            CalendarItem(app: .sonarr, date: "2026-10-09T08:00:00Z", extra: "S01E01 Pilot", item_id: 2, title: "A Show"),
-            CalendarItem(app: .sonarr, date: "2026-10-09T08:00:00Z", extra: "S01E02 Two", item_id: 2, title: "A Show"),
-            CalendarItem(app: .radarr, date: "2026-10-10", item_id: 3, title: "Tomorrow's Film"),
+            CalendarItem(app: "radarr", date: "2026-10-09", item_id: 1, title: "A Film"),
+            CalendarItem(app: "sonarr", date: "2026-10-09T08:00:00Z", extra: "S01E01 Pilot", item_id: 2, title: "A Show"),
+            CalendarItem(app: "sonarr", date: "2026-10-09T08:00:00Z", extra: "S01E02 Two", item_id: 2, title: "A Show"),
+            CalendarItem(app: "radarr", date: "2026-10-10", item_id: 3, title: "Tomorrow's Film"),
         ]
         var utc = Calendar(identifier: .gregorian)
         utc.timeZone = TimeZone(identifier: "UTC")!

@@ -73,11 +73,11 @@ extension GlanceSnapshot {
             entries: entries.prefix(Today.shown).map { entry in
                 let item = entry.item
                 return Today.Entry(
-                    kind: item.app == .sonarr ? .episode : item.app == .radarr ? .movie : .book,
+                    kind: item.arr == .sonarr ? .episode : item.arr == .radarr ? .movie : .book,
                     title: item.title,
                     code: entry.code.flatMap { $0.isEmpty ? nil : $0 },
                     // an episode airs at a moment; a release day has no time worth showing
-                    time: item.app == .sonarr ? item.date.flatMap { Format.parseDate($0) } : nil,
+                    time: item.arr == .sonarr ? item.date.flatMap { Format.parseDate($0) } : nil,
                     downloaded: item.has_file ?? false
                 )
             },

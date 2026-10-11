@@ -22,7 +22,7 @@ public enum WantedKind: String, CaseIterable, Sendable, Hashable {
 extension WantedItem {
     /// The library title this wanted row belongs to — the movie itself, or the
     /// series an episode is part of.
-    public var ref: MediaRef? { MediaRef(app: app.rawValue, id: library_id) }
+    public var ref: MediaRef? { MediaRef(app: app, id: library_id) }
 }
 
 extension DiagnosisFinding {
@@ -100,7 +100,10 @@ extension LiveAPI: WantedAPI {
             switch try await client.wanted_api_v1_wanted__app__get(
                 path: .init(app: app.rawValue), query: .init(kind: kind.rawValue, page: page)
             ) {
-            case let .ok(ok): try ok.body.json
+            case let .ok(ok):
+                var page = try ok.body.json
+                page.items = page.items.fromKnownArrs
+                return page
             case .unprocessableContent: throw APIError.unexpectedStatus(422)
             case let .undocumented(code, _): throw APIError.status(code)
             }
@@ -206,10 +209,12 @@ public final class WantedModel {
     /// Radarr wants the movie searched; Sonarr wants the episode.
     public func search(_ item: WantedItem) async {
         await perform("search-\(item.id)") {
-            switch item.app {
+            switch item.arr {
             case .radarr: try await api.triggerSearch(.movie(item.id))
             case .sonarr: try await api.searchEpisodes([item.id])
             case .readarr: try await api.triggerSearch(.book(item.id))
+            // LiveAPI drops rows from arrs this build does not know
+            case nil: ()
             }
         }
     }

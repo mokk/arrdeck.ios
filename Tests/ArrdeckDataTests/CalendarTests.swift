@@ -12,7 +12,7 @@ actor FakeCalendarAPI: CalendarAPI {
     func calendar(start: String, days: Int) async throws -> [ArrApp: Block<[CalendarItem]>] {
         requests.append((start, days))
         if let failure { throw failure }
-        return [.radarr: .healthy(items.filter { $0.app == .radarr }), .sonarr: .healthy(items.filter { $0.app == .sonarr })]
+        return [.radarr: .healthy(items.filter { $0.arr == .radarr }), .sonarr: .healthy(items.filter { $0.arr == .sonarr })]
     }
 }
 
@@ -31,11 +31,11 @@ actor FakeCalendarAPI: CalendarAPI {
 
     @Test func groupsByDayOpensAtTodayAndFoldsASeasonDrop() async {
         let api = FakeCalendarAPI(items: [
-            .init(app: .sonarr, date: "2026-09-25T04:00:00Z", extra: "S01E01 Pilot", item_id: 5, title: "Neagley"),
-            .init(app: .sonarr, date: "2026-09-25T04:00:00Z", extra: "S01E02 Two", finale_type: nil, item_id: 5, title: "Neagley"),
-            .init(app: .sonarr, date: "2026-09-25T04:00:00Z", extra: "S01E08 Eight", finale_type: "season", has_file: true, item_id: 5, title: "Neagley"),
-            .init(app: .radarr, date: "2026-09-29T00:00:00Z", release_type: "digital", title: "Spider-Man"),
-            .init(app: .sonarr, date: nil, title: "Undated"),
+            .init(app: "sonarr", date: "2026-09-25T04:00:00Z", extra: "S01E01 Pilot", item_id: 5, title: "Neagley"),
+            .init(app: "sonarr", date: "2026-09-25T04:00:00Z", extra: "S01E02 Two", finale_type: nil, item_id: 5, title: "Neagley"),
+            .init(app: "sonarr", date: "2026-09-25T04:00:00Z", extra: "S01E08 Eight", finale_type: "season", has_file: true, item_id: 5, title: "Neagley"),
+            .init(app: "radarr", date: "2026-09-29T00:00:00Z", release_type: "digital", title: "Spider-Man"),
+            .init(app: "sonarr", date: nil, title: "Undated"),
         ])
         let model = model(api)
         await model.load()
@@ -61,14 +61,14 @@ actor FakeCalendarAPI: CalendarAPI {
     }
 
     @Test func aSingleEpisodeKeepsItsTitle() {
-        let entry = CalendarEntry.fold([.init(app: .sonarr, date: "2026-09-25T04:00:00Z", extra: "S06E03 Resurrection", item_id: 1, title: "Slow Horses")])
+        let entry = CalendarEntry.fold([.init(app: "sonarr", date: "2026-09-25T04:00:00Z", extra: "S06E03 Resurrection", item_id: 1, title: "Slow Horses")])
         #expect(entry.first?.code == "S06E03" && entry.first?.episodeTitle == "Resurrection")
     }
 
     @Test func filtersByAppAndDownloadedAndOpensTheTitle() async {
         let api = FakeCalendarAPI(items: [
-            .init(app: .sonarr, date: "2026-09-23T04:00:00Z", has_file: true, item_id: 7, title: "Slow Horses"),
-            .init(app: .radarr, date: "2026-09-29T00:00:00Z", item_id: 3, title: "Spider-Man"),
+            .init(app: "sonarr", date: "2026-09-23T04:00:00Z", has_file: true, item_id: 7, title: "Slow Horses"),
+            .init(app: "radarr", date: "2026-09-29T00:00:00Z", item_id: 3, title: "Spider-Man"),
         ])
         let model = model(api)
         defer {
@@ -83,8 +83,8 @@ actor FakeCalendarAPI: CalendarAPI {
         model.hideDownloaded = true
         #expect(model.items.map(\.title) == ["Spider-Man"])
         #expect(model.items.first?.ref == .movie(3))
-        #expect(CalendarItem(app: .sonarr, item_id: 7, title: "x").ref == .series(7))
-        #expect(CalendarItem(app: .readarr, title: "no id").ref == nil)
+        #expect(CalendarItem(app: "sonarr", item_id: 7, title: "x").ref == .series(7))
+        #expect(CalendarItem(app: "readarr", title: "no id").ref == nil)
     }
 
     @Test func failuresAndUnauthorized() async {

@@ -66,7 +66,7 @@ public enum SubtitleTarget: Hashable, Sendable {
 }
 
 extension RecentItem {
-    public var ref: MediaRef? { MediaRef(app: app.rawValue, id: library_id) }
+    public var ref: MediaRef? { MediaRef(app: app, id: library_id) }
 }
 
 extension HistoryItem {

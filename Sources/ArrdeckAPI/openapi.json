@@ -672,10 +672,6 @@
       "BlocklistItemOut": {
         "properties": {
           "app": {
-            "enum": [
-              "radarr",
-              "sonarr"
-            ],
             "title": "App",
             "type": "string"
           },
@@ -1033,12 +1029,6 @@
       "CalendarItemOut": {
         "properties": {
           "app": {
-            "enum": [
-              "radarr",
-              "sonarr",
-              "readarr",
-              "lidarr"
-            ],
             "title": "App",
             "type": "string"
           },
@@ -2161,11 +2151,6 @@
       "ExclusionOut": {
         "properties": {
           "app": {
-            "enum": [
-              "radarr",
-              "sonarr",
-              "readarr"
-            ],
             "title": "App",
             "type": "string"
           },
@@ -2295,12 +2280,6 @@
         "description": "One release/torrent with every history event that happened to it.",
         "properties": {
           "app": {
-            "enum": [
-              "radarr",
-              "sonarr",
-              "readarr",
-              "lidarr"
-            ],
             "title": "App",
             "type": "string"
           },
@@ -2502,12 +2481,6 @@
         "description": "The arr's ManualImport command, as started or as it stands now.",
         "properties": {
           "app": {
-            "enum": [
-              "radarr",
-              "sonarr",
-              "readarr",
-              "lidarr"
-            ],
             "title": "App",
             "type": "string"
           },
@@ -2552,11 +2525,6 @@
       "ImportListOut": {
         "properties": {
           "app": {
-            "enum": [
-              "radarr",
-              "sonarr",
-              "readarr"
-            ],
             "title": "App",
             "type": "string"
           },
@@ -3588,10 +3556,6 @@
         "description": "How an arr reads a release name, and what it would do with it.",
         "properties": {
           "app": {
-            "enum": [
-              "radarr",
-              "sonarr"
-            ],
             "title": "App",
             "type": "string"
           },
@@ -4375,12 +4339,6 @@
       "QueueItemOut": {
         "properties": {
           "app": {
-            "enum": [
-              "radarr",
-              "sonarr",
-              "readarr",
-              "lidarr"
-            ],
             "title": "App",
             "type": "string"
           },
@@ -4581,11 +4539,6 @@
       "RecentItemOut": {
         "properties": {
           "app": {
-            "enum": [
-              "radarr",
-              "sonarr",
-              "readarr"
-            ],
             "title": "App",
             "type": "string"
           },
@@ -6010,22 +5963,6 @@
             "type": "integer"
           },
           "service": {
-            "enum": [
-              "radarr",
-              "sonarr",
-              "readarr",
-              "lidarr",
-              "prowlarr",
-              "qbittorrent",
-              "transmission",
-              "overseerr",
-              "gluetun",
-              "bazarr",
-              "plex",
-              "prometheus",
-              "trakt",
-              "helper"
-            ],
             "title": "Service",
             "type": "string"
           },
@@ -7076,12 +7013,6 @@
             "type": "string"
           },
           "app": {
-            "enum": [
-              "radarr",
-              "sonarr",
-              "readarr",
-              "lidarr"
-            ],
             "title": "App",
             "type": "string"
           },

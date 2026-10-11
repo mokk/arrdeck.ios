@@ -336,7 +336,7 @@ struct QueueSection: View {
                     ForEach(items, id: \.id) { item in
                         QueueRow(
                             item: item,
-                            pending: model.isPending("queue-\(item.app.rawValue)-\(item.id)"),
+                            pending: model.isPending("queue-\(item.app)-\(item.id)"),
                             forceImport: { Task { await model.forceImport(item) } },
                             retry: { Task { await model.blocklistRetry(item) } }
                         )
@@ -379,7 +379,7 @@ struct QueueRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.title).font(.subheadline.weight(.medium)).lineLimit(1)
                 HStack(spacing: 6) {
-                    StateBadge(state: item.app.rawValue)
+                    StateBadge(state: item.app)
                     StateBadge(state: badge)
                     Text(item.time_left ?? "").font(.caption).foregroundStyle(.secondary)
                 }
@@ -450,7 +450,7 @@ struct CalendarSection<Destination: View>: View {
                         VStack(alignment: .leading, spacing: 3) {
                             Text(item.title).font(.subheadline.weight(.medium)).lineLimit(1)
                             HStack(spacing: 6) {
-                                StateBadge(state: item.app.rawValue)
+                                StateBadge(state: item.app)
                                 if let kind = item.release_type { StateBadge(state: kind.capitalized) }
                                 Text(item.extra ?? "").font(.caption).foregroundStyle(.secondary).lineLimit(1)
                             }
@@ -505,7 +505,7 @@ struct HistorySection<Destination: View>: View {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(item.title).font(.subheadline.weight(.medium)).lineLimit(1)
                                 HStack(spacing: 4) {
-                                    StateBadge(state: item.app.rawValue)
+                                    StateBadge(state: item.app)
                                     ForEach(item.events ?? [], id: \._type) { event in
                                         StateBadge(state: event._type)
                                     }

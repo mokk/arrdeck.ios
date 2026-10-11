@@ -75,15 +75,15 @@ struct GlanceBuilderTests {
     @Test func todayKeepsTheLocalDayFoldsSeasonsAndCapsAtFour() throws {
         let blocks: [ArrApp: Block<[CalendarItem]>] = [
             .radarr: .healthy([
-                CalendarItem(app: .radarr, date: "2026-10-11T00:00:00Z", has_file: true, item_id: 1, title: "A Film"),
-                CalendarItem(app: .radarr, date: "2026-10-12T00:00:00Z", item_id: 2, title: "Tomorrow's Film"),
+                CalendarItem(app: "radarr", date: "2026-10-11T00:00:00Z", has_file: true, item_id: 1, title: "A Film"),
+                CalendarItem(app: "radarr", date: "2026-10-12T00:00:00Z", item_id: 2, title: "Tomorrow's Film"),
             ]),
             .sonarr: .healthy([
-                CalendarItem(app: .sonarr, date: "2026-10-11T08:00:00Z", extra: "S01E01 Pilot", item_id: 3, title: "A Show"),
-                CalendarItem(app: .sonarr, date: "2026-10-11T08:00:00Z", extra: "S01E02 Two", item_id: 3, title: "A Show"),
-                CalendarItem(app: .sonarr, date: "2026-10-11T20:00:00Z", extra: "S02E05 Five", item_id: 4, title: "B Show"),
-                CalendarItem(app: .sonarr, date: "2026-10-11T21:00:00Z", extra: "S03E01 One", item_id: 5, title: "C Show"),
-                CalendarItem(app: .sonarr, date: "2026-10-11T22:00:00Z", extra: "S04E01 One", item_id: 6, title: "D Show"),
+                CalendarItem(app: "sonarr", date: "2026-10-11T08:00:00Z", extra: "S01E01 Pilot", item_id: 3, title: "A Show"),
+                CalendarItem(app: "sonarr", date: "2026-10-11T08:00:00Z", extra: "S01E02 Two", item_id: 3, title: "A Show"),
+                CalendarItem(app: "sonarr", date: "2026-10-11T20:00:00Z", extra: "S02E05 Five", item_id: 4, title: "B Show"),
+                CalendarItem(app: "sonarr", date: "2026-10-11T21:00:00Z", extra: "S03E01 One", item_id: 5, title: "C Show"),
+                CalendarItem(app: "sonarr", date: "2026-10-11T22:00:00Z", extra: "S04E01 One", item_id: 6, title: "D Show"),
             ]),
             .readarr: .offline("not configured"),
         ]

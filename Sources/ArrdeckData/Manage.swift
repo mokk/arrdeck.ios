@@ -340,7 +340,7 @@ extension LiveAPI: ManageAPI {
     public func status() async throws -> [ServiceStatus] {
         try await call {
             switch try await client.status_api_v1_status_get() {
-            case let .ok(ok): try ok.body.json
+            case let .ok(ok): try ok.body.json.filter { Services.known.contains($0.service) }
             case let .undocumented(code, _): throw APIError.status(code)
             }
         }

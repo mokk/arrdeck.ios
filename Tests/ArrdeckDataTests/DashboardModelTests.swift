@@ -146,7 +146,7 @@ actor FakeAPI: DashboardAPI {
 
     @Test func runPollsAtTheCadenceUntilCancelled() async throws {
         let api = FakeAPI(configured: ["radarr"])
-        let going = QueueItem(app: .radarr, id: 1, size: 10, size_left: 5, status: "downloading", title: "x")
+        let going = QueueItem(app: "radarr", id: 1, size: 10, size_left: 5, status: "downloading", title: "x")
         await api.set(queue: [.radarr: .healthy([going]), .sonarr: .healthy([])])
         let model = DashboardModel(api: api, cadence: .scaled(by: 0.01), onSessionLost: {})
 
@@ -175,7 +175,7 @@ actor FakeAPI: DashboardAPI {
         #expect(model.actionError == nil)
 
         await api.set(actionError: .unexpectedStatus(409))
-        let item = QueueItem(app: .sonarr, id: 7, size: 1, size_left: 0, status: "completed", title: "t")
+        let item = QueueItem(app: "sonarr", id: 7, size: 1, size_left: 0, status: "completed", title: "t")
         await model.blocklistRetry(item)
         #expect(model.actionError == "HTTP 409")
         #expect(!model.isPending("queue-sonarr-7"))

@@ -18,7 +18,10 @@ extension LiveAPI: HistoryAPI {
     public func historyPage(_ page: Int) async throws -> HistoryPage {
         try await call {
             switch try await client.history_all_api_v1_history_all_get(query: .init(page: page)) {
-            case let .ok(ok): try ok.body.json
+            case let .ok(ok):
+                var history = try ok.body.json
+                history.items = history.items.fromKnownArrs
+                return history
             case .unprocessableContent: throw APIError.unexpectedStatus(422)
             case let .undocumented(code, _): throw APIError.status(code)
             }
@@ -28,7 +31,12 @@ extension LiveAPI: HistoryAPI {
     public func blocklist() async throws -> BlocklistPage {
         try await call {
             switch try await client.blocklist_api_v1_blocklist_get() {
-            case let .ok(ok): try ok.body.json
+            case let .ok(ok):
+                var blocklist = try ok.body.json
+                let known = (blocklist.items ?? []).fromKnownArrs
+                blocklist.total = blocklist.total.map { $0 - ((blocklist.items ?? []).count - known.count) }
+                blocklist.items = known
+                return blocklist
             case .unprocessableContent: throw APIError.unexpectedStatus(422)
             case let .undocumented(code, _): throw APIError.status(code)
             }
@@ -86,14 +94,14 @@ public final class HistoryModel {
 
     public var shown: [HistoryItem] {
         items.filter { item in
-            (appFilter == nil || item.app.rawValue == appFilter!.rawValue)
+            (appFilter == nil || item.app == appFilter!.rawValue)
                 && (eventFilter == nil || (item.events ?? []).contains { $0._type == eventFilter })
         }
     }
 
     /// Which arrs have blocklist entries, for the per-arr clear buttons.
     public var blockedApps: [ArrApp] {
-        ArrApp.allCases.filter { app in (blocklist.value ?? []).contains { $0.app.rawValue == app.rawValue } }
+        ArrApp.allCases.filter { app in (blocklist.value ?? []).contains { $0.arr == app } }
     }
 
     public func load() async {
@@ -130,7 +138,7 @@ public final class HistoryModel {
     /// Releases arrdeck's own blocklist-and-retry sent here. Without this the
     /// list only ever grew, and a mistakenly blocked release stayed blocked.
     public func unblock(_ item: BlocklistItem) async {
-        guard let app = ArrApp(rawValue: item.app.rawValue) else { return }
+        guard let app = item.arr else { return }
         await perform { try await api.removeFromBlocklist(app, id: item.id) }
         await loadBlocklist()
     }

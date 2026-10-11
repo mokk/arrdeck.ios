@@ -163,7 +163,7 @@ private func candidate(
 @Suite struct AttentionReasonTests {
     @Test func statusMessagesThenTheErrorWithoutRepeats() {
         let item = QueueItem(
-            app: .sonarr, error_message: "Not an upgrade", id: 1, size: 1, size_left: 0, status: "completed",
+            app: "sonarr", error_message: "Not an upgrade", id: 1, size: 1, size_left: 0, status: "completed",
             status_messages: [
                 .init(messages: ["Not an upgrade", "Sample"], title: "Show.S01"),
                 .init(messages: ["Unknown episode"], title: "Show.S01E05.mkv"),
@@ -178,7 +178,7 @@ private func candidate(
     }
 
     @Test func plainErrorsWhenThereIsNothingElse() {
-        let item = QueueItem(app: .radarr, errors: ["Disk full"], id: 1, size: 1, size_left: 0, status: "warning",
+        let item = QueueItem(app: "radarr", errors: ["Disk full"], id: 1, size: 1, size_left: 0, status: "warning",
                              title: "x", tracked_state: "imported")
         #expect(item.attentionReasons == ["Disk full"])
         #expect(!item.importable)
@@ -212,7 +212,7 @@ actor FakeImportAPI: ManualImportAPI {
     func startImport(_ request: ImportRequest) async throws -> ImportCommand {
         if let startFailure { throw startFailure }
         started.append(request)
-        return ImportCommand(app: .radarr, done: false, id: 77, status: "queued")
+        return ImportCommand(app: "radarr", done: false, id: 77, status: "queued")
     }
     func importCommand(app: ArrApp, id: Int) async throws -> ImportCommand {
         polls += 1
@@ -220,7 +220,7 @@ actor FakeImportAPI: ManualImportAPI {
             pollFailures -= 1
             throw APIError.transport("offline")
         }
-        return states.isEmpty ? ImportCommand(app: .radarr, done: true, id: id, ok: true) : states.removeFirst()
+        return states.isEmpty ? ImportCommand(app: "radarr", done: true, id: id, ok: true) : states.removeFirst()
     }
 }
 
@@ -231,8 +231,8 @@ actor FakeImportAPI: ManualImportAPI {
 
     @Test func startsThePickedRequestAndPollsUntilDone() async {
         let api = FakeImportAPI(candidates: [candidate("/dl/a.mkv"), candidate("/dl/b.mkv")], states: [
-            .init(app: .radarr, done: false, id: 77, message: "Processing file 1 of 2", status: "started"),
-            .init(app: .radarr, done: true, id: 77, imported: 2, message: "Manually imported 2 files", ok: true,
+            .init(app: "radarr", done: false, id: 77, message: "Processing file 1 of 2", status: "started"),
+            .init(app: "radarr", done: true, id: 77, imported: 2, message: "Manually imported 2 files", ok: true,
                   status: "completed"),
         ])
         let model = model(api)
@@ -253,7 +253,7 @@ actor FakeImportAPI: ManualImportAPI {
 
     @Test func aFailedCommandShowsTheArrsMessage() async {
         let api = FakeImportAPI(candidates: [candidate("/dl/a.mkv")], states: [
-            .init(app: .radarr, done: true, id: 77, message: "Destination already exists", ok: false, status: "failed"),
+            .init(app: "radarr", done: true, id: 77, message: "Destination already exists", ok: false, status: "failed"),
         ])
         let model = model(api)
         await model.load()
@@ -395,7 +395,7 @@ final class ImportRecordingTransport: ClientTransport, @unchecked Sendable {
 /// with the endpoint, where the model asks for it alongside the queue.
 extension FakeDownloadsAPI: ManualImportAPI {
     func attention() async throws -> Attention {
-        Attention(count: 1, items: [QueueItem(app: .radarr, id: 3, size: 1, size_left: 0, status: "completed",
+        Attention(count: 1, items: [QueueItem(app: "radarr", id: 3, size: 1, size_left: 0, status: "completed",
                                               title: "Dune", tracked_state: "importBlocked")], unavailable: [])
     }
     func importCandidates(_ source: ImportSource) async throws -> [ImportCandidate] { [] }

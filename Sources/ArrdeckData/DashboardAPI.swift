@@ -116,7 +116,7 @@ public struct LiveAPI: DashboardAPI {
     public func services() async throws -> [ServiceInfo] {
         try await call {
             switch try await client.services_api_v1_services_get() {
-            case let .ok(ok): try ok.body.json
+            case let .ok(ok): try ok.body.json.filter { Services.known.contains($0.service) }
             case let .undocumented(code, _): throw APIError.status(code)
             }
         }
@@ -153,7 +153,7 @@ public struct LiveAPI: DashboardAPI {
     public func recent() async throws -> [RecentItem] {
         try await call {
             switch try await client.recent_api_v1_dashboard_recent_get() {
-            case let .ok(ok): try ok.body.json
+            case let .ok(ok): try ok.body.json.fromKnownArrs
             case let .undocumented(code, _): throw APIError.status(code)
             }
         }
@@ -177,7 +177,7 @@ public struct LiveAPI: DashboardAPI {
                 let body = try ok.body.json
                 var out: [ArrApp: Block<[QueueItem]>] = [.radarr: Block(body.radarr), .sonarr: Block(body.sonarr)]
                 if let readarr = body.readarr { out[.readarr] = Block(readarr) }
-                return out
+                return out.mapValues { $0.fromKnownArrs() }
             case let .undocumented(code, _): throw APIError.status(code)
             }
         }
@@ -190,7 +190,7 @@ public struct LiveAPI: DashboardAPI {
                 let body = try ok.body.json
                 var out: [ArrApp: Block<[CalendarItem]>] = [.radarr: Block(body.radarr), .sonarr: Block(body.sonarr)]
                 if let readarr = body.readarr { out[.readarr] = Block(readarr) }
-                return out
+                return out.mapValues { $0.fromKnownArrs() }
             case .unprocessableContent: throw APIError.unexpectedStatus(422)
             case let .undocumented(code, _): throw APIError.status(code)
             }
@@ -231,7 +231,7 @@ public struct LiveAPI: DashboardAPI {
                 let body = try ok.body.json
                 var out: [ArrApp: Block<[HistoryItem]>] = [.radarr: Block(body.radarr), .sonarr: Block(body.sonarr)]
                 if let readarr = body.readarr { out[.readarr] = Block(readarr) }
-                return out
+                return out.mapValues { $0.fromKnownArrs() }
             case let .undocumented(code, _): throw APIError.status(code)
             }
         }

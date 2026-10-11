@@ -68,10 +68,10 @@ func liveAPI(_ transport: AnswerTransport) -> LiveAPI {
 
     @Test func downForReadsAsMinutesThenHours() throws {
         let since = Date(timeIntervalSince1970: 1_000_000)
-        let status = ServiceStatus(down_since: since, ok: false, service: .radarr)
+        let status = ServiceStatus(down_since: since, ok: false, service: "radarr")
         #expect(status.downFor(now: since.addingTimeInterval(14 * 60)) == "down 14m")
         #expect(status.downFor(now: since.addingTimeInterval(2 * 3600 + 5 * 60)) == "down 2h 5m")
-        #expect(ServiceStatus(ok: true, service: .plex).downFor() == nil)
+        #expect(ServiceStatus(ok: true, service: "plex").downFor() == nil)
     }
 }
 

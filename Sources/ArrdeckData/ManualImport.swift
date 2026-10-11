@@ -127,7 +127,12 @@ extension LiveAPI: ManualImportAPI {
     public func attention() async throws -> Attention {
         try await call {
             switch try await client.queue_attention_api_v1_queue_attention_get() {
-            case let .ok(ok): try ok.body.json
+            case let .ok(ok):
+                var attention = try ok.body.json
+                let known = (attention.items ?? []).fromKnownArrs
+                attention.count = attention.count.map { $0 - ((attention.items ?? []).count - known.count) }
+                attention.items = known
+                return attention
             case let .undocumented(code, _): throw APIError.status(code)
             }
         }

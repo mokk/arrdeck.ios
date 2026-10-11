@@ -17,7 +17,7 @@ extension LiveAPI: ToolsAPI {
     public func exclusions() async throws -> [Exclusion] {
         try await call {
             switch try await client.exclusions_api_v1_exclusions_get() {
-            case let .ok(ok): try ok.body.json
+            case let .ok(ok): try ok.body.json.fromKnownArrs
             case let .undocumented(code, _): throw APIError.status(code)
             }
         }
