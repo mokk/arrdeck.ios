@@ -333,7 +333,7 @@ struct QueueSection: View {
                     ForEach(stale, id: \.0) { _, age in
                         StaleNote(age: age)
                     }
-                    ForEach(items, id: \.id) { item in
+                    ForEach(items, id: \.rowID) { item in
                         QueueRow(
                             item: item,
                             pending: model.isPending("queue-\(item.app)-\(item.id)"),

@@ -19,6 +19,16 @@ extension ArrNamed {
     public var arr: ArrApp? { ArrApp(rawValue: app) }
 }
 
+extension QueueItem {
+    /// Ids are each arr's own, so a list mixing arrs keys its rows by both.
+    public var rowID: String { "\(app)-\(id)" }
+}
+
+extension BlocklistItem {
+    /// Ids are each arr's own, so a list mixing arrs keys its rows by both.
+    public var rowID: String { "\(app)-\(id)" }
+}
+
 extension QueueItem: ArrNamed {}
 extension CalendarItem: ArrNamed {}
 extension HistoryItem: ArrNamed {}

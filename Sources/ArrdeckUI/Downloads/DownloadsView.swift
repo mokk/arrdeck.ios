@@ -109,7 +109,7 @@ public struct DownloadsView: View {
             if model.hasArr, let items = model.queue.value.map({ blocks in ArrApp.allCases.flatMap { blocks[$0]?.value ?? [] } }),
                !items.isEmpty {
                 Section("Radarr / Sonarr queue") {
-                    ForEach(items, id: \.id) { item in
+                    ForEach(items, id: \.rowID) { item in
                         QueueRow(
                             item: item,
                             pending: model.isPending("queue-\(item.app)-\(item.id)"),

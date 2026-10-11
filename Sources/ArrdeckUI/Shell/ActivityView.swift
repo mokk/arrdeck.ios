@@ -128,7 +128,7 @@ struct DownloadingList: View {
                     case let .loaded(blocks):
                         let items = ArrApp.allCases.flatMap { blocks[$0]?.value ?? [] }
                         if items.isEmpty { EmptyNote("Nothing in the queue") }
-                        ForEach(items, id: \.id) { item in
+                        ForEach(items, id: \.rowID) { item in
                             QueueRow(
                                 item: item,
                                 pending: model.isPending("queue-\(item.app)-\(item.id)"),

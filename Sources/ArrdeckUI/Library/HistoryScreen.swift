@@ -142,7 +142,7 @@ public struct HistoryScreen: View {
                 }
                 .disabled(model.busy)
                 Section {
-                    ForEach(items, id: \.id) { item in
+                    ForEach(items, id: \.rowID) { item in
                         HStack(spacing: 10) {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(item.title ?? item.source_title ?? "").font(.subheadline.weight(.medium)).lineLimit(1)
