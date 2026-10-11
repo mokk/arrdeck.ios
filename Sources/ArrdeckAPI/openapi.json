@@ -347,6 +347,26 @@
             "title": "Approved",
             "type": "boolean"
           },
+          "custom_format_score": {
+            "title": "Custom Format Score",
+            "type": "integer"
+          },
+          "custom_formats": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Custom Formats",
+            "type": "array"
+          },
+          "edition": {
+            "title": "Edition",
+            "type": "string"
+          },
+          "full_season": {
+            "title": "Full Season",
+            "type": "boolean"
+          },
           "guid": {
             "title": "Guid",
             "type": "string"
@@ -359,9 +379,25 @@
             "title": "Indexer Id",
             "type": "integer"
           },
+          "info_url": {
+            "title": "Info Url",
+            "type": "string"
+          },
+          "languages": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Languages",
+            "type": "array"
+          },
           "leechers": {
             "title": "Leechers",
             "type": "integer"
+          },
+          "protocol": {
+            "title": "Protocol",
+            "type": "string"
           },
           "quality": {
             "title": "Quality",
@@ -374,6 +410,10 @@
             },
             "title": "Rejections",
             "type": "array"
+          },
+          "release_group": {
+            "title": "Release Group",
+            "type": "string"
           },
           "seeders": {
             "title": "Seeders",
@@ -394,6 +434,33 @@
           "title"
         ],
         "title": "ArrReleaseOut",
+        "type": "object"
+      },
+      "AttentionOut": {
+        "properties": {
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/QueueItemOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "unavailable": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Unavailable",
+            "type": "array"
+          }
+        },
+        "title": "AttentionOut",
         "type": "object"
       },
       "AuthorDetailOut": {
@@ -1034,6 +1101,60 @@
         "title": "CalendarResponse",
         "type": "object"
       },
+      "CleanupConditions": {
+        "description": "ANDed. Unset (null, false, empty) is no condition; a rule with none at\nall matches nothing.",
+        "properties": {
+          "min_size_gb": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 100000.0,
+            "title": "Min Size Gb",
+            "type": "number"
+          },
+          "rating_below": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 10.0,
+            "title": "Rating Below",
+            "type": "number"
+          },
+          "unmonitored": {
+            "default": false,
+            "title": "Unmonitored",
+            "type": "boolean"
+          },
+          "unwatched_days": {
+            "maximum": 3650.0,
+            "minimum": 1.0,
+            "title": "Unwatched Days",
+            "type": "integer"
+          },
+          "watched_days": {
+            "maximum": 3650.0,
+            "minimum": 1.0,
+            "title": "Watched Days",
+            "type": "integer"
+          },
+          "with_tags": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 50,
+            "title": "With Tags",
+            "type": "array"
+          },
+          "without_tags": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 50,
+            "title": "Without Tags",
+            "type": "array"
+          }
+        },
+        "title": "CleanupConditions",
+        "type": "object"
+      },
       "CleanupItemOut": {
         "properties": {
           "added": {
@@ -1095,6 +1216,222 @@
         "title": "CleanupItemOut",
         "type": "object"
       },
+      "CleanupKeepIn": {
+        "properties": {
+          "title": {
+            "default": "",
+            "maxLength": 300,
+            "title": "Title",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "title": "CleanupKeepIn",
+        "type": "object"
+      },
+      "CleanupKeptOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kept_at": {
+            "default": 0,
+            "title": "Kept At",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "movie",
+              "series"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "CleanupKeptOut",
+        "type": "object"
+      },
+      "CleanupLeavingOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "movie",
+              "series"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "leave_at": {
+            "title": "Leave At",
+            "type": "integer"
+          },
+          "marked_at": {
+            "title": "Marked At",
+            "type": "integer"
+          },
+          "poster": {
+            "title": "Poster",
+            "type": "string"
+          },
+          "reasons": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CleanupReasonOut"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "rule_id": {
+            "default": "",
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "rule_name": {
+            "default": "",
+            "title": "Rule Name",
+            "type": "string"
+          },
+          "size": {
+            "default": 0,
+            "title": "Size",
+            "type": "integer"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "marked_at",
+          "leave_at"
+        ],
+        "title": "CleanupLeavingOut",
+        "type": "object"
+      },
+      "CleanupLogTitleOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "movie",
+              "series"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "leave_at": {
+            "title": "Leave At",
+            "type": "integer"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "size": {
+            "default": 0,
+            "title": "Size",
+            "type": "integer"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "CleanupLogTitleOut",
+        "type": "object"
+      },
+      "CleanupMatchOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "movie",
+              "series"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "leave_at": {
+            "title": "Leave At",
+            "type": "integer"
+          },
+          "poster": {
+            "title": "Poster",
+            "type": "string"
+          },
+          "reasons": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CleanupReasonOut"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "size": {
+            "default": 0,
+            "title": "Size",
+            "type": "integer"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "CleanupMatchOut",
+        "type": "object"
+      },
       "CleanupOut": {
         "description": "What could go to free space, in four lists. Nothing here deletes: the\nclient sends the chosen ids to the libraries' bulk delete.",
         "properties": {
@@ -1137,6 +1474,272 @@
           }
         },
         "title": "CleanupOut",
+        "type": "object"
+      },
+      "CleanupPreviewOut": {
+        "description": "What the rule would take now. Nothing is changed by asking.",
+        "properties": {
+          "held": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "default": {},
+            "title": "Held",
+            "type": "object"
+          },
+          "matches": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CleanupMatchOut"
+            },
+            "title": "Matches",
+            "type": "array"
+          },
+          "total_size": {
+            "default": 0,
+            "title": "Total Size",
+            "type": "integer"
+          }
+        },
+        "title": "CleanupPreviewOut",
+        "type": "object"
+      },
+      "CleanupReasonOut": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "CleanupReasonOut",
+        "type": "object"
+      },
+      "CleanupRuleIn": {
+        "properties": {
+          "conditions": {
+            "$ref": "#/components/schemas/CleanupConditions",
+            "default": {
+              "unmonitored": false,
+              "with_tags": [],
+              "without_tags": []
+            }
+          },
+          "enabled": {
+            "default": false,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "grace_days": {
+            "default": 14,
+            "maximum": 365.0,
+            "minimum": 3.0,
+            "title": "Grace Days",
+            "type": "integer"
+          },
+          "id": {
+            "default": "",
+            "maxLength": 40,
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "movie",
+              "series"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "maxLength": 80,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "CleanupRuleIn",
+        "type": "object"
+      },
+      "CleanupRuleOut": {
+        "properties": {
+          "conditions": {
+            "$ref": "#/components/schemas/CleanupConditions"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "grace_days": {
+            "title": "Grace Days",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "movie",
+              "series"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "enabled",
+          "grace_days",
+          "conditions"
+        ],
+        "title": "CleanupRuleOut",
+        "type": "object"
+      },
+      "CleanupRulesIn": {
+        "properties": {
+          "rules": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CleanupRuleIn"
+            },
+            "maxItems": 30,
+            "title": "Rules",
+            "type": "array"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/CleanupRulesSettings"
+          }
+        },
+        "required": [
+          "settings"
+        ],
+        "title": "CleanupRulesIn",
+        "type": "object"
+      },
+      "CleanupRulesOut": {
+        "properties": {
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/CleanupRuleOut"
+            },
+            "title": "Rules",
+            "type": "array"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/CleanupRulesSettings"
+          }
+        },
+        "required": [
+          "settings",
+          "rules"
+        ],
+        "title": "CleanupRulesOut",
+        "type": "object"
+      },
+      "CleanupRulesSettings": {
+        "properties": {
+          "enabled": {
+            "default": false,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "max_deletions": {
+            "default": 10,
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Max Deletions",
+            "type": "integer"
+          }
+        },
+        "title": "CleanupRulesSettings",
+        "type": "object"
+      },
+      "CleanupRunOut": {
+        "properties": {
+          "deferred": {
+            "default": 0,
+            "title": "Deferred",
+            "type": "integer"
+          },
+          "deleted": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CleanupLogTitleOut"
+            },
+            "title": "Deleted",
+            "type": "array"
+          },
+          "dry_run": {
+            "default": false,
+            "title": "Dry Run",
+            "type": "boolean"
+          },
+          "errors": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "kept": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CleanupLogTitleOut"
+            },
+            "title": "Kept",
+            "type": "array"
+          },
+          "marked": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CleanupLogTitleOut"
+            },
+            "title": "Marked",
+            "type": "array"
+          },
+          "released": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CleanupLogTitleOut"
+            },
+            "title": "Released",
+            "type": "array"
+          },
+          "skipped": {
+            "title": "Skipped",
+            "type": "string"
+          },
+          "trigger": {
+            "title": "Trigger",
+            "type": "string"
+          },
+          "ts": {
+            "title": "Ts",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ts",
+          "trigger"
+        ],
+        "title": "CleanupRunOut",
         "type": "object"
       },
       "CleanupSeasonOut": {
@@ -1807,6 +2410,14 @@
             "title": "Importable",
             "type": "boolean"
           },
+          "language_ids": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Language Ids",
+            "type": "array"
+          },
           "languages": {
             "default": [],
             "items": {
@@ -1827,6 +2438,10 @@
           "quality": {
             "title": "Quality",
             "type": "string"
+          },
+          "quality_id": {
+            "title": "Quality Id",
+            "type": "integer"
           },
           "rejections": {
             "default": [],
@@ -1855,6 +2470,74 @@
           "path"
         ],
         "title": "ImportCandidateOut",
+        "type": "object"
+      },
+      "ImportChoiceOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "ImportChoiceOut",
+        "type": "object"
+      },
+      "ImportCommandOut": {
+        "description": "The arr's ManualImport command, as started or as it stands now.",
+        "properties": {
+          "app": {
+            "enum": [
+              "radarr",
+              "sonarr",
+              "readarr"
+            ],
+            "title": "App",
+            "type": "string"
+          },
+          "done": {
+            "default": false,
+            "title": "Done",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "imported": {
+            "title": "Imported",
+            "type": "integer"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "result": {
+            "title": "Result",
+            "type": "string"
+          },
+          "status": {
+            "default": "queued",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "app",
+          "id"
+        ],
+        "title": "ImportCommandOut",
         "type": "object"
       },
       "ImportListOut": {
@@ -1910,6 +2593,28 @@
           "id"
         ],
         "title": "ImportListOut",
+        "type": "object"
+      },
+      "ImportOptionsOut": {
+        "properties": {
+          "languages": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ImportChoiceOut"
+            },
+            "title": "Languages",
+            "type": "array"
+          },
+          "qualities": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ImportChoiceOut"
+            },
+            "title": "Qualities",
+            "type": "array"
+          }
+        },
+        "title": "ImportOptionsOut",
         "type": "object"
       },
       "IndexerOut": {
@@ -2399,12 +3104,23 @@
       },
       "ManualImportFileIn": {
         "properties": {
+          "book_id": {
+            "title": "Book Id",
+            "type": "integer"
+          },
           "episode_ids": {
             "default": [],
             "items": {
               "type": "integer"
             },
             "title": "Episode Ids",
+            "type": "array"
+          },
+          "language_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Language Ids",
             "type": "array"
           },
           "movie_id": {
@@ -2414,6 +3130,10 @@
           "path": {
             "title": "Path",
             "type": "string"
+          },
+          "quality_id": {
+            "title": "Quality Id",
+            "type": "integer"
           },
           "series_id": {
             "title": "Series Id",
@@ -2573,6 +3293,14 @@
           "quality_profile_id": {
             "title": "Quality Profile Id",
             "type": "integer"
+          },
+          "ratings": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/RatingOut"
+            },
+            "title": "Ratings",
+            "type": "array"
           },
           "runtime": {
             "title": "Runtime",
@@ -3091,6 +3819,43 @@
         "title": "PopularSnapshotOut",
         "type": "object"
       },
+      "PrefsIn": {
+        "properties": {
+          "updated_at": {
+            "minimum": 0.0,
+            "title": "Updated At",
+            "type": "integer"
+          },
+          "values": {
+            "additionalProperties": true,
+            "title": "Values",
+            "type": "object"
+          }
+        },
+        "required": [
+          "values",
+          "updated_at"
+        ],
+        "title": "PrefsIn",
+        "type": "object"
+      },
+      "PrefsOut": {
+        "properties": {
+          "updated_at": {
+            "default": 0,
+            "title": "Updated At",
+            "type": "integer"
+          },
+          "values": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Values",
+            "type": "object"
+          }
+        },
+        "title": "PrefsOut",
+        "type": "object"
+      },
       "ProfileAssignIn": {
         "properties": {
           "ids": {
@@ -3217,6 +3982,12 @@
             "title": "Quiet Start",
             "type": "string"
           },
+          "service_down_minutes": {
+            "maximum": 120.0,
+            "minimum": 1.0,
+            "title": "Service Down Minutes",
+            "type": "integer"
+          },
           "tags": {
             "additionalProperties": {
               "items": {
@@ -3263,6 +4034,11 @@
             "default": "",
             "title": "Quiet Start",
             "type": "string"
+          },
+          "service_down_minutes": {
+            "default": 10,
+            "title": "Service Down Minutes",
+            "type": "integer"
           },
           "tags": {
             "additionalProperties": {
@@ -3502,6 +4278,10 @@
             "title": "Episode Id",
             "type": "integer"
           },
+          "error_message": {
+            "title": "Error Message",
+            "type": "string"
+          },
           "errors": {
             "default": [],
             "items": {
@@ -3522,6 +4302,11 @@
             "title": "Movie Id",
             "type": "integer"
           },
+          "needs_attention": {
+            "default": false,
+            "title": "Needs Attention",
+            "type": "boolean"
+          },
           "series_id": {
             "title": "Series Id",
             "type": "integer"
@@ -3537,6 +4322,14 @@
           "status": {
             "title": "Status",
             "type": "string"
+          },
+          "status_messages": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/QueueStatusMessageOut"
+            },
+            "title": "Status Messages",
+            "type": "array"
           },
           "time_left": {
             "title": "Time Left",
@@ -3583,6 +4376,47 @@
           "sonarr"
         ],
         "title": "QueueResponse",
+        "type": "object"
+      },
+      "QueueStatusMessageOut": {
+        "properties": {
+          "messages": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Messages",
+            "type": "array"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "title": "QueueStatusMessageOut",
+        "type": "object"
+      },
+      "RatingOut": {
+        "properties": {
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "number"
+          },
+          "votes": {
+            "title": "Votes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "source",
+          "value"
+        ],
+        "title": "RatingOut",
         "type": "object"
       },
       "ReadingIn": {
@@ -3790,6 +4624,73 @@
           "status"
         ],
         "title": "RequestStateOut",
+        "type": "object"
+      },
+      "RestartableOut": {
+        "properties": {
+          "configured": {
+            "title": "Configured",
+            "type": "boolean"
+          },
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "projects": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/RestartableProjectOut"
+            },
+            "title": "Projects",
+            "type": "array"
+          }
+        },
+        "required": [
+          "configured"
+        ],
+        "title": "RestartableOut",
+        "type": "object"
+      },
+      "RestartableProjectOut": {
+        "description": "A compose project the host helper may restart.",
+        "properties": {
+          "containers": {
+            "default": 0,
+            "title": "Containers",
+            "type": "integer"
+          },
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "is_self": {
+            "default": false,
+            "title": "Is Self",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "running": {
+            "default": false,
+            "title": "Running",
+            "type": "boolean"
+          },
+          "running_containers": {
+            "default": 0,
+            "title": "Running Containers",
+            "type": "integer"
+          },
+          "service": {
+            "title": "Service",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "RestartableProjectOut",
         "type": "object"
       },
       "RestoreIn": {
@@ -4298,6 +5199,14 @@
             "title": "Quality Profile Id",
             "type": "integer"
           },
+          "ratings": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/RatingOut"
+            },
+            "title": "Ratings",
+            "type": "array"
+          },
           "runtime": {
             "title": "Runtime",
             "type": "integer"
@@ -4350,6 +5259,38 @@
           "seasons"
         ],
         "title": "SeriesDetailOut",
+        "type": "object"
+      },
+      "ServiceActionOut": {
+        "properties": {
+          "action": {
+            "enum": [
+              "restart",
+              "up"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "pending": {
+            "default": false,
+            "title": "Pending",
+            "type": "boolean"
+          },
+          "project": {
+            "title": "Project",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project",
+          "action"
+        ],
+        "title": "ServiceActionOut",
         "type": "object"
       },
       "ServiceBlock_IndexerStatsOut_": {
@@ -4933,6 +5874,11 @@
       },
       "ServiceStatus": {
         "properties": {
+          "down_since": {
+            "format": "date-time",
+            "title": "Down Since",
+            "type": "string"
+          },
           "error": {
             "title": "Error",
             "type": "string"
@@ -4959,7 +5905,8 @@
               "bazarr",
               "plex",
               "prometheus",
-              "trakt"
+              "trakt",
+              "helper"
             ],
             "title": "Service",
             "type": "string"
@@ -5598,6 +6545,47 @@
           "totals"
         ],
         "title": "TorrentGroupOut",
+        "type": "object"
+      },
+      "TorrentImportIn": {
+        "description": "Import a finished torrent no arr is tracking. The folder is never sent:\nthe server looks the torrent up and uses the client's own save path.",
+        "properties": {
+          "client": {
+            "enum": [
+              "qbittorrent",
+              "transmission"
+            ],
+            "title": "Client",
+            "type": "string"
+          },
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/ManualImportFileIn"
+            },
+            "title": "Files",
+            "type": "array"
+          },
+          "mode": {
+            "default": "auto",
+            "enum": [
+              "auto",
+              "move",
+              "copy"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "torrent_id": {
+            "title": "Torrent Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "client",
+          "torrent_id",
+          "files"
+        ],
+        "title": "TorrentImportIn",
         "type": "object"
       },
       "TorrentLimitsIn": {
@@ -7116,6 +8104,349 @@
           }
         },
         "summary": "Cleanup",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/cleanup/kept": {
+      "delete": {
+        "description": "Empty the keep list: the rules may match those titles again.",
+        "operationId": "clear_kept_api_v1_cleanup_kept_delete",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Clear Kept",
+        "tags": [
+          "library"
+        ]
+      },
+      "get": {
+        "operationId": "kept_api_v1_cleanup_kept_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CleanupKeptOut"
+                  },
+                  "title": "Response Kept Api V1 Cleanup Kept Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Kept",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/cleanup/kept/{kind}/{item_id}": {
+      "delete": {
+        "operationId": "unkeep_api_v1_cleanup_kept__kind___item_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Unkeep",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/cleanup/leaving": {
+      "get": {
+        "description": "Titles marked to go, soonest first.",
+        "operationId": "leaving_api_v1_cleanup_leaving_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CleanupLeavingOut"
+                  },
+                  "title": "Response Leaving Api V1 Cleanup Leaving Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Leaving",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/cleanup/leaving/{kind}/{item_id}/keep": {
+      "post": {
+        "description": "Keep a title for good: off the leaving list and the Plex shelf, and never\nmatched by any rule again until it is taken off the keep list. Works for a\ntitle that is not leaving yet, too (from a preview).",
+        "operationId": "keep_api_v1_cleanup_leaving__kind___item_id__keep_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CleanupKeepIn",
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CleanupKeptOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Keep",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/cleanup/log": {
+      "get": {
+        "description": "The last runs, newest first. Dry runs are not recorded.",
+        "operationId": "run_log_api_v1_cleanup_log_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CleanupRunOut"
+                  },
+                  "title": "Response Run Log Api V1 Cleanup Log Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Run Log",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/cleanup/rules": {
+      "get": {
+        "operationId": "get_rules_api_v1_cleanup_rules_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CleanupRulesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Rules",
+        "tags": [
+          "library"
+        ]
+      },
+      "put": {
+        "description": "Replaces the switch and the whole rule list. A rule without an id gets\none. Switching off releases everything that was leaving, so turning it on\nagain starts every grace period afresh.",
+        "operationId": "put_rules_api_v1_cleanup_rules_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CleanupRulesIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CleanupRulesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Rules",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/cleanup/rules/preview": {
+      "post": {
+        "description": "What this rule — saved or not, on or off — would take right now, why,\nand how much space that is. Read-only. 502 when Plex, an arr or Overseerr\ncannot be asked, rather than an answer built on missing data.",
+        "operationId": "preview_rule_api_v1_cleanup_rules_preview_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CleanupRuleIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CleanupPreviewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Rule",
+        "tags": [
+          "library"
+        ]
+      }
+    },
+    "/api/v1/cleanup/run": {
+      "post": {
+        "description": "Run the lifecycle now. With the switch off only a dry run does anything\n(the answer says skipped=disabled otherwise). 409 while a run is going.",
+        "operationId": "run_now_api_v1_cleanup_run_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "dry_run",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Dry Run",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CleanupRunOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Now",
         "tags": [
           "library"
         ]
@@ -9603,7 +10934,14 @@
           "required": true
         },
         "responses": {
-          "204": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportCommandOut"
+                }
+              }
+            },
             "description": "Successful Response"
           },
           "422": {
@@ -9625,7 +10963,7 @@
     },
     "/api/v1/manual-import/{app}/assign": {
       "post": {
-        "description": "Import files against targets the user picked, for the ones the arr\ncouldn't place itself. Quality and language still come from the arr's own\ndetection — it parses those from the filename even when the title is a\nmystery, and guessing them here would be worse than reusing its answer.",
+        "description": "Import files against targets the user picked, for the ones the arr\ncouldn't place itself; a file sent without a target keeps the arr's own\nmatch, so one request (and one command to follow) covers both. Quality and\nlanguage still come from the arr's own detection — it parses those from\nthe filename even when the title is a mystery, and guessing them here\nwould be worse than reusing its answer.",
         "operationId": "manual_import_assign_api_v1_manual_import__app__assign_post",
         "parameters": [
           {
@@ -9649,7 +10987,14 @@
           "required": true
         },
         "responses": {
-          "204": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportCommandOut"
+                }
+              }
+            },
             "description": "Successful Response"
           },
           "422": {
@@ -9664,6 +11009,219 @@
           }
         },
         "summary": "Manual Import Assign",
+        "tags": [
+          "importing"
+        ]
+      }
+    },
+    "/api/v1/manual-import/{app}/command/{command_id}": {
+      "get": {
+        "description": "How an import the arr accepted went. Poll until `done`; `message` is\nthe arr's own words, success or failure.",
+        "operationId": "manual_import_command_api_v1_manual_import__app__command__command_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app",
+            "required": true,
+            "schema": {
+              "title": "App",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "command_id",
+            "required": true,
+            "schema": {
+              "title": "Command Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportCommandOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Manual Import Command",
+        "tags": [
+          "importing"
+        ]
+      }
+    },
+    "/api/v1/manual-import/{app}/options": {
+      "get": {
+        "description": "What a file's quality and languages can be set to in an import. Declared\nbefore /manual-import/{app}/{item_id}, which would otherwise claim it.",
+        "operationId": "manual_import_options_api_v1_manual_import__app__options_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app",
+            "required": true,
+            "schema": {
+              "title": "App",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportOptionsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Manual Import Options",
+        "tags": [
+          "importing"
+        ]
+      }
+    },
+    "/api/v1/manual-import/{app}/torrent": {
+      "post": {
+        "description": "Import picked files from a finished torrent's folder. The folder is\nworked out again here and every path must be one the arr found in it.",
+        "operationId": "torrent_import_api_v1_manual_import__app__torrent_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app",
+            "required": true,
+            "schema": {
+              "title": "App",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TorrentImportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportCommandOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Torrent Import",
+        "tags": [
+          "importing"
+        ]
+      }
+    },
+    "/api/v1/manual-import/{app}/torrent/{client_name}/{torrent_id}": {
+      "get": {
+        "description": "What the arr makes of a finished torrent's folder, in the same shape as\na queue item's candidates.",
+        "operationId": "torrent_import_candidates_api_v1_manual_import__app__torrent__client_name___torrent_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app",
+            "required": true,
+            "schema": {
+              "title": "App",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "client_name",
+            "required": true,
+            "schema": {
+              "title": "Client Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "torrent_id",
+            "required": true,
+            "schema": {
+              "title": "Torrent Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ImportCandidateOut"
+                  },
+                  "title": "Response Torrent Import Candidates Api V1 Manual Import  App  Torrent  Client Name   Torrent Id  Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Torrent Import Candidates",
         "tags": [
           "importing"
         ]
@@ -10056,6 +11614,68 @@
         "summary": "Popular",
         "tags": [
           "popular"
+        ]
+      }
+    },
+    "/api/v1/prefs": {
+      "get": {
+        "description": "The stored set: {values, updated_at}. updated_at is unix milliseconds of\nthe write that produced it; values is {} and updated_at 0 until something\nhas been written.",
+        "operationId": "get_prefs_api_v1_prefs_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrefsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Prefs",
+        "tags": [
+          "settings"
+        ]
+      },
+      "put": {
+        "description": "Replaces the whole set with {values, updated_at}, unless the server holds\na newer one. Always answers with what is stored now.\n\nLast write wins: a PUT whose updated_at (unix milliseconds) is older than the\nstored one changes nothing, and the answer carries the stored values and a\ngreater updated_at than was sent, which tells the client its write lost and\nthe returned values are the ones to adopt. An equal updated_at is accepted,\nso a retry is harmless. One in the future is clamped to the server's clock,\nso a device with a wrong clock cannot lock out the others; the answer carries\nthe clamped value, which the client should record as its sync time.\n\nvalues must be flat. Keys are 1-64 characters, at most 100 of them; each\nvalue is a string, number, boolean, null or an array of strings; the whole\nobject is at most 16 KB. Anything else is a 422. A client should send back,\nunchanged, any key it does not know.",
+        "operationId": "put_prefs_api_v1_prefs_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrefsIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrefsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Prefs",
+        "tags": [
+          "settings"
         ]
       }
     },
@@ -10530,6 +12150,28 @@
         ]
       }
     },
+    "/api/v1/queue/attention": {
+      "get": {
+        "description": "Every queue item, across the arrs, that is stuck until someone looks at\nit — each with the arr's own reasons. An arr that is down is named in\n`unavailable` rather than failing the list.",
+        "operationId": "queue_attention_api_v1_queue_attention_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttentionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Queue Attention",
+        "tags": [
+          "dashboard"
+        ]
+      }
+    },
     "/api/v1/queue/{app}/{item_id}": {
       "delete": {
         "operationId": "remove_queue_item_api_v1_queue__app___item_id__delete",
@@ -10640,7 +12282,7 @@
     },
     "/api/v1/queue/{app}/{item_id}/force-import": {
       "post": {
-        "description": "Rescue a stuck import: take the arr's manual-import candidates that\nalready have a confident mapping and import them.",
+        "description": "Rescue a stuck import: take the arr's manual-import candidates that\nalready have a confident mapping and import them. Answers 204 with no body,\nas it always has: installed iOS builds treat anything else as a failure.",
         "operationId": "force_import_api_v1_queue__app___item_id__force_import_post",
         "parameters": [
           {
@@ -12276,6 +13918,84 @@
         "summary": "Subtitles Search All",
         "tags": [
           "subtitles"
+        ]
+      }
+    },
+    "/api/v1/system/restartable": {
+      "get": {
+        "description": "The compose projects the host helper will restart, matched to arrdeck's\nservices by name. Never an error: \"not configured\" and \"unreachable\" are\nstates the Settings page shows, not failures.",
+        "operationId": "restartable_api_v1_system_restartable_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestartableOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Restartable",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/v1/system/services/{name}/{action}": {
+      "post": {
+        "description": "`docker compose restart` or `up -d` in one project, through the helper,\nwhich holds the allowlist. ServiceUnavailable (helper unreachable) is a 502\nfrom the app-wide handler.",
+        "operationId": "service_action_api_v1_system_services__name___action__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "title": "Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "action",
+            "required": true,
+            "schema": {
+              "enum": [
+                "restart",
+                "up"
+              ],
+              "title": "Action",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceActionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Service Action",
+        "tags": [
+          "system"
         ]
       }
     },
