@@ -1,18 +1,21 @@
 import ArrdeckData
 import SwiftUI
 
-/// The Add tab: search Radarr/Sonarr as you type, browse Overseerr's
-/// popular titles while the box is empty, Radarr's collections, and raw
-/// Prowlarr releases on submit.
+/// The Add tab: search Radarr/Sonarr/Readarr/Lidarr as you type, browse
+/// Overseerr's popular titles while the box is empty, Radarr's collections,
+/// and raw Prowlarr releases on submit. Music already in Lidarr opens its
+/// own page, which has everything the add sheet would offer and more.
 public struct AddView: View {
     @State private var model: AddModel
     @State private var selected: SearchResult?
     @State private var collection: Collection?
+    /// An artist or album already in Lidarr, opened rather than offered.
+    @State private var opened: MediaRef?
     @State private var recommendations: [SearchResult] = []
     @State private var watchlist: [SearchResult] = []
     @State private var trakt: [SearchResult] = []
     @AppStorage("add.traktList") private var traktList: TraktList = .trending
-    let api: any DiscoverAPI & LibraryAPI
+    let api: any DiscoverAPI & TitleScreensAPI
     let baseURL: URL
     let hasPlex: Bool
     let hasTrakt: Bool
@@ -23,7 +26,7 @@ public struct AddView: View {
     let dismiss: (() -> Void)?
 
     public init(
-        configured: Set<String>, api: any DiscoverAPI & LibraryAPI, baseURL: URL, hasPlex: Bool,
+        configured: Set<String>, api: any DiscoverAPI & TitleScreensAPI, baseURL: URL, hasPlex: Bool,
         fixed: AddTab? = nil, onSessionLost: @escaping @MainActor () -> Void, dismiss: (() -> Void)? = nil
     ) {
         self.api = api
@@ -51,6 +54,7 @@ public struct AddView: View {
         case .movies?: String(localized: "Add movie")
         case .series?: String(localized: "Add show")
         case .books?: String(localized: "Add book")
+        case .music?: String(localized: "Add music")
         default: String(localized: "Add")
         }
     }
@@ -81,6 +85,9 @@ public struct AddView: View {
         }
         .sheet(item: $collection) { item in
             CollectionSheet(collection: item, api: api, baseURL: baseURL) { collection = nil }
+        }
+        .navigationDestination(item: $opened) { ref in
+            TitleDetail(ref: ref, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
         }
         .alert("Action failed", isPresented: Binding(get: { model.actionError != nil }, set: { if !$0 { model.actionError = nil } })) {
             Button("OK") { model.actionError = nil }
@@ -127,6 +134,13 @@ public struct AddView: View {
                     resultsSection(model.results, title: nil)
                 } else {
                     Section { EmptyNote("Search Readarr for a book to add.") }
+                }
+            case .music:
+                // nor about music
+                if model.searching {
+                    resultsSection(model.results, title: nil)
+                } else {
+                    Section { EmptyNote("Search for an artist or an album in Lidarr to add it") }
                 }
             case .collections:
                 collectionsSection
@@ -254,7 +268,13 @@ public struct AddView: View {
             case let .failed(reason)?: ErrorNote(reason)
             case let .loaded(results)?:
                 if results.isEmpty { EmptyNote("No matches") }
-                PosterGrid(results: results, baseURL: baseURL) { selected = $0 }
+                PosterGrid(results: results, baseURL: baseURL) { result in
+                    if result.searchKind?.isMusic == true, result.in_library == true, let ref = result.ref {
+                        opened = ref
+                    } else {
+                        selected = result
+                    }
+                }
                     .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
                     .listRowBackground(Color.clear)
             }
@@ -320,10 +340,6 @@ public struct AddView: View {
     }
 }
 
-extension SearchResult: Identifiable {
-    /// Music's remote_id is always 0; its MusicBrainz id tells rows apart.
-    public var id: String { "\(kind)-\(foreign_id ?? String(remote_id))" }
-}
 extension Collection: Identifiable {}
 
 struct ReleaseRow: View {
@@ -352,12 +368,25 @@ struct PosterGrid: View {
     let baseURL: URL
     let open: (SearchResult) -> Void
 
+    /// The year; for an album its artist too, and for an artist the word.
+    func caption(_ result: SearchResult) -> String {
+        switch result.searchKind {
+        case .album: [result.artist, result.year.map(String.init)].compactMap { $0 }.joined(separator: " · ")
+        case .artist: String(localized: "Artist")
+        default: result.year.map(String.init) ?? " "
+        }
+    }
+
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 14)], alignment: .leading, spacing: 14) {
             ForEach(results) { result in
                 Button { open(result) } label: {
                     VStack(alignment: .leading, spacing: 4) {
-                        if result.poster != nil {
+                        if result.searchKind?.isMusic == true {
+                            // a coloured tile with the name when there is no cover
+                            Poster(path: result.poster, baseURL: baseURL, width: 100, cornerRadius: 12,
+                                   title: result.title, subtitle: result.artist, square: true)
+                        } else if result.poster != nil {
                             Poster(path: result.poster, baseURL: baseURL, width: 100, cornerRadius: 12)
                         } else {
                             Text(result.title).font(.caption2).foregroundStyle(.secondary)
@@ -367,7 +396,7 @@ struct PosterGrid: View {
                         }
                         Text(result.title).font(.caption.weight(.semibold)).lineLimit(2).frame(height: 32, alignment: .top)
                         HStack {
-                            Text(result.year.map(String.init) ?? " ").font(.caption2).foregroundStyle(.secondary)
+                            Text(caption(result)).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
                             Spacer()
                             if result.in_library == true, result.has_file == true || result.monitored == true {
                                 Text(result.has_file == true ? "Downloaded" : "Monitored")
@@ -391,6 +420,8 @@ struct MediaSheet: View {
     @State private var confirmingDelete = false
     /// The last monitor choice sticks, so "latest season only" is not picked every time.
     @AppStorage("add.seriesMonitor") private var storedMonitor: SeriesMonitor = .all
+    /// The same for a new artist's albums, under the PWA's name.
+    @AppStorage("add.artistMonitor") private var storedArtistMonitor: ArtistMonitor = .all
     let baseURL: URL
     let dismiss: () -> Void
 
@@ -408,9 +439,11 @@ struct MediaSheet: View {
         NavigationStack {
             List {
                 Section {
-                    DetailHero(poster: result.poster, baseURL: baseURL, overview: result.overview ?? "No description available.", links: result.externalLinks) {
+                    DetailHero(poster: result.poster, baseURL: baseURL, overview: result.overview ?? "No description available.",
+                               links: result.externalLinks, square: result.searchKind?.isMusic == true) {
                         Text(result.kindLabel)
                         if let author = result.author { Text("· \(author)") }
+                        if let artist = result.artist { Text("· \(artist)") }
                         if let year = result.year { Text("· \(year)") }
                         Text("· \(result.libraryState)")
                     }
@@ -428,6 +461,7 @@ struct MediaSheet: View {
             .toolbar { Button("Cancel") { dismiss() } }
             .task {
                 model.monitor = storedMonitor
+                model.artistMonitor = storedArtistMonitor
                 model.preferredQualityProfile = UserDefaults.standard.object(forKey: Self.profileKey(result)) as? Int
                 await model.load()
                 await model.loadSeasons()
@@ -436,6 +470,7 @@ struct MediaSheet: View {
                 storedMonitor = monitor
                 Task { await model.loadSeasons() }
             }
+            .onChange(of: model.artistMonitor) { _, monitor in storedArtistMonitor = monitor }
             .onChange(of: model.qualityProfile) { _, profile in
                 // the profile picked for a new title is the default for the next one
                 guard result.in_library != true, let profile else { return }
@@ -460,8 +495,9 @@ struct MediaSheet: View {
                     }
                 }
             }
-            // Readarr matches a new author against a metadata profile too.
-            if result.searchKind == .book, let profiles = model.options?.metadata_profiles, !profiles.isEmpty {
+            // Readarr matches a new author against a metadata profile too,
+            // and Lidarr a new artist.
+            if model.usesMetadataProfile, let profiles = model.options?.metadata_profiles, !profiles.isEmpty {
                 Picker("Metadata profile", selection: $model.metadataProfile) {
                     ForEach(profiles, id: \.id) { Text($0.name).tag(Int?.some($0.id)) }
                 }
@@ -470,6 +506,19 @@ struct MediaSheet: View {
                 ForEach(model.options?.root_folders ?? [], id: \.id) { folder in
                     Text(folder.free_space.map { "\(folder.path) (\(Format.bytes($0)) free)" } ?? folder.path).tag(String?.some(folder.path))
                 }
+            }
+        }
+        if result.searchKind == .artist {
+            Section {
+                Picker("Monitor", selection: $model.artistMonitor) {
+                    ForEach(ArtistMonitor.allCases, id: \.self) { Text($0.label).tag($0) }
+                }
+            }
+        }
+        if result.searchKind == .album {
+            Section {
+            } footer: {
+                Text("If Lidarr does not have the artist yet, they are added with these settings and only this album monitored.")
             }
         }
         if result.searchKind == .series {

@@ -527,3 +527,68 @@ public final class AlbumDetailModel {
         (error as? APIError)?.description ?? error.localizedDescription
     }
 }
+
+// MARK: - Adding
+
+/// Which of a new artist's albums Lidarr monitors: Lidarr's own choices.
+public enum ArtistMonitor: String, CaseIterable, Sendable, Hashable {
+    case all, future, missing, existing, latest, first, none
+
+    public var label: String {
+        switch self {
+        case .all: String(localized: "All albums")
+        case .future: String(localized: "Future albums")
+        case .missing: String(localized: "Missing albums")
+        case .existing: String(localized: "Existing albums")
+        case .latest: String(localized: "Latest album")
+        case .first: String(localized: "First album")
+        case .none: String(localized: "None")
+        }
+    }
+}
+
+/// Adding an artist or an album from a music search. The MusicBrainz id is
+/// the result's `foreign_id`; music's `remote_id` is always 0.
+public protocol MusicAddAPI: Sendable {
+    func addArtist(_ result: SearchResult, qualityProfile: Int, rootFolder: String,
+                   metadataProfile: Int?, monitor: ArtistMonitor) async throws
+    /// When Lidarr has no such artist yet they are added too, with these
+    /// settings and only this album monitored.
+    func addAlbum(_ result: SearchResult, qualityProfile: Int, rootFolder: String, metadataProfile: Int?) async throws
+}
+
+extension LiveAPI: MusicAddAPI {
+    public func addArtist(_ result: SearchResult, qualityProfile: Int, rootFolder: String,
+                          metadataProfile: Int?, monitor: ArtistMonitor) async throws {
+        guard let id = result.foreign_id else { throw APIError.unexpectedStatus(422) }
+        let body = Components.Schemas.AddArtistIn(
+            foreign_artist_id: id, metadata_profile_id: metadataProfile,
+            monitor: .init(rawValue: monitor.rawValue),
+            quality_profile_id: qualityProfile, root_folder_path: rootFolder,
+            // monitoring nothing means there is nothing to search for yet
+            search_now: monitor != .none, title: result.title
+        )
+        try await call {
+            switch try await client.add_artist_api_v1_artists_post(body: .json(body)) {
+            case .created: ()
+            case .unprocessableContent: throw APIError.unexpectedStatus(422)
+            case let .undocumented(code, _): throw APIError.status(code)
+            }
+        }
+    }
+
+    public func addAlbum(_ result: SearchResult, qualityProfile: Int, rootFolder: String, metadataProfile: Int?) async throws {
+        guard let id = result.foreign_id else { throw APIError.unexpectedStatus(422) }
+        let body = Components.Schemas.AddAlbumIn(
+            foreign_album_id: id, metadata_profile_id: metadataProfile,
+            quality_profile_id: qualityProfile, root_folder_path: rootFolder, title: result.title
+        )
+        try await call {
+            switch try await client.add_album_api_v1_albums_post(body: .json(body)) {
+            case .created: ()
+            case .unprocessableContent: throw APIError.unexpectedStatus(422)
+            case let .undocumented(code, _): throw APIError.status(code)
+            }
+        }
+    }
+}

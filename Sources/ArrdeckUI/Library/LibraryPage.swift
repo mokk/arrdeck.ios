@@ -157,10 +157,8 @@ public struct LibraryPage: View {
                 } else {
                     Button { searchingEverything = true } label: { Label("Search everything", systemImage: "magnifyingglass") }
                     sortMenu
-                    if addTab != nil {
-                        Button { adding = true } label: { Label("Add", systemImage: "plus") }
-                            .accessibilityIdentifier("library-add")
-                    }
+                    Button { adding = true } label: { Label("Add", systemImage: "plus") }
+                        .accessibilityIdentifier("library-add")
                 }
             }
         }
@@ -222,12 +220,12 @@ public struct LibraryPage: View {
         requests = (try? await source.requestMap()) ?? [:]
     }
 
-    var addTab: AddTab? {
+    var addTab: AddTab {
         switch app {
         case .radarr: .movies
         case .sonarr: .series
         case .readarr: .books
-        case .lidarr: nil
+        case .lidarr: .music
         }
     }
 
@@ -238,7 +236,7 @@ public struct LibraryPage: View {
             ContentUnavailableView {
                 Label(emptyTitle, systemImage: "tray")
             } actions: {
-                if addTab != nil { Button(addLabel) { adding = true }.buttonStyle(.bordered) }
+                Button(addLabel) { adding = true }.buttonStyle(.bordered)
             }
         } else if model.shown.isEmpty, !model.query.isEmpty {
             ContentUnavailableView {

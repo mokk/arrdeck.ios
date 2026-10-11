@@ -210,6 +210,17 @@ extension FakeDiscoverAPI: SeriesAddAPI {
     }
 }
 
+extension FakeDiscoverAPI: MusicAddAPI {
+    func addArtist(_ result: SearchResult, qualityProfile: Int, rootFolder: String,
+                   metadataProfile: Int?, monitor: ArtistMonitor) async throws {
+        try log("add-artist-\(result.foreign_id ?? "")-\(monitor.rawValue)")
+    }
+
+    func addAlbum(_ result: SearchResult, qualityProfile: Int, rootFolder: String, metadataProfile: Int?) async throws {
+        try log("add-album-\(result.foreign_id ?? "")")
+    }
+}
+
 @Suite struct SeriesMonitorTests {
     @Test @MainActor func pickedSeasonsStartAtEveryRegularSeasonAndAreSent() async {
         let api = FakeDiscoverAPI()

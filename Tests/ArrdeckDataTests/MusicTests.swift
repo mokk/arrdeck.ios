@@ -408,3 +408,81 @@ actor FakeMusicAPI: LibraryAPI, MusicLibraryAPI, ManageAPI {
         ])
     }
 }
+
+// MARK: - adding
+
+@MainActor @Suite struct AddMusicTests {
+    @Test func musicIsATabOnceLidarrIsConfiguredAndSearchesLidarr() async throws {
+        let api = FakeDiscoverAPI()
+        let model = AddModel(configured: ["radarr", "lidarr", "prowlarr"], api: api, onSessionLost: {})
+        #expect(model.tabs == [.movies, .music, .collections, .releases])
+        model.tab = .music
+        await model.load()
+        #expect(await api.count("discover-music") == 0, "nothing popular to show for music")
+        model.input = "boards"
+        await model.submit()
+        #expect(await api.count("search-music-boards") >= 1)
+        #expect(AddTab.music.mediaKind == .music && MediaKind.music.app == .lidarr)
+    }
+
+    @Test func anArtistIsAddedWithTheMonitorChoiceAndNoneDoesNotSearch() async {
+        let api = FakeDiscoverAPI()
+        let artist = SearchResult(foreign_id: "69158f97", kind: "artist", remote_id: 0, title: "Boards of Canada")
+        let sheet = MediaSheetModel(result: artist, api: api, onSessionLost: {})
+        await sheet.load()
+        #expect(sheet.usesMetadataProfile)
+        #expect(sheet.addSearches)
+        sheet.artistMonitor = .none
+        #expect(!sheet.addSearches)
+        await sheet.add()
+        #expect(await api.count("add-artist-69158f97-none") == 1)
+        #expect(sheet.done)
+    }
+
+    @Test func anAlbumIsAddedThroughTheAddRoute() async {
+        let api = FakeDiscoverAPI()
+        let album = SearchResult(album_type: "EP", artist: "Cale Parks", foreign_id: "bd8ea9e2", kind: "album", remote_id: 0, title: "Boards")
+        #expect(album.kindLabel == "EP", "Lidarr's own word for it")
+        #expect(album.app == .lidarr && album.externalLinks.isEmpty)
+        let sheet = MediaSheetModel(result: album, api: api, onSessionLost: {})
+        await sheet.load()
+        await sheet.add()
+        #expect(await api.count("add-0-4-/movies") == 1)
+    }
+
+    @Test func musicInTheLibraryOpensItsPage() {
+        #expect(SearchResult(in_library: true, kind: "artist", library_id: 1, remote_id: 0, title: "x").ref == .artist(1))
+        #expect(SearchResult(in_library: true, kind: "album", library_id: 4, remote_id: 0, title: "x").ref == .album(4))
+        #expect(SearchResult(kind: "album", remote_id: 0, title: "x").ref == nil)
+    }
+}
+
+@Suite struct AddMusicWireTests {
+    @Test func searchAndAddReachLidarrsRoutes() async throws {
+        let transport = ImportRecordingTransport(routes: [
+            "/api/v1/search/music?q=boards": .init(body: """
+            [{"kind": "album", "title": "Boards", "year": 2020, "remote_id": 0, "foreign_id": "bd8ea9e2",
+              "in_library": false, "artist": "Cale Parks", "album_type": "EP"},
+             {"kind": "artist", "title": "Boards of Canada", "remote_id": 0, "foreign_id": "69158f97",
+              "poster": "/api/v1/library/artists/1/image/poster-250.jpg?v=1", "in_library": true, "library_id": 1,
+              "monitored": true, "quality_profile_id": 1, "has_file": true}]
+            """),
+            "/api/v1/artists": .init(status: 201, body: #"{"id": 9, "title": "Boards of Canada"}"#),
+            "/api/v1/albums": .init(status: 201, body: #"{"id": 10, "title": "Boards"}"#),
+        ])
+        let api = LiveAPI(client: Client(serverURL: URL(string: "http://stub")!, transport: transport))
+        let found = try await api.search(.music, query: "boards")
+        #expect(found.map(\.searchKind) == [.album, .artist])
+        #expect(Set(found.map(\.id)).count == 2, "rows apart by MusicBrainz id, though remote_id is 0 for both")
+        try await api.addArtist(found[1], qualityProfile: 1, rootFolder: "/music", metadataProfile: 2, monitor: .latest)
+        try await api.add(found[0], qualityProfile: 1, rootFolder: "/music", metadataProfile: 2, edition: nil)
+        let bodies = try transport.requests.dropFirst().map {
+            try JSONSerialization.jsonObject(with: Data($0.body.utf8)) as! NSDictionary
+        }
+        #expect(bodies[0] == ["foreign_artist_id": "69158f97", "title": "Boards of Canada", "quality_profile_id": 1,
+                              "metadata_profile_id": 2, "root_folder_path": "/music", "monitor": "latest",
+                              "search_now": true] as NSDictionary)
+        #expect(bodies[1] == ["foreign_album_id": "bd8ea9e2", "title": "Boards", "quality_profile_id": 1,
+                              "metadata_profile_id": 2, "root_folder_path": "/music"] as NSDictionary)
+    }
+}

@@ -14,13 +14,14 @@ public typealias RootFolder = Components.Schemas.RootFolderOut
 extension Components.Schemas.ServiceBlock_PopularSnapshotOut_: ServiceBlockShape {}
 
 public enum MediaKind: String, CaseIterable, Sendable, Hashable {
-    case movies, series, books
+    case movies, series, books, music
 
     public var app: ArrApp {
         switch self {
         case .movies: .radarr
         case .series: .sonarr
         case .books: .readarr
+        case .music: .lidarr
         }
     }
 
@@ -29,6 +30,7 @@ public enum MediaKind: String, CaseIterable, Sendable, Hashable {
         case .movies: String(localized: "Movies")
         case .series: String(localized: "Series")
         case .books: String(localized: "Books")
+        case .music: String(localized: "Music")
         }
     }
 }
@@ -41,7 +43,9 @@ extension SearchResult {
         case .movie: return .movie(library_id)
         case .series: return .series(library_id)
         case .book: return .book(library_id)
-        case .artist, .album, nil: return nil
+        case .artist: return .artist(library_id)
+        case .album: return .album(library_id)
+        case nil: return nil
         }
     }
 
@@ -49,7 +53,8 @@ extension SearchResult {
     /// never reached.
     public var app: ArrApp { searchKind?.app ?? .radarr }
 
-    /// "Movie", "Series" or "Book", for the sheet's first badge.
+    /// "Movie", "Series", "Book", "Artist", or Lidarr's word for an album, for
+    /// the sheet's first badge.
     public var kindLabel: String {
         switch searchKind {
         case .movie: String(localized: "Movie")
@@ -85,6 +90,11 @@ extension SearchResult {
     }
 }
 
+extension SearchResult: Identifiable {
+    /// Music's remote_id is always 0; its MusicBrainz id tells rows apart.
+    public var id: String { "\(kind)-\(foreign_id ?? String(remote_id))" }
+}
+
 extension PopularRelease {
     /// Hours since the indexer published it; nil when it did not say.
     public func hoursOld(now: Date = .now) -> Double? {
@@ -98,7 +108,9 @@ public protocol DiscoverAPI: Sendable {
     func searchReleases(_ query: String) async throws -> [Release]
     func discover(_ kind: MediaKind) async throws -> [SearchResult]
     func grab(guid: String, indexerID: Int) async throws
-    /// `metadataProfile` matters for books only: Readarr keeps it on the author.
+    /// `metadataProfile` matters for books and music only: Readarr keeps it
+    /// on the author, Lidarr on the artist. An artist added here monitors
+    /// all their albums; MusicAddAPI chooses.
     func add(_ result: SearchResult, qualityProfile: Int, rootFolder: String, metadataProfile: Int?, edition: String?) async throws
     func collections() async throws -> [Collection]
     func collectionDetail(_ id: Int) async throws -> CollectionDetail
@@ -124,6 +136,13 @@ extension LiveAPI: DiscoverAPI {
                 }
             case .books:
                 switch try await client.search_books_api_v1_search_books_get(query: .init(q: query)) {
+                case let .ok(ok): return try ok.body.json.ofKnownKinds
+                case .unprocessableContent: throw APIError.unexpectedStatus(422)
+                case let .undocumented(code, _): throw APIError.status(code)
+                }
+            case .music:
+                // artists and albums from Lidarr's metadata server, best match first
+                switch try await client.search_music_api_v1_search_music_get(query: .init(q: query)) {
                 case let .ok(ok): return try ok.body.json.ofKnownKinds
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)
@@ -157,8 +176,8 @@ extension LiveAPI: DiscoverAPI {
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)
                 }
-            case .books:
-                return [] // Overseerr has no popular list for books
+            case .books, .music:
+                return [] // Overseerr has no popular list for books or music
             }
         }
     }
@@ -206,7 +225,12 @@ extension LiveAPI: DiscoverAPI {
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)
                 }
-            case .artist, .album, nil:
+            case .artist:
+                try await addArtist(result, qualityProfile: qualityProfile, rootFolder: rootFolder,
+                                    metadataProfile: metadataProfile, monitor: .all)
+            case .album:
+                try await addAlbum(result, qualityProfile: qualityProfile, rootFolder: rootFolder, metadataProfile: metadataProfile)
+            case nil:
                 throw APIError.unexpectedStatus(422)
             }
         }
@@ -257,13 +281,14 @@ extension LiveAPI: DiscoverAPI {
 // MARK: - Add
 
 public enum AddTab: String, CaseIterable, Sendable, Hashable {
-    case movies, series, books, collections, releases
+    case movies, series, books, music, collections, releases
 
     public var label: String {
         switch self {
         case .movies: String(localized: "Movies")
         case .series: String(localized: "Series")
         case .books: String(localized: "Books")
+        case .music: String(localized: "Music")
         case .collections: String(localized: "Collections")
         case .releases: String(localized: "Releases")
         }
@@ -274,6 +299,7 @@ public enum AddTab: String, CaseIterable, Sendable, Hashable {
         case .movies, .collections: "radarr"
         case .series: "sonarr"
         case .books: "readarr"
+        case .music: "lidarr"
         case .releases: "prowlarr"
         }
     }
@@ -286,6 +312,7 @@ public enum AddTab: String, CaseIterable, Sendable, Hashable {
         case .movies: String(localized: "Search movies…")
         case .series: String(localized: "Search series…")
         case .books: String(localized: "Search books…")
+        case .music: String(localized: "Search artists and albums…")
         case .collections: String(localized: "Filter by name…")
         case .releases: String(localized: "Search raw releases…")
         }
@@ -340,8 +367,8 @@ public final class AddModel {
         switch tab {
         case .movies, .series:
             if canDiscover { await loadDiscover(tab == .movies ? .movies : .series) }
-        case .books:
-            break // Overseerr knows nothing about books: no popular list
+        case .books, .music:
+            break // Overseerr knows nothing about books or music: no popular list
         case .collections:
             await loadCollections()
         case .releases:
@@ -375,7 +402,7 @@ public final class AddModel {
         let mine = generation
         let query = input.trimmingCharacters(in: .whitespaces)
         switch tab {
-        case .movies, .series, .books:
+        case .movies, .series, .books, .music:
             let kind = tab.mediaKind ?? .movies
             if results?.value == nil { results = .loading }
             do {
@@ -466,6 +493,8 @@ public final class MediaSheetModel {
     public var edition: String?
     /// Shows only: what Sonarr monitors, and the seasons when they are picked.
     public var monitor: SeriesMonitor = .all
+    /// Artists only: which of their albums Lidarr monitors.
+    public var artistMonitor: ArtistMonitor = .all
     public private(set) var seasons: [Int]?
     public var picked: Set<Int> = []
     public private(set) var busy = false
@@ -487,7 +516,17 @@ public final class MediaSheetModel {
 
     /// Whether adding will also search: not when nothing is monitored.
     public var addSearches: Bool {
-        result.searchKind != .series || SeriesMonitorPick.searches(monitor: monitor, seasons: monitor == .pick ? Array(picked) : nil)
+        switch result.searchKind {
+        case .series: SeriesMonitorPick.searches(monitor: monitor, seasons: monitor == .pick ? Array(picked) : nil)
+        case .artist: artistMonitor != .none
+        default: true
+        }
+    }
+
+    /// Readarr keeps a metadata profile on the author, Lidarr on the artist,
+    /// and an album added without its artist brings them in with it.
+    public var usesMetadataProfile: Bool {
+        result.searchKind == .book || result.searchKind?.isMusic == true
     }
 
     /// The show's seasons, fetched the first time "Pick seasons" is chosen.
@@ -527,7 +566,7 @@ public final class MediaSheetModel {
 
     public func add() async {
         guard let qualityProfile, let rootFolder else { return }
-        let metadataProfile = result.searchKind == .book ? metadataProfile : nil
+        let metadataProfile = usesMetadataProfile ? metadataProfile : nil
         let edition = result.searchKind == .book ? edition : nil
         if result.searchKind == .series, let source = api as? any SeriesAddAPI {
             let monitor = monitor
@@ -535,6 +574,14 @@ public final class MediaSheetModel {
             let result = result
             await perform {
                 try await source.addSeries(result, qualityProfile: qualityProfile, rootFolder: rootFolder, monitor: monitor, seasons: seasons)
+            }
+            return
+        }
+        if result.searchKind == .artist, let source = api as? any MusicAddAPI {
+            let (monitor, result) = (artistMonitor, result)
+            await perform {
+                try await source.addArtist(result, qualityProfile: qualityProfile, rootFolder: rootFolder,
+                                           metadataProfile: metadataProfile, monitor: monitor)
             }
             return
         }
