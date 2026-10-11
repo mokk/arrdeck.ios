@@ -1,7 +1,7 @@
 import ArrdeckData
 import SwiftUI
 
-/// Settings → Display: how the app looks and behaves on this device. The sort
+/// Settings → Display: how the app looks and behaves, on every device that uses this server. The sort
 /// menu changes the same layouts; this is every choice in one place.
 struct DisplaySettingsView: View {
     let configured: Set<String>
@@ -112,7 +112,7 @@ struct DisplaySettingsView: View {
             }
             Section {
             } footer: {
-                Text("These choices are kept on this device only. Drag the tabs to reorder them.")
+                Text("These choices follow you to your other devices on this server, except the language, which is set per device. Drag the tabs to reorder them.")
             }
         }
         .alwaysEditing()

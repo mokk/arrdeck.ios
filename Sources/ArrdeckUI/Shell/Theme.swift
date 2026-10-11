@@ -2,19 +2,6 @@ import ArrdeckData
 import Observation
 import SwiftUI
 
-/// Light, dark, or whatever the system is.
-public enum Appearance: String, CaseIterable, Sendable {
-    case system, light, dark
-
-    public var label: String {
-        switch self {
-        case .system: String(localized: "System")
-        case .light: String(localized: "Light")
-        case .dark: String(localized: "Dark")
-        }
-    }
-}
-
 /// The chosen palette and appearance. Observable, so a view that reads one of
 /// the colours below redraws when the palette changes — the colours reach it
 /// through `Color.grouped` and friends rather than being threaded through
@@ -30,12 +17,23 @@ public final class ThemeStore {
         didSet { UserDefaults.standard.set(appearance.rawValue, forKey: Self.appearanceKey) }
     }
 
-    static let paletteKey = "display.palette"
-    static let appearanceKey = "display.appearance"
+    static let paletteKey = DisplayKeys.palette
+    static let appearanceKey = DisplayKeys.appearance
 
     init() {
         palette = UserDefaults.standard.pref(Self.paletteKey, default: Palette.arrdeck)
         appearance = UserDefaults.standard.pref(Self.appearanceKey, default: Appearance.system)
+    }
+
+    /// Takes the choices from storage again, for when synced preferences
+    /// arrived from another device: the views redraw through the @Observable
+    /// properties, as they would for a tap on the picker.
+    func reload() {
+        let stored = UserDefaults.standard
+        let nextPalette = stored.pref(Self.paletteKey, default: Palette.arrdeck)
+        let nextAppearance = stored.pref(Self.appearanceKey, default: Appearance.system)
+        if palette != nextPalette { palette = nextPalette }
+        if appearance != nextAppearance { appearance = nextAppearance }
     }
 
     /// nil follows the system; a palette with no light variant pins dark.

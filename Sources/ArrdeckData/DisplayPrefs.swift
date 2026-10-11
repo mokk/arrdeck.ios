@@ -1,7 +1,20 @@
 import Foundation
 
+/// Light, dark, or whatever the system is.
+public enum Appearance: String, CaseIterable, Sendable {
+    case system, light, dark
+
+    public var label: String {
+        switch self {
+        case .system: String(localized: "System")
+        case .light: String(localized: "Light")
+        case .dark: String(localized: "Dark")
+        }
+    }
+}
+
 /// How a library tab shows its titles: covers, a compact list, or a list
-/// with the extra facts. Kept per tab, on this device.
+/// with the extra facts. Kept per tab, and shared with the other devices on the server.
 public enum LibraryLayout: String, CaseIterable, Sendable, Hashable {
     case posters, list, details
     /// Shows in airing order; books as series with their gaps; Radarr's collections.
@@ -116,6 +129,8 @@ public enum DisplayKeys {
     public static let sizes = "display.sizes"
     public static let spoilers = "display.spoilers"
     public static let confirm = "display.confirm"
+    public static let palette = "display.palette"
+    public static let appearance = "display.appearance"
 }
 
 extension UserDefaults {

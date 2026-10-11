@@ -38,10 +38,14 @@ public struct ServerView: View {
             onSessionLost: { controller.sessionLost() }
         ))
         _feed = State(initialValue: ActivityFeedModel(api: api, onSessionLost: { controller.sessionLost() }))
+        _prefsSync = State(initialValue: PrefsSyncModel(api: api, profileID: profile.id, onApplied: { ThemeStore.shared.reload() }))
     }
 
     /// What happened since Activity was last opened — the badge on its tab.
     @State private var feed: ActivityFeedModel
+    /// Settings → Display, kept in step with the server's copy so the choices
+    /// follow you to your other devices.
+    @State private var prefsSync: PrefsSyncModel
 
     var sessionLost: @MainActor () -> Void {
         { [controller] in controller.sessionLost() }
@@ -92,13 +96,28 @@ public struct ServerView: View {
             }
         }
         .task { await controller.watchNetwork() }
+        .task(id: syncsPrefs) {
+            guard syncsPrefs else { return }
+            await prefsSync.run()
+        }
         .onChange(of: scenePhase) { _, phase in
             // back from the background, perhaps somewhere else
-            if phase == .active { controller.reroute() }
+            if phase == .active {
+                controller.reroute()
+                prefsSync.refreshIfStale()
+            }
         }
     }
 
     @Environment(\.scenePhase) private var scenePhase
+
+    /// Whether the display preferences are kept in step with the server: while
+    /// the backend answers this device (until then there is no copy to read and
+    /// a request would only fail), and when it has the endpoint. One that has
+    /// not reported its features yet is tried anyway; a failure changes nothing.
+    var syncsPrefs: Bool {
+        controller.isUsable && (controller.profile.lastKnown?.supports(.prefs) ?? true)
+    }
 
     @State private var selectedTab: AppTab = .movies
     @AppStorage(DisplayKeys.startTab) private var startTab = ""
