@@ -81,4 +81,6 @@ public enum Feature: String, CaseIterable, Sendable {
     case subtitles
     case vpn
     case backupRestore = "backup_restore"
+    case cleanupRules = "cleanup_rules"
+    case prefs
 }
