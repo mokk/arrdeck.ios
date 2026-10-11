@@ -136,7 +136,7 @@ struct SystemView: View {
                     ? String(localized: "\(project.label) stops answering while it restarts.")
                     : String(localized: "\(project.label) is started again.")
             // always destructive: a restart cuts off whatever the service is doing
-            ask(confirmCenter, action, subject: subject, destructive: true) {
+            ask(confirmCenter, action, subject: subject, destructive: true, always: true) {
                 guard let control else { return }
                 if await control.act(project), !project.isSelf { await model.load() }
             }

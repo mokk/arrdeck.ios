@@ -54,7 +54,7 @@ struct CleanupRulesView<Header: View>: View {
     func change(_ change: CleanupRulesModel.Change, _ action: String, subject: String? = nil,
                 perform: @escaping @MainActor () async -> Void) {
         if model.asks(change) {
-            ask(confirmCenter, action, subject: subject, destructive: true, perform: perform)
+            ask(confirmCenter, action, subject: subject, destructive: true, always: true, perform: perform)
         } else {
             Task { await perform() }
         }
@@ -382,7 +382,7 @@ struct RuleEditorSheet: View {
                         Button("Delete rule", role: .destructive) {
                             ask(confirmCenter, String(localized: "Delete rule"),
                                 subject: String(localized: "\(draft.title): what it marked is released at the next run."),
-                                destructive: true) {
+                                destructive: true, always: true) {
                                 if await model.delete(draft.id) { done() } else { takeFailure() }
                             }
                         }
@@ -528,7 +528,7 @@ struct RuleEditorSheet: View {
         if model.asks(.save(enabled: draft.enabled)) {
             ask(confirmCenter, String(localized: "Save rule"),
                 subject: String(localized: "\(draft.title) is switched on: the change applies from the next run."),
-                destructive: true, perform: perform)
+                destructive: true, always: true, perform: perform)
         } else {
             Task { await perform() }
         }

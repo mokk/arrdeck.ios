@@ -356,6 +356,7 @@ struct QueueRow: View {
     var grab: (() -> Void)? = nil
     /// Opens the import sheet, to pick files, targets and quality by hand.
     var fix: (() -> Void)? = nil
+    @Environment(\.confirmCenter) private var confirmCenter
 
     /// A release a delay profile is holding, and when it goes on its own.
     var heldUntil: String? {
@@ -394,8 +395,12 @@ struct QueueRow: View {
                     Button("Grab now", action: grab).buttonStyle(.bordered).controlSize(.small)
                 }
                 if let state = item.tracked_state, state.hasPrefix("import"), state != "imported" {
-                    Button("Force import", action: forceImport)
-                        .buttonStyle(.bordered).controlSize(.small)
+                    // An import always asks, whatever Settings says.
+                    Button("Force import") {
+                        ask(confirmCenter, String(localized: "Force import"), subject: item.title,
+                            destructive: true, always: true) { forceImport() }
+                    }
+                    .buttonStyle(.bordered).controlSize(.small)
                     if let fix {
                         Button("Manual import…", action: fix)
                             .buttonStyle(.bordered).controlSize(.small)

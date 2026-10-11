@@ -5,6 +5,8 @@ import SwiftUI
 /// ask before every action, only before deleting, or never. Actions go
 /// through `run`, which performs them straight away when the policy does not
 /// ask, and otherwise holds them until the dialog at the root answers.
+/// Restarting a service, the cleanup rules and imports pass `always`: they
+/// ask whatever the setting says.
 @MainActor @Observable
 final class ConfirmCenter {
     struct Pending: Identifiable {
@@ -17,10 +19,10 @@ final class ConfirmCenter {
 
     var pending: Pending?
 
-    func run(_ action: String, subject: String? = nil, destructive: Bool = false,
+    func run(_ action: String, subject: String? = nil, destructive: Bool = false, always: Bool = false,
              perform: @escaping @MainActor () async -> Void) {
         let policy = UserDefaults.standard.pref(DisplayKeys.confirm, default: ConfirmPolicy.deletes)
-        if policy.asks(destructive: destructive) {
+        if always || policy.asks(destructive: destructive) {
             pending = Pending(action: action, subject: subject, destructive: destructive, perform: perform)
         } else {
             Task { await perform() }
@@ -56,9 +58,9 @@ extension View {
 /// Runs an action through the confirm center when there is one.
 @MainActor
 func ask(_ center: ConfirmCenter?, _ action: String, subject: String? = nil, destructive: Bool = false,
-         perform: @escaping @MainActor () async -> Void) {
+         always: Bool = false, perform: @escaping @MainActor () async -> Void) {
     if let center {
-        center.run(action, subject: subject, destructive: destructive, perform: perform)
+        center.run(action, subject: subject, destructive: destructive, always: always, perform: perform)
     } else {
         Task { await perform() }
     }

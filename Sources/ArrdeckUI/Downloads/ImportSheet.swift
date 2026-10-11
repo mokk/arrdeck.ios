@@ -22,7 +22,7 @@ struct ImportSheet: View {
     @State private var model: ImportModel?
     @State private var path: [ImportRoute] = []
     // Its own dialog host: the shell's sits under this sheet and cannot
-    // present over it. The policy in Settings still decides whether it asks.
+    // present over it. An import always asks, whatever Settings says.
     @State private var confirm = ConfirmCenter()
 
     /// `api` is whatever the presenting screen holds; the live client does
@@ -178,7 +178,7 @@ private struct ImportList: View {
                 // Asked even under "only before deleting": an import can
                 // replace a file already in the library, and move takes the
                 // files from the torrent client.
-                ask(confirm, actionLabel, subject: "\(app) · \(model.picks.mode.explanation)", destructive: true) {
+                ask(confirm, actionLabel, subject: "\(app) · \(model.picks.mode.explanation)", destructive: true, always: true) {
                     await model.start()
                 }
             } label: {
