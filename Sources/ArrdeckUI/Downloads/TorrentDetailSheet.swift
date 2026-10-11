@@ -139,6 +139,7 @@ struct TorrentDetailSheet: View {
                 Text(extras.actionError ?? "")
             }
         }
+        .outsideChrome()
     }
 
     @ViewBuilder var extrasSections: some View {

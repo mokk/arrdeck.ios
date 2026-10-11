@@ -65,7 +65,9 @@ public struct SeriesDetailView: View {
             }
         }
         .dashboardListStyle()
+        .chromePage(title: title) { WatchedDot(watched: model.watched) }
         .navigationTitle(title)
+        // opened from iOS search the page sits in a sheet, which keeps its bar
         .toolbar { WatchedDot(watched: model.watched) }
         .task {
             await model.load()

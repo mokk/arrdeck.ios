@@ -95,6 +95,7 @@ public struct BookDetailView: View {
             }
         }
         .dashboardListStyle()
+        .chromePage(title: title)
         .navigationTitle(title)
         .task { await model.load() }
         .onChange(of: model.deleted) { _, deleted in if deleted { dismiss() } }

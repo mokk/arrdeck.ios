@@ -46,6 +46,7 @@ struct OpdsSettingsView: View {
 
     var body: some View {
         Form {
+            ListPageHeading(title: String(localized: "Reading apps"))
             switch settings {
             case .loading: LoadingRow()
             case let .failed(reason): ErrorNote(reason)
@@ -78,6 +79,7 @@ struct OpdsSettingsView: View {
             }
         }
         .themedList()
+        .chromePage()
         .navigationTitle("Reading apps")
         .pageTitle()
         .confirmationDialog("New address", isPresented: $confirmingNew, titleVisibility: .visible) {

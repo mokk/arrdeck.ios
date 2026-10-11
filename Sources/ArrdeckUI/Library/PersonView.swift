@@ -20,6 +20,7 @@ struct PersonView: View {
             case let .failed(reason): ErrorNote(reason).padding()
             case let .loaded(person):
                 VStack(alignment: .leading, spacing: 16) {
+                    PageHeading(title: person.name ?? "", horizontal: 0)
                     HStack(spacing: 14) {
                         if let image = person.image, let url = URL(string: image, relativeTo: baseURL) {
                             AsyncImage(url: url) { $0.resizable().scaledToFill() } placeholder: { Circle().fill(.quaternary) }
@@ -61,6 +62,7 @@ struct PersonView: View {
             }
         }
         .background(Color.grouped)
+        .chromePage()
         .navigationTitle(person.value?.name ?? "")
         .task {
             do { person = .loaded(try await api.person(ref.tmdbID)) } catch { person = .failed(error.localizedDescription) }

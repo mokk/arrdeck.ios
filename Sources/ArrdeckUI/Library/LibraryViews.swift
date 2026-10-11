@@ -58,16 +58,12 @@ struct MediaDestination: View {
     var body: some View {
         detail
             .id(current)
-            .toolbar {
+            .chromeActions {
                 if neighbours.previous != nil || neighbours.next != nil {
-                    ToolbarItemGroup(placement: .primaryAction) {
-                        Button { step(neighbours.previous) } label: { Image(systemName: "chevron.up") }
-                            .disabled(neighbours.previous == nil)
-                            .accessibilityLabel("Previous title")
-                        Button { step(neighbours.next) } label: { Image(systemName: "chevron.down") }
-                            .disabled(neighbours.next == nil)
-                            .accessibilityLabel("Next title")
-                    }
+                    Button { step(neighbours.previous) } label: { Label("Previous title", systemImage: "chevron.up") }
+                        .disabled(neighbours.previous == nil)
+                    Button { step(neighbours.next) } label: { Label("Next title", systemImage: "chevron.down") }
+                        .disabled(neighbours.next == nil)
                 }
             }
             // No swipe to step between titles: any drag gesture on the page

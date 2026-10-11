@@ -333,6 +333,7 @@ struct RunResultSheet: View {
             .navigationTitle(run.dry_run == true ? "Test run" : "Run")
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done", action: done) } }
         }
+        .outsideChrome()
     }
 }
 
@@ -413,6 +414,7 @@ struct RuleEditorSheet: View {
             } message: { Text(failure ?? "") }
             .confirmDialog(confirmCenter)
         }
+        .outsideChrome()
     }
 
     var conditionsSection: some View {

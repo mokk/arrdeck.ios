@@ -14,9 +14,12 @@ struct GlobalSearchSheet: View {
     let onSessionLost: @MainActor () -> Void
     let dismiss: () -> Void
 
-    init(api: any LibraryPageAPI, apps: [LibraryApp], baseURL: URL, hasPlex: Bool,
+    init(api: any LibraryPageAPI, apps: [LibraryApp], baseURL: URL, hasPlex: Bool, query: String = "",
          onSessionLost: @escaping @MainActor () -> Void, dismiss: @escaping () -> Void) {
-        _model = State(initialValue: GlobalSearchModel(api: api, apps: apps))
+        let model = GlobalSearchModel(api: api, apps: apps)
+        // carried over from a library's own search
+        model.query = query
+        _model = State(initialValue: model)
         self.api = api
         self.apps = apps
         self.baseURL = baseURL
@@ -75,6 +78,7 @@ struct GlobalSearchSheet: View {
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Done", action: dismiss) } }
             .task { await model.load() }
         }
+        .outsideChrome()
     }
 
     func row(_ hit: GlobalSearch.Hit) -> some View {

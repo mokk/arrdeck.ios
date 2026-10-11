@@ -14,6 +14,7 @@ struct IcalSettingsView: View {
 
     var body: some View {
         Form {
+            ListPageHeading(title: String(localized: "Calendar subscription"))
             switch settings {
             case .loading: LoadingRow()
             case let .failed(reason): ErrorNote(reason)
@@ -61,6 +62,7 @@ struct IcalSettingsView: View {
             }
         }
         .themedList()
+        .chromePage()
         .navigationTitle("Calendar subscription")
         .pageTitle()
         .confirmationDialog("New address", isPresented: $confirmingNew, titleVisibility: .visible) {

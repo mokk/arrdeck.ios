@@ -203,6 +203,10 @@ struct Sparkline: View {
 /// toolbar item would render behind the tabs inside a TabView.
 struct BulkBarChrome<Content: View>: View {
     @ViewBuilder let content: () -> Content
+    @Environment(\.chrome) private var chrome
+    /// Its bottom edge on screen: the tab bar's inset does not reach a page
+    /// in a tab's stack, so it rises above the bar by itself.
+    @State private var bottom: CGFloat = 0
 
     var body: some View {
         HStack(spacing: 12) { content() }
@@ -211,18 +215,20 @@ struct BulkBarChrome<Content: View>: View {
             .padding(.vertical, 10)
             .background(.bar, in: Capsule())
             .padding(.horizontal, 16)
-            .padding(.bottom, 6)
+            .padding(.bottom, 6 + (chrome?.lift(from: bottom) ?? 0))
+            .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).maxY } action: { bottom = $0 }
     }
 }
 
 extension View {
     /// Inset-grouped is the iOS card look; macOS has no such style and only
     /// needs to compile.
+    /// In a tab's stack it also ends with the margin above the tab bar.
     func dashboardListStyle() -> some View {
         #if os(iOS)
-        listStyle(.insetGrouped).themedList()
+        listStyle(.insetGrouped).themedList().chromeBottomMargin()
         #else
-        listStyle(.inset).themedList()
+        listStyle(.inset).themedList().chromeBottomMargin()
         #endif
     }
 }

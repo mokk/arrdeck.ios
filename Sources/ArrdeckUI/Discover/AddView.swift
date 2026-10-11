@@ -44,6 +44,7 @@ public struct AddView: View {
     public var body: some View {
         if dismiss != nil {
             NavigationStack { page }
+            .outsideChrome()
         } else {
             page
         }
@@ -478,6 +479,7 @@ struct MediaSheet: View {
             }
             .onChange(of: model.done) { _, done in if done { dismiss() } }
         }
+        .outsideChrome()
     }
 
     @ViewBuilder var addSections: some View {
@@ -634,5 +636,6 @@ struct CollectionSheet: View {
                 MediaSheet(result: movie, api: api, baseURL: baseURL) { selected = nil }
             }
         }
+        .outsideChrome()
     }
 }

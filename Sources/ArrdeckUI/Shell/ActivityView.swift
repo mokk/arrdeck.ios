@@ -20,6 +20,8 @@ public struct ActivityView: View {
     }
 
     @State private var segment: Segment = .history
+    @Environment(\.chrome) private var chrome
+    @Environment(\.chromeTab) private var chromeTab
     @State private var model: DownloadsModel
     @State private var newSince: Date
     let feed: ActivityFeedModel
@@ -45,22 +47,42 @@ public struct ActivityView: View {
         _newSince = State(initialValue: feed.lastSeen)
     }
 
-    public var body: some View {
-        VStack(spacing: 0) {
-            Picker("Section", selection: $segment) {
-                ForEach(Segment.allCases, id: \.self) { segment in
-                    // stuck downloads are counted on the segment that lists them
-                    if segment == .downloading, model.attentionCount > 0 {
-                        Text(verbatim: "\(segment.label) (\(model.attentionCount))").tag(segment)
-                    } else {
-                        Text(segment.label).tag(segment)
-                    }
+    var picker: some View {
+        Picker("Section", selection: $segment) {
+            ForEach(Segment.allCases, id: \.self) { segment in
+                // stuck downloads are counted on the segment that lists them
+                if segment == .downloading, model.attentionCount > 0 {
+                    Text(verbatim: "\(segment.label) (\(model.attentionCount))").tag(segment)
+                } else {
+                    Text(segment.label).tag(segment)
                 }
             }
-            .pickerStyle(.segmented)
+        }
+        .pickerStyle(.segmented)
+    }
+
+    /// With no navigation bar: the segments pinned over the list, folding
+    /// away with the tab bar as the list scrolls down. The list keeps their
+    /// room at its top, so nothing jumps.
+    var header: some View {
+        let out = chrome?.isExpanded ?? true
+        return picker
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
             .background(Color.grouped)
+            .opacity(out ? 1 : 0)
+            .offset(y: out ? 0 : -24)
+            .allowsHitTesting(out)
+    }
+
+    public var body: some View {
+        VStack(spacing: 0) {
+            if chromeTab == nil {
+                picker
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(Color.grouped)
+            }
             switch segment {
             case .downloading:
                 DownloadingList(model: model, api: api, newSince: newSince, onSessionLost: onSessionLost) { segment = .queue }
@@ -71,6 +93,12 @@ public struct ActivityView: View {
                               titled: false, onSessionLost: onSessionLost)
             }
         }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if chromeTab != nil { header }
+        }
+        // each segment's list reports its own scrolling
+        .chromePage(reportsScroll: false)
+        .onChange(of: segment) { _, _ in chrome?.reset() }
         .navigationTitle("Activity")
         .pageTitle()
         .navigationDestination(for: MediaRef.self) { ref in
@@ -172,21 +200,21 @@ struct DownloadingList: View {
             }
         }
         .dashboardListStyle()
+        .reportsChromeScroll()
         .refreshable { await model.refresh() }
-        .toolbar {
-            ToolbarItemGroup(placement: .primaryAction) {
-                if !model.clients.isEmpty {
-                    Button {
-                        Task { await model.toggleThrottle() }
-                    } label: {
-                        Label(model.isThrottled ? "Throttled" : "Throttle", systemImage: "tortoise")
-                            .symbolVariant(model.isThrottled ? .fill : .none)
-                    }
-                    .tint(model.isThrottled ? Color.warning : nil)
-                    .disabled(model.isPending("throttle"))
-                    Button { adding = true } label: { Label("Add torrent", systemImage: "plus") }
-                        .accessibilityIdentifier("add-torrent")
+        .chromeActions {
+            if !model.clients.isEmpty {
+                Button {
+                    Task { await model.toggleThrottle() }
+                } label: {
+                    Label(model.isThrottled ? "Throttled" : "Throttle", systemImage: "tortoise")
+                        .symbolVariant(model.isThrottled ? .fill : .none)
                 }
+                .tint(model.isThrottled ? Color.warning : nil)
+                .disabled(model.isPending("throttle"))
+                .accessibilityIdentifier("throttle")
+                Button { adding = true } label: { Label("Add torrent", systemImage: "plus") }
+                    .accessibilityIdentifier("add-torrent")
             }
         }
         .sheet(item: $selected) { torrent in

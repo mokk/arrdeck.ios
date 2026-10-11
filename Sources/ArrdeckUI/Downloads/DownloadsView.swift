@@ -14,6 +14,7 @@ public struct DownloadsView: View {
     let onSessionLost: @MainActor () -> Void
     /// Inside the Activity tab the model is shared and already polling.
     private var embedded = false
+    @State private var searching = false
     private var newSince: Date?
 
     public init(
@@ -124,23 +125,26 @@ public struct DownloadsView: View {
             }
         }
         .dashboardListStyle()
-        .searchable(text: $model.searchText, prompt: "Filter by name…")
+        .reportsChromeScroll(embedded)
         .refreshable { await model.refresh() }
         .task { if !embedded { await model.run() } }
         .navigationTitle(embedded ? "Activity" : "Downloads")
         .pageTitle()
         .safeAreaInset(edge: .bottom) {
             // Above the tab bar: a bottomBar toolbar item lands behind it.
-            if model.selecting { BulkBarChrome { bulkBar } }
-        }
-        .toolbar {
-            ToolbarItemGroup(placement: .automatic) {
-                Button(model.selecting ? "Done" : "Select") { model.selecting.toggle() }
-                    .accessibilityIdentifier("select")
-                if !model.clients.isEmpty {
-                    Button { adding = true } label: { Label("Add torrent", systemImage: "plus") }
-                        .accessibilityIdentifier("add-torrent")
+            if model.selecting {
+                BulkBarChrome {
+                    bulkBar
+                    Button("Done") { model.selecting = false }
+                        .fontWeight(.semibold)
+                        .accessibilityIdentifier("select-done")
                 }
+            }
+        }
+        .chromeActions(floating: embedded) {
+            if !model.selecting {
+                Button { searching = true } label: { Label("Filter by name", systemImage: "magnifyingglass") }
+                    .accessibilityIdentifier("downloads-search")
                 if !model.clients.isEmpty {
                     Button {
                         Task { await model.toggleThrottle() }
@@ -152,10 +156,14 @@ public struct DownloadsView: View {
                     .disabled(model.isPending("throttle"))
                     .accessibilityIdentifier("throttle")
                 }
-                filterMenu
-                sortMenu
+                viewMenu
+                if !model.clients.isEmpty {
+                    Button { adding = true } label: { Label("Add torrent", systemImage: "plus") }
+                        .accessibilityIdentifier("add-torrent")
+                }
             }
         }
+        .chromeSearch(text: $model.searchText, isPresented: $searching, prompt: Text("Filter by name…"))
         .sheet(item: $selected) { torrent in
             TorrentDetailSheet(torrent: torrent, model: model, api: api, onSessionLost: onSessionLost) { selected = nil }
         }
@@ -205,6 +213,21 @@ public struct DownloadsView: View {
             Button("Delete", role: .destructive) { confirmingBulkDelete = true }
         }
         .disabled(model.selected.isEmpty || model.isPending("bulk"))
+    }
+
+    /// Filters, sort and Select in one menu, so the column keeps to what is
+    /// used most.
+    var viewMenu: some View {
+        Menu {
+            filterMenu
+            sortMenu
+            Divider()
+            Button("Select…") { model.selecting = true }
+                .accessibilityIdentifier("select")
+        } label: {
+            Label("View", systemImage: model.stateFilter == nil ? "line.3.horizontal.decrease" : "line.3.horizontal.decrease.circle.fill")
+        }
+        .accessibilityIdentifier("downloads-view")
     }
 
     var sortMenu: some View {

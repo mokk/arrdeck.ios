@@ -1864,6 +1864,16 @@
         }
       }
     },
+    "Close search": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luk søgning"
+          }
+        }
+      }
+    },
     "Collections": {
       "localizations": {
         "da": {
@@ -2875,6 +2885,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Filtrér kunstnere"
+          }
+        }
+      }
+    },
+    "Filter by name": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrer efter navn"
           }
         }
       }
@@ -6442,6 +6462,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Serier"
+          }
+        }
+      }
+    },
+    "Shows all tabs": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viser alle faner"
           }
         }
       }

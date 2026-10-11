@@ -9,6 +9,7 @@ struct ExclusionsView: View {
 
     var body: some View {
         List {
+            ListPageHeading(title: String(localized: "Exclusions"))
             switch rows {
             case .loading: LoadingRow()
             case let .failed(reason): ErrorNote(reason)
@@ -39,6 +40,7 @@ struct ExclusionsView: View {
             }
         }
         .dashboardListStyle()
+        .chromePage()
         .navigationTitle("Exclusions")
         .pageTitle()
         .task { await load() }
@@ -71,6 +73,7 @@ struct ParseView: View {
 
     var body: some View {
         Form {
+            ListPageHeading(title: String(localized: "Release name tester"))
             Section {
                 if apps.count > 1 {
                     Picker("App", selection: $app) {
@@ -118,6 +121,7 @@ struct ParseView: View {
             }
         }
         .themedList()
+        .chromePage()
         .navigationTitle("Release name tester")
         .pageTitle()
     }

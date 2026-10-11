@@ -50,6 +50,7 @@ public struct ArtistDetailView: View {
             }
         }
         .dashboardListStyle()
+        .chromePage(title: model.artist.value?.name ?? "…")
         .navigationTitle(model.artist.value?.name ?? "…")
         .task { await model.load() }
         .refreshable { await model.load() }
@@ -264,6 +265,7 @@ struct ArtistEditSheet: View {
                 }
             }
         }
+        .outsideChrome()
     }
 }
 
@@ -327,6 +329,7 @@ public struct AlbumDetailView: View {
             }
         }
         .dashboardListStyle()
+        .chromePage(title: title)
         .navigationTitle(title)
         .task { await model.load() }
         .refreshable { await model.load() }

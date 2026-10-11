@@ -21,6 +21,7 @@ public struct StatsScreen: View {
 
     public var body: some View {
         List {
+            ListPageHeading(title: String(localized: "Statistics"))
             if watching != nil {
                 Section {
                     Picker("View", selection: $mode) {
@@ -39,6 +40,7 @@ public struct StatsScreen: View {
             }
         }
         .dashboardListStyle()
+        .chromePage()
         .navigationTitle("Statistics")
         .pageTitle()
         .task { await model.load() }

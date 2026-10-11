@@ -39,6 +39,7 @@ struct AddIndexerSheet: View {
             .task { await model.load() }
             .onChange(of: model.done) { _, done in if done { dismiss() } }
         }
+        .outsideChrome()
     }
 
     var picker: some View {

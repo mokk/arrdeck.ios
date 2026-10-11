@@ -14,9 +14,20 @@ struct DetailHero<Badges: View>: View {
     /// Album covers and artist pictures are square.
     var square = false
     @ViewBuilder let badges: () -> Badges
+    /// The page's title, on a page in a tab with no navigation bar.
+    @Environment(\.chromeTitle) private var title
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+            if let title {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(title.text).font(.title2.bold())
+                    title.accessory
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityAddTraits(.isHeader)
+                .accessibilityIdentifier("page-title")
+            }
             HStack(alignment: .top, spacing: 14) {
                 if poster != nil {
                     Poster(path: poster, baseURL: baseURL, width: 100, cornerRadius: 12, square: square)
@@ -182,6 +193,7 @@ struct CreditsSection: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)
                     }
+                    .accessibilityIdentifier("credits-row")
                     .listRowInsets(EdgeInsets())
                 }
                 ForEach(Array(crew.enumerated()), id: \.offset) { _, person in

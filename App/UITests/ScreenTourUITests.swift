@@ -47,8 +47,8 @@ final class ScreenTourUITests: XCTestCase {
         XCTAssert(any["tab-settings"].waitForExistence(timeout: 15), "tab bar never appeared")
         app.tap()
 
-        for tab in ["books", "music", "movies", "shows", "activity", "calendar", "settings"] where any["tab-\(tab)"].exists {
-            any["tab-\(tab)"].tap()
+        for tab in ["books", "music", "movies", "shows", "activity", "calendar", "settings"] where app.tab(tab).exists {
+            app.tab(tab).tap()
             sleep(2)
             snap("tab-\(tab)")
             if tab == "activity" {
@@ -67,16 +67,18 @@ final class ScreenTourUITests: XCTestCase {
             "Reading apps", "Notifications",
         ]
         for page in pages {
-            any["tab-settings"].tap()
+            app.tab("settings").tap()
             let link = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", page)).firstMatch
             for _ in 0..<4 where !link.isHittable { app.swipeUp() }
             guard link.exists, link.isHittable else { continue }
             link.tap()
             sleep(2)
             snap("settings-\(page.lowercased().replacingOccurrences(of: " ", with: "-"))")
-            // and straight back by re-tapping the tab
-            any["tab-settings"].tap()
-            XCTAssert(app.navigationBars["Settings"].waitForExistence(timeout: 5),
+            XCTAssertFalse(app.showsNavigationBar, "\(page) still has a navigation bar")
+            // and straight back by re-tapping the tab (unfolded first: the
+            // folded icon only unfolds)
+            app.tab("settings").tap()
+            XCTAssert(app.waitForPage("settings", timeout: 5),
                       "re-tapping Settings did not return from \(page)")
             for _ in 0..<4 { app.swipeDown() }
         }

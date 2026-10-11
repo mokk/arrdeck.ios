@@ -30,6 +30,7 @@ public struct DashboardView: View {
 
     public var body: some View {
         List {
+            ListPageHeading(title: String(localized: "Overview"))
             if let error = model.connectionError {
                 Section {
                     Label(error, systemImage: "wifi.slash")
@@ -60,13 +61,14 @@ public struct DashboardView: View {
             TrendsSection(model: model) { StatsScreen(api: api, onSessionLost: onSessionLost) }
         }
         .dashboardListStyle()
+        .chromePage()
         .refreshable { await model.refresh() }
         .task { await model.run() }
         // NavigationLink(value:) takes the optional ref and pushes the wrapped
         // value, so the destination is registered for MediaRef, not MediaRef?.
         .navigationDestination(for: MediaRef.self) { ref in destination(ref) }
         .navigationDestination(item: $opened) { ref in destination(ref) }
-        .toolbar {
+        .chromeActions {
             if model.hasArr {
                 NavigationLink {
                     WantedView(

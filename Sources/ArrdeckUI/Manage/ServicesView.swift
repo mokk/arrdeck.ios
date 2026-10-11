@@ -11,6 +11,7 @@ struct ServicesView: View {
 
     var body: some View {
         List {
+            ListPageHeading(title: String(localized: "Connections"))
             if let error = model.error {
                 Section { ErrorNote(error) }
             } else if !model.loaded {
@@ -21,6 +22,7 @@ struct ServicesView: View {
             }
         }
         .dashboardListStyle()
+        .chromePage()
         .navigationTitle("Connections")
         .pageTitle()
         .task { await model.load() }

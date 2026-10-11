@@ -12,6 +12,7 @@ public struct PopularView: View {
 
     public var body: some View {
         List {
+            ListPageHeading(title: String(localized: "Popular"))
             Section {
                 Picker("Kind", selection: $model.kind) {
                     ForEach(PopularKind.allCases, id: \.self) { Text($0.label).tag($0) }
@@ -44,6 +45,7 @@ public struct PopularView: View {
             }
         }
         .dashboardListStyle()
+        .chromePage()
         .navigationTitle("Popular")
         .pageTitle()
         .task { await model.load() }

@@ -36,11 +36,15 @@ struct CleanupView: View {
     var body: some View {
         Group {
             if mode == .rules, let rules {
-                CleanupRulesView(model: rules, tags: tags, baseURL: baseURL) { modePicker }
+                CleanupRulesView(model: rules, tags: tags, baseURL: baseURL) {
+                    ListPageHeading(title: String(localized: "Cleanup"))
+                    modePicker
+                }
             } else {
                 lists
             }
         }
+        .chromePage()
         .navigationTitle("Cleanup")
         .pageTitle()
     }
@@ -60,6 +64,7 @@ struct CleanupView: View {
 
     var lists: some View {
         List {
+            ListPageHeading(title: String(localized: "Cleanup"))
             modePicker
             Section {
                 Picker("List", selection: $model.list) {
@@ -200,5 +205,6 @@ struct CleanupView: View {
             .navigationTitle("Delete \(model.chosen.count) titles?")
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { confirming = false } } }
         }
+        .outsideChrome()
     }
 }

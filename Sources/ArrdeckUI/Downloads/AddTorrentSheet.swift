@@ -81,5 +81,6 @@ struct AddTorrentSheet: View {
                 }
             }
         }
+        .outsideChrome()
     }
 }

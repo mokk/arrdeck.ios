@@ -59,6 +59,7 @@ public struct AuthorDetailView: View {
             }
         }
         .dashboardListStyle()
+        .chromePage(title: model.author.value?.name ?? "…")
         .navigationTitle(model.author.value?.name ?? "…")
         .task { await model.load() }
         .alert("Action failed", isPresented: Binding(get: { model.actionError != nil }, set: { if !$0 { model.actionError = nil } })) {

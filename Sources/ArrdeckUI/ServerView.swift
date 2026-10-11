@@ -127,6 +127,10 @@ public struct ServerView: View {
     @AppStorage(DisplayKeys.hiddenTabs) private var hiddenTabs = ""
     @State private var openedOnStartTab = false
     @State private var confirmCenter = ConfirmCenter()
+    /// The tab bar, the page's actions and its back button, folding away as
+    /// the page scrolls down.
+    @State private var chrome = ChromeModel()
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     /// A title opened from iOS search.
     @State private var spotlit: SpotlightTarget?
     /// Quick actions and Siri's "open" requests, taken once the tabs exist.
@@ -152,6 +156,12 @@ public struct ServerView: View {
         #else
         .tabBar
         #endif
+    }
+
+    /// Whether the chrome never folds: VoiceOver should find the tabs and
+    /// actions where they always are, and the iPad's sidebar does not fold.
+    func pinsChrome(_ layout: ShellLayout) -> Bool {
+        voiceOver || layout == .sidebar
     }
 
     /// A tab tapped in the capsule or the sidebar.
@@ -204,23 +214,37 @@ public struct ServerView: View {
                                     .onAppear { pushed.remove(tab) }
                                     .onDisappear { pushed.insert(tab) }
                             }
+                            // on the stack, so the screens pushed in it know their tab too
+                            .environment(\.chromeTab, tab)
                             .id(stackGeneration[tab, default: 0])
                             .opacity(tab == selectedTab ? 1 : 0)
                             .allowsHitTesting(tab == selectedTab)
                             .zIndex(tab == selectedTab ? 1 : 0)
                         }
                     }
+                    // no navigation bar over the pages, so the clock needs its own backing
+                    .overlay(alignment: .top) { StatusBarScrim() }
                     .safeAreaInset(edge: .bottom, spacing: 0) {
                         // no background: the content scrolls on under the floating glass
                         if layout == .tabBar {
                             VStack(spacing: 8) {
-                                if let expiry { ExpiryStrip(expiry: expiry) }
+                                // faded rather than removed, so the page above does not jump
+                                if let expiry { ExpiryStrip(expiry: expiry).opacity(chrome.isExpanded ? 1 : 0) }
                                 // the bar switches tabs itself and asks only when the current one is tapped again
-                                AppTabBar(tabs: available, selected: $selectedTab, badges: [.activity: feed.count], reselect: tap)
+                                AppTabBar(tabs: available, selected: $selectedTab, badges: [.activity: feed.count],
+                                          collapsed: !chrome.isExpanded, expand: chrome.reset, reselect: tap)
                             }
+                            // out of the way while a search field has the keyboard
+                            .opacity(chrome.typing ? 0 : 1)
+                            .allowsHitTesting(!chrome.typing)
+                            .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { chrome.barTop = $0 }
+                            .onDisappear { chrome.barTop = 0 }
                         }
                     }
                 }
+                .environment(\.chrome, chrome)
+                .onChange(of: selectedTab, initial: true) { _, tab in chrome.select(tab) }
+                .onChange(of: pinsChrome(layout), initial: true) { _, pinned in chrome.pinned = pinned }
                 .onAppear {
                     // the chosen start tab once per launch; after that the
                     // selection is whatever was tapped last

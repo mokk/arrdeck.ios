@@ -166,6 +166,7 @@ public struct ManageView: View {
             }
         }
         .dashboardListStyle()
+        .chromePage()
         .navigationTitle("Settings")
         .pageTitle()
         .navigationDestination(for: MediaRef.self) { ref in
@@ -224,6 +225,7 @@ struct IndexersView: View {
 
     var body: some View {
         List {
+            ListPageHeading(title: String(localized: "Indexers"))
             switch model.indexers {
             case .loading:
                 LoadingRow()
@@ -257,9 +259,10 @@ struct IndexersView: View {
             }
         }
         .dashboardListStyle()
+        .chromePage()
         .navigationTitle("Indexers")
         .pageTitle()
-        .toolbar {
+        .chromeActions {
             Button { adding = true } label: { Label("Add indexer", systemImage: "plus") }
                 .accessibilityIdentifier("add-indexer")
         }

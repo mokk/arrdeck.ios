@@ -1,13 +1,17 @@
 import ArrdeckData
 import SwiftUI
 
-/// Movies, Shows, Books or Music: the library as cards, with sort, search
-/// and add in the bar. Nothing else on the page — the cards are the page.
+/// Movies, Shows, Books or Music: the library as cards, with search, sort and
+/// add floating at the bottom right. Nothing else on the page — the cards are
+/// the page.
 /// Music's cards are artists.
 public struct LibraryPage: View {
     @State private var model: LibraryListModel
     @State private var adding = false
     @State private var searchingEverything = false
+    /// The filter field at the bottom is open.
+    @State private var searching = false
+    @Environment(\.chromeTab) private var chromeTab
     @State private var diagnosing: LibraryRow?
     @State private var deleting: LibraryRow?
     @State private var confirmingBulkDelete = false
@@ -136,6 +140,7 @@ public struct LibraryPage: View {
                 .frame(maxWidth: .infinity)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .reportsChromeScroll()
             .overlay(alignment: .trailing) {
                 if !model.selecting {
                     LetterStrip(letters: letters.map(\.letter)) { letter in
@@ -143,27 +148,37 @@ public struct LibraryPage: View {
                             proxy.scrollTo(id, anchor: .top)
                         }
                     }
+                    // clear of the actions and the tab bar at the bottom
+                    .padding(.bottom, chromeTab == nil ? 0 : ChromeMetrics.column(3))
                 }
             }
         }
         .background(Color.grouped)
         .navigationTitle(title)
         .pageTitle()
-        .searchable(text: $model.query, placement: .underTitle, prompt: Text(prompt))
-        .toolbar {
-            ToolbarItemGroup(placement: .primaryAction) {
-                if model.selecting {
-                    Button("Done") { model.selecting = false }
-                } else {
-                    Button { searchingEverything = true } label: { Label("Search everything", systemImage: "magnifyingglass") }
-                    sortMenu
-                    Button { adding = true } label: { Label("Add", systemImage: "plus") }
-                        .accessibilityIdentifier("library-add")
+        .chromePage(reportsScroll: false)
+        .safeAreaInset(edge: .bottom) {
+            if model.selecting {
+                BulkBarChrome {
+                    LibraryBulkBar(model: model) { confirmingBulkDelete = true }
+                    Button("Done") { model.selecting = false }.fontWeight(.semibold)
                 }
             }
         }
-        .safeAreaInset(edge: .bottom) {
-            if model.selecting { BulkBarChrome { LibraryBulkBar(model: model) { confirmingBulkDelete = true } } }
+        .chromeActions {
+            if !model.selecting {
+                Button { searching = true } label: { Label("Search", systemImage: "magnifyingglass") }
+                    .accessibilityIdentifier("library-search")
+                sortMenu
+                Button { adding = true } label: { Label("Add", systemImage: "plus") }
+                    .accessibilityIdentifier("library-add")
+            }
+        }
+        .chromeSearch(text: $model.query, isPresented: $searching, prompt: Text(prompt)) {
+            Button { searchingEverything = true } label: {
+                Label("Search everything", systemImage: "sparkle.magnifyingglass")
+            }
+            .accessibilityIdentifier("library-search-everything")
         }
         .navigationDestination(for: MediaRef.self) { ref in
             MediaDestination(ref: ref, api: api, baseURL: baseURL, hasPlex: dashboard.has("plex"),
@@ -178,7 +193,7 @@ public struct LibraryPage: View {
         }
         .sheet(isPresented: $searchingEverything) {
             GlobalSearchSheet(api: api, apps: LibraryApp.allCases.filter { dashboard.has($0.rawValue) }, baseURL: baseURL,
-                              hasPlex: dashboard.has("plex"), onSessionLost: onSessionLost) { searchingEverything = false }
+                              hasPlex: dashboard.has("plex"), query: model.query, onSessionLost: onSessionLost) { searchingEverything = false }
         }
         .onChange(of: model.rows.value?.count) { _, _ in
             // the titles into iOS search, refreshed whenever the library reloads

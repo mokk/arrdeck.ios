@@ -25,6 +25,7 @@ public struct WantedView: View {
 
     public var body: some View {
         List {
+            ListPageHeading(title: String(localized: "Wanted"))
             Section {
                 Picker("Kind", selection: $model.kind) {
                     ForEach(WantedKind.allCases, id: \.self) { Text($0.label).tag($0) }
@@ -71,6 +72,7 @@ public struct WantedView: View {
             }
         }
         .dashboardListStyle()
+        .chromePage()
         .navigationTitle("Wanted")
         .pageTitle()
         .navigationDestination(for: MediaRef.self) { ref in
@@ -200,6 +202,7 @@ struct DiagnoseSheet: View {
                 catch { diagnosis = .failed((error as? APIError)?.description ?? error.localizedDescription) }
             }
         }
+        .outsideChrome()
     }
 
     func levelColor(_ level: String) -> Color {

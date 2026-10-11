@@ -65,6 +65,7 @@ struct ImportSheet: View {
             .navigationTitle(title)
             .toolbar { Button("Done") { dismiss() } }
         }
+        .outsideChrome()
         .confirmDialog(confirm)
     }
 

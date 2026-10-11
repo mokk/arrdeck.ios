@@ -11,6 +11,7 @@ struct SubtitleToolsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            PageHeading(title: String(localized: "Subtitles")).background(Color.grouped)
             Picker("Section", selection: $tab) {
                 Text("Missing").tag(Tab.missing)
                 Text("Language profiles").tag(Tab.profiles)
@@ -18,11 +19,16 @@ struct SubtitleToolsView: View {
             .pickerStyle(.segmented)
             .padding(.horizontal, 16).padding(.vertical, 8)
             .background(Color.grouped)
-            switch tab {
-            case .missing: MissingSubtitlesList(api: api)
-            case .profiles: LanguageProfilesEditor(api: api)
+            // a Group hands the reporter to whichever list is showing
+            Group {
+                switch tab {
+                case .missing: MissingSubtitlesList(api: api)
+                case .profiles: LanguageProfilesEditor(api: api)
+                }
             }
+            .reportsChromeScroll()
         }
+        .chromePage(reportsScroll: false)
         .navigationTitle("Subtitles")
         .pageTitle()
     }

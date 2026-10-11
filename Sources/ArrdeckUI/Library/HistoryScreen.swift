@@ -43,6 +43,8 @@ public struct HistoryScreen: View {
 
     public var body: some View {
         List {
+            // its own page under Overview; inside Activity the tab says where you are
+            if titled { ListPageHeading(title: String(localized: "History")) }
             Section {
                 Picker("Section", selection: $segment) {
                     ForEach(Segment.allCases, id: \.self) { Text($0.label).tag($0) }
@@ -57,9 +59,12 @@ public struct HistoryScreen: View {
             }
         }
         .dashboardListStyle()
+        // under Overview a page of its own; inside Activity, which already
+        // hides the bar, it only adds its scrolling and its filter
+        .chromePage()
         .navigationTitle(titled ? String(localized: "History") : String(localized: "Activity"))
         .pageTitle()
-        .toolbar {
+        .chromeActions {
             if segment == .history {
                 Menu {
                     Picker("Service", selection: $model.appFilter) {

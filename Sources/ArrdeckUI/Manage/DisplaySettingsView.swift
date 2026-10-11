@@ -25,6 +25,7 @@ struct DisplaySettingsView: View {
 
     var body: some View {
         Form {
+            ListPageHeading(title: String(localized: "Display"))
             Section {
                 Picker("Language", selection: $language) {
                     ForEach(AppLanguage.allCases, id: \.self) { Text(verbatim: $0.label).tag($0) }
@@ -125,6 +126,7 @@ struct DisplaySettingsView: View {
         }
         .alwaysEditing()
         .themedList()
+        .chromePage()
         .navigationTitle("Display")
         .pageTitle()
     }
@@ -177,6 +179,7 @@ struct NotificationSettingsView: View {
 
     var body: some View {
         Form {
+            ListPageHeading(title: String(localized: "Notifications"))
             switch model.events {
             case .loading: LoadingRow()
             case let .failed(reason): ErrorNote(reason)
@@ -237,6 +240,7 @@ struct NotificationSettingsView: View {
             }
         }
         .themedList()
+        .chromePage()
         .navigationTitle("Notifications")
         .pageTitle()
         .task {

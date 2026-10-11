@@ -9,11 +9,32 @@ struct AppTabBar: View {
     let tabs: [AppTab]
     @Binding var selected: AppTab
     var badges: [AppTab: Int] = [:]
+    /// Folded into one circle at the left showing the current tab, while the
+    /// page scrolls down.
+    var collapsed = false
+    /// The folded circle was tapped: unfold, without switching or popping.
+    var expand: () -> Void = {}
     /// The tab that was already showing was tapped again.
     var reselect: (AppTab) -> Void = { _ in }
     @Namespace private var selection
+    @Namespace private var glass
 
     var body: some View {
+        GlassGroup {
+            HStack(spacing: 0) {
+                if collapsed {
+                    folded
+                    Spacer(minLength: 0)
+                } else {
+                    bar
+                }
+            }
+        }
+        .padding(.horizontal, ChromeMetrics.edge)
+        .padding(.bottom, 2)
+    }
+
+    var bar: some View {
         HStack(spacing: 0) {
             ForEach(tabs, id: \.self) { tab in
                 Button {
@@ -28,7 +49,7 @@ struct AppTabBar: View {
                         .symbolVariant(selected == tab ? .fill : .none)
                         .foregroundStyle(selected == tab ? Color.accent : Color.primary)
                         .overlay(alignment: .topTrailing) { badge(tab) }
-                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .frame(maxWidth: .infinity, minHeight: ChromeMetrics.circle)
                         .background {
                             // the selected tab's pill, sliding between tabs
                             if selected == tab {
@@ -46,9 +67,29 @@ struct AppTabBar: View {
             }
         }
         .padding(.horizontal, 5)
-        .liquidGlassCapsule()
-        .padding(.horizontal, 20)
-        .padding(.bottom, 2)
+        .liquidGlass(Capsule(), id: "bar", in: glass)
+    }
+
+    /// The current tab's icon alone; a dot when another tab has news.
+    var folded: some View {
+        Button(action: expand) {
+            Image(systemName: selected.symbol)
+                .font(.system(size: 19, weight: .medium))
+                .symbolVariant(.fill)
+                .foregroundStyle(Color.accent)
+                .overlay(alignment: .topTrailing) {
+                    if badges.contains(where: { $0.value > 0 }) {
+                        Circle().fill(Color.accent).frame(width: 8, height: 8).offset(x: 6, y: -4)
+                    }
+                }
+                .frame(width: ChromeMetrics.circle, height: ChromeMetrics.circle)
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .liquidGlass(Circle(), id: "bar", in: glass)
+        .accessibilityLabel(selected.label)
+        .accessibilityHint("Shows all tabs")
+        .accessibilityIdentifier("tab-folded")
     }
 
     @ViewBuilder func badge(_ tab: AppTab) -> some View {
@@ -67,12 +108,37 @@ struct AppTabBar: View {
 extension View {
     /// Liquid Glass where the OS has it (26 and later); a material capsule
     /// with a soft shadow before that.
-    @ViewBuilder func liquidGlassCapsule() -> some View {
+    func liquidGlassCapsule() -> some View {
+        liquidGlass(Capsule())
+    }
+
+    /// Liquid Glass in this shape where the OS has it (26 and later), a
+    /// material with a soft shadow before that. Two shapes with the same `id`
+    /// inside one GlassGroup morph into each other.
+    @ViewBuilder func liquidGlass<S: Shape>(_ shape: S, id: String? = nil, in namespace: Namespace.ID? = nil) -> some View {
         if #available(iOS 26, macOS 26, *) {
-            glassEffect(.regular.interactive(), in: .capsule)
+            if let id, let namespace {
+                glassEffect(.regular.interactive(), in: shape).glassEffectID(id, in: namespace)
+            } else {
+                glassEffect(.regular.interactive(), in: shape)
+            }
         } else {
-            background(.regularMaterial, in: Capsule())
+            background(.regularMaterial, in: shape)
                 .shadow(color: .black.opacity(0.12), radius: 12, y: 4)
+        }
+    }
+}
+
+/// A GlassEffectContainer where there is one, so the glass inside blends and
+/// morphs; just the content before iOS 26.
+struct GlassGroup<Content: View>: View {
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        if #available(iOS 26, macOS 26, *) {
+            GlassEffectContainer { content() }
+        } else {
+            content()
         }
     }
 }

@@ -18,6 +18,7 @@ struct SystemView: View {
 
     var body: some View {
         List {
+            ListPageHeading(title: String(localized: "System"))
             statusSection
             tasksSection
             ForEach(model.apps, id: \.self) { app in
@@ -29,6 +30,7 @@ struct SystemView: View {
             logsSection
         }
         .dashboardListStyle()
+        .chromePage()
         .navigationTitle("System")
         .pageTitle()
         .task { await load() }

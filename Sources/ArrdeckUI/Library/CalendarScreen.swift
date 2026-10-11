@@ -59,19 +59,19 @@ public struct CalendarScreen: View {
                 .padding(.bottom, 16)
             }
             .background(Color.grouped)
+            .chromePage()
             .navigationTitle("Calendar")
             .pageTitle()
-            .toolbar {
+            .chromeActions {
                 if let ical = api as? any IcalAPI {
-                    ToolbarItem(placement: .secondaryAction) {
-                        NavigationLink {
-                            IcalSettingsView(api: ical, baseURL: shareURL)
-                        } label: { Label("Subscribe", systemImage: "calendar.badge.plus") }
-                    }
+                    NavigationLink {
+                        IcalSettingsView(api: ical, baseURL: shareURL)
+                    } label: { Label("Subscribe", systemImage: "calendar.badge.plus") }
                 }
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Today") { withAnimation { proxy.scrollTo(model.today, anchor: .top) } }
+                Button { withAnimation { proxy.scrollTo(model.today, anchor: .top) } } label: {
+                    Label("Today", systemImage: "calendar.day.timeline.left")
                 }
+                .accessibilityIdentifier("calendar-today")
             }
             .onChange(of: model.blocks.value == nil) { _, missing in
                 // once, when the list first has something to scroll through

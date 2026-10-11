@@ -72,6 +72,7 @@ struct ReleasesSheet: View {
                 Text(model.actionError ?? "")
             }
         }
+        .outsideChrome()
     }
 
     /// Sort and the filters that only make sense once there is something to

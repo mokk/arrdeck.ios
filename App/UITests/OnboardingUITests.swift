@@ -59,8 +59,10 @@ final class OnboardingUITests: XCTestCase {
         func swipeRight(from x: CGFloat) {
             // a quick flick, as a thumb does: a slow drag from mid-screen is
             // not taken as "back"
-            window.coordinate(withNormalizedOffset: CGVector(dx: x, dy: 0.55))
-                .press(forDuration: 0.05, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.55)),
+            // across the backdrop, which has nothing to tap: lower down the
+            // press can land on a link chip and open it outside the app
+            window.coordinate(withNormalizedOffset: CGVector(dx: x, dy: 0.2))
+                .press(forDuration: 0.05, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.2)),
                        withVelocity: .fast, thenHoldForDuration: 0)
         }
         // the second film has a previous one to step to
@@ -70,28 +72,30 @@ final class OnboardingUITests: XCTestCase {
         // finger, and iOS drops the swipe
         XCTAssert(app.buttons["Search now"].waitForExistence(timeout: 15), "detail never loaded its actions")
         sleep(1)
-        let title = app.navigationBars.element(boundBy: 0).identifier
+        let title = app.visibleHeading
         swipeRight(from: 0.3)
         sleep(1)
         snap("title-after-mid-swipe")
+        print("MID-SWIPE went back: \(!any["movie-detail"].exists)")
         // Whether iOS takes a mid-screen flick as "back" depends on timing the
         // simulator does not keep steady; what must never happen is the old
         // bug, the swipe stepping to the previous title.
         if any["movie-detail"].exists {
-            XCTAssertEqual(app.navigationBars.element(boundBy: 0).identifier, title,
+            XCTAssertEqual(app.visibleHeading, title,
                            "a right swipe stepped to another title instead of going back")
             swipeRight(from: 0.01)
         }
-        XCTAssert(app.navigationBars["Movies"].waitForExistence(timeout: 5), "swiping right did not go back from a title")
+        XCTAssert(any["movie-detail"].waitForNonExistence(timeout: 5) && app.waitForPage("library-radarr", timeout: 5),
+                  "swiping right did not go back from a title")
 
         // from the edge on a Settings page (from mid-screen iOS only takes it
         // when the swipe doesn't start on a card of the list)
-        any["tab-settings"].tap()
+        app.tab("settings").tap()
         app.buttons["manage-stats"].tap()
         XCTAssert(any["stats"].waitForExistence(timeout: 10))
         sleep(1)
         swipeRight(from: 0.01)
-        XCTAssert(app.navigationBars["Settings"].waitForExistence(timeout: 5), "an edge swipe did not go back from Statistics")
+        XCTAssert(app.waitForPage("settings", timeout: 5), "an edge swipe did not go back from Statistics")
     }
 
     /// The import sheet opens over a finished torrent's sheet and shows what the
@@ -173,18 +177,17 @@ final class OnboardingUITests: XCTestCase {
         // Readarr is configured on this backend, so Books is the first tab.
         XCTAssert(any["tab-books"].exists, "Books must appear when Readarr is configured")
         any["tab-books"].tap()
-        XCTAssert(app.navigationBars["Books"].waitForExistence(timeout: 10), "books page never appeared")
+        XCTAssert(app.waitForPage("library-readarr"), "books page never appeared")
         XCTAssert(any["library-card"].firstMatch.waitForExistence(timeout: 20), "no book cards rendered")
         snap("books")
         any["library-card"].firstMatch.tap()
         XCTAssert(any["book-detail"].waitForExistence(timeout: 10), "card did not open the book")
         XCTAssert(app.buttons["Search now"].waitForExistence(timeout: 15), "book detail never loaded its actions")
         snap("book-detail")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        try app.goBack()
 
-        any["tab-movies"].tap()
-        // A ScrollView's identifier is not exposed under .searchable; the title is.
-        XCTAssert(app.navigationBars["Movies"].waitForExistence(timeout: 10), "movies page never appeared")
+        app.tab("movies").tap()
+        XCTAssert(app.waitForPage("library-radarr"), "movies page never appeared")
         XCTAssert(any["library-card"].firstMatch.waitForExistence(timeout: 20), "no movie cards rendered")
         snap("movies")
         // Back from landscape the grid must fit the portrait width again: it
@@ -205,10 +208,10 @@ final class OnboardingUITests: XCTestCase {
         XCTAssert(any["movie-detail"].waitForExistence(timeout: 10), "card did not open the detail")
         XCTAssert(app.buttons["Search now"].waitForExistence(timeout: 15), "detail never loaded its actions")
         snap("movie-detail")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        try app.goBack()
 
         // The add sheet, scoped to movies: Overseerr's popular titles fill it.
-        app.buttons["library-add"].tap()
+        try XCTUnwrap(app.visible("library-add"), "no Add on Movies").tap()
         XCTAssert(app.staticTexts["Add movie"].waitForExistence(timeout: 5), "add sheet never appeared")
         // The watchlist, Trakt and recommendation rows come first, and a List
         // only builds the rows on screen: scroll down to the popular grid.
@@ -219,13 +222,13 @@ final class OnboardingUITests: XCTestCase {
         app.buttons["Cancel"].tap()
 
         // Shows.
-        any["tab-shows"].tap()
-        XCTAssert(app.navigationBars["Shows"].waitForExistence(timeout: 10), "shows page never appeared")
+        app.tab("shows").tap()
+        XCTAssert(app.waitForPage("library-sonarr"), "shows page never appeared")
         XCTAssert(any["library-card"].firstMatch.waitForExistence(timeout: 20), "no show cards rendered")
         snap("shows")
 
         // Activity: the arr queue and moving torrents, then the full queue.
-        any["tab-activity"].tap()
+        app.tab("activity").tap()
         XCTAssert(any["activity"].waitForExistence(timeout: 10), "activity never appeared")
         // History opens first, with what is new since the last visit marked;
         // the torrents are under Downloading
@@ -240,12 +243,12 @@ final class OnboardingUITests: XCTestCase {
         XCTAssert(app.buttons["Blocklist"].waitForExistence(timeout: 10), "history never came back")
 
         // Calendar.
-        any["tab-calendar"].tap()
+        app.tab("calendar").tap()
         XCTAssert(any["calendar"].waitForExistence(timeout: 10), "calendar never appeared")
         XCTAssert(app.buttons["Today"].waitForExistence(timeout: 5), "calendar has no way back to today")
 
         // Settings: the hub, the old dashboard as Overview, connections.
-        any["tab-settings"].tap()
+        app.tab("settings").tap()
         XCTAssert(any["settings"].waitForExistence(timeout: 10), "settings never appeared")
         snap("settings")
         app.buttons["overview"].tap()
@@ -253,8 +256,8 @@ final class OnboardingUITests: XCTestCase {
         let storage = app.staticTexts["Storage"]
         for _ in 0..<8 where !storage.exists { app.swipeUp() }
         XCTAssert(storage.waitForExistence(timeout: 15), "storage card never rendered")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        XCTAssert(app.navigationBars["Settings"].waitForExistence(timeout: 5), "did not return to Settings from Overview")
+        try app.goBack()
+        XCTAssert(app.waitForPage("settings", timeout: 5), "did not return to Settings from Overview")
         snap("settings-after-overview")
         // Statistics → Watching, when Plex is set up: Plex's play history.
         app.buttons["manage-stats"].tap()
@@ -266,8 +269,8 @@ final class OnboardingUITests: XCTestCase {
             snap("stats-watching")
             app.buttons["Library"].tap()
         }
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        XCTAssert(app.navigationBars["Settings"].waitForExistence(timeout: 5), "did not return to Settings from Statistics")
+        try app.goBack()
+        XCTAssert(app.waitForPage("settings", timeout: 5), "did not return to Settings from Statistics")
         let connections = app.buttons["manage-connections"]
         // It is the last row. Under the tab bar it still counts as hittable, so
         // scroll to the bottom first rather than until it "can" be tapped.
@@ -284,12 +287,12 @@ final class OnboardingUITests: XCTestCase {
             app.buttons["Language profiles"].tap()
             XCTAssert(app.buttons["Select all shown"].waitForExistence(timeout: 20), "profile editor never loaded")
             snap("subtitles-profiles")
-            app.navigationBars.buttons.element(boundBy: 0).tap()
+            try app.goBack()
             app.swipeUp()
         }
         connections.tap()
         XCTAssert(app.staticTexts["configured"].firstMatch.waitForExistence(timeout: 20), "connections never loaded")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        try app.goBack()
 
         // Relaunch: the profile must come back from the Keychain, not from
         // memory — and being the only one, it opens straight to its tabs.
