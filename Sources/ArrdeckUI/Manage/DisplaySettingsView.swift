@@ -14,6 +14,7 @@ struct DisplaySettingsView: View {
     @AppStorage(DisplayKeys.sizes) private var sizes: SizeStyle = .binary
     @AppStorage(DisplayKeys.spoilers) private var spoilers: Spoilers = .off
     @AppStorage(DisplayKeys.confirm) private var confirm: ConfirmPolicy = .deletes
+    @AppStorage(DisplayKeys.liveActivity) private var liveActivity = true
 
     var apps: [ArrApp] { [.readarr, .radarr, .sonarr].filter { configured.contains($0.rawValue) } }
     var allTabs: [AppTab] { AppTab.arrange(AppTab.available(configured: configured), order: AppTab.list(tabOrder), hidden: []) }
@@ -102,6 +103,13 @@ struct DisplaySettingsView: View {
                 Text("Behaviour")
             } footer: {
                 Text("Spoiler protection hides the titles and summaries of episodes Plex has not seen you watch; tap one to show it. Deleting a title always asks whether to keep its files.")
+            }
+            // not behind os(iOS), though only a phone has one: the catalog
+            // check extracts strings from the macOS build
+            Section {
+                Toggle("Live Activity", isOn: $liveActivity)
+            } footer: {
+                Text("While arrdeck is open and something is downloading, its progress shows on the Lock Screen and in the Dynamic Island. Set on this device only.")
             }
             if let notifications {
                 Section {

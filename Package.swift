@@ -20,6 +20,7 @@ let package = Package(
         .library(name: "ArrdeckAPI", targets: ["ArrdeckAPI"]),
         .library(name: "ArrdeckData", targets: ["ArrdeckData"]),
         .library(name: "ArrdeckUI", targets: ["ArrdeckUI"]),
+        .library(name: "ArrdeckGlance", targets: ["ArrdeckGlance"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.0.0"),
@@ -52,6 +53,7 @@ let package = Package(
             name: "ArrdeckData",
             dependencies: [
                 "ArrdeckAPI",
+                "ArrdeckGlance",
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
                 .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
                 // the routing transport's request type
@@ -60,15 +62,21 @@ let package = Package(
         ),
         // Views compile against the macOS SDK too, so type errors surface from
         // `swift build` without Xcode. iOS-only API stays out of this target.
-        .target(name: "ArrdeckUI", dependencies: ["ArrdeckKit", "ArrdeckData"]),
+        .target(name: "ArrdeckUI", dependencies: ["ArrdeckKit", "ArrdeckData", "ArrdeckGlance"]),
+        // What the widgets and the Live Activity read, and the only code the
+        // widget extension links: no dependencies, so the extension stays
+        // small (WidgetKit holds it to a tight memory limit) and has neither
+        // a network client nor credentials. The app writes, the widgets read.
+        .target(name: "ArrdeckGlance"),
         .testTarget(
             name: "ArrdeckKitTests",
             dependencies: ["ArrdeckKit", "ArrdeckAPI"]
         ),
+        .testTarget(name: "ArrdeckGlanceTests", dependencies: ["ArrdeckGlance"]),
         .testTarget(
             name: "ArrdeckDataTests",
             dependencies: [
-                "ArrdeckData", "ArrdeckAPI",
+                "ArrdeckData", "ArrdeckAPI", "ArrdeckGlance",
                 .product(name: "HTTPTypes", package: "swift-http-types"),
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
             ]

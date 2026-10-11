@@ -21,6 +21,8 @@ struct ArrdeckApp: App {
     var body: some Scene {
         WindowGroup {
             ProfileListView()
+                // a tap on a widget or the Live Activity: the tab it shows
+                .onOpenURL { url in AppDelegate.route(url) }
         }
     }
 }

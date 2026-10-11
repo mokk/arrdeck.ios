@@ -76,6 +76,8 @@ public struct ServerView: View {
                     // pages read its queue for download progress.
                     .task { await model.run() }
                     .task { await feed.run() }
+                    // the widgets' snapshot and the Live Activity, from the same polls
+                    .background { GlanceFeed(model: model, server: controller.profile.name) }
             } else {
                 NavigationStack {
                     ProfileView(controller: controller)
@@ -259,6 +261,7 @@ public struct ServerView: View {
         switch action {
         case .activity where available.contains(.activity): selectedTab = .activity
         case .calendar where available.contains(.calendar): selectedTab = .calendar
+        case .settings where available.contains(.settings): selectedTab = .settings
         case .add where model.hasArr: launchAdd = true
         case .search where model.hasArr: launchSearch = true
         default: break

@@ -131,6 +131,9 @@ public enum DisplayKeys {
     public static let confirm = "display.confirm"
     public static let palette = "display.palette"
     public static let appearance = "display.appearance"
+    /// Bool, default on. Per device: not one of the synced keys, since a
+    /// Lock Screen is one phone's.
+    public static let liveActivity = "display.liveActivity"
 }
 
 extension UserDefaults {

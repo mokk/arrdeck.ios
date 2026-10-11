@@ -1,4 +1,5 @@
 import ArrdeckData
+import ArrdeckGlance
 import ArrdeckKit
 import Observation
 import SwiftUI
@@ -7,12 +8,15 @@ import UIKit
 #endif
 import UserNotifications
 
-/// Where the app was asked to go from outside it: a home-screen quick action
-/// or a Siri / Shortcuts "open" intent. Either can arrive before any server is
-/// on screen — at a cold launch the profiles, the session and /services all
-/// load first — so the request waits here until the tabs exist to take it.
+/// Where the app was asked to go from outside it: a home-screen quick action,
+/// a Siri / Shortcuts "open" intent, or a tap on a widget or the Live
+/// Activity. Any of them can arrive before a server is on screen — at a cold
+/// launch the profiles, the session and /services all load first — so the
+/// request waits here until the tabs exist to take it.
 public enum LaunchAction: String, CaseIterable, Sendable {
     case add, search, activity, calendar
+    /// Only from the Free space widget: Storage is under Settings.
+    case settings
 
     static let typePrefix = "dk.thrawn.arrdeck."
 
@@ -20,6 +24,12 @@ public enum LaunchAction: String, CaseIterable, Sendable {
     public init?(shortcutType: String) {
         guard shortcutType.hasPrefix(Self.typePrefix) else { return nil }
         self.init(rawValue: String(shortcutType.dropFirst(Self.typePrefix.count)))
+    }
+
+    /// From a widget's link, "arrdeck://open/activity".
+    public init?(url: URL) {
+        guard let link = GlanceLink(url: url) else { return nil }
+        self.init(rawValue: link.rawValue)
     }
 
     var shortcutType: String { Self.typePrefix + rawValue }
@@ -30,6 +40,7 @@ public enum LaunchAction: String, CaseIterable, Sendable {
         case .search: String(localized: "Search")
         case .activity: String(localized: "Activity")
         case .calendar: String(localized: "Calendar")
+        case .settings: String(localized: "Settings")
         }
     }
 
@@ -39,17 +50,19 @@ public enum LaunchAction: String, CaseIterable, Sendable {
         case .search: "magnifyingglass"
         case .activity: AppTab.activity.symbol
         case .calendar: AppTab.calendar.symbol
+        case .settings: AppTab.settings.symbol
         }
     }
 
-    /// What this server can do of the four: Add and Search need an arr, the
-    /// others their tab.
+    /// What this server can do of the four quick actions: Add and Search need
+    /// an arr, the others their tab. Settings is a widget's target, not one.
     static func available(tabs: [AppTab], hasArr: Bool) -> [LaunchAction] {
         allCases.filter { action in
             switch action {
             case .add, .search: hasArr
             case .activity: tabs.contains(.activity)
             case .calendar: tabs.contains(.calendar)
+            case .settings: false
             }
         }
     }

@@ -12,7 +12,7 @@ export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Develope
 
 # Xcode reuses a cached profile until it expires, so a reinstall alone never
 # moves the date. Inside its last two days (the app's warning window), set the
-# profile aside — moved, not deleted — and Xcode makes a new seven-day one.
+# profiles aside — moved, not deleted — and Xcode makes a new seven-day one.
 python3 - "${RENEW:-0}" <<'PY'
 import datetime, os, plistlib, shutil, subprocess, sys
 force = sys.argv[1] == "1"
@@ -26,7 +26,12 @@ for name in os.listdir(cache) if os.path.isdir(cache) else []:
         profile = plistlib.loads(raw)
     except Exception:
         continue
-    if profile.get("Name") != "iOS Team Provisioning Profile: dk.thrawn.arrdeck":
+    # the app's and its widget extension's (dk.thrawn.arrdeck.widgets): each
+    # has its own profile, and renewing only the app's would leave the
+    # widgets to expire first
+    profile_name = profile.get("Name", "")
+    app = "iOS Team Provisioning Profile: dk.thrawn.arrdeck"
+    if profile_name != app and not profile_name.startswith(app + "."):
         continue
     expires = profile["ExpirationDate"].replace(tzinfo=datetime.timezone.utc)
     if force or expires < soon:

@@ -12,6 +12,16 @@ options:
 packages:
   ArrdeckPackage:
     path: ..
+# The App Group the app and its widgets share the snapshot through, for both
+# targets. A free (Personal Team) signature may not be allowed one. If the
+# phone build fails to sign because of it, delete the CODE_SIGN_ENTITLEMENTS
+# line and run ./generate.sh: the app then writes no snapshot and the widgets
+# say "Open arrdeck to load"; the Live Activity needs no group and carries on.
+# (Sources/ArrdeckGlance/GlanceStore.swift names the group for the Swift side;
+# without the entitlement it finds no container and does nothing.)
+settingGroups:
+  appGroup:
+    CODE_SIGN_ENTITLEMENTS: AppGroup.entitlements
 targets:
   Arrdeck:
     type: application
@@ -22,10 +32,20 @@ targets:
         product: ArrdeckKit
       - package: ArrdeckPackage
         product: ArrdeckUI
+      # embedded in the app's PlugIns, so Scripts/install-device.sh installs both
+      - target: ArrdeckWidgets
     info:
       path: Sources/Info.plist
       properties:
         UILaunchScreen: {}
+        # the download progress the app shows while open; see DownloadsLiveActivity
+        NSSupportsLiveActivities: true
+        # arrdeck://open/<tab> from a widget or the Live Activity. The sign-in
+        # callback (arrdeck://paired) shares the scheme but never needed it
+        # registered: the browser sheet catches its own callback first.
+        CFBundleURLTypes:
+          - CFBundleURLName: dk.thrawn.arrdeck
+            CFBundleURLSchemes: [arrdeck]
         # Two separate iOS gates with the same silent-timeout symptom, both
         # required for a LAN profile like http://10.0.0.154:3500 —
         # NSAllowsLocalNetworking lifts ATS's plain-HTTP block for local hosts
@@ -36,11 +56,40 @@ targets:
         NSLocalNetworkUsageDescription: >-
           Arrdeck connects to your media server on your home network.
     settings:
+      groups: [appGroup]
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dk.thrawn.arrdeck
         SWIFT_VERSION: "6.0"
         # Personal (free) team: device installs are signed automatically and
         # expire after 7 days. Swap in a paid team ID for 1-year profiles.
+        DEVELOPMENT_TEAM: CF87P9CCK2
+        CODE_SIGN_STYLE: Automatic
+  # Home-screen and Lock Screen widgets plus the Live Activity's views. It
+  # links only ArrdeckGlance: the snapshot it reads, no network client.
+  ArrdeckWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Widgets
+      # the app's catalog, so the widgets' strings find their Danish too
+      # (the extension's Bundle.main is its own bundle, not the app's)
+      - path: Sources/Localizable.xcstrings
+        buildPhase: resources
+    dependencies:
+      - package: ArrdeckPackage
+        product: ArrdeckGlance
+    info:
+      path: Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: arrdeck
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      groups: [appGroup]
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dk.thrawn.arrdeck.widgets
+        SWIFT_VERSION: "6.0"
+        # the app's team and signing; a second App ID on the free team
         DEVELOPMENT_TEAM: CF87P9CCK2
         CODE_SIGN_STYLE: Automatic
   ArrdeckUITests:

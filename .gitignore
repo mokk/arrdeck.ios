@@ -6,3 +6,4 @@ xcuserdata/
 App/Sources/Info.plist
 App/build/
 .derived/
+App/Widgets/Info.plist

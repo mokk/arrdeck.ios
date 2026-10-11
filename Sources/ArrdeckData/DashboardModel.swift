@@ -43,6 +43,9 @@ public final class DashboardModel {
     /// Each card's most recent poll failure while it still shows older data;
     /// cleared by that card's next success.
     public private(set) var cardErrors: [Card: String] = [:]
+    /// When each card last got an answer, identical or not. The widgets'
+    /// snapshot is timed by this: an unchanged answer is still a fresh one.
+    public private(set) var answeredAt: [Card: Date] = [:]
     /// A user action (approve, retry…) that the backend refused. Settable so
     /// the view can dismiss it.
     public var actionError: String?
@@ -189,6 +192,7 @@ public final class DashboardModel {
                 let value = try await fetch()
                 self[keyPath: keyPath] = .loaded(value)
                 cardErrors[card] = nil
+                answeredAt[card] = .now
                 connectionError = nil
                 return interval(value)
             } catch is CancellationError {
