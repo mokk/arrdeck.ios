@@ -186,8 +186,11 @@ final class DownloadsLiveActivity {
     func end() {
         activityID = nil
         sent = nil
-        guard !Live.activities.isEmpty else { return }
-        Task { await Self.endAll() }
+        // the ids now, not when the task runs: a request made right after
+        // this call must not be swept up and ended with the old ones
+        let ids = Live.activities.map(\.id)
+        guard !ids.isEmpty else { return }
+        Task { await Self.end(ids) }
     }
 
     // Off the main actor and looked up inside: an Activity is not Sendable,
@@ -196,8 +199,10 @@ final class DownloadsLiveActivity {
         for activity in Live.activities where activity.id == id { await activity.update(content) }
     }
 
-    nonisolated private static func endAll() async {
-        for activity in Live.activities { await activity.end(nil, dismissalPolicy: .immediate) }
+    nonisolated private static func end(_ ids: [String]) async {
+        for activity in Live.activities where ids.contains(activity.id) {
+            await activity.end(nil, dismissalPolicy: .immediate)
+        }
     }
 }
 #endif

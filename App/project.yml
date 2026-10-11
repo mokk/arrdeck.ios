@@ -14,9 +14,10 @@ packages:
     path: ..
 # The App Group the app and its widgets share the snapshot through, for both
 # targets. A free (Personal Team) signature may not be allowed one. If the
-# phone build fails to sign because of it, delete the CODE_SIGN_ENTITLEMENTS
-# line and run ./generate.sh: the app then writes no snapshot and the widgets
-# say "Open arrdeck to load"; the Live Activity needs no group and carries on.
+# phone build fails to sign because of it, set the value below to "" (not
+# delete the line: xcodegen rejects an empty group) and run ./generate.sh: the
+# app then writes no snapshot and the widgets say "Open arrdeck to load"; the
+# Live Activity needs no group and carries on.
 # (Sources/ArrdeckGlance/GlanceStore.swift names the group for the Swift side;
 # without the entitlement it finds no container and does nothing.)
 settingGroups:
