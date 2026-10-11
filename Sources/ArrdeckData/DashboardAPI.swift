@@ -96,7 +96,8 @@ public struct LiveAPI: DashboardAPI {
         let session = URLSession(configuration: config)
         let transport = OpenAPIURLSession.URLSessionTransport(configuration: .init(session: session))
         client = ArrdeckAPI.Client(
-            serverURL: router.current, transport: RoutingTransport(base: transport, router: router)
+            serverURL: router.current, configuration: Self.configuration,
+            transport: RoutingTransport(base: transport, router: router)
         )
         self.router = router
         self.session = session
@@ -105,7 +106,8 @@ public struct LiveAPI: DashboardAPI {
     /// For tests: the routing over a stand-in transport.
     init(router: AddressRouter, transport: any ClientTransport) {
         client = ArrdeckAPI.Client(
-            serverURL: router.current, transport: RoutingTransport(base: transport, router: router)
+            serverURL: router.current, configuration: Self.configuration,
+            transport: RoutingTransport(base: transport, router: router)
         )
         self.router = router
         session = nil
@@ -302,6 +304,12 @@ public struct LiveAPI: DashboardAPI {
         }
     }
 
+    /// The backend writes timestamps it makes itself (a service's down_since)
+    /// with microseconds, and the arrs' without; the runtime's default reads
+    /// only the latter, and one fractional date failed the whole /status list
+    /// exactly when a service was down.
+    static let configuration = Configuration(dateTranscoder: LenientDateTranscoder())
+
     /// Everything that is not already an APIError is a transport failure:
     /// no route, a timeout, or a body that was not the JSON the spec promised
     /// (a reverse proxy's HTML error page, say).
@@ -315,5 +323,18 @@ public struct LiveAPI: DashboardAPI {
         } catch {
             throw APIError.transport(error.localizedDescription)
         }
+    }
+}
+
+/// ISO 8601 with or without fractional seconds; written without them.
+struct LenientDateTranscoder: DateTranscoder {
+    private let plain = ISO8601DateTranscoder(options: [.withInternetDateTime])
+    private let fractional = ISO8601DateTranscoder(options: [.withInternetDateTime, .withFractionalSeconds])
+
+    func encode(_ date: Date) throws -> String { try plain.encode(date) }
+
+    func decode(_ string: String) throws -> Date {
+        if let date = try? fractional.decode(string) { return date }
+        return try plain.decode(string)
     }
 }

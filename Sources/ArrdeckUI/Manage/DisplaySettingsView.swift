@@ -160,6 +160,9 @@ struct NotificationSettingsView: View {
     @State private var quietOn = false
     @State private var quietStart = Date()
     @State private var quietEnd = Date()
+    /// The delay as the stepper shows it; saved a moment after the last tap
+    /// so stepping from 10 to 30 is one save, not twenty.
+    @State private var downMinutes: Int?
 
     init(api: any NotificationsAPI) {
         _model = State(initialValue: NotificationSettingsModel(api: api))
@@ -189,6 +192,20 @@ struct NotificationSettingsView: View {
                     Text("Events")
                 } footer: {
                     Text("What arrdeck pushes to the browsers subscribed to it. This app cannot receive web push itself.")
+                }
+                if model.hasServiceAlerts {
+                    Section {
+                        Stepper(value: Binding(
+                            get: { downMinutes ?? model.serviceDownMinutes },
+                            set: { downMinutes = $0 }
+                        ), in: NotificationSettingsModel.serviceDownRange) {
+                            Text("After \(downMinutes ?? model.serviceDownMinutes) min without an answer")
+                        }
+                    } header: {
+                        Text("Service alerts")
+                    } footer: {
+                        Text("Every service is checked once a minute: one notification when one has not answered for this long, one when it is back. During quiet hours they wait until the window ends.")
+                    }
                 }
                 Section {
                     Toggle("Quiet hours", isOn: $quietOn)
@@ -230,6 +247,12 @@ struct NotificationSettingsView: View {
                 quietEnd = until
                 quietOn = true
             }
+        }
+        .task(id: downMinutes) {
+            guard let minutes = downMinutes else { return }
+            try? await Task.sleep(for: .milliseconds(600))
+            guard !Task.isCancelled else { return }
+            await model.setServiceDownMinutes(minutes)
         }
         .onChange(of: quietOn) { _, _ in saveQuiet() }
         .onChange(of: quietStart) { _, _ in if quietOn { saveQuiet() } }

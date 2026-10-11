@@ -12,8 +12,10 @@ public protocol NotificationsAPI: Sendable {
     func pushEvents() async throws -> PushEvents
     func savePushEvents(_ enabled: [String]) async throws -> PushEvents
     func pushRules() async throws -> PushRules
+    /// `serviceDownMinutes` nil leaves the server's value as it is; send the
+    /// one it last reported so a quiet-hours save does not reset it.
     func savePushRules(quietStart: String, quietEnd: String, timezone: String, tags: [String: [Int]],
-                       digestDay: Int, digestTime: String) async throws -> PushRules
+                       digestDay: Int, digestTime: String, serviceDownMinutes: Int?) async throws -> PushRules
 }
 
 extension LiveAPI: NotificationsAPI {
@@ -47,10 +49,11 @@ extension LiveAPI: NotificationsAPI {
     }
 
     public func savePushRules(quietStart: String, quietEnd: String, timezone: String, tags: [String: [Int]],
-                              digestDay: Int, digestTime: String) async throws -> PushRules {
+                              digestDay: Int, digestTime: String, serviceDownMinutes: Int?) async throws -> PushRules {
         let body = Components.Schemas.PushRulesIn(
             digest_day: digestDay, digest_time: digestTime,
             quiet_end: quietEnd, quiet_start: quietStart,
+            service_down_minutes: serviceDownMinutes,
             tags: .init(additionalProperties: tags), timezone: timezone
         )
         return try await call {
@@ -106,13 +109,32 @@ public final class NotificationSettingsModel {
         await save(start: rules?.quiet_start ?? "", end: rules?.quiet_end ?? "", day: day, time: time)
     }
 
-    private func save(start: String, end: String, day: Int, time: String) async {
+    /// Whether this server pushes service alerts at all; older ones neither
+    /// list the events nor keep the delay.
+    public var hasServiceAlerts: Bool {
+        (events.value?.available ?? []).contains { $0.key == "service_down" || $0.key == "service_up" }
+    }
+
+    public static let serviceDownRange = 1...120
+
+    /// How long a service has to stay silent before "service down" is pushed.
+    public var serviceDownMinutes: Int { rules?.service_down_minutes ?? 10 }
+
+    public func setServiceDownMinutes(_ minutes: Int) async {
+        let clamped = min(max(minutes, Self.serviceDownRange.lowerBound), Self.serviceDownRange.upperBound)
+        guard clamped != rules?.service_down_minutes else { return }
+        await save(start: rules?.quiet_start ?? "", end: rules?.quiet_end ?? "", day: digestDay, time: digestTime,
+                   downMinutes: clamped)
+    }
+
+    private func save(start: String, end: String, day: Int, time: String, downMinutes: Int? = nil) async {
         do {
             rules = try await api.savePushRules(
                 quietStart: start, quietEnd: end,
                 timezone: TimeZone.current.identifier,
                 tags: rules?.tags?.additionalProperties ?? [:],
-                digestDay: day, digestTime: time
+                digestDay: day, digestTime: time,
+                serviceDownMinutes: downMinutes ?? rules?.service_down_minutes
             )
         } catch { self.error = error.localizedDescription }
     }
