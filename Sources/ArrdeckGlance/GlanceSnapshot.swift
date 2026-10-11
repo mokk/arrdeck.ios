@@ -21,24 +21,29 @@ public struct GlanceSnapshot: Codable, Sendable, Equatable {
     public var downloads: Downloads?
     public var today: Today?
     public var disk: Disk?
+    /// What arrived lately. Optional, so a file written before it existed
+    /// still reads.
+    public var activity: Activity?
     /// 1000 or 1024: Settings → Display → Sizes, so a widget's "1.2 TB" is the app's.
     public var byteBase: Int
 
-    public init(server: String, downloads: Downloads? = nil, today: Today? = nil, disk: Disk? = nil, byteBase: Int = 1024) {
+    public init(server: String, downloads: Downloads? = nil, today: Today? = nil, disk: Disk? = nil,
+                activity: Activity? = nil, byteBase: Int = 1024) {
         self.version = Self.currentVersion
         self.server = server
         self.downloads = downloads
         self.today = today
         self.disk = disk
+        self.activity = activity
         self.byteBase = byteBase
     }
 
     /// The newest of the sections' times; nil when there is nothing at all.
     public var takenAt: Date? {
-        [downloads?.at, today?.at, disk?.at].compactMap { $0 }.max()
+        [downloads?.at, today?.at, disk?.at, activity?.at].compactMap { $0 }.max()
     }
 
-    public var isEmpty: Bool { downloads == nil && today == nil && disk == nil }
+    public var isEmpty: Bool { downloads == nil && today == nil && disk == nil && activity == nil }
 
     /// This copy over an older one: a section this copy does not have keeps
     /// the older one's, with its older time. Another server's copy is not
@@ -49,6 +54,7 @@ public struct GlanceSnapshot: Codable, Sendable, Equatable {
         merged.downloads = downloads ?? older.downloads
         merged.today = today ?? older.today
         merged.disk = disk ?? older.disk
+        merged.activity = activity ?? older.activity
         return merged
     }
 }
@@ -130,6 +136,62 @@ extension GlanceSnapshot {
                 self.code = code
                 self.time = time
                 self.downloaded = downloaded
+            }
+        }
+    }
+
+    /// What the arrs did lately — arrived, failed, grabbed — newest first,
+    /// for the Activity widget. History stays true as it ages, only
+    /// incomplete: what came after the last poll is missing.
+    public struct Activity: Codable, Sendable, Equatable {
+        public var at: Date
+        public var entries: [Entry]
+
+        /// Enough for the large widget; the smaller ones show the first few.
+        public static let shown = 8
+
+        public init(at: Date, entries: [Entry]) {
+            self.at = at
+            self.entries = entries
+        }
+
+        public struct Entry: Codable, Sendable, Equatable, Hashable {
+            public enum Kind: String, Codable, Sendable { case episode, movie, book, album }
+            public enum Event: String, Codable, Sendable {
+                /// Imported into the library: it is there to watch or read.
+                case arrived
+                case failed
+                /// Sent to a download client, not imported yet.
+                case grabbed
+            }
+
+            public var kind: Kind
+            public var event: Event
+            /// The library's title when the app knows it, the release name
+            /// cleaned up otherwise.
+            public var title: String
+            /// S02E08, or S02E02–E08 for a run of one season's episodes.
+            public var code: String?
+            /// Episodes folded into this entry; 1 for anything else.
+            public var count: Int
+            /// The newest of them.
+            public var date: Date
+            /// Names the title's poster in the shared container (movie-207);
+            /// nil when the title is not in the library the app has loaded.
+            public var key: String?
+            /// The poster file for `key` is there to show.
+            public var hasPoster: Bool
+
+            public init(kind: Kind, event: Event, title: String, code: String? = nil, count: Int = 1, date: Date,
+                        key: String? = nil, hasPoster: Bool = false) {
+                self.kind = kind
+                self.event = event
+                self.title = title
+                self.code = code
+                self.count = count
+                self.date = date
+                self.key = key
+                self.hasPoster = hasPoster
             }
         }
     }

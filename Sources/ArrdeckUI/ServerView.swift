@@ -77,7 +77,7 @@ public struct ServerView: View {
                     .task { await model.run() }
                     .task { await feed.run() }
                     // the widgets' snapshot and the Live Activity, from the same polls
-                    .background { GlanceFeed(model: model, server: controller.profile.name) }
+                    .background { GlanceFeed(model: model, server: controller.profile.name, baseURL: controller.activeURL, api: api) }
             } else {
                 NavigationStack {
                     ProfileView(controller: controller)

@@ -12,6 +12,15 @@ import ActivityKit
 struct GlanceFeed: View {
     let model: DashboardModel
     let server: String
+    /// Where the posters are fetched from: the address answering now.
+    let baseURL: URL
+    /// The Activity widget's feed: one record per episode, where the
+    /// dashboard's history has one per torrent (a season pack is one row).
+    let api: any ActivityAPI
+    @State private var recent: [ActivityEvent]?
+    /// How far back the Activity widget looks, and how often.
+    static let lookback: TimeInterval = 14 * 86400
+    static let every: Duration = .seconds(300)
     @AppStorage(DisplayKeys.liveActivity) private var liveActivity = true
     @Environment(\.scenePhase) private var scenePhase
 
@@ -24,6 +33,12 @@ struct GlanceFeed: View {
             .accessibilityHidden(true)
             .onChange(of: answered, initial: true) { publish() }
             .onChange(of: liveActivity) { publish() }
+            // Activity's titles and posters arrive after its history: the
+            // libraries load on their own, the posters one by one
+            .onChange(of: LibraryTitles.shared.titles) { publish() }
+            .onChange(of: GlancePosters.shared.stored) { publish() }
+            .onChange(of: recent) { publish() }
+            .task(id: server) { await pollRecent() }
             .onChange(of: scenePhase) { _, phase in
                 switch phase {
                 case .background: GlancePublisher.shared.flush()
@@ -36,7 +51,19 @@ struct GlanceFeed: View {
     func publish() {
         // the polls answer only while in front; this is belt and braces
         guard scenePhase != .background else { return }
-        GlancePublisher.shared.publish(model, server: server, liveActivity: liveActivity)
+        GlancePublisher.shared.publish(model, recent: recent, server: server, baseURL: baseURL, liveActivity: liveActivity)
+    }
+
+    /// The last two weeks of the arrs' events, every few minutes while open.
+    /// A failure keeps the last answer; the Activity tab's own poll is the
+    /// one that notices a lost session.
+    func pollRecent() async {
+        while !Task.isCancelled {
+            if let since = try? await api.activitySince(.now.addingTimeInterval(-Self.lookback)) {
+                recent = since.items
+            }
+            try? await Task.sleep(for: Self.every)
+        }
     }
 }
 
@@ -58,8 +85,10 @@ final class GlancePublisher {
     let liveActivity = DownloadsLiveActivity()
     #endif
 
-    /// After any of the dashboard's torrent, calendar or disk polls.
-    func publish(_ model: DashboardModel, server: String, liveActivity enabled: Bool, now: Date = .now) {
+    /// After any of the dashboard's torrent, calendar or disk polls, and when
+    /// Activity's feed, titles or posters change.
+    func publish(_ model: DashboardModel, recent: [ActivityEvent]?, server: String, baseURL: URL,
+                 liveActivity enabled: Bool, now: Date = .now) {
         // until /services answers, "no torrent client" only means "not known
         // yet", and would end an activity adopted from the last run
         guard model.servicesKnown else { return }
@@ -69,6 +98,9 @@ final class GlancePublisher {
             torrents: model.torrentClients.isEmpty ? nil : model.torrents.value,
             calendar: model.hasArr ? model.calendar.value : nil,
             disks: model.hasArr ? model.diskSpace.value : nil,
+            activity: model.hasArr ? recent : nil,
+            titles: LibraryTitles.shared.titles,
+            posters: GlancePosters.shared.stored,
             byteBase: byteBase, now: now
         )
         #if os(iOS) && canImport(ActivityKit)
@@ -82,11 +114,16 @@ final class GlancePublisher {
         guard store.isAvailable, !fresh.isEmpty else { return }
         let previous = written ?? store.read()
         let merged = fresh.merging(previous)
+        if let entries = merged.activity?.entries {
+            GlancePosters.shared.update(for: entries, titles: LibraryTitles.shared.titles, baseURL: baseURL)
+        }
         guard merged != previous else { return }
         store.write(merged)
         written = merged
         // a download starting or finishing is worth showing at once
+        // and so is something arriving, or its poster landing
         let changed = previous?.downloads?.count != merged.downloads?.count || previous?.server != merged.server
+            || previous?.activity?.entries != merged.activity?.entries
         reloadWidgets(now: now, force: changed)
     }
 

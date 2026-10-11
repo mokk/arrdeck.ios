@@ -11,6 +11,7 @@ struct ArrdeckWidgets: WidgetBundle {
     var body: some Widget {
         DownloadingWidget()
         TodayWidget()
+        ActivityWidget()
         FreeSpaceWidget()
         DownloadsActivityWidget()
     }

@@ -18,6 +18,8 @@ public struct GlanceStore: Sendable {
 
     /// nil: no shared container, so nothing to read or write.
     public let fileURL: URL?
+    /// Small poster copies for the Activity widget, named by an entry's key.
+    public let postersURL: URL?
 
     public init(appGroup: String? = GlanceStore.appGroup) {
         let container = appGroup.flatMap {
@@ -29,6 +31,12 @@ public struct GlanceStore: Sendable {
     /// For tests: any directory, or nil for a device without the App Group.
     public init(directory: URL?) {
         fileURL = directory?.appending(path: Self.fileName)
+        postersURL = directory?.appending(path: "posters", directoryHint: .isDirectory)
+    }
+
+    /// Where the poster for an Activity entry's `key` is kept.
+    public func posterURL(_ key: String) -> URL? {
+        postersURL?.appending(path: key + ".jpg")
     }
 
     public var isAvailable: Bool { fileURL != nil }

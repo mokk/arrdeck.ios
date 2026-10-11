@@ -59,7 +59,13 @@ extension GlanceSnapshot {
                 ],
                 count: 2
             ),
-            disk: Disk(at: now, free: 1_052_684_484_608, total: nil, label: "radarr")
+            disk: Disk(at: now, free: 1_052_684_484_608, total: nil, label: "radarr"),
+            activity: Activity(at: now, entries: [
+                .init(kind: .episode, event: .arrived, title: "Slow Horses", code: "S06E05", date: now.addingTimeInterval(-1800)),
+                .init(kind: .movie, event: .arrived, title: "Animals", date: now.addingTimeInterval(-7200)),
+                .init(kind: .episode, event: .arrived, title: "Mayfair Witches", code: "S02E02–E08", count: 7,
+                      date: now.addingTimeInterval(-26 * 3600)),
+            ])
         )
     }
 }

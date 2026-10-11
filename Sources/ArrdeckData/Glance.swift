@@ -3,7 +3,8 @@ import Foundation
 
 /// The widgets' snapshot from what the dashboard already polls — the torrent
 /// summary, the calendar and the disks — so the widgets cost no request of
-/// their own. Pure: the model's values in, the snapshot out.
+/// their own; Activity's feed is the one polled for them. Pure: the values
+/// in, the snapshot out.
 extension GlanceSnapshot {
     /// A section is left out (nil) while its card has no answer, so merging
     /// keeps the previous copy instead of saying "nothing downloading".
@@ -12,6 +13,9 @@ extension GlanceSnapshot {
         torrents: [TorrentClient: Block<TorrentSummary>]?,
         calendar items: [ArrApp: Block<[CalendarItem]>]?,
         disks: Block<[DiskSpace]>?,
+        activity events: [ActivityEvent]? = nil,
+        titles: [MediaRef: GlanceTitle] = [:],
+        posters: Set<String> = [],
         byteBase: Int,
         now: Date = .now,
         calendar: Calendar = .current
@@ -21,6 +25,7 @@ extension GlanceSnapshot {
             downloads: torrents.flatMap { downloads($0, now: now) },
             today: items.flatMap { today($0, now: now, calendar: calendar) },
             disk: disks.flatMap { disk($0, now: now) },
+            activity: events.map { activity($0, titles: titles, posters: posters, now: now, calendar: calendar) },
             byteBase: byteBase
         )
     }
@@ -96,6 +101,113 @@ extension GlanceSnapshot {
         }
     }
 
+    /// The arrs' events newest first, one entry per title and day: the
+    /// latest event that day says where it got to (a grab, then its import,
+    /// is an arrival), and a day's episodes of one show are one entry
+    /// ("S01E01–E08, S02E01–E08"), or the widget would be a column of one show.
+    static func activity(_ events: [ActivityEvent], titles: [MediaRef: GlanceTitle],
+                         posters: Set<String>, now: Date, calendar: Calendar) -> Activity {
+        struct Record {
+            var event: Activity.Entry.Event
+            var date: Date
+            var episode: Episode?
+        }
+        struct Group {
+            var app: String
+            var ref: MediaRef?
+            var release: String
+            var records: [Record]
+        }
+        var groups: [String: Group] = [:]
+        for item in events {
+            // the torrent clients' "completed" says nothing a widget names
+            guard ArrApp(rawValue: item.app) != nil, let event = activityEvent(item.kind.rawValue),
+                  let date = Format.parseDate(item.date)
+            else { continue }
+            let ref = MediaRef(app: item.app, id: item.movie_id ?? item.series_id ?? item.book_id ?? item.album_id)
+            let episode = item.season.flatMap { season in item.episode.map { Episode(season: season, number: $0) } }
+                ?? episodeNumber(item.title)
+            let id = [item.app, ref?.glanceKey ?? SpokenSummary.spokenName(item.title), CalendarDay.iso(date, calendar: calendar)]
+                .joined(separator: "|")
+            groups[id, default: Group(app: item.app, ref: ref, release: item.title, records: [])]
+                .records.append(Record(event: event, date: date, episode: episode))
+        }
+        let entries = groups.values.compactMap { group -> Activity.Entry? in
+            guard let latest = group.records.max(by: { $0.date < $1.date }) else { return nil }
+            // what the latest event says, for the episodes it happened to
+            let records = group.records.filter { $0.event == latest.event }
+            let episodes = Set(records.compactMap(\.episode))
+            let title = group.ref.flatMap { titles[$0]?.title } ?? SpokenSummary.spokenName(group.release)
+            let key = group.ref?.glanceKey
+            return Activity.Entry(
+                kind: activityKind(ArrApp(rawValue: group.app)), event: latest.event,
+                title: title.isEmpty ? group.release : title,
+                code: episodeCode(episodes),
+                count: episodes.isEmpty ? records.count : episodes.count,
+                date: latest.date, key: key, hasPoster: key.map(posters.contains) ?? false
+            )
+        }
+        .sorted { $0.date > $1.date }
+        return Activity(at: now, entries: Array(entries.prefix(Activity.shown)))
+    }
+
+    struct Episode: Hashable, Comparable {
+        var season: Int
+        var number: Int
+
+        static func < (a: Episode, b: Episode) -> Bool { (a.season, a.number) < (b.season, b.number) }
+    }
+
+    static func activityEvent(_ type: String) -> Activity.Entry.Event? {
+        switch type {
+        case "imported": .arrived
+        case "failed": .failed
+        case "fetched": .grabbed
+        // deleted, and Readarr's "incomplete" on the way to an import
+        default: nil
+        }
+    }
+
+    static func activityKind(_ arr: ArrApp?) -> Activity.Entry.Kind {
+        switch arr {
+        case .radarr, nil: .movie
+        case .sonarr: .episode
+        case .readarr: .book
+        case .lidarr: .album
+        }
+    }
+
+    /// S02E08 in a release name, as numbers.
+    static func episodeNumber(_ release: String) -> Episode? {
+        guard let match = release.firstMatch(of: /(?i)(?:^|[^a-z0-9])s(\d{1,2})e(\d{1,3})/),
+              let season = Int(match.1), let number = Int(match.2)
+        else { return nil }
+        return Episode(season: season, number: number)
+    }
+
+    /// Each season's episodes: a run as "S02E02–E08", single ones listed
+    /// ("S02E01, E04"), seasons one after another. Nil with no numbers known.
+    static func episodeCode(_ episodes: Set<Episode>) -> String? {
+        guard !episodes.isEmpty else { return nil }
+        let seasons = Dictionary(grouping: episodes.sorted(), by: \.season).sorted { $0.key < $1.key }
+        return seasons.map { season, episodes in
+            let numbers = episodes.map(\.number)
+            var runs: [ClosedRange<Int>] = []
+            for number in numbers {
+                if let last = runs.last, last.upperBound + 1 == number {
+                    runs[runs.count - 1] = last.lowerBound...number
+                } else {
+                    runs.append(number...number)
+                }
+            }
+            let parts = runs.map { run in
+                run.count == 1 ? String(format: "E%02d", run.lowerBound) : String(format: "E%02d–E%02d", run.lowerBound, run.upperBound)
+            }
+            return String(format: "S%02d", season) + parts.joined(separator: ", ")
+        }
+        .joined(separator: ", ")
+    }
+
     /// The root folder with the least room left — what fills up first. Paths
     /// on one volume report the same numbers, which the minimum absorbs.
     static func disk(_ block: Block<[DiskSpace]>, now: Date) -> Disk? {
@@ -105,5 +217,30 @@ extension GlanceSnapshot {
         else { return nil }
         let total = fullest.total_bytes.flatMap { $0 > 0 ? $0 : nil }
         return Disk(at: now, free: fullest.free_bytes ?? 0, total: total, label: fullest.label)
+    }
+}
+
+/// A title the app has loaded from a library: what the Activity widget calls
+/// a history row, and where its poster is (relative to the server).
+public struct GlanceTitle: Sendable, Equatable {
+    public var title: String
+    public var poster: String?
+
+    public init(title: String, poster: String?) {
+        self.title = title
+        self.poster = poster
+    }
+}
+
+extension MediaRef {
+    /// The name of this title's poster in the widgets' container: movie-207.
+    public var glanceKey: String {
+        switch self {
+        case let .movie(id): "movie-\(id)"
+        case let .series(id): "series-\(id)"
+        case let .book(id): "book-\(id)"
+        case let .artist(id): "artist-\(id)"
+        case let .album(id): "album-\(id)"
+        }
     }
 }

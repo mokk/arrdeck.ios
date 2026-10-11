@@ -15,7 +15,7 @@ public enum Freshness: Sendable, Equatable {
 
 extension GlanceSnapshot {
     public enum Section: CaseIterable, Sendable {
-        case downloads, today, disk
+        case downloads, today, disk, activity
     }
 
     /// After how long a section turns stale, and after how long it expires.
@@ -26,6 +26,8 @@ extension GlanceSnapshot {
         // the day's list changes only when something is added to it
         case .today: (6 * 3600, 24 * 3600)
         case .disk: (12 * 3600, 7 * 24 * 3600)
+        // what happened stays true; only what came since is missing
+        case .activity: (6 * 3600, 3 * 24 * 3600)
         }
     }
 
@@ -34,6 +36,7 @@ extension GlanceSnapshot {
         case .downloads: downloads?.at
         case .today: today?.at
         case .disk: disk?.at
+        case .activity: activity?.at
         }
     }
 
@@ -62,7 +65,8 @@ extension GlanceSnapshot {
             moments.insert(at.addingTimeInterval(limits.stale))
             moments.insert(at.addingTimeInterval(limits.expired))
         }
-        if today != nil, let midnight = calendar.nextDate(
+        // at midnight today's list expires and Activity's "today" moves on
+        if today != nil || activity != nil, let midnight = calendar.nextDate(
             after: now, matching: DateComponents(hour: 0, minute: 0, second: 0), matchingPolicy: .nextTime
         ) {
             moments.insert(midnight)

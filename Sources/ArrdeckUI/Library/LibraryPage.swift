@@ -196,8 +196,12 @@ public struct LibraryPage: View {
                               hasPlex: dashboard.has("plex"), query: model.query, onSessionLost: onSessionLost) { searchingEverything = false }
         }
         .onChange(of: model.rows.value?.count) { _, _ in
-            // the titles into iOS search, refreshed whenever the library reloads
-            if let rows = model.rows.value { SpotlightIndexer.index(rows, app: app) }
+            // the titles into iOS search, refreshed whenever the library reloads,
+            // and to the Activity widget, which names history rows by them
+            if let rows = model.rows.value {
+                SpotlightIndexer.index(rows, app: app)
+                LibraryTitles.shared.record(rows, app: app)
+            }
         }
         .sheet(item: $diagnosing) { row in
             DiagnoseSheet(app: app.arr, id: row.id, title: row.title, api: api) { diagnosing = nil }

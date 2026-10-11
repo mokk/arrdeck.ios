@@ -572,6 +572,17 @@
         }
       }
     },
+    "%lld today": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld i dag"
+          }
+        }
+      }
+    },
     "%lld torrents, %lld active": {
       "localizations": {
         "da": {
@@ -2589,6 +2600,17 @@
         }
       }
     },
+    "Earlier": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidligere"
+          }
+        }
+      }
+    },
     "Edit": {
       "localizations": {
         "da": {
@@ -2785,6 +2807,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Eksisterende afsnit"
+          }
+        }
+      }
+    },
+    "Failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fejlede"
           }
         }
       }
@@ -4383,6 +4416,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Næste titel"
+          }
+        }
+      }
+    },
+    "No activity yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen aktivitet endnu"
           }
         }
       }
@@ -7723,6 +7767,17 @@
         }
       }
     },
+    "What arrived, failed or was grabbed lately, with today's first.": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvad der er kommet, fejlet eller hentet for nylig – dagens først."
+          }
+        }
+      }
+    },
     "What could go to free space. Tick what to remove; nothing is deleted until you confirm.": {
       "localizations": {
         "da": {
@@ -7862,6 +7917,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "År"
+          }
+        }
+      }
+    },
+    "Yesterday": {
+      "extractionState": "manual",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I går"
           }
         }
       }

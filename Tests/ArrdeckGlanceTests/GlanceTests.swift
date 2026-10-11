@@ -135,6 +135,54 @@ struct FreshnessTests {
     }
 }
 
+struct ActivitySectionTests {
+    /// 2026-10-11 12:00 UTC
+    let noon = Date(timeIntervalSince1970: 1_791_720_000)
+
+    var utc: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        return calendar
+    }
+
+    func activity(at: Date) -> GlanceSnapshot.Activity {
+        .init(at: at, entries: [.init(kind: .movie, event: .arrived, title: "Animals", date: at, key: "movie-207")])
+    }
+
+    @Test func itIsKeptWhenAPollWithoutItLands() {
+        let older = GlanceSnapshot(server: "Home", activity: activity(at: noon))
+        let fresh = GlanceSnapshot(server: "Home", disk: .init(at: noon.addingTimeInterval(60), free: 1, total: nil, label: nil))
+        #expect(fresh.merging(older).activity == older.activity)
+        #expect(!GlanceSnapshot(server: "Home", activity: activity(at: noon)).isEmpty)
+    }
+
+    @Test func historyAgesSlowly() {
+        let s = GlanceSnapshot(server: "Home", activity: activity(at: noon))
+        #expect(s.freshness(.activity, now: noon.addingTimeInterval(5 * 3600), calendar: utc) == .fresh)
+        #expect(s.freshness(.activity, now: noon.addingTimeInterval(7 * 3600), calendar: utc) == .stale)
+        #expect(s.freshness(.activity, now: noon.addingTimeInterval(3 * 86400), calendar: utc) == .expired)
+    }
+
+    @Test func midnightMovesItsTodayOn() {
+        // without a calendar section, Activity alone schedules midnight
+        let s = GlanceSnapshot(server: "Home", activity: activity(at: noon))
+        #expect(s.transitions(after: noon, calendar: utc).contains(noon.addingTimeInterval(12 * 3600)))
+    }
+
+    @Test func itRoundTripsThroughTheFile() throws {
+        let s = GlanceSnapshot(server: "Home", activity: activity(at: noon))
+        #expect(GlanceStore.decode(try GlanceStore.encode(s)) == s)
+    }
+
+    @Test func aFileFromBeforeActivityStillReads() throws {
+        var s = GlanceSnapshot(server: "Home", disk: .init(at: noon, free: 1, total: nil, label: nil))
+        s.activity = nil
+        let data = try GlanceStore.encode(s)
+        #expect(!String(decoding: data, as: UTF8.self).contains("activity"))
+        #expect(GlanceStore.decode(data)?.disk?.free == 1)
+    }
+}
+
 struct GlanceLinkTests {
     @Test func everyLinkRoundTrips() {
         for link in GlanceLink.allCases {
