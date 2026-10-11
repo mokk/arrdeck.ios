@@ -49,26 +49,38 @@ public enum ArrApp: String, CaseIterable, Sendable, Hashable {
 }
 
 /// The arrs with a library tab of their own: its layouts, sort keys, bulk
-/// actions and global search. Lidarr is an ArrApp but has no library tab
-/// yet, and the server's library routes do not take it, so it is not one
-/// of these.
+/// actions and global search. Lidarr's library is its artists.
 public enum LibraryApp: String, CaseIterable, Sendable, Hashable {
-    case radarr, sonarr, readarr
+    case radarr, sonarr, readarr, lidarr
 
     public var arr: ArrApp {
         switch self {
         case .radarr: .radarr
         case .sonarr: .sonarr
         case .readarr: .readarr
+        case .lidarr: .lidarr
         }
     }
 
-    public init?(_ arr: ArrApp) {
+    public init(_ arr: ArrApp) {
         switch arr {
         case .radarr: self = .radarr
         case .sonarr: self = .sonarr
         case .readarr: self = .readarr
-        case .lidarr: return nil
+        case .lidarr: self = .lidarr
+        }
+    }
+
+    /// Album covers and artist pictures are square, not a poster's 2:3.
+    public var squareArtwork: Bool { self == .lidarr }
+
+    /// The tab's name: Movies, Shows, Books, Music.
+    public var label: String {
+        switch self {
+        case .radarr: String(localized: "Movies")
+        case .sonarr: String(localized: "Shows")
+        case .readarr: String(localized: "Books")
+        case .lidarr: String(localized: "Music")
         }
     }
 }

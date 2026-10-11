@@ -14,7 +14,7 @@ struct ExclusionsView: View {
             case let .failed(reason): ErrorNote(reason)
             case let .loaded(all):
                 if all.isEmpty { EmptyNote("Nothing is excluded.") }
-                ForEach(["radarr", "sonarr", "readarr"], id: \.self) { app in
+                ForEach(["radarr", "sonarr", "readarr", "lidarr"], id: \.self) { app in
                     let mine = all.filter { $0.app == app }
                     if !mine.isEmpty {
                         Section(Services.label(app)) {

@@ -35,8 +35,10 @@ public enum PrefsSyncPolicy {
 /// per device.
 ///
 /// | this app (UserDefaults)                  | wire key                          | wire value                          |
-/// | display.layout.radarr/sonarr/readarr     | layout.movies/series/books        | same raw value ("upnext" included)  |
-/// | display.unmonitored.radarr/sonarr/readarr| unmonitored.movies/series/books   | same                                |
+/// | display.layout.radarr/sonarr/readarr/    | layout.movies/series/books/music  | same raw value ("upnext" included)  |
+/// |   lidarr                                 |                                   |                                     |
+/// | display.unmonitored.radarr/sonarr/       | unmonitored.movies/series/books/  | same                                |
+/// |   readarr/lidarr                         |   music                           |                                     |
 /// | display.startTab  (AppTab, "" = default) | startTab                          | "/books" "/movies" "/shows" …, ""   |
 /// | display.tabOrder, display.hiddenTabs     | tabOrder, hiddenTabs              | array of the same routes            |
 /// | display.dates, .sizes, .spoilers,        | dates, sizes, spoilers, confirm   | same                                |
@@ -47,7 +49,7 @@ public enum DisplaySync {
     /// The web routes of the tabs. Spelled out rather than derived: the web's
     /// are what the server holds, and `/shows` is not `/series`.
     static let routes: [AppTab: String] = [
-        .books: "/books", .movies: "/movies", .shows: "/shows",
+        .books: "/books", .movies: "/movies", .shows: "/shows", .music: "/music",
         .activity: "/activity", .calendar: "/calendar", .settings: "/settings",
     ]
 
@@ -56,6 +58,7 @@ public enum DisplaySync {
         case .radarr: "movies"
         case .sonarr: "series"
         case .readarr: "books"
+        case .lidarr: "music"
         }
     }
 

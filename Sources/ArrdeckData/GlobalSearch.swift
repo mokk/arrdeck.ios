@@ -5,7 +5,7 @@ import Observation
 /// once when the search opens; typing costs no request.
 public enum GlobalSearch {
     public struct Hit: Identifiable, Hashable, Sendable {
-        public enum Group: Int, CaseIterable, Sendable { case movies, shows, books, authors }
+        public enum Group: Int, CaseIterable, Sendable { case movies, shows, books, authors, artists }
         public var id: String
         public var group: Group
         public var title: String
@@ -38,12 +38,13 @@ public enum GlobalSearch {
             case .movie: .movies
             case .series: .shows
             case .book: .books
+            case .artist, .album: .artists
             }
         }
         let titled = rows.filter { $0.title.lowercased().contains(needle) || ($0.seriesTitle ?? "").lowercased().contains(needle) }
             .map { row in
                 Hit(id: "\(row.ref)", group: group(of: row), title: row.title,
-                    subtitle: row.author ?? row.year.map(String.init), poster: row.poster, ref: row.ref)
+                    subtitle: row.author ?? row.disambiguation ?? row.year.map(String.init), poster: row.poster, ref: row.ref)
             }
         let people = authors.filter { $0.name.lowercased().contains(needle) }
             .map { Hit(id: "author:\($0.id)", group: .authors, title: $0.name, authorID: $0.id) }
@@ -78,6 +79,8 @@ public final class GlobalSearchModel {
             case .readarr:
                 books = (try? await api.libraryBooks()) ?? []
                 all += books.map(LibraryRow.init)
+            case .lidarr:
+                all += ((try? await (api as? any MusicLibraryAPI)?.libraryArtists()) ?? []).map(LibraryRow.init)
             }
         }
         var seen = Set<Int>()

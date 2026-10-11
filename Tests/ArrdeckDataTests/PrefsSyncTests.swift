@@ -62,12 +62,14 @@ import Testing
 
     @Test func aDeviceOnDefaultsCollectsEveryKeyTheWebAppHasWithItsDefault() {
         let values = DisplaySync.collect(fresh())
-        #expect(values.count == 15)
+        #expect(values.count == 17)
         #expect(Set(values.keys) == DisplaySync.keys)
         #expect(values["layout.movies"] == .string("posters"))
         #expect(values["layout.series"] == .string("posters"))
         #expect(values["layout.books"] == .string("posters"))
+        #expect(values["layout.music"] == .string("posters"))
         #expect(values["unmonitored.movies"] == .string("show"))
+        #expect(values["unmonitored.music"] == .string("show"))
         #expect(values["startTab"] == .string(""))
         #expect(values["tabOrder"] == .strings([]))
         #expect(values["hiddenTabs"] == .strings([]))
@@ -164,6 +166,37 @@ import Testing
         #expect(defaults.string(forKey: DisplayKeys.confirm) == nil)
         // untouched: the server did not send it
         #expect(defaults.string(forKey: DisplayKeys.unmonitored(.radarr)) == "dim")
+    }
+
+    /// layout.music and unmonitored.music came with the Music tab, and /music
+    /// with its route; a layout another tab has means nothing to it.
+    @Test func theMusicTabSyncsLikeTheOthers() {
+        let defaults = fresh()
+        DisplaySync.apply([
+            "layout.music": .string("details"), "unmonitored.music": .string("dim"),
+            "startTab": .string("/music"),
+            "tabOrder": .strings(["/music", "/movies"]), "hiddenTabs": .strings(["/music"]),
+        ], to: defaults)
+        #expect(defaults.string(forKey: DisplayKeys.layout(.lidarr)) == "details")
+        #expect(defaults.string(forKey: DisplayKeys.unmonitored(.lidarr)) == "dim")
+        #expect(defaults.string(forKey: DisplayKeys.startTab) == "music")
+        #expect(defaults.string(forKey: DisplayKeys.tabOrder) == "music,movies")
+        #expect(defaults.string(forKey: DisplayKeys.hiddenTabs) == "music")
+        let values = DisplaySync.collect(defaults)
+        #expect(values["layout.music"] == .string("details"))
+        #expect(values["tabOrder"] == .strings(["/music", "/movies"]))
+        #expect(values["hiddenTabs"] == .strings(["/music"]))
+
+        DisplaySync.apply(["layout.music": .string("upnext")], to: defaults)
+        #expect(defaults.string(forKey: DisplayKeys.layout(.lidarr)) == "details", "Up next is a Shows layout")
+    }
+
+    /// A tab order saved before there was a Music tab puts it after the
+    /// ordered ones, as the web app does.
+    @Test func anOrderFromBeforeMusicPutsItLast() {
+        let available = AppTab.available(configured: ["radarr", "sonarr", "lidarr"])
+        let arranged = AppTab.arrange(available, order: AppTab.list("shows,movies,activity,calendar,settings"), hidden: [])
+        #expect(arranged == [.shows, .movies, .activity, .calendar, .settings, .music])
     }
 
     @Test func anEmptyStartTabResetsToTheDefault() {

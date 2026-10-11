@@ -46,19 +46,21 @@ struct OpenNamesContractTests {
 }
 
 @Suite struct LidarrNamesTests {
-    @Test func lidarrIsAnArrButNotALibraryTab() {
+    @Test func lidarrIsAnArrWithALibraryTab() {
         #expect(ArrApp(rawValue: "lidarr") == .lidarr)
         #expect(Services.label("lidarr") == "Lidarr")
         #expect(ArrApp.lidarr.symbol == "music.note")
         #expect(ArrApp.radarr.symbol == AppTab.movies.symbol && ArrApp.readarr.symbol == AppTab.books.symbol)
-        #expect(LibraryApp(.lidarr) == nil)
-        #expect(LibraryApp.allCases.map(\.arr) == [.radarr, .sonarr, .readarr])
-        #expect(!DisplaySync.keys.contains { $0.hasSuffix(".music") || $0.hasSuffix(".lidarr") },
-                "no music layout is synced until there is a music tab")
+        #expect(ArrApp.lidarr.symbol == AppTab.music.symbol)
+        #expect(LibraryApp(.lidarr) == .lidarr)
+        #expect(LibraryApp.allCases.map(\.arr) == [.radarr, .sonarr, .readarr, .lidarr])
+        #expect(LibraryApp.lidarr.libraryKind == "artists", "the Music tab's bulk actions address artists")
+        #expect(DisplaySync.keys.isSuperset(of: ["layout.music", "unmonitored.music"]))
     }
 
-    @Test func lidarrAloneGivesActivityAndCalendar() {
-        #expect(AppTab.available(configured: ["lidarr"]) == [.activity, .calendar, .settings])
+    @Test func lidarrAloneGivesMusicActivityAndCalendar() {
+        #expect(AppTab.available(configured: ["lidarr"]) == [.music, .activity, .calendar, .settings])
+        #expect(AppTab.available(configured: ["readarr", "radarr", "sonarr", "lidarr"]).prefix(4) == [.books, .movies, .shows, .music])
     }
 
     @Test func connectionsTakeAnAddressAndAKey() {
@@ -160,7 +162,7 @@ struct OpenNamesContractTests {
         }
     }
 
-    @Test func albumsLandOnTheirReleaseDayAndOpenNothing() async throws {
+    @Test func albumsLandOnTheirReleaseDayAndOpenTheAlbum() async throws {
         let model = CalendarModel(api: Fake(), calendar: utc, now: { Date(timeIntervalSince1970: 1_791_720_000) }, onSessionLost: {})
         defer { model.hiddenApps = [] }
         await model.load()
@@ -168,7 +170,8 @@ struct OpenNamesContractTests {
         let day = try #require(model.days.first { $0.day == "2026-10-16" })
         let albums = day.entries.filter { $0.item.arr == .lidarr }
         #expect(albums.count == 2, "two albums by one artist are two rows, not a fold")
-        #expect(albums.allSatisfy { $0.item.ref == nil && $0.code == nil })
+        #expect(albums.allSatisfy { $0.item.ref == $0.item.item_id.map(MediaRef.album) && $0.code == nil })
+        #expect(albums.allSatisfy { $0.item.ref != nil })
         model.hiddenApps = [.lidarr]
         #expect(model.items.map(\.title) == ["A Show"])
     }

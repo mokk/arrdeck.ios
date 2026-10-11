@@ -9,7 +9,7 @@ import UIKit
 /// connection screen whenever it does not. One controller decides which, so a
 /// card's 401 and a completed sign-in both flip it.
 ///
-/// Tabs: Books · Movies · Shows · Activity · Calendar · Settings, each only
+/// Tabs: Books · Movies · Shows · Music · Activity · Calendar · Settings, each only
 /// while its service is configured. Each tab has its own navigation stack.
 public struct ServerView: View {
     @State private var controller: SessionController
@@ -276,6 +276,8 @@ public struct ServerView: View {
             LibraryPage(app: .radarr, dashboard: model, api: api, baseURL: controller.activeURL, onSessionLost: sessionLost)
         case .shows:
             LibraryPage(app: .sonarr, dashboard: model, api: api, baseURL: controller.activeURL, onSessionLost: sessionLost)
+        case .music:
+            LibraryPage(app: .lidarr, dashboard: model, api: api, baseURL: controller.activeURL, onSessionLost: sessionLost)
         case .activity:
             ActivityView(api: api, feed: feed, clients: model.torrentClients, hasArr: model.hasArr,
                          arrs: ArrApp.allCases.filter { model.has($0.rawValue) },

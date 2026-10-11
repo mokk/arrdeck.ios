@@ -16,18 +16,26 @@ public typealias WatchedItem = Components.Schemas.WatchedItemOut
 extension Components.Schemas.ServiceBlock_WatchedMapOut_: ServiceBlockShape {}
 
 /// A title in one of the arrs' libraries — what a poster, a history row or a
-/// queue item links to.
+/// queue item links to. Lidarr's library has two levels: the Music tab's
+/// cards are artists, while every row elsewhere (calendar, history, wanted,
+/// recently added, the queue) is an album.
 public enum MediaRef: Hashable, Sendable {
     case movie(Int)
     case series(Int)
     case book(Int)
+    case artist(Int)
+    case album(Int)
 
+    /// The library title behind an arr's own library id: the movie, the
+    /// series, the book, or for Lidarr the album, which is what recently
+    /// added, Wanted and the calendar carry.
     public init?(app: String, id: Int?) {
         guard let id else { return nil }
         switch app {
         case "radarr": self = .movie(id)
         case "sonarr": self = .series(id)
         case "readarr": self = .book(id)
+        case "lidarr": self = .album(id)
         default: return nil
         }
     }
@@ -37,12 +45,13 @@ public enum MediaRef: Hashable, Sendable {
         case .movie: .radarr
         case .series: .sonarr
         case .book: .readarr
+        case .artist, .album: .lidarr
         }
     }
 
     public var id: Int {
         switch self {
-        case let .movie(id), let .series(id), let .book(id): id
+        case let .movie(id), let .series(id), let .book(id), let .artist(id), let .album(id): id
         }
     }
 }
@@ -74,6 +83,7 @@ extension HistoryItem {
         if let movie_id { return .movie(movie_id) }
         if let series_id { return .series(series_id) }
         if let book_id { return .book(book_id) }
+        if let album_id { return .album(album_id) }
         return nil
     }
 }
@@ -272,6 +282,23 @@ extension LiveAPI: LibraryAPI {
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)
                 }
+            case let .artist(id):
+                let edit = Components.Schemas.ArtistUpdateIn(monitored: monitored, quality_profile_id: qualityProfile)
+                switch try await client.update_artist_api_v1_library_artists__artist_id__patch(path: .init(artist_id: id), body: .json(edit)) {
+                case .ok: ()
+                case .unprocessableContent: throw APIError.unexpectedStatus(422)
+                case let .undocumented(code, _): throw APIError.status(code)
+                }
+            case let .album(id):
+                // an album's quality is its artist's; only the flag is its own
+                guard let monitored else { return }
+                switch try await client.update_album_api_v1_library_albums__album_id__patch(
+                    path: .init(album_id: id), body: .json(.init(monitored: monitored))
+                ) {
+                case .ok: ()
+                case .unprocessableContent: throw APIError.unexpectedStatus(422)
+                case let .undocumented(code, _): throw APIError.status(code)
+                }
             }
         }
     }
@@ -303,11 +330,26 @@ extension LiveAPI: LibraryAPI {
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)
                 }
+            case let .artist(id):
+                switch try await client.delete_artist_api_v1_library_artists__artist_id__delete(
+                    path: .init(artist_id: id), query: .init(delete_files: deleteFiles)
+                ) {
+                case .noContent: ()
+                case .unprocessableContent: throw APIError.unexpectedStatus(422)
+                case let .undocumented(code, _): throw APIError.status(code)
+                }
+            case .album:
+                // Lidarr removes albums with their artist; an album's files go
+                // through MusicLibraryAPI.deleteAlbumFiles
+                throw APIError.unexpectedStatus(405)
             }
         }
     }
 
     public func triggerSearch(_ ref: MediaRef) async throws {
+        // The search route reads a Lidarr id as an album; an artist is
+        // searched as the bulk action does it, every monitored album of theirs.
+        if case let .artist(id) = ref { return try await bulkSearch(.lidarr, ids: [id]) }
         try await call {
             switch try await client.trigger_search_api_v1_library__app___item_id__search_post(
                 path: .init(app: ref.app.rawValue, item_id: ref.id)

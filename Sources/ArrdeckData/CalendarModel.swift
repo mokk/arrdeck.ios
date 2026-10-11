@@ -38,15 +38,15 @@ extension LiveAPI: CalendarAPI {
 
 extension CalendarItem {
     /// The library title an entry opens: the film, the episode's show, the
-    /// book. An album opens nothing yet.
+    /// book, the album.
     public var ref: MediaRef? {
         guard let item_id else { return nil }
         return switch arr {
         case .radarr: .movie(item_id)
         case .sonarr: .series(item_id)
         case .readarr: .book(item_id)
-        // an album has no page to open yet
-        case .lidarr, nil: nil
+        case .lidarr: .album(item_id)
+        case nil: nil
         }
     }
 

@@ -23,14 +23,14 @@ public struct ActivityView: View {
     @State private var model: DownloadsModel
     @State private var newSince: Date
     let feed: ActivityFeedModel
-    let api: any DownloadsAPI & ExtrasAPI & HistoryAPI & LibraryAPI
+    let api: any DownloadsAPI & HistoryAPI & TitleScreensAPI
     let hasArr: Bool
     let baseURL: URL
     let hasPlex: Bool
     let onSessionLost: @MainActor () -> Void
 
     public init(
-        api: any DownloadsAPI & ExtrasAPI & HistoryAPI & LibraryAPI, feed: ActivityFeedModel, clients: [TorrentClient], hasArr: Bool,
+        api: any DownloadsAPI & HistoryAPI & TitleScreensAPI, feed: ActivityFeedModel, clients: [TorrentClient], hasArr: Bool,
         arrs: [ArrApp] = [], baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void
     ) {
         self.api = api
@@ -74,14 +74,7 @@ public struct ActivityView: View {
         .navigationTitle("Activity")
         .pageTitle()
         .navigationDestination(for: MediaRef.self) { ref in
-            switch ref {
-            case let .movie(id):
-                MovieDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
-            case let .series(id):
-                SeriesDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
-            case let .book(id):
-                BookDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
-            }
+            TitleDetail(ref: ref, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
         }
         .task { await model.run() }
         .accessibilityIdentifier("activity")

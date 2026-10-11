@@ -1,8 +1,9 @@
 import ArrdeckData
 import SwiftUI
 
-/// Movies or Shows: the library as cards, with sort, search and add in the
-/// bar. Nothing else on the page — the cards are the page.
+/// Movies, Shows, Books or Music: the library as cards, with sort, search
+/// and add in the bar. Nothing else on the page — the cards are the page.
+/// Music's cards are artists.
 public struct LibraryPage: View {
     @State private var model: LibraryListModel
     @State private var adding = false
@@ -13,6 +14,8 @@ public struct LibraryPage: View {
     @State private var requests: [String: RequestState] = [:]
     @State private var reading: [Int: Reading] = [:]
     @AppStorage("library.books.reading") private var readingFilter = ""
+    /// The PWA's key and values: "", "onDisk", "missing".
+    @AppStorage("library.music.onDisk") private var diskFilter: MusicDiskFilter = .any
     @AppStorage private var layout: LibraryLayout
     @AppStorage private var unmonitored: UnmonitoredMode
     let app: LibraryApp
@@ -36,13 +39,15 @@ public struct LibraryPage: View {
         _unmonitored = AppStorage(wrappedValue: .show, DisplayKeys.unmonitored(app))
     }
 
-    /// The sorted rows minus the unmonitored ones when those are hidden, and
-    /// for books those outside the chosen reading status.
+    /// The sorted rows minus the unmonitored ones when those are hidden, for
+    /// books those outside the chosen reading status, and for music those
+    /// outside the on-disk choice.
     var visible: [LibraryRow] {
         var rows = unmonitored == .hide ? model.shown.filter { !$0.isUnmonitored } : model.shown
         if app == .readarr, !readingFilter.isEmpty {
             rows = rows.filter { reading[$0.id]?.status.rawValue == readingFilter }
         }
+        if app == .lidarr { rows = rows.filter(diskFilter.keeps) }
         return rows
     }
 
@@ -76,19 +81,14 @@ public struct LibraryPage: View {
         }
     }
 
-    var title: String {
-        switch app {
-        case .radarr: String(localized: "Movies")
-        case .sonarr: String(localized: "Shows")
-        case .readarr: String(localized: "Books")
-        }
-    }
+    var title: String { app.label }
 
     var prompt: String {
         switch app {
         case .radarr: String(localized: "Search movies")
         case .sonarr: String(localized: "Search shows")
         case .readarr: String(localized: "Search books")
+        case .lidarr: String(localized: "Search artists")
         }
     }
 
@@ -157,8 +157,10 @@ public struct LibraryPage: View {
                 } else {
                     Button { searchingEverything = true } label: { Label("Search everything", systemImage: "magnifyingglass") }
                     sortMenu
-                    Button { adding = true } label: { Label("Add", systemImage: "plus") }
-                        .accessibilityIdentifier("library-add")
+                    if addTab != nil {
+                        Button { adding = true } label: { Label("Add", systemImage: "plus") }
+                            .accessibilityIdentifier("library-add")
+                    }
                 }
             }
         }
@@ -216,15 +218,16 @@ public struct LibraryPage: View {
 
     /// Overseerr's open requests, for the badges; only when it is configured.
     func loadRequests() async {
-        guard app != .readarr, dashboard.has("overseerr"), let source = api as? any RequestsMapAPI else { return }
+        guard app == .radarr || app == .sonarr, dashboard.has("overseerr"), let source = api as? any RequestsMapAPI else { return }
         requests = (try? await source.requestMap()) ?? [:]
     }
 
-    var addTab: AddTab {
+    var addTab: AddTab? {
         switch app {
         case .radarr: .movies
         case .sonarr: .series
         case .readarr: .books
+        case .lidarr: nil
         }
     }
 
@@ -235,7 +238,7 @@ public struct LibraryPage: View {
             ContentUnavailableView {
                 Label(emptyTitle, systemImage: "tray")
             } actions: {
-                Button(addLabel) { adding = true }.buttonStyle(.bordered)
+                if addTab != nil { Button(addLabel) { adding = true }.buttonStyle(.bordered) }
             }
         } else if model.shown.isEmpty, !model.query.isEmpty {
             ContentUnavailableView {
@@ -259,6 +262,7 @@ public struct LibraryPage: View {
         case .radarr: String(localized: "No movies yet.")
         case .sonarr: String(localized: "No shows yet.")
         case .readarr: String(localized: "No books yet.")
+        case .lidarr: String(localized: "No music yet.")
         }
     }
 
@@ -267,6 +271,7 @@ public struct LibraryPage: View {
         case .radarr: String(localized: "Add a movie")
         case .sonarr: String(localized: "Add a show")
         case .readarr: String(localized: "Add a book")
+        case .lidarr: String(localized: "Add an artist")
         }
     }
 
@@ -281,8 +286,13 @@ public struct LibraryPage: View {
                     ForEach(ReadingStatus.allCases, id: \.self) { Text($0.label).tag($0.rawValue) }
                 }
             }
+            if app == .lidarr {
+                Picker("On disk", selection: $diskFilter) {
+                    ForEach(MusicDiskFilter.allCases, id: \.self) { Text($0.label).tag($0) }
+                }
+            }
             Picker("Sort by", selection: $model.sort) {
-                ForEach(LibrarySort.keys(for: app), id: \.self) { key in Text(key.label).tag(key) }
+                ForEach(LibrarySort.keys(for: app), id: \.self) { key in Text(key.label(for: app)).tag(key) }
             }
             Picker("Direction", selection: $model.descending) {
                 Text("Ascending").tag(false)
@@ -321,7 +331,7 @@ struct LibraryGrid: View {
         switch row.ref {
         case .movie: RequestLookup.find(requests, movieTMDB: row.tmdb)
         case .series: RequestLookup.find(requests, showTVDB: row.tvdb)
-        case .book: nil
+        case .book, .artist, .album: nil
         }
     }
 
@@ -375,24 +385,21 @@ struct CardTap: ViewModifier {
     let delete: (LibraryRow) -> Void
     @Environment(\.confirmCenter) private var confirmCenter
 
-    /// Each arr shows one title at /movie/<slug>, /series/<slug>, /book/<slug>.
+    /// Each arr shows one title at /movie/<slug>, /series/<slug>, /book/<slug>;
+    /// Lidarr an artist at /artist/<MusicBrainz id>.
     var arrURL: URL? {
         guard let webURL, let slug = row.slug else { return nil }
         let segment = switch row.ref {
         case .movie: "movie"
         case .series: "series"
         case .book: "book"
+        case .artist: "artist"
+        case .album: "album"
         }
         return webURL.appending(path: segment).appending(path: slug)
     }
 
-    var appName: String {
-        switch model.app {
-        case .radarr: "Radarr"
-        case .sonarr: "Sonarr"
-        case .readarr: "Readarr"
-        }
-    }
+    var appName: String { Services.label(model.app.rawValue) }
 
     func body(content: Content) -> some View {
         if model.selecting {
@@ -411,7 +418,8 @@ struct CardTap: ViewModifier {
                     Button {
                         ask(confirmCenter, String(localized: "Search now"), subject: row.title) { await model.search(row) }
                     } label: { Label("Search now", systemImage: "magnifyingglass") }
-                    if row.dot == .wanted, model.app != .readarr {
+                    // the diagnosis is per movie or show; Readarr's and Lidarr's cards are not what it takes
+                    if row.dot == .wanted, model.app == .radarr || model.app == .sonarr {
                         Button { diagnose(row) } label: { Label("Why hasn't this arrived?", systemImage: "questionmark.circle") }
                     }
                     if let arrURL {
@@ -445,6 +453,7 @@ struct LibraryListRow: View {
         case .radarr: row.year.map(String.init) ?? ""
         case .sonarr: String(localized: "\(row.episodeFiles ?? 0)/\(row.episodes ?? 0) episodes")
         case .readarr: [row.author, row.year.map(String.init)].compactMap { $0 }.joined(separator: " · ")
+        case .lidarr: MusicLayout.albumCount(row.albums ?? 0)
         }
     }
 
@@ -455,13 +464,17 @@ struct LibraryListRow: View {
         case .radarr: [row.quality, size, rating]
         case .sonarr: [row.network, row.year.map(String.init), size]
         case .readarr: [row.seriesTitle, size]
+        case .lidarr:
+            [(row.tracks ?? 0) > 0 ? MusicLayout.tracksOnDisk(have: row.trackFiles ?? 0, total: row.tracks ?? 0) : nil,
+             size, row.genre, rating]
         }
         return parts.compactMap { $0 }.joined(separator: " · ")
     }
 
     var body: some View {
         HStack(spacing: 12) {
-            Poster(path: row.poster, baseURL: baseURL, width: details ? 56 : 36, cornerRadius: details ? 8 : 6, title: row.title)
+            Poster(path: row.poster, baseURL: baseURL, width: details ? 56 : 36, cornerRadius: details ? 8 : 6, title: row.title,
+                   square: app.squareArtwork)
                 .overlay(alignment: .topTrailing) {
                     if let selected {
                         Image(systemName: selected ? "checkmark.circle.fill" : "circle")
@@ -561,6 +574,8 @@ struct LibraryCard: View {
             return "\(row.episodeFiles ?? 0)/\(row.episodes ?? 0) · \(Format.bytes(row.sizeOnDisk))"
         case .readarr:
             return [row.author, row.year.map(String.init)].compactMap { $0 }.joined(separator: " · ")
+        case .lidarr:
+            return MusicLayout.albumCount(row.albums ?? 0)
         }
     }
 
@@ -576,7 +591,8 @@ struct LibraryCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Poster(path: row.poster, baseURL: baseURL, width: posterWidth, cornerRadius: 12, title: row.title, subtitle: subtitle)
+            Poster(path: row.poster, baseURL: baseURL, width: posterWidth, cornerRadius: 12, title: row.title, subtitle: subtitle,
+                   square: app.squareArtwork)
                 .frame(maxWidth: .infinity)
                 .overlay(alignment: .topTrailing) {
                     if let selected {

@@ -26,6 +26,7 @@ extension Format {
         case "rottenTomatoes": ("RT", "Rotten Tomatoes")
         case "metacritic": ("Metacritic", "Metacritic")
         case "trakt": ("Trakt", "Trakt")
+        case "musicbrainz": ("MusicBrainz", "MusicBrainz")
         default: (rating.source, rating.source)
         }
         let text = switch rating.source {

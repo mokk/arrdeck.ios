@@ -11,13 +11,15 @@ struct DetailHero<Badges: View>: View {
     let links: [ExternalLink]
     /// Every source's score, as chips under the metadata line.
     var ratings: [Rating] = []
+    /// Album covers and artist pictures are square.
+    var square = false
     @ViewBuilder let badges: () -> Badges
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top, spacing: 14) {
                 if poster != nil {
-                    Poster(path: poster, baseURL: baseURL, width: 100, cornerRadius: 12)
+                    Poster(path: poster, baseURL: baseURL, width: 100, cornerRadius: 12, square: square)
                 }
                 if let overview, !overview.isEmpty {
                     Text(overview).font(.subheadline).foregroundStyle(.secondary)

@@ -7,13 +7,13 @@ public struct WantedView: View {
     @State private var model: WantedModel
     @State private var diagnosing: WantedItem?
     @State private var searching: WantedItem?
-    let api: any WantedAPI & LibraryAPI & ExtrasAPI
+    let api: any WantedAPI & TitleScreensAPI
     let baseURL: URL
     let hasPlex: Bool
     let onSessionLost: @MainActor () -> Void
 
     public init(
-        api: any WantedAPI & LibraryAPI & ExtrasAPI, apps: [ArrApp], baseURL: URL, hasPlex: Bool,
+        api: any WantedAPI & TitleScreensAPI, apps: [ArrApp], baseURL: URL, hasPlex: Bool,
         onSessionLost: @escaping @MainActor () -> Void
     ) {
         self.api = api
@@ -74,14 +74,7 @@ public struct WantedView: View {
         .navigationTitle("Wanted")
         .pageTitle()
         .navigationDestination(for: MediaRef.self) { ref in
-            switch ref {
-            case let .movie(id):
-                MovieDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
-            case let .series(id):
-                SeriesDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
-            case let .book(id):
-                BookDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
-            }
+            TitleDetail(ref: ref, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
         }
         .task { await model.load(reset: true) }
         .refreshable { await model.load(reset: true) }

@@ -94,15 +94,8 @@ public struct DashboardView: View {
         )
     }
 
-    @ViewBuilder func destination(_ ref: MediaRef) -> some View {
-        switch ref {
-        case let .movie(id):
-            MovieDetailView(id: id, api: api, baseURL: baseURL, hasPlex: model.has("plex"), onSessionLost: onSessionLost)
-        case let .series(id):
-            SeriesDetailView(id: id, api: api, baseURL: baseURL, hasPlex: model.has("plex"), onSessionLost: onSessionLost)
-        case let .book(id):
-            BookDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
-        }
+    func destination(_ ref: MediaRef) -> some View {
+        TitleDetail(ref: ref, api: api, baseURL: baseURL, hasPlex: model.has("plex"), onSessionLost: onSessionLost)
     }
 }
 

@@ -16,7 +16,7 @@ struct DisplaySettingsView: View {
     @AppStorage(DisplayKeys.confirm) private var confirm: ConfirmPolicy = .deletes
     @AppStorage(DisplayKeys.liveActivity) private var liveActivity = true
 
-    var apps: [LibraryApp] { [.readarr, .radarr, .sonarr].filter { configured.contains($0.rawValue) } }
+    var apps: [LibraryApp] { [.readarr, .radarr, .sonarr, .lidarr].filter { configured.contains($0.rawValue) } }
     var allTabs: [AppTab] { AppTab.arrange(AppTab.available(configured: configured), order: AppTab.list(tabOrder), hidden: []) }
     var hidden: Set<AppTab> { Set(AppTab.list(hiddenTabs)) }
 
@@ -141,16 +141,8 @@ private struct LibraryDisplaySection: View {
         _unmonitored = AppStorage(wrappedValue: .show, DisplayKeys.unmonitored(app))
     }
 
-    var title: String {
-        switch app {
-        case .radarr: String(localized: "Movies")
-        case .sonarr: String(localized: "Shows")
-        case .readarr: String(localized: "Books")
-        }
-    }
-
     var body: some View {
-        Section(title) {
+        Section(app.label) {
             Picker("Layout", selection: $layout) {
                 ForEach(LibraryLayout.options(for: app), id: \.self) { Text($0.label).tag($0) }
             }

@@ -32,12 +32,14 @@ public enum LibraryLayout: String, CaseIterable, Sendable, Hashable {
         }
     }
 
-    /// Each tab's views: the three shared layouts, then the one only that kind has.
+    /// Each tab's views: the three shared layouts, then the one only that
+    /// kind has. Music has only the shared three.
     public static func options(for app: LibraryApp) -> [LibraryLayout] {
         switch app {
         case .radarr: [.posters, .list, .details, .collections]
         case .sonarr: [.posters, .list, .details, .upNext, .seasons]
         case .readarr: [.posters, .list, .details, .shelf]
+        case .lidarr: [.posters, .list, .details]
         }
     }
 

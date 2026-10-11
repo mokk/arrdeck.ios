@@ -20,19 +20,19 @@ public enum WantedKind: String, CaseIterable, Sendable, Hashable {
 }
 
 extension WantedItem {
-    /// The library title this wanted row belongs to — the movie itself, or the
-    /// series an episode is part of. An album has no page yet, so nil, and
-    /// with it no diagnosis either: that is per library title.
+    /// The library title this wanted row belongs to — the movie itself, the
+    /// series an episode is part of, the book, or the album. The diagnosis
+    /// is per library title too.
     public var ref: MediaRef? { MediaRef(app: app, id: library_id) }
 
-    /// What an interactive search for this row asks for; nil for an album,
-    /// whose releases are not offered yet.
+    /// What an interactive search for this row asks for.
     public var releaseTarget: ReleaseTarget? {
         switch arr {
         case .radarr: .movie(id)
         case .sonarr: .episode(series: library_id, episode: id)
         case .readarr: .book(id)
-        case .lidarr, nil: nil
+        case .lidarr: .album(id)
+        case nil: nil
         }
     }
 }

@@ -126,6 +126,8 @@ struct Poster: View {
     /// the title, instead of a grey box that reads as "still loading".
     var title: String?
     var subtitle: String?
+    /// Album covers and artist pictures are square, not a film poster's 2:3.
+    var square = false
 
     var url: URL? { path.flatMap { URL(string: $0, relativeTo: baseURL) } }
 
@@ -139,7 +141,7 @@ struct Poster: View {
                 Rectangle().fill(.quaternary)
             }
         }
-        .frame(width: width, height: width * 1.5)
+        .frame(width: width, height: square ? width : width * 1.5)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
     }
 }

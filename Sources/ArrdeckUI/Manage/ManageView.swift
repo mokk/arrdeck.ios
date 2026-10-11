@@ -169,14 +169,7 @@ public struct ManageView: View {
         .navigationTitle("Settings")
         .pageTitle()
         .navigationDestination(for: MediaRef.self) { ref in
-            switch ref {
-            case let .movie(id):
-                MovieDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
-            case let .series(id):
-                SeriesDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
-            case let .book(id):
-                BookDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
-            }
+            TitleDetail(ref: ref, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
         }
         .accessibilityIdentifier("settings")
     }

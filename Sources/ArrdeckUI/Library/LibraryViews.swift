@@ -2,7 +2,35 @@ import ArrdeckData
 import SwiftUI
 
 /// The API a library tab needs, the per-kind views included.
-public typealias LibraryPageAPI = ManageAPI & LibraryAPI & ExtrasAPI & DiscoverAPI & WantedAPI & BookShelfAPI
+public typealias LibraryPageAPI = ManageAPI & LibraryAPI & ExtrasAPI & DiscoverAPI & WantedAPI & BookShelfAPI & MusicLibraryAPI
+
+/// What every title page asks of the backend: any list that opens one —
+/// the calendar, history, Wanted, recently added — needs this much.
+public typealias TitleScreensAPI = LibraryAPI & ExtrasAPI & MusicLibraryAPI & ManageAPI
+
+/// The page behind a title: a film, a show, a book, an artist or an album.
+struct TitleDetail: View {
+    let ref: MediaRef
+    let api: any TitleScreensAPI
+    let baseURL: URL
+    let hasPlex: Bool
+    let onSessionLost: @MainActor () -> Void
+
+    var body: some View {
+        switch ref {
+        case let .movie(id):
+            MovieDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+        case let .series(id):
+            SeriesDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+        case let .book(id):
+            BookDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
+        case let .artist(id):
+            ArtistDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
+        case let .album(id):
+            AlbumDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
+        }
+    }
+}
 
 /// A title's detail page, from any list that can open one. Given the list's
 /// order it also steps to the next or previous title — toolbar arrows or a
@@ -51,15 +79,8 @@ struct MediaDestination: View {
         if let ref { current = ref }
     }
 
-    @ViewBuilder var detail: some View {
-        switch current {
-        case let .movie(id):
-            MovieDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
-        case let .series(id):
-            SeriesDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
-        case let .book(id):
-            BookDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
-        }
+    var detail: some View {
+        TitleDetail(ref: current, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
     }
 }
 

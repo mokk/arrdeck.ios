@@ -6,18 +6,21 @@ public typealias ArrRelease = Components.Schemas.ArrReleaseOut
 public typealias RenamePreview = Components.Schemas.RenamePreviewOut
 
 /// What an interactive search is for. Radarr searches per movie; Sonarr's
-/// release lookup needs a season or an episode, never the whole series.
+/// release lookup needs a season or an episode, never the whole series;
+/// Lidarr's an album.
 public enum ReleaseTarget: Hashable, Sendable {
     case movie(Int)
     case season(series: Int, season: Int)
     case episode(series: Int, episode: Int)
     case book(Int)
+    case album(Int)
 
     public var app: ArrApp {
         switch self {
         case .movie: .radarr
         case .season, .episode: .sonarr
         case .book: .readarr
+        case .album: .lidarr
         }
     }
 }
@@ -65,6 +68,8 @@ extension LibraryApp {
         case .radarr: "movies"
         case .sonarr: "series"
         case .readarr: "books"
+        // the Music tab's cards, and so its bulk actions, are artists
+        case .lidarr: "artists"
         }
     }
 }
@@ -97,6 +102,12 @@ extension LiveAPI: ExtrasAPI {
                 }
             case let .book(id):
                 switch try await client.book_releases_api_v1_releases_book__book_id__get(path: .init(book_id: id)) {
+                case let .ok(ok): return try ok.body.json
+                case .unprocessableContent: throw APIError.unexpectedStatus(422)
+                case let .undocumented(code, _): throw APIError.status(code)
+                }
+            case let .album(id):
+                switch try await client.album_releases_api_v1_releases_album__album_id__get(path: .init(album_id: id)) {
                 case let .ok(ok): return try ok.body.json
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)

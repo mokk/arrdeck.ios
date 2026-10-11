@@ -56,6 +56,13 @@ public struct LibraryRow: Identifiable, Hashable, Sendable {
     /// Shows only: the next episode on the calendar and the season it is in.
     public var nextEpisode: NextEpisode?
     public var currentSeason: SeasonProgress?
+    /// Artists only: their albums, the tracks on disk out of all of them,
+    /// the first genre, and what tells two of the same name apart.
+    public var albums: Int?
+    public var trackFiles: Int?
+    public var tracks: Int?
+    public var genre: String?
+    public var disambiguation: String?
 
     /// What "dim" and "hide" apply to. A show is unmonitored by its flag; a film
     /// or a book only when it is neither wanted nor on disk, the way the PWA
@@ -81,6 +88,29 @@ public struct LibraryRow: Identifiable, Hashable, Sendable {
         rating = book.rating
         slug = book.slug
     }
+
+    public init(_ artist: LibraryArtist) {
+        id = artist.id
+        ref = .artist(artist.id)
+        title = artist.name ?? ""
+        poster = artist.poster
+        tags = artist.tags ?? []
+        monitored = artist.monitored ?? false
+        // what the PWA sorts and dims on: anything on disk counts
+        status = MusicLayout.artistState(monitored: artist.monitored, files: artist.track_file_count)
+        sizeOnDisk = artist.size_on_disk ?? 0
+        added = artist.added
+        rating = artist.rating
+        slug = artist.slug
+        albums = artist.album_count
+        trackFiles = artist.track_file_count
+        tracks = artist.track_count
+        genre = artist.genres?.first
+        disambiguation = artist.disambiguation
+    }
+
+    /// Music only: whether any of the artist's tracks are on disk.
+    public var onDisk: Bool { (trackFiles ?? 0) > 0 }
 
     public init(_ movie: LibraryMovie) {
         id = movie.id
@@ -131,6 +161,7 @@ public enum LibrarySort: String, CaseIterable, Sendable, Hashable {
     case size = "size_on_disk"
     case episodes = "episode_file_count"
     case author
+    case tracks = "track_file_count"
 
     public var label: String {
         switch self {
@@ -141,6 +172,7 @@ public enum LibrarySort: String, CaseIterable, Sendable, Hashable {
         case .size: String(localized: "Size")
         case .episodes: String(localized: "Episodes")
         case .author: String(localized: "Author")
+        case .tracks: String(localized: "Tracks on disk")
         }
     }
 
@@ -149,7 +181,13 @@ public enum LibrarySort: String, CaseIterable, Sendable, Hashable {
         case .radarr: [.added, .title, .year, .status, .size]
         case .sonarr: [.added, .title, .year, .status, .episodes, .size]
         case .readarr: [.added, .author, .title, .year, .status, .size]
+        case .lidarr: [.added, .title, .status, .tracks, .size]
         }
+    }
+
+    /// "Name" for an artist; a title everywhere else.
+    public func label(for app: LibraryApp) -> String {
+        self == .title && app == .lidarr ? String(localized: "Name") : label
     }
 }
 
@@ -174,6 +212,7 @@ public enum LibrarySorting {
             case .size: less = a.sizeOnDisk < b.sizeOnDisk
             case .episodes: less = (a.episodeFiles ?? 0) < (b.episodeFiles ?? 0)
             case .author: less = (a.author ?? "").lowercased() < (b.author ?? "").lowercased()
+            case .tracks: less = (a.trackFiles ?? 0) < (b.trackFiles ?? 0)
             }
             return descending ? !less && !isEqual(a, b, sort) : less
         }
@@ -209,6 +248,29 @@ public enum LibrarySorting {
         case .size: a.sizeOnDisk == b.sizeOnDisk
         case .episodes: a.episodeFiles == b.episodeFiles
         case .author: (a.author ?? "").lowercased() == (b.author ?? "").lowercased()
+        case .tracks: a.trackFiles == b.trackFiles
+        }
+    }
+}
+
+/// The Music tab's narrowing: every artist, those with something on disk,
+/// or those with nothing yet. Stored by raw value, as the PWA stores it.
+public enum MusicDiskFilter: String, CaseIterable, Sendable, Hashable {
+    case any = "", onDisk, missing
+
+    public var label: String {
+        switch self {
+        case .any: String(localized: "All artists")
+        case .onDisk: String(localized: "On disk")
+        case .missing: String(localized: "Nothing on disk")
+        }
+    }
+
+    public func keeps(_ row: LibraryRow) -> Bool {
+        switch self {
+        case .any: true
+        case .onDisk: row.onDisk
+        case .missing: !row.onDisk
         }
     }
 }
@@ -535,8 +597,16 @@ public final class LibraryListModel {
     }
 
     private func loadOptions() async { options = try? await api.options(app.arr) }
+    // Readarr has tags too, but the arrdeck tag route only knows Radarr, Sonarr and Lidarr.
     private func loadTags() async { tags = app == .readarr ? [] : ((try? await api.tags(app.arr)) ?? []) }
     private func loadWatched() async { watchedMap = (try? await api.watched())?.value }
+
+    /// The Music tab's rows. The API is reached by cast, as the reading list
+    /// is, so the library's other tabs need no music API to be tested.
+    private func artists() async throws -> [LibraryArtist] {
+        guard let music = api as? any MusicLibraryAPI else { throw APIError.unexpectedStatus(404) }
+        return try await music.libraryArtists()
+    }
 
     private func loadRows() async {
         do {
@@ -544,6 +614,7 @@ public final class LibraryListModel {
             case .radarr: try await api.libraryMovies().map(LibraryRow.init)
             case .sonarr: try await api.librarySeries().map(LibraryRow.init)
             case .readarr: try await api.libraryBooks().map(LibraryRow.init)
+            case .lidarr: try await artists().map(LibraryRow.init)
             }
             self.rows = .loaded(rows)
         } catch {
@@ -637,7 +708,7 @@ public final class SystemModel {
 
     public init(configured: Set<String>, api: any ManageAPI, onSessionLost: @escaping @MainActor () -> Void) {
         apps = [ArrApp.radarr, .sonarr].filter { configured.contains($0.rawValue) }
-        logApps = ["radarr", "sonarr", "prowlarr"].filter { configured.contains($0) }
+        logApps = ["radarr", "sonarr", "lidarr", "prowlarr"].filter { configured.contains($0) }
         logApp = logApps.first ?? "radarr"
         self.api = api
         self.onSessionLost = onSessionLost

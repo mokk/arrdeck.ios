@@ -8,6 +8,7 @@ import SwiftUI
 struct GlobalSearchSheet: View {
     @State private var model: GlobalSearchModel
     let api: any LibraryPageAPI
+    let apps: [LibraryApp]
     let baseURL: URL
     let hasPlex: Bool
     let onSessionLost: @MainActor () -> Void
@@ -17,10 +18,16 @@ struct GlobalSearchSheet: View {
          onSessionLost: @escaping @MainActor () -> Void, dismiss: @escaping () -> Void) {
         _model = State(initialValue: GlobalSearchModel(api: api, apps: apps))
         self.api = api
+        self.apps = apps
         self.baseURL = baseURL
         self.hasPlex = hasPlex
         self.onSessionLost = onSessionLost
         self.dismiss = dismiss
+    }
+
+    /// What can be found: Lidarr's artists only when there is a Lidarr.
+    var prompt: String {
+        apps.contains(.lidarr) ? String(localized: "Films, shows, books, authors, artists") : String(localized: "Films, shows, books, authors")
     }
 
     func label(_ group: GlobalSearch.Hit.Group) -> String {
@@ -29,6 +36,7 @@ struct GlobalSearchSheet: View {
         case .shows: String(localized: "Shows")
         case .books: String(localized: "Books")
         case .authors: String(localized: "Authors")
+        case .artists: String(localized: "Artists")
         }
     }
 
@@ -57,7 +65,7 @@ struct GlobalSearchSheet: View {
                 }
             }
             .navigationTitle("Search everything")
-            .searchable(text: $model.query, placement: .alwaysVisible, prompt: Text("Films, shows, books, authors"))
+            .searchable(text: $model.query, placement: .alwaysVisible, prompt: Text(prompt))
             .navigationDestination(for: MediaRef.self) { ref in
                 MediaDestination(ref: ref, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
             }
@@ -71,7 +79,7 @@ struct GlobalSearchSheet: View {
 
     func row(_ hit: GlobalSearch.Hit) -> some View {
         HStack(spacing: 10) {
-            Poster(path: hit.poster, baseURL: baseURL, width: 30, cornerRadius: 4, title: hit.title)
+            Poster(path: hit.poster, baseURL: baseURL, width: 30, cornerRadius: 4, title: hit.title, square: hit.group == .artists)
             VStack(alignment: .leading, spacing: 1) {
                 Text(hit.title).font(.subheadline.weight(.medium)).lineLimit(1)
                 if let subtitle = hit.subtitle { Text(subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
@@ -96,6 +104,8 @@ enum SpotlightIndexer {
         case let .movie(id): "movie:\(id)"
         case let .series(id): "series:\(id)"
         case let .book(id): "book:\(id)"
+        case let .artist(id): "artist:\(id)"
+        case let .album(id): "album:\(id)"
         }
     }
 
@@ -106,6 +116,8 @@ enum SpotlightIndexer {
         case "movie": .movie(id)
         case "series": .series(id)
         case "book": .book(id)
+        case "artist": .artist(id)
+        case "album": .album(id)
         default: nil
         }
     }
@@ -116,7 +128,7 @@ enum SpotlightIndexer {
         let items = rows.map { row in
             let attributes = CSSearchableItemAttributeSet(contentType: .content)
             attributes.title = row.title
-            attributes.contentDescription = [row.author, row.year.map(String.init)].compactMap { $0 }.joined(separator: " · ")
+            attributes.contentDescription = [row.author ?? row.disambiguation, row.year.map(String.init)].compactMap { $0 }.joined(separator: " · ")
             return CSSearchableItem(uniqueIdentifier: identifier(row.ref), domainIdentifier: domain(app), attributeSet: attributes)
         }
         let index = CSSearchableIndex.default()

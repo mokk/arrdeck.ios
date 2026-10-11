@@ -37,11 +37,12 @@ import Testing
         #expect(WantedItem(app: "radarr", id: 180, library_id: 180, title: "x").ref == .movie(180))
     }
 
-    @Test func anAlbumOpensNothingAndOffersNoReleasesYet() {
+    @Test func anAlbumOpensItsPageAndOffersItsReleases() {
         let album = WantedItem(app: "lidarr", id: 12, library_id: 12, subtitle: "Boards of Canada", title: "Geogaddi")
         #expect(album.arr == .lidarr)
-        #expect(album.ref == nil, "no album page yet, and so no diagnosis")
-        #expect(album.releaseTarget == nil)
+        #expect(album.ref == .album(12), "the album's page, and its diagnosis")
+        #expect(album.releaseTarget == .album(12))
+        #expect(album.releaseTarget?.app == .lidarr)
         #expect(WantedItem(app: "sonarr", id: 4404, library_id: 63, title: "x").releaseTarget == .episode(series: 63, episode: 4404))
         #expect(WantedItem(app: "readarr", id: 5, library_id: 5, title: "x").releaseTarget == .book(5))
     }
@@ -136,8 +137,10 @@ actor FakeWantedAPI: WantedAPI {
         #expect(await api.count("wanted-lidarr-cutoff-1") == 1)
         await model.searchAll()
         #expect(await api.count("search-all-lidarr-cutoff") == 1)
-        await #expect(throws: APIError.self) { _ = try await model.diagnose(item(12, app: .lidarr)) }
-        #expect(await api.count("diagnose-12") == 0, "an album is never sent to the diagnosis")
+        let album = WantedItem(app: "lidarr", id: 12, library_id: 12, title: "Geogaddi")
+        let diagnosis = try await model.diagnose(album)
+        #expect(diagnosis.app == "lidarr")
+        #expect(await api.count("diagnose-12") == 1, "an album is diagnosed by its own id")
     }
 
     @Test func failuresReportAndUnauthorizedEndsTheSession() async {
