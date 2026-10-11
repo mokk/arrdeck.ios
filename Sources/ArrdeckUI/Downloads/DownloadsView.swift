@@ -9,6 +9,7 @@ public struct DownloadsView: View {
     @State private var deleting: Torrent?
     @State private var adding = false
     @State private var confirmingBulkDelete = false
+    @State private var importing: ImportJob?
     let api: any DownloadsAPI & ExtrasAPI
     let onSessionLost: @MainActor () -> Void
     /// Inside the Activity tab the model is shared and already polling.
@@ -115,7 +116,8 @@ public struct DownloadsView: View {
                             forceImport: { Task { await model.forceImport(item) } },
                             retry: { Task { await model.blocklistRetry(item) } },
                             remove: { Task { await model.removeFromQueue(item) } },
-                            grab: { Task { await model.grabNow(item) } }
+                            grab: { Task { await model.grabNow(item) } },
+                            fix: { importing = ImportJob(item) }
                         )
                     }
                 }
@@ -156,6 +158,10 @@ public struct DownloadsView: View {
         }
         .sheet(item: $selected) { torrent in
             TorrentDetailSheet(torrent: torrent, model: model, api: api, onSessionLost: onSessionLost) { selected = nil }
+        }
+        .sheet(item: $importing) { job in
+            ImportSheet(job: job, api: api, onSessionLost: onSessionLost,
+                        onFinished: { Task { await model.refreshQueue() } }) { importing = nil }
         }
         .sheet(isPresented: $adding) {
             AddTorrentSheet(clients: model.clients, api: api, onSessionLost: onSessionLost) {

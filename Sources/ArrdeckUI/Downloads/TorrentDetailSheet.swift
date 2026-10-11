@@ -8,7 +8,10 @@ struct TorrentDetailSheet: View {
     let torrent: Torrent
     let model: DownloadsModel
     let dismiss: () -> Void
+    let api: any ExtrasAPI
+    let onSessionLost: @MainActor () -> Void
     @State private var extras: TorrentExtrasModel
+    @State private var importing: ImportJob?
 
     @State private var details: Loadable<TorrentDetails> = .loading
     @State private var confirmingDelete = false
@@ -17,6 +20,8 @@ struct TorrentDetailSheet: View {
         self.torrent = torrent
         self.model = model
         self.dismiss = dismiss
+        self.api = api
+        self.onSessionLost = onSessionLost
         _extras = State(initialValue: TorrentExtrasModel(torrent: torrent, api: api, onSessionLost: onSessionLost))
     }
 
@@ -65,6 +70,24 @@ struct TorrentDetailSheet: View {
                 }
                 .disabled(model.isPending(torrent.key))
 
+                // A finished torrent no arr picked up: hand it to one. The
+                // server refuses one an arr is already tracking, and says so.
+                if torrent.progress >= 1, !model.arrs.isEmpty {
+                    Section {
+                        ForEach(model.arrs, id: \.self) { app in
+                            Button("Import into \(Services.label(app.rawValue))") {
+                                importing = ImportJob(
+                                    source: .torrent(app: app, client: torrent.torrentClient, torrentID: torrent.id),
+                                    title: torrent.name
+                                )
+                            }
+                            .accessibilityIdentifier("import-into-\(app.rawValue)")
+                        }
+                    } footer: {
+                        Text("Shows what the arr finds in the folder before anything is imported.")
+                    }
+                }
+
                 switch details {
                 case .loading:
                     Section { LoadingRow() }
@@ -95,6 +118,9 @@ struct TorrentDetailSheet: View {
             }
             .navigationTitle("Torrent")
             .toolbar { Button("Done") { dismiss() } }
+            .sheet(item: $importing) { job in
+                ImportSheet(job: job, api: api, onSessionLost: onSessionLost) { importing = nil }
+            }
             .task {
                 do {
                     let loaded = try await model.details(for: torrent)

@@ -31,7 +31,7 @@ public struct ActivityView: View {
 
     public init(
         api: any DownloadsAPI & ExtrasAPI & HistoryAPI & LibraryAPI, feed: ActivityFeedModel, clients: [TorrentClient], hasArr: Bool,
-        baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void
+        arrs: [ArrApp] = [], baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void
     ) {
         self.api = api
         self.feed = feed
@@ -39,14 +39,23 @@ public struct ActivityView: View {
         self.baseURL = baseURL
         self.hasPlex = hasPlex
         self.onSessionLost = onSessionLost
-        _model = State(initialValue: DownloadsModel(api: api, clients: clients, hasArr: hasArr, onSessionLost: onSessionLost))
+        _model = State(initialValue: DownloadsModel(
+            api: api, clients: clients, hasArr: hasArr, arrs: arrs, onSessionLost: onSessionLost
+        ))
         _newSince = State(initialValue: feed.lastSeen)
     }
 
     public var body: some View {
         VStack(spacing: 0) {
             Picker("Section", selection: $segment) {
-                ForEach(Segment.allCases, id: \.self) { Text($0.label).tag($0) }
+                ForEach(Segment.allCases, id: \.self) { segment in
+                    // stuck downloads are counted on the segment that lists them
+                    if segment == .downloading, model.attentionCount > 0 {
+                        Text(verbatim: "\(segment.label) (\(model.attentionCount))").tag(segment)
+                    } else {
+                        Text(segment.label).tag(segment)
+                    }
+                }
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, 16)
@@ -89,6 +98,7 @@ struct DownloadingList: View {
     let showAll: () -> Void
     @State private var adding = false
     @State private var selected: Torrent?
+    @State private var importing: ImportJob?
 
     static let movingStates: Set<String> = ["downloading", "checking", "queued", "stalled"]
 
@@ -107,6 +117,9 @@ struct DownloadingList: View {
             if let error = model.connectionError {
                 Section { Label(error, systemImage: "wifi.slash").font(.subheadline).foregroundStyle(Color.warning) }
             }
+            if model.attentionCount > 0 {
+                NeedsAttentionSection(model: model) { importing = $0 }
+            }
             if model.hasArr {
                 Section("Radarr / Sonarr") {
                     switch model.queue {
@@ -122,7 +135,8 @@ struct DownloadingList: View {
                                 forceImport: { Task { await model.forceImport(item) } },
                                 retry: { Task { await model.blocklistRetry(item) } },
                                 remove: { Task { await model.removeFromQueue(item) } },
-                                grab: { Task { await model.grabNow(item) } }
+                                grab: { Task { await model.grabNow(item) } },
+                                fix: { importing = ImportJob(item) }
                             )
                         }
                     }
@@ -191,6 +205,71 @@ struct DownloadingList: View {
                 Task { await model.refresh() }
             }
         }
+        .sheet(item: $importing) { job in
+            ImportSheet(job: job, api: api, onSessionLost: onSessionLost,
+                        onFinished: { Task { await model.refreshQueue() } }) { importing = nil }
+        }
         .accessibilityIdentifier("downloading")
     }
+}
+
+extension ImportJob {
+    /// A stuck queue item; its title is the release, as the arr names it.
+    init?(_ item: QueueItem) {
+        guard let app = ArrApp(rawValue: item.app.rawValue) else { return nil }
+        self.init(source: .queue(app: app, itemID: item.id), title: item.title)
+    }
+}
+
+/// Downloads the arrs will not import on their own, each with the arr's
+/// reason, first on the page because nothing else moves until they are fixed.
+struct NeedsAttentionSection: View {
+    let model: DownloadsModel
+    let fix: (ImportJob) -> Void
+
+    var body: some View {
+        Section {
+            ForEach(model.attentionItems, id: \.attentionKey) { item in
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(item.title).font(.subheadline.weight(.medium)).lineLimit(2)
+                        HStack(spacing: 6) {
+                            StateBadge(state: item.app.rawValue)
+                            if let state = item.tracked_state { StateBadge(state: state) }
+                        }
+                        ForEach(item.attentionReasons, id: \.self) { reason in
+                            Text(reason).font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                    Spacer(minLength: 0)
+                    if let job = ImportJob(item) {
+                        Button("Fix") { fix(job) }
+                            .buttonStyle(.borderedProminent).controlSize(.small)
+                            .accessibilityIdentifier("attention-fix")
+                    }
+                }
+            }
+            if let unavailable = model.attention?.unavailable, !unavailable.isEmpty {
+                // an arr that didn't answer may have stuck items of its own
+                Text("Not checked: \(unavailable.map(Services.label).joined(separator: ", "))")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        } header: {
+            HStack(spacing: 6) {
+                Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Color.warning)
+                Text("Needs attention")
+                Text(verbatim: "\(model.attentionCount)")
+                    .font(.caption2.weight(.bold)).monospacedDigit()
+                    .padding(.horizontal, 6).padding(.vertical, 1)
+                    .background(Color.warning, in: Capsule())
+                    .foregroundStyle(.white)
+            }
+        }
+        .accessibilityIdentifier("needs-attention")
+    }
+}
+
+extension QueueItem {
+    /// Queue ids are per arr; Radarr's 12 and Sonarr's 12 are different rows.
+    var attentionKey: String { "\(app.rawValue)-\(id)" }
 }

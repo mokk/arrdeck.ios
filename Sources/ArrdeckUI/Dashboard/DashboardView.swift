@@ -354,6 +354,8 @@ struct QueueRow: View {
     let retry: () -> Void
     var remove: (() -> Void)? = nil
     var grab: (() -> Void)? = nil
+    /// Opens the import sheet, to pick files, targets and quality by hand.
+    var fix: (() -> Void)? = nil
 
     /// A release a delay profile is holding, and when it goes on its own.
     var heldUntil: String? {
@@ -394,6 +396,10 @@ struct QueueRow: View {
                 if let state = item.tracked_state, state.hasPrefix("import"), state != "imported" {
                     Button("Force import", action: forceImport)
                         .buttonStyle(.bordered).controlSize(.small)
+                    if let fix {
+                        Button("Manual import…", action: fix)
+                            .buttonStyle(.bordered).controlSize(.small)
+                    }
                 }
                 if troubled {
                     Button("Blocklist & retry", action: retry)

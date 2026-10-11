@@ -275,6 +275,7 @@ public struct ServerView: View {
             LibraryPage(app: .sonarr, dashboard: model, api: api, baseURL: controller.activeURL, onSessionLost: sessionLost)
         case .activity:
             ActivityView(api: api, feed: feed, clients: model.torrentClients, hasArr: model.hasArr,
+                         arrs: ArrApp.allCases.filter { model.has($0.rawValue) },
                          baseURL: controller.activeURL, hasPlex: model.has("plex"), onSessionLost: sessionLost)
         case .calendar:
             CalendarScreen(api: api, baseURL: controller.activeURL, shareURL: controller.profile.baseURL,
