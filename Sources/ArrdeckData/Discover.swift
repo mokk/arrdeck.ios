@@ -37,27 +37,28 @@ extension SearchResult {
     /// The library title, once it is one.
     public var ref: MediaRef? {
         guard let library_id else { return nil }
-        switch kind {
+        switch searchKind {
         case .movie: return .movie(library_id)
         case .series: return .series(library_id)
         case .book: return .book(library_id)
+        case .artist, .album, nil: return nil
         }
     }
 
-    public var app: ArrApp {
-        switch kind {
-        case .movie: .radarr
-        case .series: .sonarr
-        case .book: .readarr
-        }
-    }
+    /// LiveAPI drops the kinds this build does not know, so the fallback is
+    /// never reached.
+    public var app: ArrApp { searchKind?.app ?? .radarr }
 
     /// "Movie", "Series" or "Book", for the sheet's first badge.
     public var kindLabel: String {
-        switch kind {
+        switch searchKind {
         case .movie: String(localized: "Movie")
         case .series: String(localized: "Series")
         case .book: String(localized: "Book")
+        case .artist: String(localized: "Artist")
+        // Lidarr's own word for it: Album, EP, Single…
+        case .album: album_type ?? String(localized: "Album")
+        case nil: kind
         }
     }
 
@@ -70,14 +71,14 @@ extension SearchResult {
 
     public var externalLinks: [ExternalLink] {
         var links: [ExternalLink] = []
-        if kind == .book { return links }
+        guard let searchKind, searchKind == .movie || searchKind == .series else { return links }
         if let imdb = imdb_id, let url = URL(string: "https://www.imdb.com/title/\(imdb)/") {
             links.append(.init(label: "IMDb", url: url))
         }
-        if let tmdb = tmdb_id, let url = URL(string: "https://www.themoviedb.org/\(kind == .movie ? "movie" : "tv")/\(tmdb)") {
+        if let tmdb = tmdb_id, let url = URL(string: "https://www.themoviedb.org/\(searchKind == .movie ? "movie" : "tv")/\(tmdb)") {
             links.append(.init(label: "TMDB", url: url))
         }
-        if kind == .series, let url = URL(string: "https://www.thetvdb.com/dereferrer/series/\(remote_id)") {
+        if searchKind == .series, let url = URL(string: "https://www.thetvdb.com/dereferrer/series/\(remote_id)") {
             links.append(.init(label: "TVDB", url: url))
         }
         return links
@@ -111,19 +112,19 @@ extension LiveAPI: DiscoverAPI {
             switch kind {
             case .movies:
                 switch try await client.search_movies_api_v1_search_movies_get(query: .init(q: query)) {
-                case let .ok(ok): return try ok.body.json
+                case let .ok(ok): return try ok.body.json.ofKnownKinds
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)
                 }
             case .series:
                 switch try await client.search_series_api_v1_search_series_get(query: .init(q: query)) {
-                case let .ok(ok): return try ok.body.json
+                case let .ok(ok): return try ok.body.json.ofKnownKinds
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)
                 }
             case .books:
                 switch try await client.search_books_api_v1_search_books_get(query: .init(q: query)) {
-                case let .ok(ok): return try ok.body.json
+                case let .ok(ok): return try ok.body.json.ofKnownKinds
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)
                 }
@@ -146,13 +147,13 @@ extension LiveAPI: DiscoverAPI {
             switch kind {
             case .movies:
                 switch try await client.discover_movies_api_v1_discover_movies_get() {
-                case let .ok(ok): return try ok.body.json
+                case let .ok(ok): return try ok.body.json.ofKnownKinds
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)
                 }
             case .series:
                 switch try await client.discover_series_api_v1_discover_series_get() {
-                case let .ok(ok): return try ok.body.json
+                case let .ok(ok): return try ok.body.json.ofKnownKinds
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)
                 }
@@ -174,7 +175,7 @@ extension LiveAPI: DiscoverAPI {
 
     public func add(_ result: SearchResult, qualityProfile: Int, rootFolder: String, metadataProfile: Int?, edition: String?) async throws {
         try await call {
-            switch result.kind {
+            switch result.searchKind {
             case .book:
                 switch try await client.add_book_api_v1_books_post(body: .json(.init(
                     foreign_book_id: result.foreign_id ?? String(result.remote_id),
@@ -205,6 +206,8 @@ extension LiveAPI: DiscoverAPI {
                 case .unprocessableContent: throw APIError.unexpectedStatus(422)
                 case let .undocumented(code, _): throw APIError.status(code)
                 }
+            case .artist, .album, nil:
+                throw APIError.unexpectedStatus(422)
             }
         }
     }
@@ -484,7 +487,7 @@ public final class MediaSheetModel {
 
     /// Whether adding will also search: not when nothing is monitored.
     public var addSearches: Bool {
-        result.kind != .series || SeriesMonitorPick.searches(monitor: monitor, seasons: monitor == .pick ? Array(picked) : nil)
+        result.searchKind != .series || SeriesMonitorPick.searches(monitor: monitor, seasons: monitor == .pick ? Array(picked) : nil)
     }
 
     /// The show's seasons, fetched the first time "Pick seasons" is chosen.
@@ -513,7 +516,7 @@ public final class MediaSheetModel {
         }
         if rootFolder == nil { rootFolder = options?.root_folders.first?.path }
         if metadataProfile == nil { metadataProfile = options?.metadata_profiles?.first?.id }
-        if result.kind == .book, result.in_library != true {
+        if result.searchKind == .book, result.in_library != true {
             editions = result.editions ?? []
             edition = edition ?? result.foreign_edition_id
             if let known = result.foreign_edition_id, let all = try? await api.bookEditions(edition: known), all.count > editions.count {
@@ -524,9 +527,9 @@ public final class MediaSheetModel {
 
     public func add() async {
         guard let qualityProfile, let rootFolder else { return }
-        let metadataProfile = result.kind == .book ? metadataProfile : nil
-        let edition = result.kind == .book ? edition : nil
-        if result.kind == .series, let source = api as? any SeriesAddAPI {
+        let metadataProfile = result.searchKind == .book ? metadataProfile : nil
+        let edition = result.searchKind == .book ? edition : nil
+        if result.searchKind == .series, let source = api as? any SeriesAddAPI {
             let monitor = monitor
             let seasons = monitor == .pick ? picked.sorted() : nil
             let result = result

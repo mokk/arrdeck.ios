@@ -65,3 +65,34 @@ extension Services {
         "overseerr", "gluetun", "bazarr", "plex", "prometheus", "trakt", "helper",
     ]
 }
+
+/// What a search result is. The server sends the kind as a plain string
+/// (Scripts/derive-spec.jq opens it): Lidarr brought artist and album, and a
+/// kind added after this build would otherwise fail the whole list. A row of
+/// a kind this build cannot name is dropped where LiveAPI returns it.
+public enum SearchKind: String, CaseIterable, Sendable, Hashable {
+    case movie, series, book, artist, album
+
+    public var app: ArrApp {
+        switch self {
+        case .movie: .radarr
+        case .series: .sonarr
+        case .book: .readarr
+        case .artist, .album: .lidarr
+        }
+    }
+
+    /// An artist or an album: Lidarr's, square artwork, and no TMDB id.
+    public var isMusic: Bool { self == .artist || self == .album }
+}
+
+extension SearchResult {
+    /// nil for a kind this build does not know; such a row never gets past
+    /// LiveAPI.
+    public var searchKind: SearchKind? { SearchKind(rawValue: kind) }
+}
+
+extension Array where Element == SearchResult {
+    /// The results of kinds this build can show.
+    public var ofKnownKinds: [SearchResult] { filter { $0.searchKind != nil } }
+}

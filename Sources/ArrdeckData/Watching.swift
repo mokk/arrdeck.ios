@@ -28,7 +28,7 @@ extension LiveAPI: WatchingAPI {
     public func plexWatchlist() async throws -> [SearchResult] {
         try await call {
             switch try await client.plex_watchlist_api_v1_plex_watchlist_get() {
-            case let .ok(ok): try ok.body.json
+            case let .ok(ok): try ok.body.json.ofKnownKinds
             case let .undocumented(code, _): throw APIError.status(code)
             }
         }

@@ -162,6 +162,27 @@ struct StubTransport: ClientTransport {
         #expect(try await api.recent().map(\.title) == ["A Film"])
     }
 
+    /// A kind of search result this build has never heard of costs that row,
+    /// not the list: the server added artist and album with Lidarr.
+    @Test func aSearchResultOfAnUnknownKindIsDroppedFromItsList() async throws {
+        let api = api([
+            "/api/v1/search/movies": .init(body: """
+            [{"kind": "movie", "title": "A Film", "remote_id": 1},
+             {"kind": "podcast", "title": "A Show About Films", "remote_id": 2}]
+            """),
+            "/api/v1/discover/recommendations": .init(body: """
+            [{"kind": "podcast", "title": "A Show", "remote_id": 3},
+             {"kind": "movie", "title": "Another Film", "remote_id": 4}]
+            """),
+        ])
+        let found = try await api.search(.movies, query: "film")
+        #expect(found.map(\.title) == ["A Film"])
+        #expect(found.first?.searchKind == .movie)
+        #expect(try await api.recommendations().map(\.title) == ["Another Film"])
+        #expect(SearchResult(kind: "album", remote_id: 0, title: "Geogaddi").searchKind?.app == .lidarr)
+        #expect(SearchResult(kind: "podcast", remote_id: 0, title: "x").searchKind == nil)
+    }
+
     @Test func unauthorizedIsItsOwnError() async {
         let api = api(["/api/v1/services": .init(status: 401, body: #"{"detail": "Not authenticated"}"#)])
         await #expect(throws: APIError.unauthorized) { try await api.services() }

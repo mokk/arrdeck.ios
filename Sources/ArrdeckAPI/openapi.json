@@ -5593,13 +5593,6 @@
             "type": "boolean"
           },
           "kind": {
-            "enum": [
-              "movie",
-              "series",
-              "book",
-              "artist",
-              "album"
-            ],
             "title": "Kind",
             "type": "string"
           },

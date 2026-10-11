@@ -16,7 +16,7 @@ extension LiveAPI: RecommendationsAPI, QueueGrabAPI {
     public func recommendations() async throws -> [SearchResult] {
         try await call {
             switch try await client.recommendations_api_v1_discover_recommendations_get() {
-            case let .ok(ok): try ok.body.json
+            case let .ok(ok): try ok.body.json.ofKnownKinds
             case let .undocumented(code, _): throw APIError.status(code)
             }
         }

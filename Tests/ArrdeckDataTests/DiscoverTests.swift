@@ -5,21 +5,21 @@ import Testing
 
 @Suite struct SearchResultTests {
     @Test func libraryStateAndRef() {
-        let none = SearchResult(kind: .movie, remote_id: 1, title: "x")
+        let none = SearchResult(kind: "movie", remote_id: 1, title: "x")
         #expect(none.libraryState == "not in library")
         #expect(none.ref == nil)
-        let have = SearchResult(has_file: true, in_library: true, kind: .series, library_id: 63, remote_id: 1, title: "x")
+        let have = SearchResult(has_file: true, in_library: true, kind: "series", library_id: 63, remote_id: 1, title: "x")
         #expect(have.libraryState == "downloaded")
         #expect(have.ref == .series(63))
-        #expect(SearchResult(in_library: true, kind: .movie, monitored: false, remote_id: 1, title: "x").libraryState == "in library, unmonitored")
-        #expect(SearchResult(in_library: true, kind: .movie, monitored: true, remote_id: 1, title: "x").libraryState == "monitored")
+        #expect(SearchResult(in_library: true, kind: "movie", monitored: false, remote_id: 1, title: "x").libraryState == "in library, unmonitored")
+        #expect(SearchResult(in_library: true, kind: "movie", monitored: true, remote_id: 1, title: "x").libraryState == "monitored")
     }
 
     @Test func linksFollowTheKind() {
-        let series = SearchResult(kind: .series, remote_id: 376098, title: "x", tmdb_id: 95350)
+        let series = SearchResult(kind: "series", remote_id: 376098, title: "x", tmdb_id: 95350)
         #expect(series.externalLinks.map(\.label) == ["TMDB", "TVDB"])
         #expect(series.externalLinks[0].url.absoluteString == "https://www.themoviedb.org/tv/95350")
-        let movie = SearchResult(imdb_id: "tt1", kind: .movie, remote_id: 5, title: "x")
+        let movie = SearchResult(imdb_id: "tt1", kind: "movie", remote_id: 5, title: "x")
         #expect(movie.externalLinks.map(\.label) == ["IMDb"])
     }
 
@@ -44,7 +44,7 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
 
     func search(_ kind: MediaKind, query: String) async throws -> [SearchResult] {
         try log("search-\(kind.rawValue)-\(query)")
-        return [SearchResult(kind: kind == .movies ? .movie : .series, remote_id: 1, title: query)]
+        return [SearchResult(kind: kind == .movies ? "movie" : "series", remote_id: 1, title: query)]
     }
     func searchReleases(_ query: String) async throws -> [Release] {
         try log("releases-\(query)")
@@ -52,7 +52,7 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
     }
     func discover(_ kind: MediaKind) async throws -> [SearchResult] {
         try log("discover-\(kind.rawValue)")
-        return [SearchResult(kind: .movie, remote_id: 9, title: "Popular")]
+        return [SearchResult(kind: "movie", remote_id: 9, title: "Popular")]
     }
     func grab(guid: String, indexerID: Int) async throws { try log("grab-\(guid)-\(indexerID)") }
     func add(_ result: SearchResult, qualityProfile: Int, rootFolder: String, metadataProfile: Int?, edition: String?) async throws {
@@ -163,7 +163,7 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
 
     @Test func mediaSheetDefaultsAndAdds() async {
         let api = FakeDiscoverAPI()
-        let result = SearchResult(kind: .movie, remote_id: 77, title: "New")
+        let result = SearchResult(kind: "movie", remote_id: 77, title: "New")
         let sheet = MediaSheetModel(result: result, api: api, onSessionLost: {})
         #expect(!sheet.canAdd)
         await sheet.load()
@@ -174,7 +174,7 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
         #expect(await api.count("add-77-4-/movies") == 1)
         #expect(sheet.done)
 
-        let owned = SearchResult(in_library: true, kind: .series, library_id: 63, monitored: true, quality_profile_id: 1, remote_id: 1, title: "Have")
+        let owned = SearchResult(in_library: true, kind: "series", library_id: 63, monitored: true, quality_profile_id: 1, remote_id: 1, title: "Have")
         let edit = MediaSheetModel(result: owned, api: api, onSessionLost: {})
         await edit.load()
         #expect(edit.qualityProfile == 1, "the library's own profile wins over the default")
@@ -213,7 +213,7 @@ extension FakeDiscoverAPI: SeriesAddAPI {
 @Suite struct SeriesMonitorTests {
     @Test @MainActor func pickedSeasonsStartAtEveryRegularSeasonAndAreSent() async {
         let api = FakeDiscoverAPI()
-        let sheet = MediaSheetModel(result: SearchResult(kind: .series, remote_id: 5, title: "Show"), api: api, onSessionLost: {})
+        let sheet = MediaSheetModel(result: SearchResult(kind: "series", remote_id: 5, title: "Show"), api: api, onSessionLost: {})
         sheet.monitor = .pick
         #expect(!sheet.canAdd, "not before the seasons are known")
         await sheet.load()
@@ -229,7 +229,7 @@ extension FakeDiscoverAPI: SeriesAddAPI {
 
     @Test @MainActor func aPresetGoesThroughAndNoneDoesNotSearch() async {
         let api = FakeDiscoverAPI()
-        let sheet = MediaSheetModel(result: SearchResult(kind: .series, remote_id: 6, title: "Show"), api: api, onSessionLost: {})
+        let sheet = MediaSheetModel(result: SearchResult(kind: "series", remote_id: 6, title: "Show"), api: api, onSessionLost: {})
         sheet.monitor = .none
         await sheet.load()
         await sheet.loadSeasons()
@@ -242,11 +242,11 @@ extension FakeDiscoverAPI: SeriesAddAPI {
 
     @Test @MainActor func theLastPickedProfileIsTheDefaultWhileItExists() async {
         let api = FakeDiscoverAPI()
-        let known = MediaSheetModel(result: SearchResult(kind: .movie, remote_id: 1, title: "x"), api: api, onSessionLost: {})
+        let known = MediaSheetModel(result: SearchResult(kind: "movie", remote_id: 1, title: "x"), api: api, onSessionLost: {})
         known.preferredQualityProfile = 1
         await known.load()
         #expect(known.qualityProfile == 1)
-        let gone = MediaSheetModel(result: SearchResult(kind: .movie, remote_id: 1, title: "x"), api: api, onSessionLost: {})
+        let gone = MediaSheetModel(result: SearchResult(kind: "movie", remote_id: 1, title: "x"), api: api, onSessionLost: {})
         gone.preferredQualityProfile = 99
         await gone.load()
         #expect(gone.qualityProfile == 4, "a deleted profile falls back to the first")

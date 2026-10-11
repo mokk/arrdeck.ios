@@ -41,4 +41,13 @@ def open_names:
       then .value |= del(.enum) else . end)
   else . end;
 
-walk(relax_required) | walk(strip_null) | .components.schemas |= map_values(open_names)
+# 4. A search result's kind is open the same way: the server added artist and
+#    album with Lidarr, and a kind this build has never heard of would fail the
+#    whole result list rather than the one row. Only SearchResultOut: the other
+#    `kind` enums in the answers (cleanup, subtitles, activity) feed typed
+#    choices of their own. ArrdeckData reads it into SearchKind and drops rows
+#    it cannot name.
+def open_search_kind:
+  .SearchResultOut.properties.kind |= del(.enum);
+
+walk(relax_required) | walk(strip_null) | .components.schemas |= (map_values(open_names) | open_search_kind)

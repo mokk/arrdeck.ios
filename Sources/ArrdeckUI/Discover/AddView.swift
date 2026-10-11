@@ -105,8 +105,8 @@ public struct AddView: View {
             switch model.tab {
             case .movies, .series:
                 if !model.searching {
-                    let kind: SearchResult.kindPayload = model.tab == .movies ? .movie : .series
-                    let mine = watchlist.filter { $0.kind == kind }
+                    let kind: SearchKind = model.tab == .movies ? .movie : .series
+                    let mine = watchlist.filter { $0.searchKind == kind }
                     let missing = mine.filter { $0.in_library != true }
                     if !missing.isEmpty { watchlistSection(missing, have: mine.count - missing.count, total: mine.count) }
                     if hasTrakt { traktSection }
@@ -321,7 +321,8 @@ public struct AddView: View {
 }
 
 extension SearchResult: Identifiable {
-    public var id: String { "\(kind.rawValue)-\(remote_id)" }
+    /// Music's remote_id is always 0; its MusicBrainz id tells rows apart.
+    public var id: String { "\(kind)-\(foreign_id ?? String(remote_id))" }
 }
 extension Collection: Identifiable {}
 
@@ -451,7 +452,7 @@ struct MediaSheet: View {
             }
             // Which edition: language and format. More than one only when the
             // Readarr fork lists them; upstream's lookup has just the one.
-            if result.kind == .book, model.editions.count > 1 {
+            if result.searchKind == .book, model.editions.count > 1 {
                 Picker("Edition", selection: $model.edition) {
                     ForEach(model.editions, id: \.foreign_edition_id) { edition in
                         Text([edition.title, edition.format, edition.language, edition.year.map(String.init)].compactMap { $0 }.joined(separator: " · "))
@@ -460,7 +461,7 @@ struct MediaSheet: View {
                 }
             }
             // Readarr matches a new author against a metadata profile too.
-            if result.kind == .book, let profiles = model.options?.metadata_profiles, !profiles.isEmpty {
+            if result.searchKind == .book, let profiles = model.options?.metadata_profiles, !profiles.isEmpty {
                 Picker("Metadata profile", selection: $model.metadataProfile) {
                     ForEach(profiles, id: \.id) { Text($0.name).tag(Int?.some($0.id)) }
                 }
@@ -471,7 +472,7 @@ struct MediaSheet: View {
                 }
             }
         }
-        if result.kind == .series {
+        if result.searchKind == .series {
             Section("Monitor") {
                 Picker("Monitor", selection: $model.monitor) {
                     ForEach(SeriesMonitor.allCases, id: \.self) { Text($0.label).tag($0) }
