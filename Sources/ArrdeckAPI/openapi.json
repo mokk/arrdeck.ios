@@ -28,6 +28,10 @@
       "ActivityEventOut": {
         "description": "One thing that happened since the client last looked.",
         "properties": {
+          "album_id": {
+            "title": "Album Id",
+            "type": "integer"
+          },
           "app": {
             "title": "App",
             "type": "string"
@@ -102,6 +106,114 @@
           "count"
         ],
         "title": "ActivitySinceOut",
+        "type": "object"
+      },
+      "AddAlbumIn": {
+        "properties": {
+          "foreign_album_id": {
+            "title": "Foreign Album Id",
+            "type": "string"
+          },
+          "metadata_profile_id": {
+            "title": "Metadata Profile Id",
+            "type": "integer"
+          },
+          "monitored": {
+            "default": true,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "quality_profile_id": {
+            "title": "Quality Profile Id",
+            "type": "integer"
+          },
+          "root_folder_path": {
+            "title": "Root Folder Path",
+            "type": "string"
+          },
+          "search_now": {
+            "default": true,
+            "title": "Search Now",
+            "type": "boolean"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "foreign_album_id",
+          "title",
+          "quality_profile_id",
+          "root_folder_path"
+        ],
+        "title": "AddAlbumIn",
+        "type": "object"
+      },
+      "AddArtistIn": {
+        "properties": {
+          "foreign_artist_id": {
+            "title": "Foreign Artist Id",
+            "type": "string"
+          },
+          "metadata_profile_id": {
+            "title": "Metadata Profile Id",
+            "type": "integer"
+          },
+          "monitor": {
+            "default": "all",
+            "enum": [
+              "all",
+              "future",
+              "missing",
+              "existing",
+              "latest",
+              "first",
+              "none"
+            ],
+            "title": "Monitor",
+            "type": "string"
+          },
+          "monitor_new_items": {
+            "default": "all",
+            "enum": [
+              "all",
+              "none",
+              "new"
+            ],
+            "title": "Monitor New Items",
+            "type": "string"
+          },
+          "monitored": {
+            "default": true,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "quality_profile_id": {
+            "title": "Quality Profile Id",
+            "type": "integer"
+          },
+          "root_folder_path": {
+            "title": "Root Folder Path",
+            "type": "string"
+          },
+          "search_now": {
+            "default": true,
+            "title": "Search Now",
+            "type": "boolean"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "foreign_artist_id",
+          "title",
+          "quality_profile_id",
+          "root_folder_path"
+        ],
+        "title": "AddArtistIn",
         "type": "object"
       },
       "AddBookIn": {
@@ -300,6 +412,225 @@
         "title": "AddTorrentIn",
         "type": "object"
       },
+      "AlbumDetailOut": {
+        "properties": {
+          "album_type": {
+            "title": "Album Type",
+            "type": "string"
+          },
+          "artist": {
+            "title": "Artist",
+            "type": "string"
+          },
+          "artist_id": {
+            "title": "Artist Id",
+            "type": "integer"
+          },
+          "artist_slug": {
+            "title": "Artist Slug",
+            "type": "string"
+          },
+          "disambiguation": {
+            "title": "Disambiguation",
+            "type": "string"
+          },
+          "duration": {
+            "title": "Duration",
+            "type": "integer"
+          },
+          "genres": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Genres",
+            "type": "array"
+          },
+          "history": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/HistoryEventOut"
+            },
+            "title": "History",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "links": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/MusicLinkOut"
+            },
+            "title": "Links",
+            "type": "array"
+          },
+          "media": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AlbumMediumOut"
+            },
+            "title": "Media",
+            "type": "array"
+          },
+          "monitored": {
+            "default": false,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "overview": {
+            "title": "Overview",
+            "type": "string"
+          },
+          "poster": {
+            "title": "Poster",
+            "type": "string"
+          },
+          "quality_profile_id": {
+            "title": "Quality Profile Id",
+            "type": "integer"
+          },
+          "ratings": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/RatingOut"
+            },
+            "title": "Ratings",
+            "type": "array"
+          },
+          "release": {
+            "title": "Release",
+            "type": "string"
+          },
+          "release_date": {
+            "title": "Release Date",
+            "type": "string"
+          },
+          "secondary_types": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Secondary Types",
+            "type": "array"
+          },
+          "size_on_disk": {
+            "default": 0,
+            "title": "Size On Disk",
+            "type": "integer"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          },
+          "track_count": {
+            "default": 0,
+            "title": "Track Count",
+            "type": "integer"
+          },
+          "track_file_count": {
+            "default": 0,
+            "title": "Track File Count",
+            "type": "integer"
+          },
+          "tracks": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AlbumTrackOut"
+            },
+            "title": "Tracks",
+            "type": "array"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "AlbumDetailOut",
+        "type": "object"
+      },
+      "AlbumMediumOut": {
+        "properties": {
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "number"
+        ],
+        "title": "AlbumMediumOut",
+        "type": "object"
+      },
+      "AlbumTrackOut": {
+        "properties": {
+          "absolute": {
+            "default": 0,
+            "title": "Absolute",
+            "type": "integer"
+          },
+          "duration": {
+            "title": "Duration",
+            "type": "integer"
+          },
+          "file_id": {
+            "title": "File Id",
+            "type": "integer"
+          },
+          "has_file": {
+            "default": false,
+            "title": "Has File",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "medium": {
+            "default": 1,
+            "title": "Medium",
+            "type": "integer"
+          },
+          "number": {
+            "title": "Number",
+            "type": "string"
+          },
+          "quality": {
+            "title": "Quality",
+            "type": "string"
+          },
+          "size": {
+            "title": "Size",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "AlbumTrackOut",
+        "type": "object"
+      },
       "ArrBackupOut": {
         "properties": {
           "app": {
@@ -434,6 +765,193 @@
           "title"
         ],
         "title": "ArrReleaseOut",
+        "type": "object"
+      },
+      "ArtistDetailOut": {
+        "properties": {
+          "added": {
+            "format": "date-time",
+            "title": "Added",
+            "type": "string"
+          },
+          "album_count": {
+            "default": 0,
+            "title": "Album Count",
+            "type": "integer"
+          },
+          "albums": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/LibraryAlbumOut"
+            },
+            "title": "Albums",
+            "type": "array"
+          },
+          "artist_type": {
+            "title": "Artist Type",
+            "type": "string"
+          },
+          "disambiguation": {
+            "title": "Disambiguation",
+            "type": "string"
+          },
+          "fanart": {
+            "title": "Fanart",
+            "type": "string"
+          },
+          "genres": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Genres",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "links": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/MusicLinkOut"
+            },
+            "title": "Links",
+            "type": "array"
+          },
+          "metadata_profile_id": {
+            "title": "Metadata Profile Id",
+            "type": "integer"
+          },
+          "monitor_new_items": {
+            "title": "Monitor New Items",
+            "type": "string"
+          },
+          "monitored": {
+            "default": false,
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "overview": {
+            "title": "Overview",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "poster": {
+            "title": "Poster",
+            "type": "string"
+          },
+          "quality_profile_id": {
+            "title": "Quality Profile Id",
+            "type": "integer"
+          },
+          "rating": {
+            "title": "Rating",
+            "type": "number"
+          },
+          "ratings": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/RatingOut"
+            },
+            "title": "Ratings",
+            "type": "array"
+          },
+          "root_folder_path": {
+            "title": "Root Folder Path",
+            "type": "string"
+          },
+          "size_on_disk": {
+            "default": 0,
+            "title": "Size On Disk",
+            "type": "integer"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "sort_name": {
+            "title": "Sort Name",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tags": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "track_count": {
+            "default": 0,
+            "title": "Track Count",
+            "type": "integer"
+          },
+          "track_file_count": {
+            "default": 0,
+            "title": "Track File Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ArtistDetailOut",
+        "type": "object"
+      },
+      "ArtistUpdateIn": {
+        "properties": {
+          "metadata_profile_id": {
+            "title": "Metadata Profile Id",
+            "type": "integer"
+          },
+          "monitor_new_items": {
+            "enum": [
+              "all",
+              "none",
+              "new"
+            ],
+            "title": "Monitor New Items",
+            "type": "string"
+          },
+          "monitored": {
+            "title": "Monitored",
+            "type": "boolean"
+          },
+          "move_files": {
+            "default": false,
+            "title": "Move Files",
+            "type": "boolean"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "quality_profile_id": {
+            "title": "Quality Profile Id",
+            "type": "integer"
+          },
+          "tags": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Tags",
+            "type": "array"
+          }
+        },
+        "title": "ArtistUpdateIn",
         "type": "object"
       },
       "AttentionOut": {
@@ -2279,6 +2797,10 @@
       "HistoryItemOut": {
         "description": "One release/torrent with every history event that happened to it.",
         "properties": {
+          "album_id": {
+            "title": "Album Id",
+            "type": "integer"
+          },
           "app": {
             "title": "App",
             "type": "string"
@@ -2737,9 +3259,26 @@
             "title": "Poster",
             "type": "string"
           },
+          "rating": {
+            "title": "Rating",
+            "type": "number"
+          },
           "release_date": {
             "title": "Release Date",
             "type": "string"
+          },
+          "secondary_types": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Secondary Types",
+            "type": "array"
+          },
+          "size_on_disk": {
+            "default": 0,
+            "title": "Size On Disk",
+            "type": "integer"
           },
           "title": {
             "default": "",
@@ -2768,16 +3307,41 @@
         "type": "object"
       },
       "LibraryArtistOut": {
-        "description": "A Lidarr artist, as much as picking one needs.",
+        "description": "A Lidarr artist: a card in the Music tab, or a choice in the import\nsheet's picker.",
         "properties": {
+          "added": {
+            "format": "date-time",
+            "title": "Added",
+            "type": "string"
+          },
           "album_count": {
             "default": 0,
             "title": "Album Count",
             "type": "integer"
           },
+          "disambiguation": {
+            "title": "Disambiguation",
+            "type": "string"
+          },
+          "genres": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Genres",
+            "type": "array"
+          },
           "id": {
             "title": "Id",
             "type": "integer"
+          },
+          "metadata_profile_id": {
+            "title": "Metadata Profile Id",
+            "type": "integer"
+          },
+          "monitor_new_items": {
+            "title": "Monitor New Items",
+            "type": "string"
           },
           "monitored": {
             "default": false,
@@ -2793,9 +3357,43 @@
             "title": "Poster",
             "type": "string"
           },
+          "quality_profile_id": {
+            "title": "Quality Profile Id",
+            "type": "integer"
+          },
+          "rating": {
+            "title": "Rating",
+            "type": "number"
+          },
+          "size_on_disk": {
+            "default": 0,
+            "title": "Size On Disk",
+            "type": "integer"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
           "sort_name": {
             "title": "Sort Name",
             "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tags": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "track_count": {
+            "default": 0,
+            "title": "Track Count",
+            "type": "integer"
           },
           "track_file_count": {
             "default": 0,
@@ -3436,6 +4034,24 @@
           }
         },
         "title": "MovieFileOut",
+        "type": "object"
+      },
+      "MusicLinkOut": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url"
+        ],
+        "title": "MusicLinkOut",
         "type": "object"
       },
       "NextEpisodeOut": {
@@ -4338,9 +4954,17 @@
       },
       "QueueItemOut": {
         "properties": {
+          "album_id": {
+            "title": "Album Id",
+            "type": "integer"
+          },
           "app": {
             "title": "App",
             "type": "string"
+          },
+          "artist_id": {
+            "title": "Artist Id",
+            "type": "integer"
           },
           "book_id": {
             "title": "Book Id",
@@ -4927,6 +5551,14 @@
       },
       "SearchResultOut": {
         "properties": {
+          "album_type": {
+            "title": "Album Type",
+            "type": "string"
+          },
+          "artist": {
+            "title": "Artist",
+            "type": "string"
+          },
           "author": {
             "title": "Author",
             "type": "string"
@@ -4964,7 +5596,9 @@
             "enum": [
               "movie",
               "series",
-              "book"
+              "book",
+              "artist",
+              "album"
             ],
             "title": "Kind",
             "type": "string"
@@ -7411,6 +8045,50 @@
         ]
       }
     },
+    "/api/v1/albums": {
+      "post": {
+        "description": "One album. When Lidarr does not have its artist it adds them too, the way\nits own Add Album does: with the given profiles and folder, this album\nmonitored and nothing else, and later albums left alone.",
+        "operationId": "add_album_api_v1_albums_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddAlbumIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Add Album Api V1 Albums Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Album",
+        "tags": [
+          "music"
+        ]
+      }
+    },
     "/api/v1/arr-backups": {
       "get": {
         "description": "The arrs' own backups, newest first — arrdeck's live at /backup.",
@@ -7430,6 +8108,50 @@
         "summary": "Arr Backups",
         "tags": [
           "system"
+        ]
+      }
+    },
+    "/api/v1/artists": {
+      "post": {
+        "description": "An artist with the albums their metadata profile allows, monitored as\n`monitor` says. The lookup is repeated by MusicBrainz id because Lidarr\nwants the whole resource back.",
+        "operationId": "add_artist_api_v1_artists_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddArtistIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Add Artist Api V1 Artists Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Artist",
+        "tags": [
+          "music"
         ]
       }
     },
@@ -7890,7 +8612,7 @@
     },
     "/api/v1/blocklist": {
       "get": {
-        "description": "Releases arrdeck's own blocklist-&-retry put here, with no way to undo\nthem until now. Merged newest-first across both arrs.",
+        "description": "Releases arrdeck's own blocklist-&-retry put here, with no way to undo\nthem until now. Merged newest-first across the arrs.",
         "operationId": "blocklist_api_v1_blocklist_get",
         "parameters": [
           {
@@ -8648,7 +9370,7 @@
     },
     "/api/v1/diagnose/{app}/{item_id}": {
       "get": {
-        "description": "Answer in the order a person asks: is it coming, is it blocked, is anyone\nlooking, and is there anywhere to look.",
+        "description": "Answer in the order a person asks: is it coming, is it blocked, is anyone\nlooking, and is there anywhere to look. For Lidarr the item is an album.",
         "operationId": "diagnose_api_v1_diagnose__app___item_id__get",
         "parameters": [
           {
@@ -9163,7 +9885,7 @@
     },
     "/api/v1/import-lists": {
       "get": {
-        "description": "Trakt lists, TMDB collections and the like — how a library grows without\nanyone adding titles by hand.",
+        "description": "Trakt lists, TMDB collections, Last.fm charts and the like — how a\nlibrary grows without anyone adding titles by hand.",
         "operationId": "import_lists_api_v1_import_lists_get",
         "responses": {
           "200": {
@@ -9502,6 +10224,184 @@
         ]
       }
     },
+    "/api/v1/library/albums/{album_id}": {
+      "patch": {
+        "description": "An album's monitored flag. Its quality profile is the artist's, which\nthe artist page edits.",
+        "operationId": "update_album_api_v1_library_albums__album_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "album_id",
+            "required": true,
+            "schema": {
+              "title": "Album Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LibraryUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Album Api V1 Library Albums  Album Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Album",
+        "tags": [
+          "music"
+        ]
+      }
+    },
+    "/api/v1/library/albums/{album_id}/detail": {
+      "get": {
+        "operationId": "album_detail_api_v1_library_albums__album_id__detail_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "album_id",
+            "required": true,
+            "schema": {
+              "title": "Album Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlbumDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Album Detail",
+        "tags": [
+          "music"
+        ]
+      }
+    },
+    "/api/v1/library/albums/{album_id}/files": {
+      "delete": {
+        "description": "Every track file of the album, from disk. The album stays, so a\nmonitored one is searched for again.",
+        "operationId": "delete_album_files_api_v1_library_albums__album_id__files_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "album_id",
+            "required": true,
+            "schema": {
+              "title": "Album Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Album Files",
+        "tags": [
+          "music"
+        ]
+      }
+    },
+    "/api/v1/library/albums/{album_id}/files/{file_id}": {
+      "delete": {
+        "description": "One track file, from disk; it must belong to the album.",
+        "operationId": "delete_track_file_api_v1_library_albums__album_id__files__file_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "album_id",
+            "required": true,
+            "schema": {
+              "title": "Album Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "file_id",
+            "required": true,
+            "schema": {
+              "title": "File Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Track File",
+        "tags": [
+          "music"
+        ]
+      }
+    },
     "/api/v1/library/artists": {
       "get": {
         "description": "Every artist Lidarr tracks, by its own sort name.",
@@ -9523,6 +10423,143 @@
           }
         },
         "summary": "Library Artists",
+        "tags": [
+          "music"
+        ]
+      }
+    },
+    "/api/v1/library/artists/{artist_id}": {
+      "delete": {
+        "operationId": "delete_artist_api_v1_library_artists__artist_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "artist_id",
+            "required": true,
+            "schema": {
+              "title": "Artist Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "delete_files",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Delete Files",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Artist",
+        "tags": [
+          "music"
+        ]
+      },
+      "get": {
+        "description": "An artist with every album Lidarr knows for them, monitored or not:\nthis is where an album gets monitored.",
+        "operationId": "artist_detail_api_v1_library_artists__artist_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "artist_id",
+            "required": true,
+            "schema": {
+              "title": "Artist Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArtistDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Artist Detail",
+        "tags": [
+          "music"
+        ]
+      },
+      "patch": {
+        "description": "Monitoring, profiles, folder and tags. Lidarr takes the whole artist\nback, so it is read, changed and returned.",
+        "operationId": "update_artist_api_v1_library_artists__artist_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "artist_id",
+            "required": true,
+            "schema": {
+              "title": "Artist Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtistUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryArtistOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Artist",
         "tags": [
           "music"
         ]
@@ -9570,6 +10607,42 @@
           }
         },
         "summary": "Artist Albums",
+        "tags": [
+          "music"
+        ]
+      }
+    },
+    "/api/v1/library/artists/{artist_id}/refresh": {
+      "post": {
+        "description": "Have Lidarr fetch the artist's albums and artwork again and rescan the folder.",
+        "operationId": "refresh_artist_api_v1_library_artists__artist_id__refresh_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "artist_id",
+            "required": true,
+            "schema": {
+              "title": "Artist Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Refresh Artist",
         "tags": [
           "music"
         ]
@@ -12493,6 +13566,53 @@
         ]
       }
     },
+    "/api/v1/releases/album/{album_id}": {
+      "get": {
+        "description": "What Lidarr's indexers offer for one album, with its verdict on each.",
+        "operationId": "album_releases_api_v1_releases_album__album_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "album_id",
+            "required": true,
+            "schema": {
+              "title": "Album Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ArrReleaseOut"
+                  },
+                  "title": "Response Album Releases Api V1 Releases Album  Album Id  Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Album Releases",
+        "tags": [
+          "releases"
+        ]
+      }
+    },
     "/api/v1/releases/book/{book_id}": {
       "get": {
         "operationId": "book_releases_api_v1_releases_book__book_id__get",
@@ -13125,6 +14245,53 @@
         "summary": "Search Movies",
         "tags": [
           "discover"
+        ]
+      }
+    },
+    "/api/v1/search/music": {
+      "get": {
+        "description": "Artists and albums from Lidarr's metadata server, best match first.",
+        "operationId": "search_music_api_v1_search_music_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "title": "Q",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SearchResultOut"
+                  },
+                  "title": "Response Search Music Api V1 Search Music Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Search Music",
+        "tags": [
+          "music"
         ]
       }
     },
