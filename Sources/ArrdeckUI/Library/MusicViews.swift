@@ -126,7 +126,7 @@ struct ArtistAlbumRow: View {
                     Poster(path: album.poster, baseURL: baseURL, width: 40, cornerRadius: 6, title: album.title, square: true)
                     VStack(alignment: .leading, spacing: 3) {
                         HStack(spacing: 4) {
-                            Text(album.title ?? "").font(.subheadline).lineLimit(1)
+                            Text(album.title ?? "").font(.subheadline).lineLimit(2)
                             if let year = album.year { Text(String(year)).font(.subheadline).foregroundStyle(.secondary) }
                         }
                         HStack(spacing: 6) {
@@ -138,12 +138,18 @@ struct ArtistAlbumRow: View {
             }
             Spacer(minLength: 0)
             let monitored = album.monitored ?? false
-            Button(monitored ? "Unmonitor" : "Monitor") {
+            // an icon, so the album's title keeps the row's width
+            Button {
                 ask(confirmCenter, monitored ? String(localized: "Unmonitor") : String(localized: "Monitor"), subject: album.title) {
                     await model.setAlbumMonitored(album, !monitored)
                 }
+            } label: {
+                Image(systemName: monitored ? "bookmark.fill" : "bookmark")
+                    .foregroundStyle(monitored ? Color.accent : Color.secondary)
+                    .frame(minWidth: 44, minHeight: 44)
             }
-            .buttonStyle(.borderless).controlSize(.small)
+            .accessibilityLabel(monitored ? String(localized: "Unmonitor") : String(localized: "Monitor"))
+            .buttonStyle(.borderless)
             .disabled(model.busy)
         }
     }
@@ -296,7 +302,10 @@ public struct AlbumDetailView: View {
                         // Lidarr's own word for it: Album, EP, Single…
                         if let type = album.album_type { Text(type) }
                         ForEach(album.secondary_types ?? [], id: \.self) { Text("· \($0)") }
-                        if let date = album.release_date, album.year != nil { Text("· \(Format.day(date))") }
+                        // a release date, so with its year (Format.day is for dates near today)
+                        if let raw = album.release_date, album.year != nil, let date = Format.parseDate(raw) {
+                            Text("· \(date.formatted(.dateTime.day().month(.abbreviated).year()))")
+                        }
                     }
                     if let artist = album.artist, !artist.isEmpty {
                         if let artistID = album.artist_id {

@@ -32,11 +32,14 @@ struct DetailHero<Badges: View>: View {
                 .lineLimit(1)
             if !ratings.isEmpty { RatingChips(ratings: ratings) }
             if !links.isEmpty {
-                HStack(spacing: 6) {
+                // wraps: an artist can have six links, a film two
+                FlowLayout(spacing: 6) {
                     ForEach(links, id: \.self) { link in
                         Link(destination: link.url) {
                             Text("\(link.label) ↗")
                                 .font(.caption.weight(.semibold))
+                                .lineLimit(1)
+                                .fixedSize()
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 3)
                                 .background(.quaternary, in: Capsule())

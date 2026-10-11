@@ -47,7 +47,7 @@ final class ScreenTourUITests: XCTestCase {
         XCTAssert(any["tab-settings"].waitForExistence(timeout: 15), "tab bar never appeared")
         app.tap()
 
-        for tab in ["books", "movies", "shows", "activity", "calendar", "settings"] where any["tab-\(tab)"].exists {
+        for tab in ["books", "music", "movies", "shows", "activity", "calendar", "settings"] where any["tab-\(tab)"].exists {
             any["tab-\(tab)"].tap()
             sleep(2)
             snap("tab-\(tab)")
