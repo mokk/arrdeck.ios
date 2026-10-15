@@ -35,11 +35,11 @@ extension DirectBackend: MusicLibraryAPI {
             return ArtistDetail(
                 added: row.added, album_count: row.album_count,
                 albums: CatalogMusic.newestFirst(try await albums.compactMap { CatalogMusic.album($0, artistName: name) }),
-                artist_type: Catalog.text(artist["artistType"]), disambiguation: row.disambiguation,
+                artist_type: artist["artistType"].nonEmpty, disambiguation: row.disambiguation,
                 fanart: lidarrImage(artist, kind: "fanart"), genres: row.genres, id: row.id,
                 links: CatalogMusic.links(artist), metadata_profile_id: row.metadata_profile_id,
                 monitor_new_items: row.monitor_new_items, monitored: row.monitored, name: row.name,
-                overview: Catalog.text(artist["overview"]), path: artist["path"].string, poster: row.poster,
+                overview: artist["overview"].nonEmpty, path: artist["path"].string, poster: row.poster,
                 quality_profile_id: row.quality_profile_id, rating: row.rating, ratings: CatalogMusic.ratings(artist),
                 root_folder_path: artist["rootFolderPath"].string, size_on_disk: row.size_on_disk, slug: row.slug,
                 sort_name: row.sort_name, status: row.status, tags: row.tags, track_count: row.track_count,
@@ -94,21 +94,21 @@ extension DirectBackend: MusicLibraryAPI {
             let stats = album["statistics"]
             let release = CatalogMusic.chosenRelease(album)
             let label = release["label"].array.compactMap(\.string).joined(separator: ", ")
-            let releaseBits = [Catalog.text(release["format"]), label.isEmpty ? nil : label].compactMap { $0 }
+            let releaseBits = [release["format"].nonEmpty, label.isEmpty ? nil : label].compactMap { $0 }
             let trackCount = CatalogMusic.trackCount(stats)
             return AlbumDetail(
                 album_type: album["albumType"].string, artist: artist["artistName"].string,
                 artist_id: album["artistId"].int, artist_slug: artist["foreignArtistId"].string,
-                disambiguation: Catalog.text(album["disambiguation"]), duration: CatalogMusic.seconds(album["duration"]),
+                disambiguation: album["disambiguation"].nonEmpty, duration: CatalogMusic.seconds(album["duration"]),
                 genres: album["genres"].array.compactMap(\.string), history: CatalogMusic.history(await history ?? []),
                 id: album["id"].int ?? id, links: CatalogMusic.links(album),
                 media: release["media"].array.map { medium in
                     AlbumMedium(
-                        format: Catalog.text(medium["mediumFormat"]), name: Catalog.text(medium["mediumName"]),
+                        format: medium["mediumFormat"].nonEmpty, name: medium["mediumName"].nonEmpty,
                         number: medium["mediumNumber"].int ?? 0
                     )
                 },
-                monitored: album["monitored"].bool ?? false, overview: Catalog.text(album["overview"]),
+                monitored: album["monitored"].bool ?? false, overview: album["overview"].nonEmpty,
                 poster: Artwork.musicCover(album["images"]), quality_profile_id: artist["qualityProfileId"].int,
                 ratings: CatalogMusic.ratings(album), release: releaseBits.isEmpty ? nil : releaseBits.joined(separator: " · "),
                 release_date: album["releaseDate"].string, secondary_types: album["secondaryTypes"].array.compactMap(\.string),

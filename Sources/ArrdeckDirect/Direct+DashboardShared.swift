@@ -63,12 +63,12 @@ enum DashboardPort {
             let state = record["trackedDownloadState"].string
             let status = record["trackedDownloadStatus"].string
             return QueueItem(
-                album_id: app == .lidarr ? nonZero(record["albumId"]) : nil,
+                album_id: app == .lidarr ? record["albumId"].nonZero : nil,
                 app: app.rawValue,
-                artist_id: app == .lidarr ? nonZero(record["artistId"]) : nil,
+                artist_id: app == .lidarr ? record["artistId"].nonZero : nil,
                 book_id: record["bookId"].int,
                 episode_id: record["episodeId"].int,
-                error_message: nonEmpty(record["errorMessage"]),
+                error_message: record["errorMessage"].nonEmpty,
                 errors: statusMessages.compactMap { $0["messages"].array.first?.string },
                 estimated_completion: record["estimatedCompletionTime"].string,
                 id: record["id"].int ?? 0,
@@ -94,12 +94,12 @@ enum DashboardPort {
     static func queueTitle(app: ArrApp, record: JSON) -> String {
         let title = record["title"].string ?? ""
         switch app {
-        case .sonarr where truthy(record["series"]):
+        case .sonarr where record["series"].truthy:
             return "\(record["series"]["title"].string ?? "") — \(title)"
-        case .readarr where truthy(record["book"]) || truthy(record["author"]):
-            return joined(nonEmpty(record["author"]["authorName"]), nonEmpty(record["book"]["title"]) ?? title)
-        case .lidarr where truthy(record["album"]) || truthy(record["artist"]):
-            return joined(nonEmpty(record["artist"]["artistName"]), nonEmpty(record["album"]["title"]) ?? title)
+        case .readarr where record["book"].truthy || record["author"].truthy:
+            return joined(record["author"]["authorName"].nonEmpty, record["book"]["title"].nonEmpty ?? title)
+        case .lidarr where record["album"].truthy || record["artist"].truthy:
+            return joined(record["artist"]["artistName"].nonEmpty, record["album"]["title"].nonEmpty ?? title)
         default:
             return title
         }
@@ -140,8 +140,8 @@ enum DashboardPort {
 
     /// A Lidarr record as "Artist — Album", or its own source title.
     static func albumTitle(_ record: JSON) -> String {
-        guard let album = nonEmpty(record["album"]["title"]) else { return record["sourceTitle"].string ?? "" }
-        return joined(nonEmpty(record["artist"]["artistName"]), album)
+        guard let album = record["album"]["title"].nonEmpty else { return record["sourceTitle"].string ?? "" }
+        return joined(record["artist"]["artistName"].nonEmpty, album)
     }
 
     /// What one row of history stands for. Lidarr records a track at a time,
@@ -149,10 +149,10 @@ enum DashboardPort {
     /// records group by album and hour instead: an album is one row, not one
     /// per track.
     static func historyKey(app: ArrApp, record: JSON) -> String {
-        if app == .lidarr, !truthy(record["downloadId"]), let album = nonZero(record["albumId"]) {
+        if app == .lidarr, !record["downloadId"].truthy, let album = record["albumId"].nonZero {
             return "album:\(album):\((record["date"].string ?? "").prefix(13))"
         }
-        return nonEmpty(record["downloadId"]) ?? nonEmpty(record["sourceTitle"])
+        return record["downloadId"].nonEmpty ?? record["sourceTitle"].nonEmpty
             ?? record["id"].int.map(String.init) ?? "None"
     }
 
@@ -184,7 +184,7 @@ enum DashboardPort {
             group.bookID = orElse(group.bookID, record["bookId"].int)
             if app == .lidarr {
                 // the album page this row opens; other arrs' rows never carry it
-                group.albumID = nonZero(.init(orElse(group.albumID, record["albumId"].int)))
+                group.albumID = JSON(orElse(group.albumID, record["albumId"].int)).nonZero
             }
             if group.title.isEmpty {
                 group.title = app == .lidarr ? albumTitle(record) : record["sourceTitle"].string ?? ""
@@ -215,7 +215,7 @@ enum DashboardPort {
     static func releaseInfo(_ movie: JSON, start: String, end: String) -> (date: String, kind: String)? {
         let candidates = [(movie["inCinemas"], "cinema"), (movie["digitalRelease"], "digital")]
         return candidates
-            .compactMap { date, kind in nonEmpty(date).map { (date: $0, kind: kind) } }
+            .compactMap { date, kind in date.nonEmpty.map { (date: $0, kind: kind) } }
             .filter { start <= String($0.date.prefix(10)) && String($0.date.prefix(10)) <= end }
             .min { ($0.date, $0.kind) < ($1.date, $1.kind) }
     }
@@ -293,34 +293,7 @@ enum DashboardPort {
         try await client.rpc("torrent-get", ["fields": transmissionFields])["torrents"].array
     }
 
-    // MARK: - Reading loose JSON the way Python did
-
-    /// Python's truthiness, for the `or` chains the server's mapping is
-    /// written in: null, false, 0, "" and empty containers are all "absent".
-    static func truthy(_ value: JSON) -> Bool {
-        switch value {
-        case .null: false
-        case let .bool(flag): flag
-        case let .number(number): number != 0
-        case let .string(text): !text.isEmpty
-        case let .array(items): !items.isEmpty
-        case let .object(fields): !fields.isEmpty
-        }
-    }
-
-    static func nonEmpty(_ value: JSON) -> String? {
-        value.string.flatMap { $0.isEmpty ? nil : $0 }
-    }
-
-    static func nonZero(_ value: JSON) -> Int? {
-        value.int.flatMap { $0 == 0 ? nil : $0 }
-    }
-
-    /// A whole number, or a fractional one cut down: Prowlarr's averages and
-    /// the torrent clients' counters are not always integral.
-    static func whole(_ value: JSON) -> Int? {
-        value.int ?? value.double.map { Int($0) }
-    }
+    // MARK: - Python's ways
 
     /// `current or new`: keep an id once a record supplied a non-zero one.
     static func orElse(_ current: Int?, _ new: Int?) -> Int? {

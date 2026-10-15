@@ -27,7 +27,7 @@ extension DirectBackend: WatchedEpisodesAPI, WatchingAPI {
 
     static func watchedEpisodes(_ episodes: [JSON]) -> Set<String> {
         Set(episodes.compactMap { episode in
-            guard DashboardPort.truthy(episode["viewCount"]),
+            guard episode["viewCount"].truthy,
                   let season = episode["parentIndex"].int, let number = episode["index"].int
             else { return nil }
             return SpoilerGuard.key(season: season, episode: number)
@@ -224,7 +224,7 @@ enum WatchStatsBuilder {
                 weekday[((local.weekday ?? 2) + 5) % 7] += 1
                 hour[local.hour ?? 0] += 1
             }
-            let name = Catalog.text(play[episode ? "grandparentTitle" : "title"])
+            let name = (play[episode ? "grandparentTitle" : "title"]).nonEmpty
             let rowKey = key.isEmpty ? (name ?? "") : key
             if episode {
                 if shows[rowKey] == nil { showOrder.append(rowKey) }
@@ -311,7 +311,7 @@ enum WatchStatsBuilder {
             if kind == "movie", let tmdb = digits(ids["tmdb"]) {
                 remote = tmdb
                 match = haveMovies[tmdb]
-                done = DashboardPort.truthy(match?["hasFile"] ?? .null)
+                done = (match?["hasFile"] ?? .null).truthy
             } else if kind == "show", let tvdb = digits(ids["tvdb"]) {
                 remote = tvdb
                 match = haveSeries[tvdb]
@@ -333,7 +333,7 @@ enum WatchStatsBuilder {
                 remote_id: remote,
                 title: item["title"].string ?? "",
                 tmdb_id: digits(ids["tmdb"]),
-                year: item["year"].int.flatMap { $0 == 0 ? nil : $0 }
+                year: item["year"].nonZero
             )
         }
     }

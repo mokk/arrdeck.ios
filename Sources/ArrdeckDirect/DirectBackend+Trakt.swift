@@ -71,7 +71,7 @@ enum TraktLists {
             guard let remote = ids[idField].int, remote != 0 else { return nil }
             return SearchResult(
                 imdb_id: ids["imdb"].string, kind: kind, overview: item["overview"].string, remote_id: remote,
-                title: item["title"].string ?? "", tmdb_id: ids["tmdb"].int, year: item["year"].int.flatMap { $0 == 0 ? nil : $0 }
+                title: item["title"].string ?? "", tmdb_id: ids["tmdb"].int, year: item["year"].nonZero
             )
         }
     }
@@ -80,7 +80,7 @@ enum TraktLists {
     /// else its images.
     static func lookupPoster(_ results: [JSON]) -> String? {
         let first = results.first ?? .null
-        if let remote = Catalog.text(first["remotePoster"]) { return Artwork.normalise(remote) }
+        if let remote = first["remotePoster"].nonEmpty { return Artwork.normalise(remote) }
         return Artwork.poster(first["images"])
     }
 }

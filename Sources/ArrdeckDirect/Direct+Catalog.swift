@@ -41,18 +41,6 @@ enum Catalog {
         return Artwork.normalise("https://image.tmdb.org/t/p/w342" + path)
     }
 
-    /// Text, with an empty string as missing — Python's `value or fallback`.
-    static func text(_ value: JSON) -> String? {
-        guard let raw = value.string, !raw.isEmpty else { return nil }
-        return raw
-    }
-
-    /// The year at the front of a date the services write as text.
-    static func leadingYear(_ date: JSON) -> Int? {
-        guard let raw = date.string, raw.count >= 4, let year = Int(raw.prefix(4)) else { return nil }
-        return year
-    }
-
     /// Readarr's foreign ids are digits in a string; anything else is no id.
     static func numeric(_ value: JSON) -> Int? {
         guard let raw = value.string, !raw.isEmpty, raw.allSatisfy(\.isASCII), raw.allSatisfy(\.isNumber) else {

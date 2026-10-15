@@ -122,12 +122,12 @@ extension DirectBackend: LibraryAPI {
         return Episode(
             air_date: episode["airDateUtc"].string,
             episode: episode["episodeNumber"].int ?? 0,
-            file_id: LibraryShapes.nonZero(file["id"].int) ?? LibraryShapes.nonZero(episode["episodeFileId"].int),
+            file_id: file["id"].nonZero ?? episode["episodeFileId"].nonZero,
             finale_type: episode["finaleType"].string,
             has_file: episode["hasFile"].bool ?? false,
             id: episode["id"].int ?? 0,
             monitored: episode["monitored"].bool ?? false,
-            overview: LibraryShapes.nonEmpty(episode["overview"].string),
+            overview: episode["overview"].nonEmpty,
             quality: file["quality"]["quality"]["name"].string,
             season: episode["seasonNumber"].int ?? 0,
             size: file["size"].int,
@@ -313,7 +313,7 @@ private enum CreditsShape {
             return CreditPerson(
                 image: headshot.map { Artwork.normalise($0, size: Artwork.headshotSize) },
                 name: row["personName"].string ?? "",
-                role: LibraryShapes.nonEmpty(row[role].string),
+                role: row[role].nonEmpty,
                 tmdb_id: row["personTmdbId"].int
             )
         }

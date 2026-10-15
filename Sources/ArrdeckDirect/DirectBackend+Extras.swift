@@ -245,18 +245,18 @@ private enum Releases {
             approved: r["rejected"].bool != true,
             custom_format_score: r["customFormatScore"].int,
             custom_formats: names(r["customFormats"]),
-            edition: nonEmpty(r["edition"]),
+            edition: r["edition"].nonEmpty,
             full_season: r["fullSeason"].bool,
             guid: r["guid"].string ?? "",
             indexer: r["indexer"].string,
             indexer_id: r["indexerId"].int ?? 0,
-            info_url: nonEmpty(r["infoUrl"]),
+            info_url: r["infoUrl"].nonEmpty,
             languages: names(r["languages"]),
             leechers: r["leechers"].int,
-            _protocol: nonEmpty(r["protocol"]),
+            _protocol: r["protocol"].nonEmpty,
             quality: r["quality"]["quality"]["name"].string,
             rejections: r["rejections"].array.compactMap(\.string),
-            release_group: nonEmpty(r["releaseGroup"]),
+            release_group: r["releaseGroup"].nonEmpty,
             seeders: r["seeders"].int,
             size: r["size"].int,
             title: r["title"].string ?? ""
@@ -274,11 +274,7 @@ private enum Releases {
     }
 
     static func names(_ items: JSON) -> [String] {
-        items.array.compactMap { nonEmpty($0["name"]) }
-    }
-
-    static func nonEmpty(_ value: JSON) -> String? {
-        value.string.flatMap { $0.isEmpty ? nil : $0 }
+        items.array.compactMap { $0["name"].nonEmpty }
     }
 }
 

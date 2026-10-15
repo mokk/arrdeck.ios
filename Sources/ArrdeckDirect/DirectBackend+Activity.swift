@@ -45,7 +45,7 @@ extension DirectBackend: ActivityAPI {
             if app == .lidarr, !seen.insert("\(label)|\(DashboardPort.historyKey(app: app, record: record))").inserted {
                 return nil
             }
-            let episode = app == .sonarr && DashboardPort.truthy(record["episode"]) ? record["episode"] : .null
+            let episode = app == .sonarr && record["episode"].truthy ? record["episode"] : .null
             return (at, ActivityEvent(
                 album_id: app == .lidarr ? record["albumId"].int : nil,
                 app: app.rawValue,

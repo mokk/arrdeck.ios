@@ -35,14 +35,14 @@ enum CatalogSystem {
     }
 
     static func task(app: String, _ raw: JSON, now: Date) -> ScheduledTask {
-        let name = Catalog.text(raw["taskName"]) ?? Catalog.text(raw["name"]) ?? ""
+        let name = raw["taskName"].nonEmpty ?? raw["name"].nonEmpty ?? ""
         let interval = raw["interval"].double.map { Int($0) } ?? 0
         let next = raw["nextExecution"].date
         let late = next.map { now.timeIntervalSince($0) } ?? 0
         // an interval of 0 is "disabled", a choice rather than a failure
         let overdue = interval != 0 && next != nil && late > grace(intervalMinutes: interval)
         return ScheduledTask(
-            app: app, interval_minutes: interval, label: Catalog.text(raw["name"]) ?? name,
+            app: app, interval_minutes: interval, label: raw["name"].nonEmpty ?? name,
             last_duration_seconds: duration(raw["lastDuration"].string),
             last_execution: raw["lastExecution"].string, name: name, next_execution: raw["nextExecution"].string,
             notable: notableTasks.contains(name), overdue: overdue,
@@ -108,7 +108,7 @@ enum CatalogSystem {
             }
             return QualityItem(
                 name: item["name"].string ?? "", allowed: item["allowed"].bool ?? false, isGroup: true,
-                members: item["items"].array.compactMap { Catalog.text($0["quality"]["name"]) },
+                members: item["items"].array.compactMap { ($0["quality"]["name"]).nonEmpty },
                 isCutoff: item["id"].int == cutoff
             )
         }
@@ -132,7 +132,7 @@ enum CatalogSystem {
                 let score = format["score"].int ?? 0
                 guard score != 0 else { return nil }
                 let id = format["format"].int
-                let name = id.flatMap { names[$0] } ?? Catalog.text(format["name"]) ?? id.map(String.init) ?? ""
+                let name = id.flatMap { names[$0] } ?? format["name"].nonEmpty ?? id.map(String.init) ?? ""
                 return (name, score)
             }
             .sorted { $0.score != $1.score ? $0.score > $1.score : $0.name < $1.name }
@@ -165,7 +165,7 @@ enum CatalogSystem {
             quality_definitions: weighted.map { definition in
                 .init(
                     max_size: definition["maxSize"].double, min_size: definition["minSize"].double,
-                    name: Catalog.text(definition["title"]) ?? definition["quality"]["name"].string ?? "",
+                    name: definition["title"].nonEmpty ?? definition["quality"]["name"].string ?? "",
                     preferred_size: definition["preferredSize"].double
                 )
             }

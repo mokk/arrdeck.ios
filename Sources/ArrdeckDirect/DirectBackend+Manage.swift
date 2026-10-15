@@ -286,7 +286,7 @@ private enum Shelf {
             monitored: movie["monitored"].bool ?? false, poster: Artwork.poster(movie["images"]),
             quality: movie["movieFile"]["quality"]["quality"]["name"].string,
             quality_profile_id: movie["qualityProfileId"].int, rating: Ratings.headline(movie["ratings"]),
-            runtime: movie["runtime"].int.flatMap { $0 == 0 ? nil : $0 }, size_on_disk: movie["sizeOnDisk"].int ?? 0,
+            runtime: movie["runtime"].nonZero, size_on_disk: movie["sizeOnDisk"].int ?? 0,
             slug: movie["titleSlug"].string, tags: movie["tags"].array.compactMap(\.int), title: movie["title"].string,
             tmdb_id: movie["tmdbId"].int, year: movie["year"].int
         )
@@ -314,7 +314,7 @@ private enum Shelf {
         var out: [Int: NextEpisode] = [:]
         for episode in calendar.sorted(by: { ($0["airDateUtc"].string ?? "") < ($1["airDateUtc"].string ?? "") }) {
             guard let seriesID = episode["seriesId"].int, out[seriesID] == nil,
-                  let aired = Catalog.text(episode["airDateUtc"])
+                  let aired = episode["airDateUtc"].nonEmpty
             else { continue }
             out[seriesID] = NextEpisode(
                 air_date: JSON.parseDate(aired), episode: episode["episodeNumber"].int ?? 0,
@@ -351,12 +351,12 @@ private enum Shelf {
             added: book["added"].date, author: author["authorName"].string, author_id: book["authorId"].int,
             foreign_book_id: book["foreignBookId"].string, genres: book["genres"].array.compactMap(\.string),
             has_file: (stats["bookFileCount"].int ?? 0) > 0, id: id, monitored: book["monitored"].bool ?? false,
-            page_count: book["pageCount"].int.flatMap { $0 == 0 ? nil : $0 },
+            page_count: book["pageCount"].nonZero,
             // Readarr calls the poster a cover
             poster: Artwork.musicCover(book["images"]), quality_profile_id: author["qualityProfileId"].int,
             rating: book["ratings"]["value"].double.flatMap { $0 == 0 ? nil : $0 },
-            series_title: Catalog.text(book["seriesTitle"]), size_on_disk: stats["sizeOnDisk"].int ?? 0,
-            slug: book["titleSlug"].string, title: book["title"].string, year: Catalog.leadingYear(book["releaseDate"])
+            series_title: book["seriesTitle"].nonEmpty, size_on_disk: stats["sizeOnDisk"].int ?? 0,
+            slug: book["titleSlug"].string, title: book["title"].string, year: book["releaseDate"].year
         )
     }
 }

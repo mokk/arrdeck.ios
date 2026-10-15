@@ -15,7 +15,7 @@ enum CatalogMusic {
 
     /// Lidarr's statistics count tracks two ways; the total, when it has one.
     static func trackCount(_ stats: JSON) -> Int {
-        stats["totalTrackCount"].int.flatMap { $0 == 0 ? nil : $0 } ?? stats["trackCount"].int ?? 0
+        stats["totalTrackCount"].nonZero ?? stats["trackCount"].int ?? 0
     }
 
     static func artist(_ artist: JSON, poster: String?) -> LibraryArtist? {
@@ -23,7 +23,7 @@ enum CatalogMusic {
         let stats = artist["statistics"]
         return LibraryArtist(
             added: artist["added"].date, album_count: stats["albumCount"].int ?? 0,
-            disambiguation: Catalog.text(artist["disambiguation"]), genres: artist["genres"].array.compactMap(\.string),
+            disambiguation: artist["disambiguation"].nonEmpty, genres: artist["genres"].array.compactMap(\.string),
             id: id, metadata_profile_id: artist["metadataProfileId"].int,
             monitor_new_items: artist["monitorNewItems"].string, monitored: artist["monitored"].bool ?? false,
             name: artist["artistName"].string ?? "", poster: poster, quality_profile_id: artist["qualityProfileId"].int,
@@ -42,7 +42,7 @@ enum CatalogMusic {
         let stats = album["statistics"]
         return LibraryAlbum(
             album_type: album["albumType"].string,
-            artist: Catalog.text(album["artist"]["artistName"]) ?? artistName, artist_id: album["artistId"].int,
+            artist: album["artist"]["artistName"].nonEmpty ?? artistName, artist_id: album["artistId"].int,
             id: id, monitored: album["monitored"].bool ?? false, poster: Artwork.musicCover(album["images"]),
             rating: Ratings.music(album), release_date: album["releaseDate"].string,
             secondary_types: album["secondaryTypes"].array.compactMap(\.string),
@@ -61,7 +61,7 @@ enum CatalogMusic {
     /// takes it from MusicBrainz's community ratings.
     static func ratings(_ item: JSON) -> [Rating] {
         guard let value = Ratings.music(item) else { return [] }
-        let votes = item["ratings"]["votes"].int.flatMap { $0 == 0 ? nil : $0 }
+        let votes = item["ratings"]["votes"].nonZero
         return [Rating(source: "musicbrainz", value: value, votes: votes)]
     }
 
@@ -93,18 +93,15 @@ enum CatalogMusic {
     }
 
     static func tracks(_ tracks: [JSON], files: [JSON]) -> [AlbumTrack] {
-        var byID: [Int: JSON] = [:]
-        for file in files {
-            if let id = file["id"].int { byID[id] = file }
-        }
+        let byID = files.byID
         return tracks.compactMap { track -> AlbumTrack? in
             guard let id = track["id"].int else { return nil }
-            let file = track["trackFileId"].int.flatMap { $0 == 0 ? nil : byID[$0] }
-            let number = Catalog.text(track["trackNumber"]) ?? track["trackNumber"].int.flatMap { $0 == 0 ? nil : String($0) }
+            let file = track["trackFileId"].nonZero.flatMap { byID[$0] }
+            let number = track["trackNumber"].nonEmpty ?? track["trackNumber"].nonZero.map(String.init)
             return AlbumTrack(
                 absolute: track["absoluteTrackNumber"].int ?? 0, duration: seconds(track["duration"]),
                 file_id: file?["id"].int, has_file: track["hasFile"].bool ?? false, id: id,
-                medium: track["mediumNumber"].int.flatMap { $0 == 0 ? nil : $0 } ?? 1, number: number,
+                medium: track["mediumNumber"].nonZero ?? 1, number: number,
                 quality: file?["quality"]["quality"]["name"].string, size: file?["size"].int, title: track["title"].string
             )
         }
@@ -132,7 +129,7 @@ enum CatalogMusic {
             let raw = record["eventType"].string ?? ""
             let label = eventLabels[raw] ?? raw
             let date = record["date"].string ?? ""
-            let key = label + "\u{1F}" + (Catalog.text(record["downloadId"]) ?? String(date.prefix(16)))
+            let key = label + "\u{1F}" + (record["downloadId"].nonEmpty ?? String(date.prefix(16)))
             guard seen.insert(key).inserted else { continue }
             out.append(HistoryEvent(date: date, _type: label))
         }
@@ -147,9 +144,9 @@ enum CatalogMusic {
             let known = held[foreign ?? ""]
             // Lidarr's search hands back a library artist without artwork
             let poster = Artwork.musicCover(artist["images"], kinds: ["poster"])
-                ?? Catalog.text(artist["remotePoster"]).map { Artwork.normalise($0) } ?? known?.poster
+                ?? artist["remotePoster"].nonEmpty.map { Artwork.normalise($0) } ?? known?.poster
             let result = SearchResult(
-                foreign_id: foreign, kind: "artist", overview: Catalog.text(artist["overview"]), poster: poster,
+                foreign_id: foreign, kind: "artist", overview: artist["overview"].nonEmpty, poster: poster,
                 remote_id: 0, title: artist["artistName"].string ?? ""
             )
             return Catalog.result(result, held: known)
@@ -158,9 +155,9 @@ enum CatalogMusic {
         guard !album.object.isEmpty else { return nil }
         let foreign = album["foreignAlbumId"].string
         let result = SearchResult(
-            album_type: Catalog.text(album["albumType"]), artist: album["artist"]["artistName"].string,
-            foreign_id: foreign, kind: "album", overview: Catalog.text(album["overview"]),
-            poster: Artwork.musicCover(album["images"]) ?? Catalog.text(album["remoteCover"]).map { Artwork.normalise($0) },
+            album_type: album["albumType"].nonEmpty, artist: album["artist"]["artistName"].string,
+            foreign_id: foreign, kind: "album", overview: album["overview"].nonEmpty,
+            poster: Artwork.musicCover(album["images"]) ?? album["remoteCover"].nonEmpty.map { Artwork.normalise($0) },
             remote_id: 0, title: album["title"].string ?? "", year: DirectBackend.year(album["releaseDate"])
         )
         return Catalog.result(result, held: held[foreign ?? ""])
@@ -278,7 +275,7 @@ extension DirectBackend {
             let artists = try await catalogArtists(lidarr)
             var out: [String: Catalog.Held] = [:]
             for artist in artists {
-                guard let foreign = Catalog.text(artist["foreignArtistId"]), let id = artist["id"].int else { continue }
+                guard let foreign = artist["foreignArtistId"].nonEmpty, let id = artist["id"].int else { continue }
                 out[foreign] = Catalog.Held(
                     libraryID: id, monitored: artist["monitored"].bool ?? false,
                     qualityProfile: artist["qualityProfileId"].int,
@@ -286,7 +283,7 @@ extension DirectBackend {
                 )
             }
             for album in try await albums {
-                guard let foreign = Catalog.text(album["foreignAlbumId"]), let id = album["id"].int else { continue }
+                guard let foreign = album["foreignAlbumId"].nonEmpty, let id = album["id"].int else { continue }
                 out[foreign] = Catalog.Held(
                     libraryID: id, monitored: album["monitored"].bool ?? false, qualityProfile: nil,
                     hasFile: (album["statistics"]["trackFileCount"].int ?? 0) > 0

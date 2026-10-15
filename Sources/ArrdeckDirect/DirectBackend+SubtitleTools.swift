@@ -23,7 +23,7 @@ extension DirectBackend: SubtitleToolsAPI {
                 query: ["start": "\(start)", "length": "\(length)"]
             )
             let row = kind == .movie ? DashboardCards.wantedMovie : DashboardCards.wantedEpisode
-            return SubtitleWanted(items: page["data"].array.map(row), total: DashboardPort.whole(page["total"]) ?? 0)
+            return SubtitleWanted(items: page["data"].array.map(row), total: page["total"].whole ?? 0)
         }
     }
 
@@ -42,7 +42,7 @@ extension DirectBackend: SubtitleToolsAPI {
     static func languageProfile(_ profile: JSON) -> LanguageProfile {
         LanguageProfile(
             id: profile["profileId"].int ?? 0,
-            languages: profile["items"].array.compactMap { Catalog.text($0["language"]) },
+            languages: profile["items"].array.compactMap { ($0["language"]).nonEmpty },
             name: profile["name"].string ?? ""
         )
     }
@@ -66,7 +66,7 @@ extension DirectBackend: SubtitleToolsAPI {
 
     static func subtitleTitle(_ kind: SubtitleTitle.kindPayload, _ row: JSON) -> SubtitleTitle {
         // Bazarr writes the year as text; a number is taken as one too
-        let year = Catalog.text(row["year"]) ?? row["year"].int.flatMap { $0 == 0 ? nil : String($0) }
+        let year = row["year"].nonEmpty ?? row["year"].nonZero.map(String.init)
         return SubtitleTitle(
             id: row[kind == .movie ? "radarrId" : "sonarrSeriesId"].int ?? 0,
             kind: kind,

@@ -137,7 +137,7 @@ extension DirectBackend: DashboardAPI {
         try await call {
             let client = try registry.arr(app.rawValue)
             let record = try await DashboardPort.queueRecord(client, app: app, id: id)
-            guard let download = DashboardPort.nonEmpty(record["downloadId"]) else {
+            guard let download = record["downloadId"].nonEmpty else {
                 throw APIError.refused("queue item not found")
             }
             let candidates = try await client.get(
@@ -167,17 +167,16 @@ extension DirectBackend: DashboardAPI {
     /// The command that hunts for a replacement of what a queue record was
     /// downloading, when the record says what that was.
     private static func replacementSearch(app: ArrApp, record: JSON) -> JSON? {
-        let nonZero = DashboardPort.nonZero
         switch app {
         case .radarr:
-            return nonZero(record["movieId"]).map { ["name": "MoviesSearch", "movieIds": [.init($0)]] }
+            return record["movieId"].nonZero.map { ["name": "MoviesSearch", "movieIds": [.init($0)]] }
         case .sonarr:
-            if let episode = nonZero(record["episodeId"]) { return ["name": "EpisodeSearch", "episodeIds": [.init(episode)]] }
-            return nonZero(record["seriesId"]).map { ["name": "SeriesSearch", "seriesId": .init($0)] }
+            if let episode = record["episodeId"].nonZero { return ["name": "EpisodeSearch", "episodeIds": [.init(episode)]] }
+            return record["seriesId"].nonZero.map { ["name": "SeriesSearch", "seriesId": .init($0)] }
         case .readarr:
-            return nonZero(record["bookId"]).map { ["name": "BookSearch", "bookIds": [.init($0)]] }
+            return record["bookId"].nonZero.map { ["name": "BookSearch", "bookIds": [.init($0)]] }
         case .lidarr:
-            return nonZero(record["albumId"]).map { ["name": "AlbumSearch", "albumIds": [.init($0)]] }
+            return record["albumId"].nonZero.map { ["name": "AlbumSearch", "albumIds": [.init($0)]] }
         }
     }
 }
@@ -194,7 +193,7 @@ extension DirectBackend {
             items.map(DashboardCards.qbittorrentTorrent),
             totals: averagedTotals(
                 .qbittorrent,
-                down: DashboardPort.whole(speeds["dl_info_speed"]) ?? 0, up: DashboardPort.whole(speeds["up_info_speed"]) ?? 0
+                down: speeds["dl_info_speed"].whole ?? 0, up: speeds["up_info_speed"].whole ?? 0
             )
         )
     }
@@ -207,7 +206,7 @@ extension DirectBackend {
             items.map(DashboardCards.transmissionTorrent),
             totals: averagedTotals(
                 .transmission,
-                down: DashboardPort.whole(stats["downloadSpeed"]) ?? 0, up: DashboardPort.whole(stats["uploadSpeed"]) ?? 0
+                down: stats["downloadSpeed"].whole ?? 0, up: stats["uploadSpeed"].whole ?? 0
             )
         )
     }
@@ -239,21 +238,20 @@ private struct TransferSample: Sendable {
 /// a candidate goes in only when the arr placed it itself.
 enum DashboardForceImport {
     static func file(app: ArrApp, candidate: JSON, download: String?) -> JSON? {
-        let truthy = DashboardPort.truthy
-        guard truthy(candidate["quality"]), let target = target(app: app, candidate: candidate) else { return nil }
+        guard candidate["quality"].truthy, let target = target(app: app, candidate: candidate) else { return nil }
         var fields: [String: JSON] = ["path": candidate["path"], "quality": candidate["quality"]]
         switch app {
         case .readarr:
             // Readarr's ManualImportFile has no languages or release group
-            fields["indexerFlags"] = truthy(candidate["indexerFlags"]) ? candidate["indexerFlags"] : 0
+            fields["indexerFlags"] = candidate["indexerFlags"].truthy ? candidate["indexerFlags"] : 0
         case .lidarr:
             // nor Lidarr's, which asks instead whether it may move the album to
             // the release the files fit better
-            fields["indexerFlags"] = truthy(candidate["indexerFlags"]) ? candidate["indexerFlags"] : 0
-            fields["disableReleaseSwitching"] = .bool(truthy(candidate["disableReleaseSwitching"]))
+            fields["indexerFlags"] = candidate["indexerFlags"].truthy ? candidate["indexerFlags"] : 0
+            fields["disableReleaseSwitching"] = .bool(candidate["disableReleaseSwitching"].truthy)
         case .radarr, .sonarr:
             fields["languages"] = candidate.object["languages"] ?? []
-            fields["releaseGroup"] = .string(DashboardPort.nonEmpty(candidate["releaseGroup"]) ?? "")
+            fields["releaseGroup"] = .string(candidate["releaseGroup"].nonEmpty ?? "")
         }
         // Ties the file to the tracked download. Without it "auto" means move,
         // and the torrent loses its files and stops seeding.
@@ -264,26 +262,25 @@ enum DashboardForceImport {
     /// The arr's own match as payload ids, or nil when it could not place the
     /// file, stub match or not.
     static func target(app: ArrApp, candidate: JSON) -> [String: JSON]? {
-        let nonZero = DashboardPort.nonZero
         switch app {
         case .radarr:
-            return nonZero(candidate["movie"]["id"]).map { ["movieId": .init($0)] }
+            return candidate["movie"]["id"].nonZero.map { ["movieId": .init($0)] }
         case .readarr:
-            guard let author = nonZero(candidate["author"]["id"]), let book = nonZero(candidate["book"]["id"]),
-                  DashboardPort.truthy(candidate["foreignEditionId"]) else { return nil }
+            guard let author = candidate["author"]["id"].nonZero, let book = candidate["book"]["id"].nonZero,
+                  candidate["foreignEditionId"].truthy else { return nil }
             return ["authorId": .init(author), "bookId": .init(book), "foreignEditionId": candidate["foreignEditionId"]]
         case .lidarr:
             // a file goes on tracks of one release of an album: all four, or none
-            let tracks = candidate["tracks"].array.compactMap { nonZero($0["id"]) }
-            guard let artist = nonZero(candidate["artist"]["id"]), let album = nonZero(candidate["album"]["id"]),
-                  DashboardPort.truthy(candidate["albumReleaseId"]), !tracks.isEmpty else { return nil }
+            let tracks = candidate["tracks"].array.compactMap { $0["id"].nonZero }
+            guard let artist = candidate["artist"]["id"].nonZero, let album = candidate["album"]["id"].nonZero,
+                  candidate["albumReleaseId"].truthy, !tracks.isEmpty else { return nil }
             return [
                 "artistId": .init(artist), "albumId": .init(album),
                 "albumReleaseId": candidate["albumReleaseId"], "trackIds": .init(tracks),
             ]
         case .sonarr:
-            let episodes = candidate["episodes"].array.compactMap { nonZero($0["id"]) }
-            guard let series = nonZero(candidate["series"]["id"]), !episodes.isEmpty else { return nil }
+            let episodes = candidate["episodes"].array.compactMap { $0["id"].nonZero }
+            guard let series = candidate["series"]["id"].nonZero, !episodes.isEmpty else { return nil }
             return ["seriesId": .init(series), "episodeIds": .init(episodes)]
         }
     }

@@ -43,9 +43,9 @@ enum CatalogPopular {
     static func describe(_ release: JSON) -> PopularRelease {
         let categories = release["categories"].array
         return PopularRelease(
-            category: categories.compactMap { Catalog.text($0["name"]) }.first,
+            category: categories.compactMap { ($0["name"]).nonEmpty }.first,
             grabs: release["grabs"].int ?? 0,
-            guid: Catalog.text(release["guid"]) ?? Catalog.text(release["downloadUrl"]) ?? "",
+            guid: release["guid"].nonEmpty ?? release["downloadUrl"].nonEmpty ?? "",
             indexer_id: release["indexerId"].int ?? 0, info_url: release["infoUrl"].string,
             kind: kind(categories.compactMap { $0["id"].int }), leechers: release["leechers"].int ?? 0,
             published: release["publishDate"].string, seeders: release["seeders"].int ?? 0,
@@ -60,7 +60,7 @@ enum CatalogPopular {
         var kept: [JSON] = []
         for row in pages.joined() {
             guard let published = row["publishDate"].date, published >= cutoff else { continue }
-            let key = Catalog.text(row["downloadUrl"]) ?? Catalog.text(row["guid"]) ?? row["title"].string ?? ""
+            let key = row["downloadUrl"].nonEmpty ?? row["guid"].nonEmpty ?? row["title"].string ?? ""
             if seen.insert(key).inserted { kept.append(row) }
         }
         let ranked = kept.sorted {

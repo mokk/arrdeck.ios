@@ -69,35 +69,34 @@ enum ToolsPort {
         case .radarr:
             return Exclusion(
                 app: app.rawValue, id: id, remote_id: remoteID(entry["tmdbId"]), title: entry["movieTitle"].string,
-                year: DashboardPort.nonZero(entry["movieYear"])
+                year: entry["movieYear"].nonZero
             )
         case .sonarr:
             return Exclusion(app: app.rawValue, id: id, remote_id: remoteID(entry["tvdbId"]), title: entry["title"].string)
         case .readarr, .lidarr:
-            let title = DashboardPort.nonEmpty(entry["authorName"]) ?? DashboardPort.nonEmpty(entry["artistName"])
+            let title = entry["authorName"].nonEmpty ?? entry["artistName"].nonEmpty
                 ?? entry["title"].string
             return Exclusion(app: app.rawValue, id: id, remote_id: entry["foreignId"].string, title: title)
         }
     }
 
     private static func remoteID(_ value: JSON) -> String? {
-        DashboardPort.truthy(value) ? value.printed : nil
+        value.truthy ? value.printed : nil
     }
 
     static func parse(app: ArrApp, title: String, _ answer: JSON) -> ParseResult {
-        let truthy = DashboardPort.truthy
-        let info = truthy(answer["parsedMovieInfo"]) ? answer["parsedMovieInfo"] : answer["parsedEpisodeInfo"]
+        let info = answer["parsedMovieInfo"].truthy ? answer["parsedMovieInfo"] : answer["parsedEpisodeInfo"]
         let quality = info["quality"]["quality"]
-        let languages = truthy(info["languages"]) ? info["languages"] : answer["languages"]
-        let match = truthy(answer["movie"]) ? answer["movie"] : answer["series"]
+        let languages = info["languages"].truthy ? info["languages"] : answer["languages"]
+        let match = answer["movie"].truthy ? answer["movie"] : answer["series"]
         return ParseResult(
             app: app.rawValue,
-            custom_format_score: DashboardPort.whole(answer["customFormatScore"]) ?? 0,
-            custom_formats: answer["customFormats"].array.compactMap { DashboardPort.nonEmpty($0["name"]) },
-            edition: DashboardPort.nonEmpty(info["edition"]),
+            custom_format_score: answer["customFormatScore"].whole ?? 0,
+            custom_formats: answer["customFormats"].array.compactMap { $0["name"].nonEmpty },
+            edition: info["edition"].nonEmpty,
             episodes: info["episodeNumbers"].array.compactMap(\.int),
-            full_season: truthy(info["fullSeason"]),
-            languages: languages.array.compactMap { DashboardPort.nonEmpty($0["name"]) }.filter { $0 != "Unknown" },
+            full_season: info["fullSeason"].truthy,
+            languages: languages.array.compactMap { $0["name"].nonEmpty }.filter { $0 != "Unknown" },
             match_episodes: answer["episodes"].array.map { episode in
                 let code = String(format: "S%02dE%02d", episode["seasonNumber"].int ?? 0, episode["episodeNumber"].int ?? 0)
                 return "\(code) \(episode["title"].string ?? "")".trimmingCharacters(in: .whitespacesAndNewlines)
@@ -107,11 +106,11 @@ enum ToolsPort {
             parsed_title: app == .radarr ? info["movieTitles"][0].string : info["seriesTitle"].string,
             quality: quality["name"].string,
             release_group: info["releaseGroup"].string,
-            resolution: DashboardPort.nonZero(quality["resolution"]),
+            resolution: quality["resolution"].nonZero,
             season: app == .sonarr ? info["seasonNumber"].int : nil,
             source: quality["source"].string,
             title: title,
-            year: DashboardPort.nonZero(info["year"])
+            year: info["year"].nonZero
         )
     }
 

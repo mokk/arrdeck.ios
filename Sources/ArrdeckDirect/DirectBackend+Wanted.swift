@@ -33,7 +33,7 @@ extension DirectBackend: WantedAPI {
         let id = record["id"].int ?? 0
         let (library, title, subtitle, date, poster): (Int, String, String?, String?, String?) = switch app {
         case .radarr:
-            (id, record["title"].string ?? "", record["year"].int.flatMap { $0 == 0 ? nil : String($0) },
+            (id, record["title"].string ?? "", record["year"].nonZero.map(String.init),
              record["digitalRelease"].string ?? record["physicalRelease"].string ?? record["inCinemas"].string,
              Artwork.poster(record["images"]))
         case .sonarr:
@@ -43,7 +43,7 @@ extension DirectBackend: WantedAPI {
              record["airDateUtc"].string, Artwork.poster(record["series"]["images"]))
         case .readarr:
             (id, record["title"].string ?? "",
-             LibraryShapes.nonEmpty(record["author"]["authorName"].string) ?? record["authorTitle"].string,
+             record["author"]["authorName"].nonEmpty ?? record["authorTitle"].string,
              record["releaseDate"].string, LibraryShapes.bookCover(record["images"]))
         case .lidarr:
             (id, record["title"].string ?? "", record["artist"]["artistName"].string, record["releaseDate"].string,
@@ -197,8 +197,8 @@ private enum Diagnose {
         }
         return records.filter { $0[idField].int == id }.map { record in
             let errors = record["statusMessages"].array.compactMap { $0["messages"].array.first?.string }
-            let state = (LibraryShapes.nonEmpty(record["trackedDownloadState"].string)
-                ?? LibraryShapes.nonEmpty(record["status"].string) ?? "").lowercased()
+            let state = (record["trackedDownloadState"].nonEmpty
+                ?? record["status"].nonEmpty ?? "").lowercased()
             if let reason = errors.first {
                 // a failed import keeps its "downloading" status in the arr, so
                 // the errors are the only honest signal
@@ -219,7 +219,7 @@ private enum Diagnose {
         var out: [Finding] = []
         if !(movie["monitored"].bool ?? true) { out.append(Finding(code: "not_monitored", level: "blocked")) }
         if movie["isAvailable"].bool == false {
-            let target = LibraryShapes.nonEmpty(movie["minimumAvailability"].string) ?? "released"
+            let target = movie["minimumAvailability"].nonEmpty ?? "released"
             let date: JSON = switch target {
             case "announced", "inCinemas": movie["inCinemas"]
             case "released": movie["physicalRelease"].isNull ? movie["digitalRelease"] : movie["physicalRelease"]
@@ -235,7 +235,7 @@ private enum Diagnose {
     /// When the arr last went looking: never searched is a different answer
     /// from searched and found nothing.
     static func searchFindings(_ item: JSON) -> [Finding] {
-        guard let last = LibraryShapes.nonEmpty(item["lastSearchTime"].string) else {
+        guard let last = item["lastSearchTime"].nonEmpty else {
             return [Finding(code: "never_searched", level: "info")]
         }
         return [Finding(code: "last_searched", level: "info", params: ["when": .string(last)])]
@@ -296,7 +296,7 @@ private enum Diagnose {
             ["error", "warning"].contains($0["type"].string ?? "") && !healthNotices.contains($0["source"].string ?? "")
         }
         guard let first = warnings.first else { return [] }
-        let shown = LibraryShapes.nonZero(enabled) ?? LibraryShapes.nonZero(total) ?? 0
+        let shown = stats["enabled"].nonZero ?? stats["total"].nonZero ?? 0
         return [Finding(code: "indexers_failing", level: "warning", params: [
             "count": JSON(warnings.count), "total": JSON(shown), "message": first["message"],
         ].filter { !$0.value.isNull })]

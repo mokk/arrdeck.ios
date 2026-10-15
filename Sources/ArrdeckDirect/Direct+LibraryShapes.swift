@@ -52,7 +52,7 @@ enum LibraryShapes {
         return ratingSources.compactMap { source in
             let entry = sources[source]
             guard let value = entry["value"].double, value != 0 else { return nil }
-            return Rating(source: source, value: value, votes: nonZero(entry["votes"].int))
+            return Rating(source: source, value: value, votes: entry["votes"].nonZero)
         }
     }
 
@@ -65,14 +65,6 @@ enum LibraryShapes {
         else { return nil }
         let url = image["remoteUrl"].string ?? image["url"].string ?? ""
         return url.hasPrefix("http://") || url.hasPrefix("https://") ? Artwork.normalise(url) : nil
-    }
-
-    /// The year at the front of a date, when it is one.
-    static func year(_ date: JSON) -> Int? {
-        guard let raw = date.string, raw.count >= 4, raw.prefix(4).allSatisfy({ ("0" ... "9").contains($0) }),
-              let year = Int(raw.prefix(4))
-        else { return nil }
-        return year
     }
 
     static func hasFile(_ book: JSON) -> Bool {
@@ -92,15 +84,15 @@ enum LibraryShapes {
             has_file: hasFile(book),
             id: book["id"].int ?? 0,
             monitored: book["monitored"].bool ?? false,
-            page_count: nonZero(book["pageCount"].int),
+            page_count: book["pageCount"].nonZero,
             poster: bookCover(book["images"]),
             quality_profile_id: author["qualityProfileId"].int,
             rating: book["ratings"]["value"].double.flatMap { $0 == 0 ? nil : $0 },
-            series_title: nonEmpty(book["seriesTitle"].string),
+            series_title: book["seriesTitle"].nonEmpty,
             size_on_disk: book["statistics"]["sizeOnDisk"].int ?? 0,
             slug: book["titleSlug"].string,
             title: book["title"].string,
-            year: year(book["releaseDate"])
+            year: book["releaseDate"].year
         )
     }
 
@@ -140,7 +132,7 @@ enum LibraryShapes {
                     position: link["position"].string,
                     poster: bookCover(book["images"]),
                     title: book["title"].string,
-                    year: year(book["releaseDate"])
+                    year: book["releaseDate"].year
                 )
                 return (link["seriesPosition"].double ?? 0, row)
             }
@@ -150,16 +142,5 @@ enum LibraryShapes {
                 .map(\.element.book)
             return BookSeries(books: ordered, id: entry["id"].int ?? 0, title: entry["title"].string)
         }
-    }
-
-    // MARK: - Python truthiness
-
-    /// `value or None` for a count: Readarr and the arrs send 0 for unknown.
-    static func nonZero(_ value: Int?) -> Int? {
-        value == 0 ? nil : value
-    }
-
-    static func nonEmpty(_ value: String?) -> String? {
-        value?.isEmpty == true ? nil : value
     }
 }

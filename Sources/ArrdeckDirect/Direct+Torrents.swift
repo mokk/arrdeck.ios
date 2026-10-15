@@ -97,7 +97,7 @@ enum TorrentRows {
 
     static func transmission(_ items: JSON, resolve: Resolve) -> [Torrent] {
         items.array.map { t in
-            let error = t["errorString"].string.flatMap { $0.isEmpty ? nil : $0 }
+            let error = t["errorString"].nonEmpty
             let eta = t["eta"].int ?? -1
             let done = t["doneDate"].int ?? 0
             return Torrent(

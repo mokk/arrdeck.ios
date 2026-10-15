@@ -37,7 +37,7 @@ enum DashboardCards {
             subtitle: subtitle,
             title: title ?? "",
             // a transcode session means the server is doing real work for this play
-            transcoding: DashboardPort.truthy(item["TranscodeSession"]),
+            transcoding: item["TranscodeSession"].truthy,
             url: !machine.isEmpty && ratingKey.map { !$0.isEmpty } == true
                 ? "https://app.plex.tv/desktop/#!/server/\(machine)/details?key=/library/metadata/\(ratingKey!)"
                 : nil,
@@ -66,15 +66,15 @@ enum DashboardCards {
     /// from a second lookup, which Overseerr answers from its own cache.
     static func describe(_ request: JSON, overseerr: KeyedClient) async -> MediaRequest {
         let media = request["media"]
-        let kind = DashboardPort.nonEmpty(request["type"]) ?? DashboardPort.nonEmpty(media["mediaType"]) ?? "movie"
+        let kind = request["type"].nonEmpty ?? media["mediaType"].nonEmpty ?? "movie"
         var title = "", year: String?, poster: String?
-        if let tmdb = DashboardPort.nonZero(media["tmdbId"]) {
+        if let tmdb = media["tmdbId"].nonZero {
             // a missing title must not drop the request
             let details = (try? await overseerr.get(kind == "movie" ? "/movie/\(tmdb)" : "/tv/\(tmdb)")) ?? [:]
-            title = DashboardPort.nonEmpty(details["title"]) ?? DashboardPort.nonEmpty(details["name"]) ?? ""
-            let date = DashboardPort.nonEmpty(details["releaseDate"]) ?? DashboardPort.nonEmpty(details["firstAirDate"])
+            title = details["title"].nonEmpty ?? details["name"].nonEmpty ?? ""
+            let date = details["releaseDate"].nonEmpty ?? details["firstAirDate"].nonEmpty
             year = date.map { String($0.prefix(4)) }
-            if let path = DashboardPort.nonEmpty(details["posterPath"]) {
+            if let path = details["posterPath"].nonEmpty {
                 poster = Artwork.normalise(tmdbPoster + path)
             }
         }
@@ -82,8 +82,8 @@ enum DashboardCards {
             created_at: request["createdAt"].string,
             id: request["id"].int ?? 0,
             poster: poster,
-            requested_by: DashboardPort.nonEmpty(request["requestedBy"]["displayName"]) ?? "",
-            seasons: request["seasons"].array.compactMap { DashboardPort.nonZero($0["seasonNumber"]) },
+            requested_by: request["requestedBy"]["displayName"].nonEmpty ?? "",
+            seasons: request["seasons"].array.compactMap { $0["seasonNumber"].nonZero },
             status: request["status"].int ?? 0,
             title: title,
             _type: kind,
@@ -120,51 +120,51 @@ enum DashboardCards {
 
     static func qbittorrentTorrent(_ torrent: JSON) -> Torrent {
         let state = torrent["state"].string
-        let eta = DashboardPort.whole(torrent["eta"])
-        let completed = DashboardPort.whole(torrent["completion_on"]) ?? 0
+        let eta = torrent["eta"].whole
+        let completed = torrent["completion_on"].whole ?? 0
         return Torrent(
-            added_on: DashboardPort.whole(torrent["added_on"]),
+            added_on: torrent["added_on"].whole,
             client: .qbittorrent,
             completed_on: completed > 0 ? completed : nil,
-            dl_speed: DashboardPort.whole(torrent["dlspeed"]) ?? 0,
+            dl_speed: torrent["dlspeed"].whole ?? 0,
             // 8640000 is qBittorrent's "never"
             eta: eta == 8_640_000 ? nil : eta,
             id: torrent["hash"].string ?? "",
             name: torrent["name"].string ?? "",
             progress: torrent["progress"].double ?? 0,
             ratio: torrent["ratio"].double,
-            size: DashboardPort.whole(torrent["size"]) ?? 0,
+            size: torrent["size"].whole ?? 0,
             state: state.flatMap { qbittorrentStates[$0] } ?? state ?? "unknown",
             // one comma-separated string
             tags: (torrent["tags"].string ?? "").split(separator: ",")
                 .map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty },
             tracker: trackerHost(torrent["tracker"].string),
-            ul_speed: DashboardPort.whole(torrent["upspeed"]) ?? 0,
-            uploaded: DashboardPort.whole(torrent["uploaded"]) ?? 0
+            ul_speed: torrent["upspeed"].whole ?? 0,
+            uploaded: torrent["uploaded"].whole ?? 0
         )
     }
 
     static func transmissionTorrent(_ torrent: JSON) -> Torrent {
-        let error = DashboardPort.nonEmpty(torrent["errorString"])
-        let eta = DashboardPort.whole(torrent["eta"]) ?? -1
-        let done = DashboardPort.whole(torrent["doneDate"]) ?? 0
+        let error = torrent["errorString"].nonEmpty
+        let eta = torrent["eta"].whole ?? -1
+        let done = torrent["doneDate"].whole ?? 0
         return Torrent(
-            added_on: DashboardPort.whole(torrent["addedDate"]),
+            added_on: torrent["addedDate"].whole,
             client: .transmission,
             completed_on: done > 0 ? done : nil,
-            dl_speed: DashboardPort.whole(torrent["rateDownload"]) ?? 0,
+            dl_speed: torrent["rateDownload"].whole ?? 0,
             error: error,
             eta: eta > 0 ? eta : nil,
             id: torrent["id"].int.map(String.init) ?? "None",
             name: torrent["name"].string ?? "",
             progress: torrent["percentDone"].double ?? 0,
             ratio: torrent["uploadRatio"].double,
-            size: DashboardPort.whole(torrent["totalSize"]) ?? 0,
+            size: torrent["totalSize"].whole ?? 0,
             state: error != nil ? "error" : torrent["status"].int.flatMap { transmissionStates[$0] } ?? "unknown",
             tags: [],
             tracker: trackerHost(torrent["trackers"][0]["announce"].string),
-            ul_speed: DashboardPort.whole(torrent["rateUpload"]) ?? 0,
-            uploaded: DashboardPort.whole(torrent["uploadedEver"]) ?? 0
+            ul_speed: torrent["rateUpload"].whole ?? 0,
+            uploaded: torrent["uploadedEver"].whole ?? 0
         )
     }
 
@@ -195,17 +195,17 @@ enum DashboardCards {
         var totals: [String: Int] = [:]
         for mounts in [try? await radarrMounts, try? await sonarrMounts] {
             for entry in mounts?.array ?? [] {
-                if let path = DashboardPort.nonEmpty(entry["path"]) {
-                    totals[path] = DashboardPort.whole(entry["totalSpace"]) ?? 0
+                if let path = entry["path"].nonEmpty {
+                    totals[path] = entry["totalSpace"].whole ?? 0
                 }
             }
         }
         var merged: [String: DiskSpace] = [:]
         for (app, folders) in roots {
             for entry in folders?.array ?? [] {
-                guard let path = DashboardPort.nonEmpty(entry["path"]), merged[path] == nil else { continue }
+                guard let path = entry["path"].nonEmpty, merged[path] == nil else { continue }
                 merged[path] = DiskSpace(
-                    free_bytes: DashboardPort.whole(entry["freeSpace"]) ?? 0, label: app, path: path,
+                    free_bytes: entry["freeSpace"].whole ?? 0, label: app, path: path,
                     total_bytes: totals[path] ?? 0
                 )
             }
@@ -226,8 +226,8 @@ enum DashboardCards {
         async let prefs = qbittorrent?.get("/api/v2/app/preferences")
         let tunnel = try await status
         let address = (try? await ip) ?? [:]
-        let forwarded = DashboardPort.nonZero((try? await forward)?["port"] ?? .null)
-        let listening = DashboardPort.nonZero((try? await prefs)?["listen_port"] ?? .null)
+        let forwarded = (try? await forward)?["port"].nonZero
+        let listening = (try? await prefs)?["listen_port"].nonZero
         return VpnStatus(
             city: address["city"].string,
             client_port: listening,
@@ -258,8 +258,8 @@ enum DashboardCards {
                 // warning card stops being read
                 if entry["source"].string == "UpdateCheck" { continue }
                 warnings.append(HealthWarning(
-                    app: app, level: DashboardPort.nonEmpty(entry["type"]) ?? "warning",
-                    message: DashboardPort.nonEmpty(entry["message"]) ?? "", source: entry["source"].string,
+                    app: app, level: entry["type"].nonEmpty ?? "warning",
+                    message: entry["message"].nonEmpty ?? "", source: entry["source"].string,
                     wiki_url: entry["wikiUrl"].string
                 ))
             }
@@ -280,7 +280,7 @@ enum DashboardCards {
         var warnings: [HealthWarning] = []
         for (app, result) in [("radarr", try? await radarrClients), ("sonarr", try? await sonarrClients)] {
             guard let clients = result else { continue }
-            if !clients.array.contains(where: { DashboardPort.truthy($0["enable"]) }) {
+            if !clients.array.contains(where: { $0["enable"].truthy }) {
                 warnings.append(HealthWarning(
                     app: app, level: "error", message: "no download client is enabled", source: "DownloadClient"
                 ))
@@ -363,11 +363,11 @@ enum DashboardCards {
         async let movies = bazarr.get("/movies/wanted", query: ["start": "0", "length": "20"])
         let (counts, wantedEpisodes, wantedMovies) = try await (badges, episodes, movies)
         return Subtitles(
-            episodes: DashboardPort.whole(counts["episodes"]) ?? 0,
+            episodes: counts["episodes"].whole ?? 0,
             items: wantedMovies["data"].array.map(wantedMovie) + wantedEpisodes["data"].array.map(wantedEpisode),
-            movies: DashboardPort.whole(counts["movies"]) ?? 0,
+            movies: counts["movies"].whole ?? 0,
             // throttled providers, not configured ones: zero is the healthy answer
-            throttled_providers: DashboardPort.whole(counts["providers"]) ?? 0
+            throttled_providers: counts["providers"].whole ?? 0
         )
     }
 
@@ -397,16 +397,16 @@ enum DashboardCards {
         async let health = prowlarr.get("/health")
         let (all, numbers, checks) = try await (indexers, stats, health)
         return IndexerStats(
-            enabled: all.array.filter { DashboardPort.truthy($0["enable"]) }.count,
+            enabled: all.array.filter { $0["enable"].truthy }.count,
             health: checks.array.map {
                 .init(message: $0["message"].string, source: $0["source"].string, _type: $0["type"].string)
             },
             stats: numbers["indexers"].array.map {
                 .init(
-                    avg_response_ms: DashboardPort.whole($0["averageResponseTime"]) ?? 0,
-                    grabs: DashboardPort.whole($0["numberOfGrabs"]) ?? 0,
+                    avg_response_ms: $0["averageResponseTime"].whole ?? 0,
+                    grabs: $0["numberOfGrabs"].whole ?? 0,
                     name: $0["indexerName"].string,
-                    queries: DashboardPort.whole($0["numberOfQueries"]) ?? 0
+                    queries: $0["numberOfQueries"].whole ?? 0
                 )
             },
             total: all.array.count
@@ -434,14 +434,14 @@ enum DashboardCards {
               let library = try? await radarr.get("/movie"),
               let history = try? await DashboardPort.history(radarr, app: .radarr, pageSize: 40)
         else { return [] }
-        let movies = Dictionary(library.array.compactMap { m in m["id"].int.map { ($0, m) } }) { first, _ in first }
+        let movies = library.array.byID
         return history["records"].array.compactMap { record in
             guard record["eventType"].string == "downloadFolderImported",
                   let id = record["movieId"].int, let movie = movies[id] else { return nil }
             return RecentItem(
                 app: "radarr", date: record["date"].string ?? "", library_id: id,
                 poster: Artwork.poster(movie["images"]),
-                subtitle: DashboardPort.whole(movie["year"]).flatMap { $0 == 0 ? nil : String($0) },
+                subtitle: movie["year"].nonZero.map(String.init),
                 title: movie["title"].string ?? ""
             )
         }
@@ -452,7 +452,7 @@ enum DashboardCards {
               let library = try? await sonarr.get("/series"),
               let history = try? await DashboardPort.history(sonarr, app: .sonarr, pageSize: 40)
         else { return [] }
-        let series = Dictionary(library.array.compactMap { s in s["id"].int.map { ($0, s) } }) { first, _ in first }
+        let series = library.array.byID
         return history["records"].array.compactMap { record in
             guard record["eventType"].string == "downloadFolderImported",
                   let id = record["seriesId"].int, let show = series[id] else { return nil }
@@ -477,7 +477,7 @@ enum DashboardCards {
               let library = try? await readarr.get("/book"),
               let history = try? await DashboardPort.history(readarr, app: .readarr, pageSize: 40)
         else { return [] }
-        let books = Dictionary(library.array.compactMap { b in b["id"].int.map { ($0, b) } }) { first, _ in first }
+        let books = library.array.byID
         return history["records"].array.compactMap { record in
             guard record["eventType"].string == "bookFileImported",
                   let id = record["bookId"].int, let book = books[id] else { return nil }
@@ -501,12 +501,12 @@ enum DashboardCards {
         else { return [] }
         return history["records"].array.compactMap { record in
             let album = record["album"]
-            guard record["eventType"].string == "trackFileImported", let id = DashboardPort.nonZero(album["id"])
+            guard record["eventType"].string == "trackFileImported", let id = album["id"].nonZero
             else { return nil }
             return RecentItem(
                 app: "lidarr", date: record["date"].string ?? "", library_id: id,
                 poster: Artwork.musicCover(album["images"]),
-                subtitle: DashboardPort.nonEmpty(record["artist"]["artistName"]),
+                subtitle: record["artist"]["artistName"].nonEmpty,
                 title: album["title"].string ?? ""
             )
         }

@@ -69,7 +69,7 @@ extension DirectBackend: DiscoverAPI {
                     let result = SearchResult(
                         kind: "movie", overview: movie["overview"].string, poster: Catalog.tmdbPoster(movie["posterPath"].string),
                         remote_id: movie["id"].int ?? 0, title: movie["title"].string ?? "", tmdb_id: movie["id"].int,
-                        year: Catalog.leadingYear(movie["releaseDate"])
+                        year: movie["releaseDate"].year
                     )
                     return Catalog.result(result, held: movie["id"].int.flatMap { held[$0] })
                 }
@@ -105,7 +105,7 @@ extension DirectBackend: DiscoverAPI {
                     return (index, SearchResult(
                         imdb_id: external["imdbId"].string, kind: "series", overview: show["overview"].string,
                         poster: Catalog.tmdbPoster(show["posterPath"].string), remote_id: tvdb,
-                        title: show["name"].string ?? "", tmdb_id: tmdb, year: Catalog.leadingYear(show["firstAirDate"])
+                        title: show["name"].string ?? "", tmdb_id: tmdb, year: show["firstAirDate"].year
                     ))
                 }
             }
@@ -260,7 +260,7 @@ private enum Discovery {
             if results.isEmpty { break }
             for result in results {
                 let id = result["id"].int ?? 0
-                guard !seen.contains(id), westernLanguages.contains(Catalog.text(result["originalLanguage"]) ?? "en")
+                guard !seen.contains(id), westernLanguages.contains(result["originalLanguage"].nonEmpty ?? "en")
                 else { continue }
                 seen.insert(id)
                 out.append(result)

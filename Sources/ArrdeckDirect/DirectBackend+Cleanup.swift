@@ -140,18 +140,18 @@ enum CleanupPort {
             monitored: item["monitored"].bool ?? false,
             poster: Artwork.poster(item["images"]),
             seasons: [],
-            size: DashboardPort.whole(size) ?? 0,
+            size: size.whole ?? 0,
             title: item["title"].string,
             year: item["year"].int
         )
         if kind == .series {
             // the seasons that have files, so some can go instead of all
             row.seasons = DashboardPort.stableSorted(
-                item["seasons"].array.filter { DashboardPort.truthy($0["statistics"]["sizeOnDisk"]) }.map { season in
+                item["seasons"].array.filter { $0["statistics"]["sizeOnDisk"].truthy }.map { season in
                     let stats = season["statistics"]
                     return .init(
                         files: stats["episodeFileCount"].int ?? 0, monitored: season["monitored"].bool ?? false,
-                        number: season["seasonNumber"].int ?? 0, size: DashboardPort.whole(stats["sizeOnDisk"]) ?? 0
+                        number: season["seasonNumber"].int ?? 0, size: stats["sizeOnDisk"].whole ?? 0
                     )
                 }
             ) { $0.number < $1.number }
@@ -183,7 +183,7 @@ enum RequestMapPort {
             for request in page["results"].array {
                 let state = RequestState(
                     request_id: request["id"].int ?? 0,
-                    requested_by: DashboardPort.nonEmpty(request["requestedBy"]["displayName"]) ?? "",
+                    requested_by: request["requestedBy"]["displayName"].nonEmpty ?? "",
                     status: request["status"].int ?? 0
                 )
                 // the first request for a title is the one its badge shows
@@ -202,10 +202,10 @@ enum RequestMapPort {
     /// a film and a show that share a TMDB number apart.
     static func keys(_ request: JSON) -> [String] {
         let media = request["media"]
-        let kind = DashboardPort.nonEmpty(request["type"]) ?? DashboardPort.nonEmpty(media["mediaType"]) ?? "movie"
+        let kind = request["type"].nonEmpty ?? media["mediaType"].nonEmpty ?? "movie"
         var keys: [String] = []
-        if DashboardPort.truthy(media["tmdbId"]) { keys.append("\(kind):tmdb:\(media["tmdbId"].printed)") }
-        if kind == "tv", DashboardPort.truthy(media["tvdbId"]) { keys.append("tv:tvdb:\(media["tvdbId"].printed)") }
+        if media["tmdbId"].truthy { keys.append("\(kind):tmdb:\(media["tmdbId"].printed)") }
+        if kind == "tv", media["tvdbId"].truthy { keys.append("tv:tvdb:\(media["tvdbId"].printed)") }
         return keys
     }
 }

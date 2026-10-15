@@ -148,7 +148,7 @@ extension DirectBackend: DownloadsAPI {
         let torrent = try await info[0]
         return TorrentDetails(
             categories: try await categories.object.keys.sorted(),
-            category: torrent["category"].string.flatMap { $0.isEmpty ? nil : $0 },
+            category: torrent["category"].nonEmpty,
             dl_limit_kib: max(torrent["dl_limit"].int ?? 0, 0) / 1024,
             files: try await files.array.enumerated().map { index, file in
                 TorrentFile(
@@ -165,7 +165,7 @@ extension DirectBackend: DownloadsAPI {
                 guard !url.hasPrefix("**") else { return nil }
                 return Tracker(
                     host: url,
-                    message: tracker["msg"].string.flatMap { $0.isEmpty ? nil : $0 },
+                    message: tracker["msg"].nonEmpty,
                     ok: tracker["status"].int != 4
                 )
             },
@@ -197,7 +197,7 @@ extension DirectBackend: DownloadsAPI {
             trackers: detail["trackerStats"].array.map { tracker in
                 let succeeded = tracker["lastAnnounceSucceeded"].bool ?? true
                 return Tracker(
-                    host: tracker["host"].string.flatMap { $0.isEmpty ? nil : $0 } ?? tracker["announce"].string ?? "",
+                    host: tracker["host"].nonEmpty ?? tracker["announce"].string ?? "",
                     message: succeeded ? nil : tracker["lastAnnounceResult"].string,
                     ok: succeeded
                 )

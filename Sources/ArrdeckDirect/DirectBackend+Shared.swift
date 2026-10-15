@@ -79,10 +79,9 @@ extension DirectBackend {
             .absoluteString
     }
 
-    /// The first four characters of an arr date, when they are a real year:
-    /// Lidarr's "no date" is 0001-01-01.
+    /// The year of a Lidarr date, when it is a real one: Lidarr's "no date"
+    /// is 0001-01-01.
     static func year(_ date: JSON) -> Int? {
-        guard let raw = date.string, raw.count >= 4, let year = Int(raw.prefix(4)), year > 1 else { return nil }
-        return year
+        date.year.flatMap { $0 > 1 ? $0 : nil }
     }
 }

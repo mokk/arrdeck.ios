@@ -177,19 +177,19 @@ extension DirectBackend {
         let own = picked ? nil : DashboardForceImport.target(app: app, candidate: candidate)
         switch app {
         case .radarr:
-            guard let movie = Self.nonZero(choice.movie_id) ?? own?["movieId"]?.int else {
+            guard let movie = JSON(choice.movie_id).nonZero ?? own?["movieId"]?.int else {
                 throw APIError.refused("a movie must be chosen for each file")
             }
             return ["movie": ["id": JSON(movie)]]
         case .readarr:
-            if let book = Self.nonZero(choice.book_id) { return try await bookMatch(client, book: book) }
+            if let book = JSON(choice.book_id).nonZero { return try await bookMatch(client, book: book) }
             guard own != nil else { throw APIError.refused("a book must be chosen for each file") }
             return [:]
         case .lidarr:
             guard own != nil else { throw APIError.refused("an album must be chosen for each file") }
             return [:]
         case .sonarr:
-            let series = Self.nonZero(choice.series_id) ?? own?["seriesId"]?.int
+            let series = JSON(choice.series_id).nonZero ?? own?["seriesId"]?.int
             let episodes = episodeIDs.isEmpty ? (own?["episodeIds"]?.array.compactMap(\.int) ?? []) : episodeIDs
             guard let series, !episodes.isEmpty else {
                 throw APIError.refused("a series and at least one episode must be chosen")
@@ -198,18 +198,14 @@ extension DirectBackend {
         }
     }
 
-    private static func nonZero(_ value: Int?) -> Int? {
-        value.flatMap { $0 == 0 ? nil : $0 }
-    }
-
     /// Readarr imports into an edition, not just a book: a picked book goes
     /// to its monitored edition, the one Readarr's own import screen uses.
     private func bookMatch(_ readarr: KeyedClient, book id: Int) async throws -> [String: JSON] {
         let book = try await readarr.get("/book/\(id)")
         let editions = try await readarr.get("/edition", query: ["bookId": String(id)]).array
-        let edition = editions.first { DashboardPort.truthy($0["monitored"]) }
-        guard let author = DashboardPort.nonZero(book["authorId"]), let edition,
-              DashboardPort.truthy(edition["foreignEditionId"])
+        let edition = editions.first { $0["monitored"].truthy }
+        guard let author = book["authorId"].nonZero, let edition,
+              edition["foreignEditionId"].truthy
         else { throw APIError.refused("Readarr has no monitored edition for that book") }
         return ["author": ["id": JSON(author)], "book": ["id": JSON(id)], "foreignEditionId": edition["foreignEditionId"]]
     }
@@ -225,7 +221,7 @@ extension DirectBackend {
         var order: [Int] = []
         var picks: [Int: [ImportFile]] = [:]
         for choice in choices {
-            guard let album = Self.nonZero(choice.album_id) else { continue }
+            guard let album = JSON(choice.album_id).nonZero else { continue }
             if picks[album] == nil { order.append(album) }
             picks[album, default: []].append(choice)
         }
@@ -233,15 +229,15 @@ extension DirectBackend {
         for albumID in order {
             let album = try await lidarr.get("/album/\(albumID)")
             let releases = album["releases"].array
-            guard DashboardPort.truthy(album["artistId"]),
-                  let release = releases.first(where: { DashboardPort.truthy($0["monitored"]) }) ?? releases.first
+            guard album["artistId"].truthy,
+                  let release = releases.first(where: { $0["monitored"].truthy }) ?? releases.first
             else { throw APIError.refused("Lidarr has no release for that album") }
             let items: [JSON] = (picks[albumID] ?? []).map { choice in
                 let candidate = byPath[choice.path] ?? .null
                 var item: [String: JSON] = [
                     "path": .string(choice.path), "artistId": album["artistId"], "albumId": JSON(albumID),
                     "albumReleaseId": release["id"], "quality": candidate["quality"],
-                    "indexerFlags": DashboardPort.truthy(candidate["indexerFlags"]) ? candidate["indexerFlags"] : 0,
+                    "indexerFlags": candidate["indexerFlags"].truthy ? candidate["indexerFlags"] : 0,
                     "disableReleaseSwitching": false,
                 ]
                 if let download, !download.isEmpty { item["downloadId"] = .string(download) }
@@ -252,16 +248,15 @@ extension DirectBackend {
             for result in results.array {
                 guard let path = result["path"].string, let current = byPath[path] else { continue }
                 guard DashboardForceImport.target(app: .lidarr, candidate: result) != nil else {
-                    let title = DashboardPort.nonEmpty(album["title"]) ?? "that album"
+                    let title = album["title"].nonEmpty ?? "that album"
                     throw APIError.refused("Lidarr could not match \(ManualImportPort.quoted(path)) to a track on \(title)")
                 }
                 // what the first scan knew (quality, flags) stays, under the new match
-                let truthy = DashboardPort.truthy
                 matched[path] = current
-                    .setting("artist", truthy(result["artist"]) ? result["artist"] : ["id": album["artistId"]])
-                    .setting("album", truthy(result["album"]) ? result["album"] : ["id": JSON(albumID)])
+                    .setting("artist", result["artist"].truthy ? result["artist"] : ["id": album["artistId"]])
+                    .setting("album", result["album"].truthy ? result["album"] : ["id": JSON(albumID)])
                     .setting("albumReleaseId", result["albumReleaseId"])
-                    .setting("tracks", truthy(result["tracks"]) ? result["tracks"] : [])
+                    .setting("tracks", result["tracks"].truthy ? result["tracks"] : [])
             }
         }
         let missing = order.flatMap { picks[$0] ?? [] }.map(\.path).first { matched[$0] == nil }
@@ -292,9 +287,9 @@ extension DirectBackend {
             savePath = torrent["save_path"].string ?? ""
             // root_path is the torrent's top folder; a single-file torrent has
             // none, and content_path is then the file itself
-            content = DashboardPort.nonEmpty(torrent["root_path"]) ?? DashboardPort.nonEmpty(torrent["content_path"])
+            content = torrent["root_path"].nonEmpty ?? torrent["content_path"].nonEmpty
                 ?? ManualImportPort.join(savePath, torrent["name"].string ?? "")
-            hash = DashboardPort.nonEmpty(torrent["hash"]) ?? torrentID
+            hash = torrent["hash"].nonEmpty ?? torrentID
         case .transmission:
             let id: JSON = numeric ? (Int(torrentID).map { JSON($0) } ?? .string(torrentID)) : .string(torrentID)
             let found = try await registry.transmission()
@@ -373,7 +368,7 @@ struct ImportOptionTable: Sendable {
     var languageOrder: [Int] = []
 
     init(definitions: [JSON], languages: [JSON]) {
-        for definition in definitions where DashboardPort.truthy(definition["quality"]) {
+        for definition in definitions where definition["quality"].truthy {
             guard let id = definition["quality"]["id"].int else { continue }
             if qualities[id] == nil { qualityOrder.append(id) }
             qualities[id] = definition["quality"]
@@ -394,7 +389,7 @@ enum ManualImportPort {
     /// what it found.
     static func download(_ client: KeyedClient, app: ArrApp, itemID: Int) async throws -> String {
         let record = try await DashboardPort.queueRecord(client, app: app, id: itemID)
-        guard let download = DashboardPort.nonEmpty(record["downloadId"]) else {
+        guard let download = record["downloadId"].nonEmpty else {
             throw APIError.refused("queue item not found")
         }
         return download
@@ -439,7 +434,7 @@ enum ManualImportPort {
             importable: DashboardForceImport.file(app: app, candidate: candidate, download: nil) != nil,
             language_ids: languages.compactMap { $0["id"].int },
             languages: languages.map { $0["name"].string ?? "" },
-            name: DashboardPort.nonEmpty(candidate["name"])
+            name: candidate["name"].nonEmpty
                 ?? String(path.split(separator: "/", omittingEmptySubsequences: false).last ?? ""),
             path: path,
             quality: quality["name"].string,
@@ -447,7 +442,7 @@ enum ManualImportPort {
             rejections: candidate["rejections"].array.map { rejection in
                 if case .object = rejection { rejection["reason"].string ?? "" } else { rejection.printed }
             },
-            size: DashboardPort.whole(candidate["size"]) ?? 0,
+            size: candidate["size"].whole ?? 0,
             subtitle: subtitle,
             title: title
         )
@@ -459,8 +454,8 @@ enum ManualImportPort {
         let tracks = candidate["tracks"].array
         var track: String?
         if let first = tracks.first {
-            let number = DashboardPort.truthy(first["trackNumber"]) ? first["trackNumber"] : first["absoluteTrackNumber"]
-            track = DashboardPort.truthy(number) ? "\(number.printed). \(first["title"].string ?? "")" : first["title"].string
+            let number = first["trackNumber"].truthy ? first["trackNumber"] : first["absoluteTrackNumber"]
+            track = number.truthy ? "\(number.printed). \(first["title"].string ?? "")" : first["title"].string
             if tracks.count > 1 { track = (track ?? "") + " +\(tracks.count - 1)" }
         }
         let parts = [artist, track].compactMap { $0 }.filter { !$0.isEmpty }
@@ -474,13 +469,13 @@ enum ManualImportPort {
     static func quality(_ candidate: JSON, _ choice: ImportFile, _ options: ImportOptionTable?) throws -> JSON {
         let detected = candidate["quality"]
         guard let id = choice.quality_id else {
-            guard DashboardPort.truthy(detected) else {
+            guard detected.truthy else {
                 throw APIError.refused("the arr could not determine a quality for \(quoted(choice.path))")
             }
             return detected
         }
         guard let chosen = options?.qualities[id] else { throw APIError.refused("unknown quality id \(id)") }
-        let revision: JSON = DashboardPort.truthy(detected["revision"])
+        let revision: JSON = detected["revision"].truthy
             ? detected["revision"] : ["version": 1, "real": 0, "isRepack": false]
         return ["quality": chosen, "revision": revision]
     }
@@ -498,9 +493,9 @@ enum ManualImportPort {
     /// What the screen needs to say how an import went, from the arr's
     /// command.
     static func command(app: ArrApp, _ command: JSON) -> ImportCommand {
-        let status = DashboardPort.nonEmpty(command["status"]) ?? "queued"
+        let status = command["status"].nonEmpty ?? "queued"
         let done = ["completed", "failed", "aborted", "cancelled", "orphaned"].contains(status)
-        var message = DashboardPort.nonEmpty(command["message"])
+        var message = command["message"].nonEmpty
         // a crash leaves the message at "Failed" and the reason in a full .NET
         // stack trace, whose first line is the part a person can act on
         let trace = (command["exception"].string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -513,7 +508,7 @@ enum ManualImportPort {
         return ImportCommand(
             app: app.rawValue,
             done: done,
-            id: DashboardPort.nonZero(command["id"]) ?? 0,
+            id: command["id"].nonZero ?? 0,
             imported: imported,
             message: message,
             ok: done ? status == "completed" && command["result"].string != "unsuccessful" : nil,
@@ -577,19 +572,5 @@ enum ManualImportPort {
     /// A path as the server's messages quoted it (Python's repr).
     static func quoted(_ text: String) -> String {
         text.contains("'") && !text.contains("\"") ? "\"\(text)\"" : "'\(text)'"
-    }
-}
-
-extension JSON {
-    /// A scalar as Python's f-strings printed it: whole numbers without a
-    /// fraction, null as None.
-    var printed: String {
-        switch self {
-        case let .string(text): text
-        case let .number(value): Int(exactly: value).map(String.init) ?? String(value)
-        case let .bool(flag): flag ? "True" : "False"
-        case .null: "None"
-        case .array, .object: (try? data()).map { String(decoding: $0, as: UTF8.self) } ?? ""
-        }
     }
 }

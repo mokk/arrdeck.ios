@@ -18,7 +18,7 @@ extension DirectBackend: RecommendationsAPI, QueueGrabAPI {
             let items = try await radarrRecommendations(radarr)
             let movie = items.first { $0["tmdbId"].int == tmdbID } ?? .null
             try await radarr.send("POST", "/exclusions", json: [
-                "tmdbId": JSON(tmdbID), "movieTitle": .string(Catalog.text(movie["title"]) ?? String(tmdbID)),
+                "tmdbId": JSON(tmdbID), "movieTitle": .string(movie["title"].nonEmpty ?? String(tmdbID)),
                 "movieYear": JSON(movie["year"].int ?? 0),
             ])
             cache.set(Recommendations.key, items.map { $0["tmdbId"].int == tmdbID ? $0.setting("isExcluded", true) : $0 })
@@ -62,9 +62,9 @@ enum Recommendations {
                 let tmdb = movie["tmdbId"].int ?? 0
                 let result = SearchResult(
                     imdb_id: movie["imdbId"].string, kind: "movie", overview: movie["overview"].string,
-                    poster: Catalog.text(movie["remotePoster"]).map { Artwork.normalise($0) } ?? Artwork.poster(movie["images"]),
+                    poster: movie["remotePoster"].nonEmpty.map { Artwork.normalise($0) } ?? Artwork.poster(movie["images"]),
                     remote_id: tmdb, title: movie["title"].string ?? "", tmdb_id: tmdb,
-                    year: movie["year"].int.flatMap { $0 == 0 ? nil : $0 }
+                    year: movie["year"].nonZero
                 )
                 return Catalog.result(result, held: nil)
             }

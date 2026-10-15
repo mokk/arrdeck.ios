@@ -131,3 +131,69 @@ extension JSON {
         return .object(fields)
     }
 }
+
+// MARK: - Reading loose JSON the way Python did
+
+extension JSON {
+    /// Python's truthiness, for the `or` chains the server's mapping is
+    /// written in: null, false, 0, "" and empty containers are all "absent".
+    var truthy: Bool {
+        switch self {
+        case .null: false
+        case let .bool(flag): flag
+        case let .number(number): number != 0
+        case let .string(text): !text.isEmpty
+        case let .array(items): !items.isEmpty
+        case let .object(fields): !fields.isEmpty
+        }
+    }
+
+    /// Text, with an empty string as missing — Python's `value or None`.
+    var nonEmpty: String? {
+        string.flatMap { $0.isEmpty ? nil : $0 }
+    }
+
+    /// `value or None` for a count or an id: the arrs send 0 for unknown.
+    var nonZero: Int? {
+        int.flatMap { $0 == 0 ? nil : $0 }
+    }
+
+    /// A whole number, or a fractional one cut down: Prowlarr's averages and
+    /// the torrent clients' counters are not always integral.
+    var whole: Int? {
+        int ?? double.map { Int($0) }
+    }
+
+    /// The year at the front of a date the services write as text, when its
+    /// first four characters are digits.
+    var year: Int? {
+        guard let raw = string, raw.count >= 4 else { return nil }
+        let head = raw.prefix(4)
+        guard head.allSatisfy({ $0.isASCII && $0.isNumber }) else { return nil }
+        return Int(head)
+    }
+
+    /// A scalar as Python's f-strings printed it: whole numbers without a
+    /// fraction, null as None.
+    var printed: String {
+        switch self {
+        case let .string(text): text
+        case let .number(value): Int(exactly: value).map(String.init) ?? String(value)
+        case let .bool(flag): flag ? "True" : "False"
+        case .null: "None"
+        case .array, .object: (try? data()).map { String(decoding: $0, as: UTF8.self) } ?? ""
+        }
+    }
+}
+
+extension [JSON] {
+    /// The items by their "id", a repeated id's last one winning, as the
+    /// server's `{x["id"]: x for x in items}` had them.
+    var byID: [Int: JSON] {
+        var out: [Int: JSON] = [:]
+        for item in self {
+            if let id = item["id"].int { out[id] = item }
+        }
+        return out
+    }
+}

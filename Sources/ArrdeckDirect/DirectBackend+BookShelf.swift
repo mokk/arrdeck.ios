@@ -66,8 +66,7 @@ extension DirectBackend: BookShelfAPI {
     fileprivate static func shelfRows(
         _ seriesByAuthor: [(author: Int, series: [JSON])], books: [JSON], authors: [Int: JSON]
     ) -> [ShelfSeries] {
-        let byID = Dictionary(books.compactMap { book in book["id"].int.map { ($0, book) } },
-                              uniquingKeysWith: { _, last in last })
+        let byID = books.byID
         var out: [ShelfSeries] = []
         for (author, series) in seriesByAuthor {
             let name = authors[author]?["authorName"].string

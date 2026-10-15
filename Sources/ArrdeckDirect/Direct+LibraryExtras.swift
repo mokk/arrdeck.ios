@@ -12,7 +12,7 @@ extension DirectBackend {
         try await call {
             let readarr = try registry.arr("readarr")
             let book = try await readarr.get("/book/\(id)")
-            let authorID = LibraryShapes.nonZero(book["authorId"].int)
+            let authorID = book["authorId"].nonZero
             // Everything past the book is decoration on its page: the author,
             // the history, the files and the series each go missing alone.
             async let author = Self.decoration(readarr, authorID.map { "/author/\($0)" })
@@ -69,7 +69,7 @@ extension DirectBackend {
                     format: edition["format"].string,
                     is_ebook: edition["isEbook"].bool,
                     monitored: edition["monitored"].bool ?? false,
-                    page_count: LibraryShapes.nonZero(edition["pageCount"].int),
+                    page_count: edition["pageCount"].nonZero,
                     title: edition["title"].string
                 )
             },
@@ -82,17 +82,17 @@ extension DirectBackend {
             metadata_profile_id: author["metadataProfileId"].int,
             monitored: book["monitored"].bool ?? false,
             overview: book["overview"].string,
-            page_count: LibraryShapes.nonZero(book["pageCount"].int),
+            page_count: book["pageCount"].nonZero,
             poster: LibraryShapes.bookCover(book["images"]),
             quality_profile_id: author["qualityProfileId"].int,
             rating: ratings["value"].double,
             rating_votes: ratings["votes"].int,
             release_date: book["releaseDate"].string,
             series: series.filter { $0.books?.contains { $0.book_id == id } == true },
-            series_title: LibraryShapes.nonEmpty(book["seriesTitle"].string),
+            series_title: book["seriesTitle"].nonEmpty,
             size_on_disk: book["statistics"]["sizeOnDisk"].int ?? 0,
             title: book["title"].string,
-            year: LibraryShapes.year(book["releaseDate"])
+            year: book["releaseDate"].year
         )
     }
 
@@ -110,11 +110,7 @@ extension DirectBackend {
         async let series = readarr.get("/series", query: ["authorId": "\(author)"])
         async let books = readarr.get("/book")
         let mine = try await books.array.filter { $0["authorId"].int == author }
-        return LibraryShapes.seriesRows(try await series.array, books: Self.byID(mine))
-    }
-
-    fileprivate static func byID(_ items: [JSON]) -> [Int: JSON] {
-        Dictionary(items.compactMap { item in item["id"].int.map { ($0, item) } }, uniquingKeysWith: { _, last in last })
+        return LibraryShapes.seriesRows(try await series.array, books: mine.byID)
     }
 
     /// A book's own flag goes on the book; quality is the author's setting,
@@ -132,7 +128,7 @@ extension DirectBackend {
             let updated = try await readarr.send("PUT", "/book/\(id)", json: book)
             if !updated.isNull { book = updated }
         }
-        if let qualityProfile, let authorID = LibraryShapes.nonZero(book["authorId"].int) {
+        if let qualityProfile, let authorID = book["authorId"].nonZero {
             let author = try await readarr.get("/author/\(authorID)")
             try await readarr.send("PUT", "/author/\(authorID)", json: author.setting("qualityProfileId", JSON(qualityProfile)))
             LibraryShapes.forget("readarr:authors", in: cache)
@@ -165,7 +161,7 @@ extension DirectBackend {
                 overview: author["overview"].string,
                 poster: row.poster,
                 quality_profile_id: row.quality_profile_id,
-                series: LibraryShapes.seriesRows(try await allSeries.array, books: Self.byID(mine)),
+                series: LibraryShapes.seriesRows(try await allSeries.array, books: mine.byID),
                 size_on_disk: row.size_on_disk
             )
         }
@@ -197,9 +193,9 @@ extension DirectBackend {
                     format: edition["format"].string,
                     language: edition["language"].string,
                     monitored: edition["monitored"].bool ?? false,
-                    page_count: LibraryShapes.nonZero(edition["pageCount"].int),
+                    page_count: edition["pageCount"].nonZero,
                     title: edition["title"].string,
-                    year: LibraryShapes.year(edition["releaseDate"])
+                    year: edition["releaseDate"].year
                 )
             }
         }
@@ -220,7 +216,7 @@ extension DirectBackend {
         try await call {
             let rows = try await registry.bazarr().get("/episodes", query: ["seriesid[]": "\(id)"])["data"].array
             return rows.compactMap { row in
-                guard let episode = LibraryShapes.nonZero(row["sonarrEpisodeId"].int) else { return nil }
+                guard let episode = row["sonarrEpisodeId"].nonZero else { return nil }
                 return EpisodeSubtitles(
                     episode: row["episode"].int ?? 0,
                     episode_id: episode,
@@ -241,7 +237,7 @@ extension DirectBackend {
                 code: sub["code2"].string ?? "",
                 forced: sub["forced"].bool ?? false,
                 hi: sub["hi"].bool ?? false,
-                language: LibraryShapes.nonEmpty(sub["name"].string) ?? sub["code2"].string ?? "",
+                language: sub["name"].nonEmpty ?? sub["code2"].string ?? "",
                 path: sub["path"].string
             )
         }
@@ -345,7 +341,7 @@ extension DirectBackend {
         }
         let key = item["ratingKey"].string ?? item["ratingKey"].int.map(String.init)
         return WatchedItem(
-            key: LibraryShapes.nonEmpty(key), last_viewed_at: item["lastViewedAt"].int, progress: progress, watched: watched
+            key: key.flatMap { $0.isEmpty ? nil : $0 }, last_viewed_at: item["lastViewedAt"].int, progress: progress, watched: watched
         )
     }
 }

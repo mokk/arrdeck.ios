@@ -49,10 +49,10 @@ extension DirectBackend: PeopleAPI {
             .map(\.element)
             return Person(
                 elsewhere: elsewhere,
-                image: Catalog.text(info["profilePath"]).map {
+                image: info["profilePath"].nonEmpty.map {
                     Artwork.normalise(People.tmdbOriginal + $0, size: Artwork.headshotSize)
                 },
-                known_for: info["knownForDepartment"].string, name: Catalog.text(info["name"]) ?? entry?.name,
+                known_for: info["knownForDepartment"].string, name: info["name"].nonEmpty ?? entry?.name,
                 owned: owned, tmdb_id: tmdbID
             )
         }
@@ -65,11 +65,7 @@ extension DirectBackend: PeopleAPI {
             async let credits = radarr.get("/credit", timeout: 60).array
             let all = try await movies
             let mapping = await metadataMap(radarr, movies: all)
-            var byID: [Int: JSON] = [:]
-            for movie in all {
-                if let id = movie["id"].int { byID[id] = movie }
-            }
-            return People.Index(people: People.index(try await credits, mapping: mapping), movies: byID)
+            return People.Index(people: People.index(try await credits, mapping: mapping), movies: all.byID)
         }
     }
 
@@ -137,7 +133,7 @@ enum People {
             var entry = people[person] ?? Entry(name: credit["personName"].string, movies: [])
             guard !entry.movies.contains(where: { $0.0 == movie }) else { continue }
             let role = credit["type"].string == "cast" ? credit["character"] : credit["job"]
-            entry.movies.append((movie, Catalog.text(role)))
+            entry.movies.append((movie, role.nonEmpty))
             people[person] = entry
         }
         return people
@@ -153,24 +149,18 @@ enum People {
         var rows: [SearchResult] = []
         for credit in all {
             guard credit["mediaType"].string == "movie", let tmdb = credit["id"].int, tmdb != 0, !seen.contains(tmdb),
-                  !inLibrary.contains(tmdb), let released = Catalog.text(credit["releaseDate"]),
+                  !inLibrary.contains(tmdb), let released = credit["releaseDate"].nonEmpty,
                   String(released.prefix(10)) <= today
             else { continue }
             seen.insert(tmdb)
             let result = SearchResult(
                 kind: "movie", overview: credit["overview"].string,
-                poster: Catalog.text(credit["posterPath"]).map { Artwork.normalise(tmdbOriginal + $0) },
-                remote_id: tmdb, title: credit["title"].string ?? "", tmdb_id: tmdb, year: year(released)
+                poster: credit["posterPath"].nonEmpty.map { Artwork.normalise(tmdbOriginal + $0) },
+                remote_id: tmdb, title: credit["title"].string ?? "", tmdb_id: tmdb, year: credit["releaseDate"].year
             )
             rows.append(Catalog.result(result, held: nil))
         }
         return Array(rows.prefix(elsewhereLimit))
-    }
-
-    static func year(_ date: String) -> Int? {
-        let head = date.prefix(4)
-        guard head.count == 4, head.allSatisfy(\.isASCII), head.allSatisfy(\.isNumber) else { return nil }
-        return Int(head)
     }
 
     /// Today as the server's `date.today()` wrote it: the device's own day.

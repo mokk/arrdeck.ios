@@ -76,27 +76,27 @@ private enum BookCatalog {
         let result = SearchResult(
             author: book["author"]["authorName"].string,
             editions: editions.compactMap(choice),
-            foreign_edition_id: Catalog.text(edition["foreignEditionId"]) ?? book["foreignEditionId"].string,
+            foreign_edition_id: edition["foreignEditionId"].nonEmpty ?? book["foreignEditionId"].string,
             foreign_id: book["foreignBookId"].string, kind: "book",
-            overview: Catalog.text(book["overview"]) ?? edition["overview"].string, poster: cover(book),
-            remote_id: foreign ?? 0, title: book["title"].string ?? "", year: Catalog.leadingYear(book["releaseDate"])
+            overview: book["overview"].nonEmpty ?? edition["overview"].string, poster: cover(book),
+            remote_id: foreign ?? 0, title: book["title"].string ?? "", year: book["releaseDate"].year
         )
         return Catalog.result(result, held: held[foreign ?? -1])
     }
 
     static func choice(_ edition: JSON) -> EditionChoice? {
-        guard let id = Catalog.text(edition["foreignEditionId"]) else { return nil }
+        guard let id = edition["foreignEditionId"].nonEmpty else { return nil }
         return EditionChoice(
             foreign_edition_id: id, format: edition["format"].string, language: edition["language"].string,
             monitored: edition["monitored"].bool ?? false,
-            page_count: edition["pageCount"].int.flatMap { $0 == 0 ? nil : $0 }, title: edition["title"].string,
-            year: Catalog.leadingYear(edition["releaseDate"])
+            page_count: edition["pageCount"].nonZero, title: edition["title"].string,
+            year: edition["releaseDate"].year
         )
     }
 
     /// Readarr's own cover address first, else a cover or poster image.
     static func cover(_ book: JSON) -> String? {
-        Catalog.text(book["remoteCover"]).map { Artwork.normalise($0) } ?? Artwork.musicCover(book["images"])
+        book["remoteCover"].nonEmpty.map { Artwork.normalise($0) } ?? Artwork.musicCover(book["images"])
     }
 
     /// A combined-search book shaped into what POST /book wants, the way

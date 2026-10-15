@@ -42,7 +42,7 @@ extension DirectBackend: HistoryAPI {
         var total = 0
         for app in apps {
             guard let payload = pages[app] else { continue }
-            total += DashboardPort.whole(payload["totalRecords"]) ?? 0
+            total += payload["totalRecords"].whole ?? 0
             items += payload["records"].array.map { Self.blocklistItem(app: app, record: $0) }
         }
         return BlocklistPage(items: DashboardPort.stableSorted(items) { ($0.date ?? "") > ($1.date ?? "") }, total: total)
@@ -69,7 +69,7 @@ extension DirectBackend: HistoryAPI {
                 let payload = try await Self.blocklistPage(client, page: page, pageSize: 1000)
                 let records = payload["records"].array
                 ids += records.compactMap { $0["id"].int }
-                if records.isEmpty || ids.count >= (DashboardPort.whole(payload["totalRecords"]) ?? 0) { break }
+                if records.isEmpty || ids.count >= (payload["totalRecords"].whole ?? 0) { break }
                 page += 1
             }
             if !ids.isEmpty { try await client.send("DELETE", "/blocklist/bulk", json: ["ids": .init(ids)]) }
@@ -90,7 +90,7 @@ extension DirectBackend: HistoryAPI {
     }
 
     private static func blocklistItem(app: ArrApp, record: JSON) -> BlocklistItem {
-        let media = DashboardPort.truthy(record["movie"]) ? record["movie"] : record["series"]
+        let media = record["movie"].truthy ? record["movie"] : record["series"]
         // Lidarr names the artist; the release title says which album
         let title = app == .lidarr ? record["artist"]["artistName"].string : media["title"].string
         return BlocklistItem(
