@@ -229,7 +229,7 @@ extension DirectBackend: ExtrasAPI {
     /// Drops the cached lists a bulk change makes wrong, under the server's
     /// keys, so the next read goes to the arr. (Books and artists clearing the
     /// series map is the server's doing, kept as it was.)
-    private func forgetLibrary(_ app: LibraryApp, authors: Bool) {
+    func forgetLibrary(_ app: LibraryApp, authors: Bool) {
         var keys = [app == .radarr ? "library_map:movie" : "library_map:series"]
         if authors { keys.append("readarr:authors") }
         if app == .lidarr { keys += ["lidarr:artists", "library_map:music"] }
@@ -321,7 +321,7 @@ private enum TorrentAdding {
 }
 
 /// The arrs' mass editors, and the key each takes its ids under.
-private enum Bulk {
+enum Bulk {
     static func editor(_ app: LibraryApp) -> (path: String, ids: String) {
         switch app {
         case .radarr: ("/movie/editor", "movieIds")
