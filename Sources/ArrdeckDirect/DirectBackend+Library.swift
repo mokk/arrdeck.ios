@@ -348,11 +348,8 @@ private enum CreditsShape {
 
 extension LibraryShapes {
     /// What the server's `cache.set(key, None)` did: the next read of `key`
-    /// fetches afresh. The cache has no removal of its own, so a placeholder
-    /// no reader asks for takes the entry's place.
+    /// fetches afresh.
     static func forget(_ keys: String..., in cache: BlockCache) {
-        for key in keys { cache.set(key, Forgotten()) }
+        cache.remove(keys)
     }
-
-    private struct Forgotten: Sendable {}
 }

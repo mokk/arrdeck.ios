@@ -22,9 +22,10 @@ extension DirectBackend {
             ])
             async let files = Self.decoration(readarr, "/bookfile", query: ["bookId": "\(id)"])
             async let series = Self.seriesOf(readarr, author: authorID)
+            async let downloadable = canDownload(readarr)
             return Self.bookDetail(
                 book, author: await author, history: await history["records"].array,
-                files: await files.array, series: await series
+                files: await files.array, series: await series, downloadable: await downloadable
             )
         }
     }
@@ -41,8 +42,18 @@ extension DirectBackend {
         return (try? await authorSeries(readarr, author: author)) ?? []
     }
 
+    /// Whether the connected Readarr is our fork, which serves its files
+    /// (`FileAddressAPI` hands out the address); an upstream build lists
+    /// nothing. Asked on every book page, so cached as the server did.
+    private func canDownload(_ readarr: KeyedClient) async -> Bool {
+        let features = (try? await cached("readarr:fork_features", ttl: 300) {
+            try await readarr.get("/system/status")["forkFeatures"].array.compactMap(\.string)
+        }) ?? []
+        return features.contains("bookFileDownload")
+    }
+
     fileprivate static func bookDetail(
-        _ book: JSON, author: JSON, history: [JSON], files: [JSON], series: [BookSeries]
+        _ book: JSON, author: JSON, history: [JSON], files: [JSON], series: [BookSeries], downloadable: Bool = false
     ) -> BookDetail {
         let id = book["id"].int ?? 0
         let ratings = book["ratings"]
@@ -52,9 +63,7 @@ extension DirectBackend {
         return BookDetail(
             author: author["authorName"].string,
             author_id: book["authorId"].int,
-            // Downloading goes through the server's own file route (from our
-            // Readarr fork), which a direct profile does not have.
-            downloadable: false,
+            downloadable: downloadable,
             editions: book["editions"].array.map { edition in
                 BookEdition(
                     format: edition["format"].string,
