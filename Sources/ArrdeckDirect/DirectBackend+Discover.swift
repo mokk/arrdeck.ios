@@ -215,7 +215,7 @@ extension DirectBackend: DiscoverAPI {
 
     /// Radarr's films by TMDB id, for the in-library badges and editing in
     /// place from the Add page. Kept a minute: every keystroke of a search asks.
-    private func heldMovies(_ radarr: KeyedClient) async throws -> [Int: Catalog.Held] {
+    func heldMovies(_ radarr: KeyedClient) async throws -> [Int: Catalog.Held] {
         try await cached("library_map:movie", ttl: 60) {
             Discovery.held(try await radarr.get("/movie").array, id: "tmdbId") { $0["hasFile"].bool ?? false }
         }
@@ -223,7 +223,7 @@ extension DirectBackend: DiscoverAPI {
 
     /// Sonarr's shows by TVDB id. A show counts as downloaded once every
     /// episode is on disk.
-    private func heldSeries(_ sonarr: KeyedClient) async throws -> [Int: Catalog.Held] {
+    func heldSeries(_ sonarr: KeyedClient) async throws -> [Int: Catalog.Held] {
         try await cached("library_map:series", ttl: 60) {
             Discovery.held(try await sonarr.get("/series").array, id: "tvdbId") { series in
                 let stats = series["statistics"]
