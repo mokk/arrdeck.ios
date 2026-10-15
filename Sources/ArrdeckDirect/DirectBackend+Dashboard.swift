@@ -126,9 +126,8 @@ extension DirectBackend: DashboardAPI {
                     ["seriesid": String(seriesID), "episodeid": String(id), "action": "search-missing"]
                 )
             }
-            // what the server did: the counts are re-read on the next poll.
-            // An empty value under the key reads as a miss.
-            cache.set("subtitles", Subtitles?.none)
+            // what the server did: the counts are re-read on the next poll
+            cache.remove(["subtitles"])
         }
     }
 
