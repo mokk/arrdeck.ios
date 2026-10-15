@@ -324,7 +324,7 @@ extension DirectBackend {
     }
 
     /// "imdb://tt123" as "imdb:tt123", for every id Plex knows the item by.
-    fileprivate static func guidKeys(_ item: JSON) -> [String] {
+    static func guidKeys(_ item: JSON) -> [String] {
         item["Guid"].array.compactMap { guid in
             guard let raw = guid["id"].string, let range = raw.range(of: "://") else { return nil }
             return "\(raw[..<range.lowerBound]):\(raw[range.upperBound...])"
