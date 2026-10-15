@@ -9,10 +9,9 @@ enum DashboardCards {
     // MARK: - Plex
 
     static func playSessions(_ plex: KeyedClient) async throws -> [PlaySession] {
-        async let identity = plex.get("/identity")
+        async let identity = Plex.machine(plex)
         let items = try await plex.get("/status/sessions")["MediaContainer"]["Metadata"].array
-        // without the server's id the rows simply cannot open in Plex
-        let machine = (try? await identity)?["MediaContainer"]["machineIdentifier"].string ?? ""
+        let machine = await identity
         return items.map { playSession(machine: machine, item: $0) }
     }
 
@@ -28,7 +27,7 @@ enum DashboardCards {
             }
         }
         let duration = item["duration"].double ?? 0
-        let ratingKey = item["ratingKey"].string ?? item["ratingKey"].int.map(String.init)
+        let ratingKey = Plex.key(item["ratingKey"])
         return PlaySession(
             kind: kind,
             player: item["Player"]["title"].string ?? "",
@@ -39,7 +38,7 @@ enum DashboardCards {
             // a transcode session means the server is doing real work for this play
             transcoding: item["TranscodeSession"].truthy,
             url: !machine.isEmpty && ratingKey.map { !$0.isEmpty } == true
-                ? "https://app.plex.tv/desktop/#!/server/\(machine)/details?key=/library/metadata/\(ratingKey!)"
+                ? Plex.detailsBase(machine: machine) + ratingKey!
                 : nil,
             user: item["User"]["title"].string ?? ""
         )

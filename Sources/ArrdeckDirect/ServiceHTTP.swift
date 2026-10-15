@@ -221,6 +221,31 @@ extension URLRequest {
     }
 }
 
+/// `items` mapped at most `width` at a time, answers in the items' order:
+/// for the fan-outs that would otherwise ask a service hundreds of things at
+/// once. The next starts as one finishes, so a slow one holds a slot rather
+/// than a batch.
+func boundedMap<Item: Sendable, Mapped: Sendable>(
+    _ items: [Item], width: Int, _ transform: @escaping @Sendable (Item) async -> Mapped
+) async -> [Mapped] {
+    await withTaskGroup(of: (Int, Mapped).self) { group in
+        var next = 0
+        func start() {
+            guard next < items.count else { return }
+            let (index, item) = (next, items[next])
+            next += 1
+            group.addTask { (index, await transform(item)) }
+        }
+        for _ in 0 ..< width { start() }
+        var out = [Mapped?](repeating: nil, count: items.count)
+        for await (index, mapped) in group {
+            out[index] = mapped
+            start()
+        }
+        return out.compactMap { $0 }
+    }
+}
+
 /// A value behind a lock, for the little shared state the clients keep.
 final class Locked<Value: Sendable>: @unchecked Sendable {
     private var value: Value

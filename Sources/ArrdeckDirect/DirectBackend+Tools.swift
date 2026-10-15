@@ -8,14 +8,7 @@ extension DirectBackend: ToolsAPI {
     /// that is down leaves its rows out, not the list.
     public func exclusions() async throws -> [Exclusion] {
         let apps = ArrApp.allCases.filter { registry.isConfigured($0.rawValue) }
-        let pages = await withTaskGroup(of: (ArrApp, JSON?).self) { group in
-            for app in apps {
-                group.addTask { (app, try? await self.registry.arr(app.rawValue).get(ToolsPort.exclusionPath(app))) }
-            }
-            var out: [ArrApp: JSON] = [:]
-            for await (app, page) in group { out[app] = page }
-            return out
-        }
+        let pages = await eachArr(apps) { app, client in try await client.get(ToolsPort.exclusionPath(app)) }
         var rows: [Exclusion] = []
         for app in apps {
             guard let page = pages[app] else { continue }

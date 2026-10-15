@@ -179,8 +179,7 @@ extension DirectBackend {
     func catalogMusicSearch(_ query: String) async throws -> [SearchResult] {
         let lidarr = try registry.arr("lidarr")
         async let library = heldMusic(lidarr)
-        // a fresh term sends Lidarr to its metadata server
-        let entries = try await lidarr.get("/search", query: ["term": query], timeout: 90).array
+        let entries = try await lidarr.combinedSearch(query)
         let held = try await library
         return Array(entries.compactMap { CatalogMusic.result($0, held: held) }.prefix(30))
     }
@@ -200,7 +199,7 @@ extension DirectBackend {
         }
         let payload = CatalogMusic.newArtist(
             artist, qualityProfile: qualityProfile,
-            metadataProfile: try await defaultMetadataProfile(lidarr, metadataProfile), rootFolder: rootFolder,
+            metadataProfile: try await lidarr.metadataProfile(metadataProfile), rootFolder: rootFolder,
             monitorNewItems: "all",
             // Lidarr sets the artist's own flag from addOptions.monitored once
             // added; monitoring nothing leaves nothing to search for yet
@@ -225,7 +224,7 @@ extension DirectBackend {
         if (artist["id"].int ?? 0) == 0 {
             artist = CatalogMusic.newArtist(
                 artist, qualityProfile: qualityProfile,
-                metadataProfile: try await defaultMetadataProfile(lidarr, metadataProfile), rootFolder: rootFolder,
+                metadataProfile: try await lidarr.metadataProfile(metadataProfile), rootFolder: rootFolder,
                 monitorNewItems: "none",
                 // albumsToMonitor wins over `monitor` for the albums, so only
                 // this one is monitored; "none" would leave the artist
@@ -242,11 +241,6 @@ extension DirectBackend {
             .setting("addOptions", ["searchForNewAlbum": true])
         try await lidarr.send("POST", "/album", json: payload, timeout: 90)
         forgetArtists()
-    }
-
-    private func defaultMetadataProfile(_ lidarr: KeyedClient, _ chosen: Int?) async throws -> Int? {
-        if let chosen { return chosen }
-        return try await lidarr.get("/metadataprofile").array.first?["id"].int
     }
 
     /// MusicBrainz id to what the library holds, artists and albums alike

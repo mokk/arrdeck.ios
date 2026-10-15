@@ -79,28 +79,13 @@ enum CatalogPopular {
         let jobs = indexers.enumerated().flatMap { owner, indexer in
             queryCategories(indexer).map { (owner: owner, indexer: indexer["id"].int ?? 0, category: $0) }
         }
-        let pages = await withTaskGroup(of: (Int, [JSON]).self) { group in
-            var next = 0
-            func start() {
-                guard next < jobs.count else { return }
-                let (index, job) = (next, jobs[next])
-                next += 1
-                group.addTask {
-                    // one dead category should not empty the page
-                    let rows = try? await prowlarr.get("/search", query: [
-                        "query": "", "type": "search", "categories": String(job.category),
-                        "indexerIds": String(job.indexer), "limit": String(perQuery),
-                    ], timeout: 90).array
-                    return (index, rows ?? [])
-                }
-            }
-            for _ in 0 ..< concurrency { start() }
-            var all = [[JSON]](repeating: [], count: jobs.count)
-            for await (index, rows) in group {
-                all[index] = rows
-                start()
-            }
-            return all
+        let pages = await boundedMap(jobs, width: concurrency) { job in
+            // one dead category should not empty the page
+            let rows = try? await prowlarr.get("/search", query: [
+                "query": "", "type": "search", "categories": String(job.category),
+                "indexerIds": String(job.indexer), "limit": String(perQuery),
+            ], timeout: 90).array
+            return rows ?? []
         }
         let cutoff = now.addingTimeInterval(-Double(hours) * 3600)
         return PopularSnapshot(

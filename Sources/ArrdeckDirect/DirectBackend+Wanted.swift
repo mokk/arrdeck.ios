@@ -91,12 +91,8 @@ extension DirectBackend: WantedAPI {
             // being away included
             guard let arr = try? registry.arr(app.rawValue) else { throw APIError.unexpectedStatus(404) }
             async let fetched = arr.get(path)
-            async let queue = Self.optional { try await arr.get("/queue", query: Diagnose.queueQuery(app)) }
-            async let blocklist = Self.optional {
-                try await arr.get("/blocklist", query: [
-                    "page": "1", "pageSize": "200", "sortKey": "date", "sortDirection": "descending",
-                ])
-            }
+            async let queue = Self.optional { try await DashboardPort.queue(arr, app: app) }
+            async let blocklist = Self.optional { try await Self.blocklistPage(arr, page: 1, pageSize: 200) }
             // cached apart from the tasks card; a diagnosis is rare enough
             // that a fresh-ish read is fine
             async let tasks = Self.optional {
@@ -142,17 +138,6 @@ private enum Diagnose {
         var code: String
         var level: String
         var params: [String: JSON] = [:]
-    }
-
-    static func queueQuery(_ app: ArrApp) -> [String: String?] {
-        // without the unknown items the arr leaves out whatever it could not
-        // match, which is just what needs a look
-        switch app {
-        case .radarr: ["pageSize": "50", "includeUnknownMovieItems": "true"]
-        case .sonarr: ["pageSize": "50", "includeSeries": "true", "includeUnknownSeriesItems": "true"]
-        case .readarr: ["pageSize": "50", "includeUnknownAuthorItems": "true", "includeBook": "true", "includeAuthor": "true"]
-        case .lidarr: ["pageSize": "50", "includeUnknownArtistItems": "true", "includeAlbum": "true", "includeArtist": "true"]
-        }
     }
 
     static func findings(

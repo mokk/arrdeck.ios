@@ -136,14 +136,9 @@ extension DirectBackend: DashboardAPI {
     public func forceImport(app: ArrApp, id: Int) async throws {
         try await call {
             let client = try registry.arr(app.rawValue)
-            let record = try await DashboardPort.queueRecord(client, app: app, id: id)
-            guard let download = record["downloadId"].nonEmpty else {
-                throw APIError.refused("queue item not found")
-            }
-            let candidates = try await client.get(
-                "/manualimport", query: ["downloadId": download, "filterExistingFiles": "false"]
-            )
-            let files = candidates.array.compactMap { DashboardForceImport.file(app: app, candidate: $0, download: download) }
+            let download = try await ManualImportPort.download(client, app: app, itemID: id)
+            let candidates = try await ManualImportPort.candidates(client, download: download)
+            let files = candidates.compactMap { DashboardForceImport.file(app: app, candidate: $0, download: download) }
             guard !files.isEmpty else { throw APIError.refused("no importable files could be mapped automatically") }
             try await client.send(
                 "POST", "/command", json: ["name": "ManualImport", "files": .array(files), "importMode": "auto"]

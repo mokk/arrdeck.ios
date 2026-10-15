@@ -27,10 +27,8 @@ extension DirectBackend {
         guard let book = entries.map({ $0["book"] })
             .first(where: { !$0.object.isEmpty && $0["foreignBookId"].string == foreignID })
         else { throw APIError.refused("Readarr no longer finds that book") }
-        var metadata = metadataProfile
-        if metadata == nil, (book["author"]["id"].int ?? 0) == 0 {
-            metadata = try await readarr.get("/metadataprofile").array.first?["id"].int
-        }
+        let isNew = (book["author"]["id"].int ?? 0) == 0
+        let metadata = isNew ? try await readarr.metadataProfile(metadataProfile) : metadataProfile
         let payload = BookCatalog.payload(
             book, edition: edition, qualityProfile: qualityProfile, rootFolder: rootFolder, metadataProfile: metadata
         )
@@ -52,15 +50,6 @@ extension DirectBackend {
             }
             return out
         }
-    }
-}
-
-private extension KeyedClient {
-    /// Author and book entries, each book with its author and editions — what
-    /// adding needs. A fresh term sends Readarr to its metadata server for
-    /// every hit's editions, which can take over a minute.
-    func combinedSearch(_ term: String) async throws -> [JSON] {
-        try await get("/search", query: ["term": term], timeout: 90).array
     }
 }
 

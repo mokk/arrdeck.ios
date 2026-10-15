@@ -209,11 +209,11 @@ extension TrackerNames {
     private static func grabbedHashes(_ backend: DirectBackend) async -> [String: String] {
         (try? await backend.cached("tracker:history_map", ttl: 300) {
             var mapping: [String: String] = [:]
-            for app in ["radarr", "sonarr"] {
+            for app in [ArrApp.radarr, .sonarr] {
                 // one arr down leaves the other's grabs
-                guard let history = try? await backend.registry.arr(app).get("/history", query: [
-                    "pageSize": "500", "page": "1", "sortKey": "date", "sortDirection": "descending",
-                ]) else { continue }
+                guard let client = try? backend.registry.arr(app.rawValue),
+                      let history = try? await DashboardPort.history(client, app: app, pageSize: 500)
+                else { continue }
                 for record in history["records"].array {
                     let download = (record["downloadId"].string ?? "").uppercased()
                     if !download.isEmpty, let indexer = record["data"]["indexer"].string, !indexer.isEmpty {

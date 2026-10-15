@@ -6,15 +6,8 @@ extension DirectBackend: HistoryAPI {
     /// release once. An arr that is down leaves its rows out, not the page.
     public func historyPage(_ page: Int) async throws -> HistoryPage {
         let apps = dashboardListedArrs()
-        let pages = await withTaskGroup(of: (ArrApp, JSON?).self) { group in
-            for app in apps {
-                group.addTask {
-                    (app, try? await DashboardPort.history(try self.registry.arr(app.rawValue), app: app, pageSize: 50, page: page))
-                }
-            }
-            var out: [ArrApp: JSON] = [:]
-            for await (app, payload) in group { out[app] = payload }
-            return out
+        let pages = await eachArr(apps) { app, client in
+            try await DashboardPort.history(client, app: app, pageSize: 50, page: page)
         }
         var items: [HistoryItem] = []
         var hasMore = false
@@ -30,14 +23,7 @@ extension DirectBackend: HistoryAPI {
     /// keep a list here: Radarr, Sonarr, and Lidarr once set up.
     public func blocklist() async throws -> BlocklistPage {
         let apps = dashboardListedArrs(Self.blocklistApps)
-        let pages = await withTaskGroup(of: (ArrApp, JSON?).self) { group in
-            for app in apps {
-                group.addTask { (app, try? await Self.blocklistPage(try self.registry.arr(app.rawValue), page: 1)) }
-            }
-            var out: [ArrApp: JSON] = [:]
-            for await (app, payload) in group { out[app] = payload }
-            return out
-        }
+        let pages = await eachArr(apps) { _, client in try await Self.blocklistPage(client, page: 1) }
         var items: [BlocklistItem] = []
         var total = 0
         for app in apps {
@@ -83,7 +69,7 @@ extension DirectBackend: HistoryAPI {
         return try registry.arr(app.rawValue)
     }
 
-    private static func blocklistPage(_ client: KeyedClient, page: Int, pageSize: Int = 50) async throws -> JSON {
+    static func blocklistPage(_ client: KeyedClient, page: Int, pageSize: Int = 50) async throws -> JSON {
         try await client.get("/blocklist", query: [
             "page": String(page), "pageSize": String(pageSize), "sortKey": "date", "sortDirection": "descending",
         ])

@@ -299,9 +299,8 @@ extension DirectBackend {
     func dashboardArrBlocks<T: Sendable & Equatable>(
         _ key: String, _ fetch: @escaping @Sendable (ArrApp, KeyedClient) async throws -> T
     ) async -> [ArrApp: Block<T>] {
-        let apps = ArrApp.allCases.filter { $0 == .radarr || $0 == .sonarr || registry.isConfigured($0.rawValue) }
-        return await withTaskGroup(of: (ArrApp, Block<T>).self) { group in
-            for app in apps {
+        await withTaskGroup(of: (ArrApp, Block<T>).self) { group in
+            for app in dashboardListedArrs() {
                 group.addTask {
                     (app, await self.guarded("\(key):\(app.rawValue)") {
                         try await fetch(app, try self.registry.arr(app.rawValue))
@@ -318,5 +317,21 @@ extension DirectBackend {
     /// Radarr and Sonarr always.
     func dashboardListedArrs(_ apps: [ArrApp] = ArrApp.allCases) -> [ArrApp] {
         apps.filter { $0 == .radarr || $0 == .sonarr || registry.isConfigured($0.rawValue) }
+    }
+
+    /// The arrs asked at once, for a merged list that has no last good
+    /// answer to fall back on: one that is not set up or does not answer is
+    /// simply absent, and the caller says so or leaves its rows out.
+    func eachArr<T: Sendable>(
+        _ apps: [ArrApp], _ fetch: @escaping @Sendable (ArrApp, KeyedClient) async throws -> T
+    ) async -> [ArrApp: T] {
+        await withTaskGroup(of: (ArrApp, T?).self) { group in
+            for app in apps {
+                group.addTask { (app, try? await fetch(app, try self.registry.arr(app.rawValue))) }
+            }
+            var out: [ArrApp: T] = [:]
+            for await case let (app, value?) in group { out[app] = value }
+            return out
+        }
     }
 }

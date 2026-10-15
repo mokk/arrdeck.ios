@@ -13,18 +13,8 @@ extension DirectBackend: ManualImportAPI {
     /// list; there is no last good queue to fall back on, as on the server.
     public func attention() async throws -> Attention {
         let apps = ArrApp.allCases.filter { registry.isConfigured($0.rawValue) }
-        let queues = await withTaskGroup(of: (ArrApp, [QueueItem]?).self) { group in
-            for app in apps {
-                group.addTask {
-                    let items = try? await DashboardPort.queueItems(
-                        app: app, payload: DashboardPort.queue(self.registry.arr(app.rawValue), app: app)
-                    )
-                    return (app, items)
-                }
-            }
-            var out: [ArrApp: [QueueItem]] = [:]
-            for await (app, items) in group { out[app] = items }
-            return out
+        let queues = await eachArr(apps) { app, client in
+            DashboardPort.queueItems(app: app, payload: try await DashboardPort.queue(client, app: app))
         }
         var items: [QueueItem] = []
         var unavailable: [String] = []

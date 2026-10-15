@@ -69,22 +69,17 @@ extension DirectBackend: WatchedEpisodesAPI, WatchingAPI {
     /// costs. An hour: the library changes slower than the history.
     private func plexCatalogue(_ plex: KeyedClient) async throws -> [String: WatchStatsBuilder.Title] {
         try await cached("plex:catalogue", ttl: 3600) {
-            let sections = try await plex.get("/library/sections")["MediaContainer"]["Directory"].array
-                .filter { ["movie", "show"].contains($0["type"].string ?? "") }
+            let sections = try await Plex.sections(plex)
+            // unlike the watched map, a section that fails fails the lot
             let contents = try await withThrowingTaskGroup(of: [JSON].self) { group in
                 for section in sections {
-                    let key = section["key"].string ?? section["key"].int.map(String.init) ?? ""
-                    group.addTask {
-                        try await plex.get("/library/sections/\(key)/all", query: ["includeGuids": "1"], timeout: 30)[
-                            "MediaContainer"]["Metadata"].array
-                    }
+                    group.addTask { try await Plex.items(plex, in: section) }
                 }
                 return try await group.reduce(into: []) { $0 += $1 }
             }
             var out: [String: WatchStatsBuilder.Title] = [:]
             for item in contents {
-                guard let key = item["ratingKey"].string ?? item["ratingKey"].int.map(String.init), !key.isEmpty
-                else { continue }
+                guard let key = Plex.key(item["ratingKey"]), !key.isEmpty else { continue }
                 out[key] = WatchStatsBuilder.Title(duration: item["duration"].int ?? 0, guids: Self.guidKeys(item))
             }
             return out
@@ -209,7 +204,7 @@ enum WatchStatsBuilder {
             guard kind == "movie" || kind == "episode" else { continue }
             let episode = kind == "episode"
             if episode { episodePlays += 1 } else { moviePlays += 1 }
-            let path = Self.text(play[episode ? "grandparentKey" : "key"])
+            let path = Plex.key(play[episode ? "grandparentKey" : "key"]) ?? ""
             let key = path.split(separator: "/", omittingEmptySubsequences: false).last.map(String.init) ?? ""
             let entry = titles[key]
             let ms = entry?.duration ?? 0
@@ -273,11 +268,6 @@ enum WatchStatsBuilder {
                 )
             }
         )
-    }
-
-    /// A key Plex may send as text or a number, as Python's `str(... or "")`.
-    private static func text(_ value: JSON) -> String {
-        value.string ?? value.int.map(String.init) ?? ""
     }
 
     /// Plex's ids for an item by source, the last one winning.

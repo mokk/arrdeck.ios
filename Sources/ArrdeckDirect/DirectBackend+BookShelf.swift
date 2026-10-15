@@ -29,27 +29,13 @@ extension DirectBackend: BookShelfAPI {
     /// Each author's series, at most `shelfConcurrency` asked at once. One
     /// author's failure leaves their series off rather than sinking the shelf.
     private func seriesByAuthor(_ readarr: KeyedClient, _ authorIDs: [Int]) async -> [Int: [JSON]] {
-        await withTaskGroup(of: (Int, [JSON]).self) { group in
-            func ask(_ author: Int) {
-                group.addTask {
-                    let series = try? await self.cached("readarr:series:\(author)", ttl: Self.shelfSeriesTTL) {
-                        try await readarr.get("/series", query: ["authorId": "\(author)"])
-                    }
-                    return (author, series?.array ?? [])
-                }
+        let series = await boundedMap(authorIDs, width: Self.shelfConcurrency) { author in
+            let series = try? await self.cached("readarr:series:\(author)", ttl: Self.shelfSeriesTTL) {
+                try await readarr.get("/series", query: ["authorId": "\(author)"])
             }
-            var pending = authorIDs[...]
-            for _ in 0 ..< Self.shelfConcurrency {
-                guard let next = pending.popFirst() else { break }
-                ask(next)
-            }
-            var out: [Int: [JSON]] = [:]
-            for await (author, series) in group {
-                out[author] = series
-                if let next = pending.popFirst() { ask(next) }
-            }
-            return out
+            return series?.array ?? []
         }
+        return Dictionary(zip(authorIDs, series)) { _, last in last }
     }
 
     /// Series with at least one book in the library, by author and then

@@ -76,22 +76,12 @@ extension DirectBackend: PeopleAPI {
         let known = Set(stored.values)
         let missing = movies.compactMap { $0["id"].int }.filter { !known.contains($0) }
         guard !missing.isEmpty else { return stored }
-        await withTaskGroup(of: (Int, Int?).self) { group in
-            func ask(_ movieID: Int) {
-                group.addTask {
-                    let rows = try? await radarr.get("/credit", query: ["movieId": "\(movieID)"]).array
-                    return (movieID, rows?.lazy.compactMap { $0["movieMetadataId"].int }.first)
-                }
-            }
-            var pending = missing[...]
-            for _ in 0 ..< People.mapConcurrency {
-                guard let next = pending.popFirst() else { break }
-                ask(next)
-            }
-            for await (movieID, metadataID) in group {
-                if let metadataID { stored[metadataID] = movieID }
-                if let next = pending.popFirst() { ask(next) }
-            }
+        let found = await boundedMap(missing, width: People.mapConcurrency) { movieID in
+            let rows = try? await radarr.get("/credit", query: ["movieId": "\(movieID)"]).array
+            return rows?.lazy.compactMap { $0["movieMetadataId"].int }.first
+        }
+        for (movieID, metadataID) in zip(missing, found) {
+            if let metadataID { stored[metadataID] = movieID }
         }
         cache.set(People.mapKey, stored)
         return stored

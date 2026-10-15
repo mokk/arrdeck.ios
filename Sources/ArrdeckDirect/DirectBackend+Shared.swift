@@ -83,6 +83,42 @@ enum Ratings {
     }
 }
 
+/// What the dashboard, the watched map and the statistics read of Plex alike
+/// (plex.py, watchstats.py).
+enum Plex {
+    /// A key Plex sends as text or as a number.
+    static func key(_ value: JSON) -> String? {
+        value.string ?? value.int.map(String.init)
+    }
+
+    /// The server's own id, "" when it cannot be had: without it a row
+    /// simply cannot open in Plex.
+    static func machine(_ plex: KeyedClient) async -> String {
+        (try? await plex.get("/identity"))?["MediaContainer"]["machineIdentifier"].string ?? ""
+    }
+
+    /// Where Plex's web app opens one of this server's items, less the item's
+    /// rating key.
+    static func detailsBase(machine: String) -> String {
+        "https://app.plex.tv/desktop/#!/server/\(machine)/details?key=/library/metadata/"
+    }
+
+    /// The movie and show sections: what is watched, not music or photos.
+    static func sections(_ plex: KeyedClient) async throws -> [JSON] {
+        try await plex.get("/library/sections")["MediaContainer"]["Directory"].array
+            .filter { ["movie", "show"].contains($0["type"].string ?? "") }
+    }
+
+    /// Everything in a section. includeGuids gives the imdb/tmdb/tvdb ids
+    /// inline, which is what lets this join the arrs without a lookup per
+    /// title.
+    static func items(_ plex: KeyedClient, in section: JSON) async throws -> [JSON] {
+        let key = Self.key(section["key"]) ?? ""
+        return try await plex.get("/library/sections/\(key)/all", query: ["includeGuids": "1"], timeout: 30)[
+            "MediaContainer"]["Metadata"].array
+    }
+}
+
 extension DirectBackend {
     /// Lidarr's own copy of a library artist's picture: an address under
     /// Lidarr carrying the key, since the image loader cannot send a header.

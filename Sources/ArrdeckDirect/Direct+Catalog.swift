@@ -42,3 +42,20 @@ enum Catalog {
         return Int(raw)
     }
 }
+
+extension KeyedClient {
+    /// Readarr's and Lidarr's combined search: author or artist entries and
+    /// book or album ones, each with what adding needs. A fresh term sends
+    /// the arr to its metadata server for every hit, which can take over a
+    /// minute.
+    func combinedSearch(_ term: String) async throws -> [JSON] {
+        try await get("/search", query: ["term": term], timeout: 90).array
+    }
+
+    /// The metadata profile a new author or artist gets: the one picked, else
+    /// the arr's first.
+    func metadataProfile(_ chosen: Int?) async throws -> Int? {
+        if let chosen { return chosen }
+        return try await get("/metadataprofile").array.first?["id"].int
+    }
+}

@@ -16,15 +16,14 @@ extension DirectBackend {
             // Everything past the book is decoration on its page: the author,
             // the history, the files and the series each go missing alone.
             async let author = Self.decoration(readarr, authorID.map { "/author/\($0)" })
-            async let history = Self.decoration(readarr, "/history", query: [
-                "pageSize": "50", "page": "1", "sortKey": "date", "sortDirection": "descending",
-                "bookId": "\(id)", "includeBook": "true",
-            ])
+            async let history = try? DashboardPort.history(
+                readarr, app: .readarr, pageSize: 50, extra: ["bookId": "\(id)", "includeBook": "true"]
+            )
             async let files = Self.decoration(readarr, "/bookfile", query: ["bookId": "\(id)"])
             async let series = Self.seriesOf(readarr, author: authorID)
             async let downloadable = canDownload(readarr)
             return Self.bookDetail(
-                book, author: await author, history: await history["records"].array,
+                book, author: await author, history: await history?["records"].array ?? [],
                 files: await files.array, series: await series, downloadable: await downloadable
             )
         }
@@ -291,25 +290,10 @@ extension DirectBackend {
     }
 
     static func loadWatched(_ plex: KeyedClient) async throws -> WatchedMap {
-        async let identity = try? plex.get("/identity")
-        async let listed = plex.get("/library/sections")
-        let sections = try await listed["MediaContainer"]["Directory"].array
-            .filter { ["movie", "show"].contains($0["type"].string ?? "") }
-        let machine = await identity?["MediaContainer"]["machineIdentifier"].string ?? ""
-        let contents = await withTaskGroup(of: (Int, [JSON]?).self) { group in
-            for (index, section) in sections.enumerated() {
-                let key = section["key"].string ?? section["key"].int.map(String.init) ?? ""
-                group.addTask {
-                    // includeGuids gives the imdb/tmdb/tvdb ids inline, which is
-                    // what lets this join the arrs without a lookup per title
-                    let items = try? await plex.get("/library/sections/\(key)/all", query: ["includeGuids": "1"], timeout: 30)
-                    return (index, items?["MediaContainer"]["Metadata"].array)
-                }
-            }
-            var out = [[JSON]?](repeating: nil, count: sections.count)
-            for await (index, items) in group { out[index] = items }
-            return out
-        }
+        async let identity = Plex.machine(plex)
+        let sections = try await Plex.sections(plex)
+        let machine = await identity
+        let contents = await boundedMap(sections, width: sections.count) { try? await Plex.items(plex, in: $0) }
         var items: [String: WatchedItem] = [:]
         for (section, entries) in zip(sections, contents) {
             // a section Plex could not list is left out, not the whole map
@@ -319,8 +303,7 @@ extension DirectBackend {
             }
         }
         return WatchedMap(
-            base_url: machine.isEmpty
-                ? nil : "https://app.plex.tv/desktop/#!/server/\(machine)/details?key=/library/metadata/",
+            base_url: machine.isEmpty ? nil : Plex.detailsBase(machine: machine),
             items: .init(additionalProperties: items)
         )
     }
@@ -345,9 +328,9 @@ extension DirectBackend {
             watched = (item["viewCount"].int ?? 0) != 0
             progress = watched ? 1 : 0
         }
-        let key = item["ratingKey"].string ?? item["ratingKey"].int.map(String.init)
         return WatchedItem(
-            key: key.flatMap { $0.isEmpty ? nil : $0 }, last_viewed_at: item["lastViewedAt"].int, progress: progress, watched: watched
+            key: Plex.key(item["ratingKey"]).flatMap { $0.isEmpty ? nil : $0 }, last_viewed_at: item["lastViewedAt"].int,
+            progress: progress, watched: watched
         )
     }
 }
