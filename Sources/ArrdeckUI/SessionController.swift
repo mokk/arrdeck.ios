@@ -1,4 +1,5 @@
 import ArrdeckData
+import ArrdeckDirect
 import ArrdeckKit
 import Foundation
 import Network
@@ -73,6 +74,11 @@ public final class SessionController {
     }
 
     public func refresh() async {
+        // nothing to reach or sign in to: the services answer for themselves
+        if profile.isDirect {
+            apply(.open(DirectBackend.info))
+            return
+        }
         guard let home = profile.homeURL else {
             await refreshPrimary()
             return

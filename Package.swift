@@ -19,6 +19,7 @@ let package = Package(
         .library(name: "ArrdeckKit", targets: ["ArrdeckKit"]),
         .library(name: "ArrdeckAPI", targets: ["ArrdeckAPI"]),
         .library(name: "ArrdeckData", targets: ["ArrdeckData"]),
+        .library(name: "ArrdeckDirect", targets: ["ArrdeckDirect"]),
         .library(name: "ArrdeckUI", targets: ["ArrdeckUI"]),
         .library(name: "ArrdeckGlance", targets: ["ArrdeckGlance"]),
     ],
@@ -60,9 +61,14 @@ let package = Package(
                 .product(name: "HTTPTypes", package: "swift-http-types"),
             ]
         ),
+        // The server's work done on the device, for a profile with no arrdeck
+        // server behind it: the data layer's protocols answered by talking to
+        // Sonarr, Radarr, qBittorrent and the rest directly. URLSession only,
+        // so it builds and tests on macOS like the rest.
+        .target(name: "ArrdeckDirect", dependencies: ["ArrdeckKit", "ArrdeckData"]),
         // Views compile against the macOS SDK too, so type errors surface from
         // `swift build` without Xcode. iOS-only API stays out of this target.
-        .target(name: "ArrdeckUI", dependencies: ["ArrdeckKit", "ArrdeckData", "ArrdeckGlance"]),
+        .target(name: "ArrdeckUI", dependencies: ["ArrdeckKit", "ArrdeckData", "ArrdeckDirect", "ArrdeckGlance"]),
         // What the widgets and the Live Activity read, and the only code the
         // widget extension links: no dependencies, so the extension stays
         // small (WidgetKit holds it to a tight memory limit) and has neither
@@ -73,6 +79,7 @@ let package = Package(
             dependencies: ["ArrdeckKit", "ArrdeckAPI"]
         ),
         .testTarget(name: "ArrdeckGlanceTests", dependencies: ["ArrdeckGlance"]),
+        .testTarget(name: "ArrdeckDirectTests", dependencies: ["ArrdeckDirect", "ArrdeckData", "ArrdeckKit"]),
         .testTarget(
             name: "ArrdeckDataTests",
             dependencies: [

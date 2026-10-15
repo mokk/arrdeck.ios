@@ -7,14 +7,14 @@ import ArrdeckUI
 /// tested in ArrdeckData (SpokenSummary); this only finds the server and asks.
 /// The server is the one last opened, or the only one saved.
 enum IntentServer {
-    static func api() -> LiveAPI? {
+    static func api() -> (any Backend)? {
         guard let profiles = try? KeychainProfileStore().load(),
               let profile = LastProfile.pick(from: profiles)
         else { return nil }
-        return LiveAPI(baseURL: profile.baseURL)
+        return ServerView.backend(for: profile)
     }
 
-    static func answer(_ ask: (LiveAPI) async throws -> String) async -> String {
+    static func answer(_ ask: (any Backend) async throws -> String) async -> String {
         guard let api = api() else { return SpokenSummary.noServer }
         do {
             return try await ask(api)

@@ -1,4 +1,5 @@
 import ArrdeckData
+import ArrdeckDirect
 import ArrdeckKit
 import SwiftUI
 #if os(iOS)
@@ -15,10 +16,12 @@ public struct ServerView: View {
     @State private var controller: SessionController
     @State private var model: DashboardModel
     @State private var showingConnection = false
+    /// Connections, opened by itself for a direct profile with none yet.
+    @State private var settingUp = false
     /// State, not a plain let: SwiftUI re-runs init whenever the server list
     /// re-renders (every profile update does), and a fresh client would be
     /// bound to that throwaway init's router rather than the controller's.
-    @State private var api: LiveAPI
+    @State private var api: any Backend
     private let onSwitch: () -> Void
 
     public init(
@@ -28,8 +31,7 @@ public struct ServerView: View {
         onSwitch: @escaping () -> Void
     ) {
         let controller = SessionController(profile: profile, transport: transport, onUpdate: onUpdate)
-        // routed: the home address while it answers, the primary otherwise
-        let api = LiveAPI(router: controller.router)
+        let api = ServerView.backend(for: profile, router: controller.router)
         _api = State(initialValue: api)
         self.onSwitch = onSwitch
         _controller = State(initialValue: controller)
@@ -90,6 +92,16 @@ public struct ServerView: View {
         .task {
             LastProfile.record(controller.profile)
             if let expiry = Self.expiry { await ExpiryReminder.schedule(expiry) }
+        }
+        // a new direct profile has nothing to show until its services are in
+        .onChange(of: model.servicesKnown) { _, known in
+            if known, controller.profile.isDirect, model.configured.isEmpty { settingUp = true }
+        }
+        .sheet(isPresented: $settingUp, onDismiss: { Task { await model.refresh() } }) {
+            NavigationStack {
+                ServicesView(api: api, onSessionLost: sessionLost)
+                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { settingUp = false } } }
+            }
         }
         .sheet(isPresented: $showingConnection) {
             NavigationStack {
@@ -319,8 +331,18 @@ public struct ServerView: View {
         }
     }
 
+    /// What answers this profile's screens: its arrdeck server, routed to the
+    /// home address while that answers and the primary otherwise — or, with
+    /// no server, the services themselves. Without a router (Siri), the
+    /// primary address.
+    public static func backend(for profile: ServerProfile, router: AddressRouter? = nil) -> any Backend {
+        if profile.isDirect { return DirectBackend(profileID: profile.id) }
+        return router.map { LiveAPI(router: $0) } ?? LiveAPI(baseURL: profile.baseURL)
+    }
+
     var sessionLabel: String {
         switch controller.session {
+        case .open where controller.profile.isDirect: String(localized: "direct")
         case .open: String(localized: "open")
         case .paired, .legacy: String(localized: "signed in")
         default: ""

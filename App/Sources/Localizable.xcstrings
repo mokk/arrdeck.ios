@@ -1915,6 +1915,26 @@
         }
       }
     },
+    "Connect to my services directly": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forbind direkte til mine tjenester"
+          }
+        }
+      }
+    },
+    "Connected directly to your services": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forbundet direkte til dine tjenester"
+          }
+        }
+      }
+    },
     "Connected — arrdeck %@, no sign-in needed here": {
       "localizations": {
         "da": {
@@ -2404,6 +2424,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nedton"
+          }
+        }
+      }
+    },
+    "Direct to your services": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Direkte til dine tjenester"
           }
         }
       }
@@ -4238,6 +4268,16 @@
         }
       }
     },
+    "My services": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mine tjenester"
+          }
+        }
+      }
+    },
     "NEW": {
       "localizations": {
         "da": {
@@ -4427,6 +4467,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ingen aktivitet endnu"
+          }
+        }
+      }
+    },
+    "No arrdeck server: the app talks to each service itself, at the addresses under Settings › Connections. Away from home, they need to be reachable from where you are — through a VPN such as Tailscale, for instance.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen arrdeck-server: appen taler selv med hver tjeneste, på adresserne under Indstillinger › Forbindelser. Væk hjemmefra skal de kunne nås derfra, hvor du er — for eksempel gennem en VPN som Tailscale."
+          }
+        }
+      }
+    },
+    "No arrdeck server?": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen arrdeck-server?"
           }
         }
       }
@@ -6991,6 +7051,16 @@
         }
       }
     },
+    "The app talks to Sonarr, Radarr, qBittorrent and the rest itself. You add their addresses and API keys next.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appen taler selv med Sonarr, Radarr, qBittorrent og resten. Du tilføjer deres adresser og API-nøgler bagefter."
+          }
+        }
+      }
+    },
     "The arr found nothing to import here.": {
       "localizations": {
         "da": {
@@ -7200,6 +7270,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Denne adresse kræver login, så appen kan ikke bruge den som hjemmeadresse"
+          }
+        }
+      }
+    },
+    "This needs the arrdeck server.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Det kræver arrdeck-serveren."
           }
         }
       }
@@ -8081,6 +8161,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "registreret"
+          }
+        }
+      }
+    },
+    "direct": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "direkte"
           }
         }
       }

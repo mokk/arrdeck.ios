@@ -62,6 +62,15 @@ public struct AddProfileView: View {
                     }
                 }
             }
+
+            Section {
+                Button("Connect to my services directly") { createDirect() }
+                    .accessibilityIdentifier("connect-direct")
+            } header: {
+                Text("No arrdeck server?")
+            } footer: {
+                Text("The app talks to Sonarr, Radarr, qBittorrent and the rest itself. You add their addresses and API keys next.")
+            }
         }
         .themedList()
         .navigationTitle("Add server")
@@ -81,6 +90,10 @@ public struct AddProfileView: View {
         case .reachable, .needsPairing: return true
         case .notArrdeck, .unreachable: return false
         }
+    }
+
+    func createDirect() {
+        onCreate(.direct(name: name.isEmpty ? String(localized: "My services") : name))
     }
 
     func create(_ outcome: ProbeOutcome) {

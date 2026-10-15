@@ -24,7 +24,7 @@ DANISH = os.path.join(ROOT, "Localization", "da.json")
 
 def extracted_keys():
     out = tempfile.mkdtemp(prefix="arrdeck-loc-")
-    for target in ("ArrdeckData", "ArrdeckUI"):
+    for target in ("ArrdeckData", "ArrdeckDirect", "ArrdeckUI"):
         subprocess.run(
             ["swift", "build", "--target", target,
              "-Xswiftc", "-emit-localized-strings",

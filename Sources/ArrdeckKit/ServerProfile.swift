@@ -36,6 +36,18 @@ public struct ServerProfile: Identifiable, Codable, Hashable, Sendable {
         self.lastKnown = lastKnown
         self.homeURL = homeURL
     }
+
+    /// A profile with no arrdeck server behind it: the app talks to the
+    /// services themselves, with their addresses and keys kept on the device.
+    /// Its `baseURL` names no server, only the profile, so the stored shape
+    /// stays the one every installed build can read.
+    public static func direct(id: UUID = UUID(), name: String) -> ServerProfile {
+        ServerProfile(id: id, baseURL: URL(string: "\(directScheme):\(id.uuidString)")!, name: name)
+    }
+
+    public static let directScheme = "arrdeck-direct"
+
+    public var isDirect: Bool { baseURL.scheme == Self.directScheme }
 }
 
 /// The identity and capabilities a backend reports from /api/v1/about.

@@ -20,15 +20,24 @@ public struct ProfileView: View {
 
     public var body: some View {
         List {
-            Section {
-                Text(profile.baseURL.absoluteString)
-                    .font(.caption.monospaced())
-                    .foregroundStyle(.secondary)
-                statusRow
-                    .accessibilityIdentifier("session-status")
-                if let home = profile.homeURL {
-                    routeRow(home: home)
-                        .accessibilityIdentifier("connection-route")
+            if profile.isDirect {
+                Section {
+                    Label("Connected directly to your services", systemImage: "point.3.connected.trianglepath.dotted")
+                        .foregroundStyle(Color.success)
+                } footer: {
+                    Text("No arrdeck server: the app talks to each service itself, at the addresses under Settings › Connections. Away from home, they need to be reachable from where you are — through a VPN such as Tailscale, for instance.")
+                }
+            } else {
+                Section {
+                    Text(profile.baseURL.absoluteString)
+                        .font(.caption.monospaced())
+                        .foregroundStyle(.secondary)
+                    statusRow
+                        .accessibilityIdentifier("session-status")
+                    if let home = profile.homeURL {
+                        routeRow(home: home)
+                            .accessibilityIdentifier("connection-route")
+                    }
                 }
             }
 
@@ -68,7 +77,10 @@ public struct ProfileView: View {
                 }
             }
 
-            HomeAddressSection(controller: controller)
+            // a home address is a second way to the same server; there is none
+            if !profile.isDirect {
+                HomeAddressSection(controller: controller)
+            }
 
             if let info = SessionFlow.capabilities(of: controller.session) ?? profile.lastKnown,
                !info.features.isEmpty {

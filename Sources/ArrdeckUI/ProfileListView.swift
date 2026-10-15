@@ -1,3 +1,4 @@
+import ArrdeckDirect
 import ArrdeckKit
 import SwiftUI
 
@@ -50,15 +51,21 @@ public struct ProfileListView: View {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(profile.name).font(.headline)
-                            Text(profile.baseURL.absoluteString)
-                                .font(.caption.monospaced())
-                                .foregroundStyle(.secondary)
+                            if profile.isDirect {
+                                Text("Direct to your services")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text(profile.baseURL.absoluteString)
+                                    .font(.caption.monospaced())
+                                    .foregroundStyle(.secondary)
+                            }
                             if let home = profile.homeURL {
                                 Label(home.absoluteString, systemImage: "house")
                                     .font(.caption.monospaced())
                                     .foregroundStyle(.secondary)
                             }
-                            if let info = profile.lastKnown {
+                            if let info = profile.lastKnown, !profile.isDirect {
                                 Text(info.version.isEmpty ? "older backend" : "arrdeck \(info.version)")
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
@@ -115,6 +122,10 @@ public struct ProfileListView: View {
     }
 
     func remove(at offsets: IndexSet) {
+        // a direct profile's service keys go with it
+        for profile in offsets.map({ profiles[$0] }) where profile.isDirect {
+            KeychainConnectionStore(profileID: profile.id).delete()
+        }
         profiles.remove(atOffsets: offsets)
         persist()
     }

@@ -55,3 +55,18 @@ struct ProfileStoreTests {
         #expect(try store.load().first?.homeURL == URL(string: "http://10.0.0.154:3500")!)
     }
 }
+
+struct DirectProfileTests {
+    @Test func aDirectProfileSurvivesTheRoundTripAsDirect() throws {
+        let store = InMemoryProfileStore()
+        let profile = ServerProfile.direct(name: "Home")
+        try store.save([profile])
+        let loaded = try #require(try store.load().first)
+        #expect(loaded.isDirect)
+        #expect(loaded.id == profile.id)
+    }
+
+    @Test func aServerProfileIsNotDirect() {
+        #expect(!ServerProfile(baseURL: URL(string: "http://10.0.0.154:3500")!, name: "Home").isDirect)
+    }
+}
