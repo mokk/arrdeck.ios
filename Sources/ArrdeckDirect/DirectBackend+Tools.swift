@@ -91,7 +91,7 @@ enum ToolsPort {
             full_season: info["fullSeason"].truthy,
             languages: languages.array.compactMap { $0["name"].nonEmpty }.filter { $0 != "Unknown" },
             match_episodes: answer["episodes"].array.map { episode in
-                let code = String(format: "S%02dE%02d", episode["seasonNumber"].int ?? 0, episode["episodeNumber"].int ?? 0)
+                let code = DashboardPort.episodeCode(episode)
                 return "\(code) \(episode["title"].string ?? "")".trimmingCharacters(in: .whitespacesAndNewlines)
             },
             match_id: match["id"].int,

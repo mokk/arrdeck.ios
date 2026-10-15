@@ -235,9 +235,7 @@ enum DashboardPort {
             }
         case .sonarr:
             return entries.map { episode in
-                let code = String(
-                    format: "S%02dE%02d", episode["seasonNumber"].int ?? 0, episode["episodeNumber"].int ?? 0
-                )
+                let code = episodeCode(episode)
                 return CalendarItem(
                     app: app.rawValue, date: episode["airDateUtc"].string,
                     extra: "\(code) \(episode["title"].string ?? "")",
@@ -266,6 +264,16 @@ enum DashboardPort {
     }
 
     // MARK: - Python's ways
+
+    /// "S01E02", as the server wrote an episode everywhere.
+    static func episodeCode(_ season: Int, _ episode: Int) -> String {
+        String(format: "S%02dE%02d", season, episode)
+    }
+
+    /// A Sonarr episode's code, 0 standing in for a number it lacks.
+    static func episodeCode(_ episode: JSON) -> String {
+        episodeCode(episode["seasonNumber"].int ?? 0, episode["episodeNumber"].int ?? 0)
+    }
 
     /// `current or new`: keep an id once a record supplied a non-zero one.
     static func orElse(_ current: Int?, _ new: Int?) -> Int? {

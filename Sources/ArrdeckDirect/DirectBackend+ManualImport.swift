@@ -218,9 +218,8 @@ extension DirectBackend {
         var matched: [String: JSON] = [:]
         for albumID in order {
             let album = try await lidarr.get("/album/\(albumID)")
-            let releases = album["releases"].array
-            guard album["artistId"].truthy,
-                  let release = releases.first(where: { $0["monitored"].truthy }) ?? releases.first
+            let release = CatalogMusic.chosenRelease(album)
+            guard album["artistId"].truthy, !release.isNull
             else { throw APIError.refused("Lidarr has no release for that album") }
             let items: [JSON] = (picks[albumID] ?? []).map { choice in
                 let candidate = byPath[choice.path] ?? .null
@@ -413,7 +412,7 @@ enum ManualImportPort {
             let episodes = candidate["episodes"].array
             var code: String?
             if let first = episodes.first, let season = first["seasonNumber"].int, let number = first["episodeNumber"].int {
-                code = String(format: "S%02dE%02d", season, number) + (episodes.count > 1 ? " +\(episodes.count - 1)" : "")
+                code = DashboardPort.episodeCode(season, number) + (episodes.count > 1 ? " +\(episodes.count - 1)" : "")
             }
             (title, subtitle) = (candidate["series"]["title"].string ?? "", code)
         }

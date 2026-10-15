@@ -22,7 +22,7 @@ enum DashboardCards {
         if kind == "episode" {
             subtitle = item["title"].string ?? ""
             if let season = item["parentIndex"].int, let number = item["index"].int {
-                subtitle = String(format: "S%02dE%02d – ", season, number) + (subtitle ?? "")
+                subtitle = DashboardPort.episodeCode(season, number) + " – " + (subtitle ?? "")
                 while let last = subtitle?.last, last == " " || last == "–" { subtitle?.removeLast() }
             }
         }
@@ -289,8 +289,8 @@ enum DashboardCards {
     /// right though the list is capped.
     static func subtitles(_ bazarr: KeyedClient) async throws -> Subtitles {
         async let badges = bazarr.get("/badges")
-        async let episodes = bazarr.get("/episodes/wanted", query: ["start": "0", "length": "20"])
-        async let movies = bazarr.get("/movies/wanted", query: ["start": "0", "length": "20"])
+        async let episodes = wanted(bazarr, .episode, start: 0, length: 20)
+        async let movies = wanted(bazarr, .movie, start: 0, length: 20)
         let (counts, wantedEpisodes, wantedMovies) = try await (badges, episodes, movies)
         return Subtitles(
             episodes: counts["episodes"].whole ?? 0,
@@ -298,6 +298,13 @@ enum DashboardCards {
             movies: counts["movies"].whole ?? 0,
             // throttled providers, not configured ones: zero is the healthy answer
             throttled_providers: counts["providers"].whole ?? 0
+        )
+    }
+
+    /// One page of what Bazarr still misses for films or for episodes.
+    static func wanted(_ bazarr: KeyedClient, _ kind: SubtitleKind, start: Int, length: Int) async throws -> JSON {
+        try await bazarr.get(
+            kind == .movie ? "/movies/wanted" : "/episodes/wanted", query: ["start": "\(start)", "length": "\(length)"]
         )
     }
 
@@ -399,7 +406,7 @@ enum DashboardCards {
     static func episodeCode(_ release: String) -> String? {
         guard let match = release.firstMatch(of: /[Ss](\d+)[Ee](\d+)/),
               let season = Int(match.1), let episode = Int(match.2) else { return nil }
-        return String(format: "S%02dE%02d", season, episode)
+        return DashboardPort.episodeCode(season, episode)
     }
 
     private static func recentBooks(_ registry: Registry) async -> [RecentItem] {

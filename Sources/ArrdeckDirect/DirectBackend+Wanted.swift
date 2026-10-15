@@ -38,7 +38,7 @@ extension DirectBackend: WantedAPI {
              Artwork.poster(record["images"]))
         case .sonarr:
             (record["seriesId"].int ?? 0, record["series"]["title"].string ?? "",
-             String(format: "S%02dE%02d ", record["seasonNumber"].int ?? 0, record["episodeNumber"].int ?? 0)
+             DashboardPort.episodeCode(record) + " "
                 + (record["title"].string ?? ""),
              record["airDateUtc"].string, Artwork.poster(record["series"]["images"]))
         case .readarr:

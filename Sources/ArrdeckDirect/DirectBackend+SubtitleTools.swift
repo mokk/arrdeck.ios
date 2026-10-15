@@ -18,10 +18,7 @@ extension DirectBackend: SubtitleToolsAPI {
         // the server's query bounds, refused as it refused them
         guard start >= 0, (1 ... 200).contains(length) else { throw APIError.unexpectedStatus(422) }
         return try await call {
-            let page = try await registry.bazarr().get(
-                kind == .movie ? "/movies/wanted" : "/episodes/wanted",
-                query: ["start": "\(start)", "length": "\(length)"]
-            )
+            let page = try await DashboardCards.wanted(registry.bazarr(), kind, start: start, length: length)
             let row = kind == .movie ? DashboardCards.wantedMovie : DashboardCards.wantedEpisode
             return SubtitleWanted(items: page["data"].array.map(row), total: page["total"].whole ?? 0)
         }
