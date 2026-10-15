@@ -25,7 +25,10 @@ public final class DirectBackend: Sendable {
     /// What this build can do without a server, in the server's feature
     /// names. The screens gate on these the way they do on a server's
     /// /about, so whatever is not listed simply does not show.
-    public static let features: Set<Feature> = []
+    public static let features: Set<Feature> = [
+        .diagnose, .credits, .qualityProfiles, .scheduledTasks, .arrBackups, .blocklist, .popular, .calendar,
+        .wanted, .books, .interactiveSearch, .subtitles, .vpn,
+    ]
 
     public static var info: BackendInfo {
         BackendInfo(version: "direct", features: Set(features.map(\.rawValue)))

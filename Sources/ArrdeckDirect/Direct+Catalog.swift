@@ -64,12 +64,8 @@ enum Catalog {
 
 extension DirectBackend {
     /// What the server's `cache.set(key, None)` did after a write: the next
-    /// read of these keys fetches afresh. BlockCache has no removal, so the
-    /// entry is overwritten with a marker no caller's type matches — a miss
-    /// for `cached`, and no stale value for `guarded` either.
+    /// read of these keys fetches afresh.
     func catalogForget(_ keys: String...) {
-        for key in keys { cache.set(key, Forgotten()) }
+        cache.remove(keys)
     }
 }
-
-private struct Forgotten: Sendable {}
