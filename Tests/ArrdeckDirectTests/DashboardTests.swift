@@ -471,7 +471,7 @@ struct BlocklistTests {
     }
 }
 
-struct SubtitleTests {
+struct DashboardSubtitleTests {
     @Test func anEpisodeSearchIsAFormPatchToBazarr() async throws {
         let (direct, transport) = backend(["bazarr": .arr("http://10.0.0.5:6767")])
         transport.on("PATCH /api/episodes", json: "")
