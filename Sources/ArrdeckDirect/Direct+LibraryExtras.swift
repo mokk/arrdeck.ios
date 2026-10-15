@@ -288,7 +288,7 @@ extension DirectBackend {
         }
     }
 
-    fileprivate static func loadWatched(_ plex: KeyedClient) async throws -> WatchedMap {
+    static func loadWatched(_ plex: KeyedClient) async throws -> WatchedMap {
         async let identity = try? plex.get("/identity")
         async let listed = plex.get("/library/sections")
         let sections = try await listed["MediaContainer"]["Directory"].array
