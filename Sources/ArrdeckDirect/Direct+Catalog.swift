@@ -49,11 +49,3 @@ enum Catalog {
         return Int(raw)
     }
 }
-
-extension DirectBackend {
-    /// What the server's `cache.set(key, None)` did after a write: the next
-    /// read of these keys fetches afresh.
-    func catalogForget(_ keys: String...) {
-        cache.remove(keys)
-    }
-}

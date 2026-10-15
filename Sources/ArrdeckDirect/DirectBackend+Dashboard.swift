@@ -118,16 +118,16 @@ extension DirectBackend: DashboardAPI {
             let bazarr = try registry.bazarr()
             switch kind {
             case .movie:
-                try await bazarr.sendForm("PATCH", "/movies", ["radarrid": String(id), "action": "search-missing"])
+                try await bazarr.sendForm("PATCH", "/movies", [("action", "search-missing"), ("radarrid", String(id))])
             case .episode:
                 guard let seriesID else { throw APIError.refused("episodes need a series_id") }
                 try await bazarr.sendForm(
                     "PATCH", "/episodes",
-                    ["seriesid": String(seriesID), "episodeid": String(id), "action": "search-missing"]
+                    [("action", "search-missing"), ("episodeid", String(id)), ("seriesid", String(seriesID))]
                 )
             }
             // what the server did: the counts are re-read on the next poll
-            cache.remove(["subtitles"])
+            forget("subtitles")
         }
     }
 
@@ -277,18 +277,5 @@ enum DashboardForceImport {
             guard let series = candidate["series"]["id"].nonZero, !episodes.isEmpty else { return nil }
             return ["seriesId": .init(series), "episodeIds": .init(episodes)]
         }
-    }
-}
-
-// MARK: - Form posts
-
-extension KeyedClient {
-    /// A form-encoded write: Bazarr's actions are PATCHes with form fields,
-    /// which `send` (JSON bodies only) cannot make.
-    fileprivate func sendForm(_ method: String, _ path: String, _ fields: [String: String]) async throws {
-        var request = try endpoint.request(method, prefix + path, headers: auth)
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setForm(fields)
-        try check(try await http.send(request))
     }
 }

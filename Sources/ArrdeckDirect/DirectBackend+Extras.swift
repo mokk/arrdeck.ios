@@ -193,15 +193,20 @@ extension DirectBackend: ExtrasAPI {
     }
 
     public func bulkDelete(_ app: LibraryApp, ids: [Int], deleteFiles: Bool) async throws {
-        try await call {
-            let editor = Bulk.editor(app)
-            // Radarr names its exclusion flag differently from the other three
-            let exclusion = app == .radarr ? "addImportExclusion" : "addImportListExclusion"
-            try await registry.arr(app.arr.rawValue).send("DELETE", editor.path, json: [
-                editor.ids: JSON(ids), "deleteFiles": .bool(deleteFiles), exclusion: false,
-            ], timeout: app == .lidarr ? 60 : nil)
-            forgetLibrary(app, authors: false)
-        }
+        try await call { try await deleteTitles(app, ids: ids, deleteFiles: deleteFiles, exclude: false) }
+    }
+
+    /// The mass editor's delete; `exclude` keeps the arr's import lists from
+    /// adding the titles straight back. The library's bulk delete and the
+    /// cleanup screen's are this one call, as on the server.
+    func deleteTitles(_ app: LibraryApp, ids: [Int], deleteFiles: Bool, exclude: Bool) async throws {
+        let editor = Bulk.editor(app)
+        // Radarr names its exclusion flag differently from the other three
+        let exclusion = app == .radarr ? "addImportExclusion" : "addImportListExclusion"
+        try await registry.arr(app.arr.rawValue).send("DELETE", editor.path, json: [
+            editor.ids: JSON(ids), "deleteFiles": .bool(deleteFiles), exclusion: .bool(exclude),
+        ], timeout: app == .lidarr ? 60 : nil)
+        forgetLibrary(app, authors: false)
     }
 
     public func bulkSearch(_ app: LibraryApp, ids: [Int]) async throws {
@@ -224,16 +229,6 @@ extension DirectBackend: ExtrasAPI {
                 }
             }
         }
-    }
-
-    /// Drops the cached lists a bulk change makes wrong, under the server's
-    /// keys, so the next read goes to the arr. (Books and artists clearing the
-    /// series map is the server's doing, kept as it was.)
-    func forgetLibrary(_ app: LibraryApp, authors: Bool) {
-        var keys = [app == .radarr ? "library_map:movie" : "library_map:series"]
-        if authors { keys.append("readarr:authors") }
-        if app == .lidarr { keys += ["lidarr:artists", "library_map:music"] }
-        cache.remove(keys)
     }
 }
 

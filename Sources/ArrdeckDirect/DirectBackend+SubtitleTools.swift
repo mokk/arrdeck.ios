@@ -87,7 +87,7 @@ extension DirectBackend: SubtitleToolsAPI {
                 guard known.contains(profileID) else { throw APIError.refused("no such language profile") }
             }
             try await bazarr.sendForm("POST", movies ? "/movies" : "/series", Self.profileForm(movies: movies, ids: ids, profileID: profileID))
-            cache.remove(["subtitles"])
+            forget("subtitles")
         }
     }
 
@@ -97,20 +97,5 @@ extension DirectBackend: SubtitleToolsAPI {
         let key = movies ? "radarrid" : "seriesid"
         let value = profileID.map(String.init) ?? ""
         return ids.map { (key, String($0)) } + ids.map { _ in ("profileid", value) }
-    }
-}
-
-extension KeyedClient {
-    /// A form-encoded write whose fields may repeat — Bazarr takes lists as
-    /// the same key over and over, which the dictionary `setForm` cannot say.
-    func sendForm(_ method: String, _ path: String, _ fields: [(String, String)]) async throws {
-        var allowed = CharacterSet.alphanumerics
-        allowed.insert(charactersIn: "-._~")
-        func encoded(_ text: String) -> String { text.addingPercentEncoding(withAllowedCharacters: allowed) ?? text }
-        var request = try endpoint.request(method, prefix + path, headers: auth)
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.httpBody = Data(fields.map { "\(encoded($0.0))=\(encoded($0.1))" }.joined(separator: "&").utf8)
-        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        try check(try await http.send(request))
     }
 }

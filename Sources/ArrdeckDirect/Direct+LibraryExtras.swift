@@ -131,7 +131,7 @@ extension DirectBackend {
         if let qualityProfile, let authorID = book["authorId"].nonZero {
             let author = try await readarr.get("/author/\(authorID)")
             try await readarr.send("PUT", "/author/\(authorID)", json: author.setting("qualityProfileId", JSON(qualityProfile)))
-            LibraryShapes.forget("readarr:authors", in: cache)
+            forget("readarr:authors")
         }
     }
 
@@ -174,7 +174,7 @@ extension DirectBackend {
             if let monitored { author = author.setting("monitored", .bool(monitored)) }
             if let monitorNewItems { author = author.setting("monitorNewItems", .string(monitorNewItems)) }
             let updated = try await readarr.send("PUT", "/author/\(id)", json: author)
-            LibraryShapes.forget("readarr:authors", "library_map:book", in: cache)
+            forget("readarr:authors", "library_map:book")
             return LibraryShapes.authorRow(updated)
         }
     }
@@ -266,7 +266,7 @@ extension DirectBackend {
                     "hi": "false", "forced": "false",
                 ])
             }
-            LibraryShapes.forget("subtitles", in: cache)
+            forget("subtitles")
         }
     }
 

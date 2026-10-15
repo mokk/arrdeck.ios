@@ -45,6 +45,15 @@ public struct KeyedClient: Sendable {
         return response
     }
 
+    /// A form-encoded write, which `send` (JSON bodies only) cannot make:
+    /// Bazarr's actions are PATCHes and POSTs with form fields.
+    func sendForm(_ method: String, _ path: String, _ fields: [(String, String)]) async throws {
+        var request = try endpoint.request(method, prefix + path, headers: auth)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setForm(fields)
+        try check(try await http.send(request))
+    }
+
     /// An address under the service, for what the app hands to the image
     /// loader rather than fetching itself.
     public func url(_ path: String, query: [String: String?] = [:]) -> URL {

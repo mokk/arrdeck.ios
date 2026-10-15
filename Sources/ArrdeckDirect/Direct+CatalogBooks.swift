@@ -36,7 +36,7 @@ extension DirectBackend {
         )
         // a new author means Readarr pulls their whole bibliography before it answers
         try await readarr.send("POST", "/book", json: payload, timeout: 90)
-        catalogForget("library_map:book", "readarr:authors")
+        forget("library_map:book", "readarr:authors")
     }
 
     /// Readarr's books by their numeric foreign id, for the in-library badge.

@@ -67,14 +67,14 @@ extension DirectBackend: MusicLibraryAPI {
                 artist = artist.setting("path", .string(path))
             }
             try await lidarr.send("PUT", "/artist/\(id)", query: ["moveFiles": move ? "true" : "false"], json: artist, timeout: 30)
-            catalogForgetArtists()
+            forgetArtists()
         }
     }
 
     public func refreshArtist(_ id: Int) async throws {
         try await call {
             try await registry.arr("lidarr").send("POST", "/command", json: ["name": "RefreshArtist", "artistId": JSON(id)])
-            catalogForgetArtists()
+            forgetArtists()
         }
     }
 
@@ -137,7 +137,7 @@ extension DirectBackend: MusicLibraryAPI {
             if !doomed.isEmpty {
                 try await lidarr.send("DELETE", "/trackfile/bulk", json: ["trackFileIds": JSON(doomed)])
             }
-            catalogForgetArtists()
+            forgetArtists()
         }
     }
 }

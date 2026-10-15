@@ -133,14 +133,14 @@ extension DirectBackend: DiscoverAPI {
                     "qualityProfileId": JSON(qualityProfile), "rootFolderPath": .string(rootFolder), "monitored": true,
                     "addOptions": ["searchForMovie": true],
                 ])
-                catalogForget("library_map:movie")
+                forget("library_map:movie")
             case .series:
                 try await registry.arr("sonarr").send("POST", "/series", json: [
                     "tvdbId": JSON(result.remote_id), "title": .string(result.title),
                     "qualityProfileId": JSON(qualityProfile), "rootFolderPath": .string(rootFolder), "monitored": true,
                     "seasonFolder": true, "addOptions": ["searchForMissingEpisodes": true],
                 ])
-                catalogForget("library_map:series")
+                forget("library_map:series")
             case .book:
                 try await catalogAddBook(
                     result, edition: edition ?? result.foreign_edition_id, qualityProfile: qualityProfile,

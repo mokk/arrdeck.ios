@@ -19,19 +19,10 @@ extension DirectBackend: CleanupAPI, SeasonRemoveAPI, RequestsMapAPI {
         )
     }
 
-    /// Removes the titles with their files; `exclude` keeps the arrs' import
-    /// lists from adding them straight back. The library bulk delete, with
+    /// Removes the titles with their files: the library bulk delete, with
     /// the exclusion the cleanup screen asks for.
     public func deleteForCleanup(_ app: LibraryApp, ids: [Int], exclude: Bool) async throws {
-        try await call {
-            let editor = Bulk.editor(app)
-            // Radarr names its exclusion flag differently from the other three
-            let exclusion = app == .radarr ? "addImportExclusion" : "addImportListExclusion"
-            try await registry.arr(app.arr.rawValue).send("DELETE", editor.path, json: [
-                editor.ids: JSON(ids), "deleteFiles": true, exclusion: .bool(exclude),
-            ], timeout: app == .lidarr ? 60 : nil)
-            forgetLibrary(app, authors: false)
-        }
+        try await call { try await deleteTitles(app, ids: ids, deleteFiles: true, exclude: exclude) }
     }
 
     /// Unmonitored first, so an RSS sync does not grab them straight back,
@@ -55,7 +46,7 @@ extension DirectBackend: CleanupAPI, SeasonRemoveAPI, RequestsMapAPI {
             if !files.isEmpty {
                 try await sonarr.send("DELETE", "/episodefile/bulk", json: ["episodeFileIds": JSON(files)])
             }
-            cache.remove(["library_map:series"])
+            forget("library_map:series")
         }
     }
 

@@ -169,17 +169,17 @@ extension DirectBackend: LibraryAPI {
             switch ref {
             case let .movie(id):
                 try await putBack(registry.arr("radarr"), "/movie/\(id)", monitored: monitored, qualityProfile: qualityProfile)
-                LibraryShapes.forget("library_map:movie", in: cache)
+                forget("library_map:movie")
             case let .series(id):
                 try await putBack(registry.arr("sonarr"), "/series/\(id)", monitored: monitored, qualityProfile: qualityProfile)
-                LibraryShapes.forget("library_map:series", in: cache)
+                forget("library_map:series")
             case let .book(id):
                 try await updateReadarrBook(id, monitored: monitored, qualityProfile: qualityProfile)
             case let .artist(id):
                 // Lidarr takes the whole artist back; files stay where they are
                 try await putBack(registry.arr("lidarr"), "/artist/\(id)", monitored: monitored,
                                   qualityProfile: qualityProfile, query: ["moveFiles": "false"], timeout: 30)
-                LibraryShapes.forget("lidarr:artists", in: cache)
+                forgetArtists()
             case let .album(id):
                 // an album's quality is its artist's; only the flag is its own,
                 // and Lidarr's toggle sets it without the whole release list
@@ -187,7 +187,7 @@ extension DirectBackend: LibraryAPI {
                 try await registry.arr("lidarr").send(
                     "PUT", "/album/monitor", json: ["albumIds": JSON([id]), "monitored": .bool(monitored)]
                 )
-                LibraryShapes.forget("lidarr:artists", in: cache)
+                forgetArtists()
             }
         }
     }
@@ -212,10 +212,10 @@ extension DirectBackend: LibraryAPI {
                 try await registry.arr("radarr").send(
                     "DELETE", "/movie/\(id)", query: ["deleteFiles": files, "addImportExclusion": "false"]
                 )
-                LibraryShapes.forget("library_map:movie", in: cache)
+                forget("library_map:movie")
             case let .series(id):
                 try await registry.arr("sonarr").send("DELETE", "/series/\(id)", query: ["deleteFiles": files])
-                LibraryShapes.forget("library_map:series", in: cache)
+                forget("library_map:series")
             case let .book(id):
                 try await registry.arr("readarr").send(
                     "DELETE", "/book/\(id)", query: ["deleteFiles": files, "addImportListExclusion": "false"]
@@ -225,7 +225,7 @@ extension DirectBackend: LibraryAPI {
                     "DELETE", "/artist/\(id)", query: ["deleteFiles": files, "addImportListExclusion": "false"],
                     timeout: 60
                 )
-                LibraryShapes.forget("lidarr:artists", in: cache)
+                forgetArtists()
             case .album:
                 // as LiveAPI: Lidarr removes albums with their artist; an
                 // album's files go through MusicLibraryAPI.deleteAlbumFiles
@@ -277,7 +277,7 @@ extension DirectBackend: LibraryAPI {
     public func deleteEpisodeFile(_ fileID: Int) async throws {
         try await call {
             try await registry.arr("sonarr").send("DELETE", "/episodefile/\(fileID)")
-            LibraryShapes.forget("library_map:series", in: cache)
+            forget("library_map:series")
         }
     }
 
@@ -343,13 +343,5 @@ private enum CreditsShape {
             cast: cast.prefix(castLimit).map { person($0, role: "character") },
             crew: crew.prefix(crewLimit).map { person($0, role: "job") }
         )
-    }
-}
-
-extension LibraryShapes {
-    /// What the server's `cache.set(key, None)` did: the next read of `key`
-    /// fetches afresh.
-    static func forget(_ keys: String..., in cache: BlockCache) {
-        cache.remove(keys)
     }
 }

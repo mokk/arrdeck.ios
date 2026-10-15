@@ -80,6 +80,27 @@ extension DirectBackend {
         return value
     }
 
+    /// What the server's `cache.set(key, None)` did after a write: the next
+    /// read of these keys fetches afresh.
+    func forget(_ keys: String...) {
+        cache.remove(keys)
+    }
+
+    /// After a change to Lidarr's library: the Music tab, the import picker
+    /// and the search badges read afresh (music.py's `forget_artists`).
+    func forgetArtists() {
+        forget(CatalogMusic.artistsKey, CatalogMusic.libraryKey)
+    }
+
+    /// Drops the cached lists a bulk change makes wrong, under the server's
+    /// keys, so the next read goes to the arr. (Books and artists clearing the
+    /// series map is the server's doing, kept as it was.)
+    func forgetLibrary(_ app: LibraryApp, authors: Bool) {
+        forget(app == .radarr ? "library_map:movie" : "library_map:series")
+        if authors { forget("readarr:authors") }
+        if app == .lidarr { forgetArtists() }
+    }
+
     static func reason(_ error: any Error) -> String {
         switch error {
         case let error as ServiceUnavailable: error.message

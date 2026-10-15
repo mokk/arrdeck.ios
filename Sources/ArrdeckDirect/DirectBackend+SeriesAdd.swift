@@ -20,7 +20,7 @@ extension DirectBackend: SeriesAddAPI {
                 monitor: monitor, seasons: seasons, seasonNumbers: numbers
             )
             try await sonarr.send("POST", "/series", json: payload)
-            catalogForget("library_map:series")
+            forget("library_map:series")
         }
     }
 

@@ -188,11 +188,6 @@ extension DirectBackend {
         try await cached(CatalogMusic.artistsKey, ttl: 60) { try await lidarr.get("/artist").array }
     }
 
-    /// After a change: the tab, the picker and the search badges read afresh.
-    func catalogForgetArtists() {
-        catalogForget(CatalogMusic.artistsKey, CatalogMusic.libraryKey)
-    }
-
     /// Artists and albums from Lidarr's metadata server, best match first.
     func catalogMusicSearch(_ query: String) async throws -> [SearchResult] {
         let lidarr = try registry.arr("lidarr")
@@ -226,7 +221,7 @@ extension DirectBackend {
         )
         // adding pulls the whole discography from the metadata server first
         try await lidarr.send("POST", "/artist", json: payload, timeout: 90)
-        catalogForgetArtists()
+        forgetArtists()
     }
 
     /// One album. When Lidarr does not have its artist they come too, the
@@ -259,7 +254,7 @@ extension DirectBackend {
             .setting("monitored", true)
             .setting("addOptions", ["searchForNewAlbum": true])
         try await lidarr.send("POST", "/album", json: payload, timeout: 90)
-        catalogForgetArtists()
+        forgetArtists()
     }
 
     private func defaultMetadataProfile(_ lidarr: KeyedClient, _ chosen: Int?) async throws -> Int? {

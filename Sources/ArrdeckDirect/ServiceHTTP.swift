@@ -205,16 +205,18 @@ struct Endpoint: Sendable {
 
 extension URLRequest {
     /// An `application/x-www-form-urlencoded` body, the way qBittorrent wants
-    /// its POSTs.
+    /// its POSTs, the fields in key order.
     mutating func setForm(_ fields: [String: String]) {
+        setForm(fields.sorted { $0.key < $1.key }.map { ($0.key, $0.value) })
+    }
+
+    /// Fields in the order given, a key as often as it comes: Bazarr takes a
+    /// list as the same key over and over.
+    mutating func setForm(_ fields: [(String, String)]) {
         var allowed = CharacterSet.alphanumerics
         allowed.insert(charactersIn: "-._~")
-        let encoded = fields.sorted { $0.key < $1.key }.map { key, value in
-            let name = key.addingPercentEncoding(withAllowedCharacters: allowed) ?? key
-            let text = value.addingPercentEncoding(withAllowedCharacters: allowed) ?? value
-            return "\(name)=\(text)"
-        }
-        httpBody = Data(encoded.joined(separator: "&").utf8)
+        func encoded(_ text: String) -> String { text.addingPercentEncoding(withAllowedCharacters: allowed) ?? text }
+        httpBody = Data(fields.map { "\(encoded($0.0))=\(encoded($0.1))" }.joined(separator: "&").utf8)
         setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
     }
 }
