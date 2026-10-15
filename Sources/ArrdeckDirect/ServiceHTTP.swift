@@ -221,10 +221,10 @@ extension URLRequest {
     }
 }
 
-/// `items` mapped at most `width` at a time, answers in the items' order:
-/// for the fan-outs that would otherwise ask a service hundreds of things at
-/// once. The next starts as one finishes, so a slow one holds a slot rather
-/// than a batch.
+/// `items` mapped concurrently, at most `width` at a time, answers in the
+/// items' order. A narrow width is for the fan-outs that would otherwise ask
+/// a service hundreds of things at once; the next starts as one finishes, so
+/// a slow one holds a slot rather than a batch.
 func boundedMap<Item: Sendable, Mapped: Sendable>(
     _ items: [Item], width: Int, _ transform: @escaping @Sendable (Item) async -> Mapped
 ) async -> [Mapped] {

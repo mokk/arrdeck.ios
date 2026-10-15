@@ -59,14 +59,7 @@ enum DashboardCards {
     static func pendingRequests(_ overseerr: KeyedClient) async throws -> [MediaRequest] {
         let payload = try await requests(overseerr, filter: "pending", take: 20)
         let results = payload["results"].array
-        return await withTaskGroup(of: (Int, MediaRequest).self) { group in
-            for (index, request) in results.enumerated() {
-                group.addTask { (index, await describe(request, overseerr: overseerr)) }
-            }
-            var described: [(Int, MediaRequest)] = []
-            for await row in group { described.append(row) }
-            return described.sorted { $0.0 < $1.0 }.map(\.1)
-        }
+        return await boundedMap(results, width: results.count) { await describe($0, overseerr: overseerr) }
     }
 
     /// Overseerr's request list carries only a TMDB id, so the title comes

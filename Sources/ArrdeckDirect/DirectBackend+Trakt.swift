@@ -31,20 +31,12 @@ extension DirectBackend: TraktAPI {
     /// title is not looked up again for a day; a failed lookup is not kept,
     /// so the next load tries again.
     private func traktPosters(_ rows: [SearchResult], kind: String, arr: KeyedClient, lookup: String) async -> [String?] {
-        await withTaskGroup(of: (Int, String?).self) { group in
-            for (index, row) in rows.enumerated() {
-                let remote = row.remote_id
-                group.addTask {
-                    let poster = try? await self.cached("trakt:poster:\(kind):\(remote)", ttl: TraktLists.posterTTL) {
-                        let term = kind == "movie" ? "tmdb:\(remote)" : "tvdb:\(remote)"
-                        return TraktLists.lookupPoster(try await arr.get(lookup, query: ["term": term]).array) ?? ""
-                    }
-                    return (index, poster.flatMap { $0.isEmpty ? nil : $0 })
-                }
+        await boundedMap(rows.map(\.remote_id), width: rows.count) { remote in
+            let poster = try? await self.cached("trakt:poster:\(kind):\(remote)", ttl: TraktLists.posterTTL) {
+                let term = kind == "movie" ? "tmdb:\(remote)" : "tvdb:\(remote)"
+                return TraktLists.lookupPoster(try await arr.get(lookup, query: ["term": term]).array) ?? ""
             }
-            var out = [String?](repeating: nil, count: rows.count)
-            for await (index, poster) in group { out[index] = poster }
-            return out
+            return poster.flatMap { $0.isEmpty ? nil : $0 }
         }
     }
 }

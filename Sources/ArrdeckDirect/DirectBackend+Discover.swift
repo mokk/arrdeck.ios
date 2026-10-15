@@ -92,27 +92,20 @@ extension DirectBackend: DiscoverAPI {
     /// twenty calls once and then nothing. A show that fails to resolve is
     /// left out.
     private func withTvdbIDs(_ shows: [JSON], _ overseerr: KeyedClient) async -> [SearchResult] {
-        await withTaskGroup(of: (Int, SearchResult?).self) { group in
-            for (index, show) in shows.enumerated() {
-                guard let tmdb = show["id"].int else { continue }
-                group.addTask {
-                    let details = try? await self.cached("tvdetails:\(tmdb)", ttl: 86400) {
-                        try await overseerr.get("/tv/\(tmdb)")
-                    }
-                    guard let external = details?["externalIds"], let tvdb = external["tvdbId"].int, tvdb != 0 else {
-                        return (index, nil)
-                    }
-                    return (index, SearchResult(
-                        imdb_id: external["imdbId"].string, kind: "series", overview: show["overview"].string,
-                        poster: Artwork.tmdbPoster(show["posterPath"].string), remote_id: tvdb,
-                        title: show["name"].string ?? "", tmdb_id: tmdb, year: show["firstAirDate"].year
-                    ))
-                }
+        let shows = shows.filter { $0["id"].int != nil }
+        return await boundedMap(shows, width: shows.count) { show -> SearchResult? in
+            let tmdb = show["id"].int ?? 0
+            let details = try? await self.cached("tvdetails:\(tmdb)", ttl: 86400) {
+                try await overseerr.get("/tv/\(tmdb)")
             }
-            var resolved: [(Int, SearchResult)] = []
-            for await case let (index, result?) in group { resolved.append((index, result)) }
-            return resolved.sorted { $0.0 < $1.0 }.map(\.1)
+            guard let external = details?["externalIds"], let tvdb = external["tvdbId"].nonZero else { return nil }
+            return SearchResult(
+                imdb_id: external["imdbId"].string, kind: "series", overview: show["overview"].string,
+                poster: Artwork.tmdbPoster(show["posterPath"].string), remote_id: tvdb,
+                title: show["name"].string ?? "", tmdb_id: tmdb, year: show["firstAirDate"].year
+            )
         }
+        .compactMap { $0 }
     }
 
     public func grab(guid: String, indexerID: Int) async throws {
