@@ -26,15 +26,6 @@ extension DirectBackend: BookShelfAPI {
         }
     }
 
-    /// Authors by id, kept a minute: the book rows need a name each and do
-    /// not embed the author.
-    private func readarrAuthors(_ readarr: KeyedClient) async throws -> [Int: JSON] {
-        try await cached("readarr:authors", ttl: 60) {
-            Dictionary(try await readarr.get("/author").array.compactMap { author in author["id"].int.map { ($0, author) } },
-                       uniquingKeysWith: { _, last in last })
-        }
-    }
-
     /// Each author's series, at most `shelfConcurrency` asked at once. One
     /// author's failure leaves their series off rather than sinking the shelf.
     private func seriesByAuthor(_ readarr: KeyedClient, _ authorIDs: [Int]) async -> [Int: [JSON]] {

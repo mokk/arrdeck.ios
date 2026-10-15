@@ -38,6 +38,23 @@ enum Artwork {
 
     static func fanart(_ images: JSON) -> String? { image(images, kind: "fanart", size: backdropSize) }
 
+    /// Readarr calls the poster a cover. The first image of either kind
+    /// decides, as books.py's `book_cover` has it; only an address the
+    /// device can load as is counts.
+    static func bookCover(_ images: JSON) -> String? {
+        guard let image = images.array.first(where: { ["cover", "poster"].contains($0["coverType"].string ?? "") })
+        else { return nil }
+        let url = image["remoteUrl"].string ?? image["url"].string ?? ""
+        return url.hasPrefix("http://") || url.hasPrefix("https://") ? normalise(url) : nil
+    }
+
+    /// Overseerr hands out bare TMDB paths. The server asked for w342 and its
+    /// proxy clamped that to the poster size; `normalise` does the same.
+    static func tmdbPoster(_ path: String?) -> String? {
+        guard let path, !path.isEmpty else { return nil }
+        return normalise("https://image.tmdb.org/t/p/w342" + path)
+    }
+
     /// An album's cover, or a looked-up artist's poster.
     static func musicCover(_ images: JSON, kinds: [String] = ["cover", "poster"]) -> String? {
         for kind in kinds {

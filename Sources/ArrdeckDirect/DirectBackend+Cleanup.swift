@@ -167,8 +167,8 @@ enum RequestMapPort {
     static let take = 100
 
     static func load(_ overseerr: KeyedClient) async throws -> [String: RequestState] {
-        async let pending = page(overseerr, openFilters[0])
-        async let processing = page(overseerr, openFilters[1])
+        async let pending = DashboardCards.requests(overseerr, filter: openFilters[0], take: take)
+        async let processing = DashboardCards.requests(overseerr, filter: openFilters[1], take: take)
         var out: [String: RequestState] = [:]
         for page in try await [pending, processing] {
             for request in page["results"].array {
@@ -184,16 +184,12 @@ enum RequestMapPort {
         return out
     }
 
-    static func page(_ overseerr: KeyedClient, _ filter: String) async throws -> JSON {
-        try await overseerr.get("/request", query: ["filter": filter, "take": String(take), "sort": "added"])
-    }
-
     /// How a library card finds its request: films by TMDB id, shows by TVDB
     /// and TMDB id both, since a Sonarr row may carry either. The kind keeps
     /// a film and a show that share a TMDB number apart.
     static func keys(_ request: JSON) -> [String] {
         let media = request["media"]
-        let kind = request["type"].nonEmpty ?? media["mediaType"].nonEmpty ?? "movie"
+        let kind = DashboardCards.requestKind(request)
         var keys: [String] = []
         if media["tmdbId"].truthy { keys.append("\(kind):tmdb:\(media["tmdbId"].printed)") }
         if kind == "tv", media["tvdbId"].truthy { keys.append("tv:tvdb:\(media["tvdbId"].printed)") }

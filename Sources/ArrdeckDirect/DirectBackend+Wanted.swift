@@ -44,7 +44,7 @@ extension DirectBackend: WantedAPI {
         case .readarr:
             (id, record["title"].string ?? "",
              record["author"]["authorName"].nonEmpty ?? record["authorTitle"].string,
-             record["releaseDate"].string, LibraryShapes.bookCover(record["images"]))
+             record["releaseDate"].string, Artwork.bookCover(record["images"]))
         case .lidarr:
             (id, record["title"].string ?? "", record["artist"]["artistName"].string, record["releaseDate"].string,
              Artwork.musicCover(record["images"]))

@@ -47,10 +47,18 @@ enum DashboardCards {
 
     // MARK: - Overseerr
 
-    static let tmdbPoster = "https://image.tmdb.org/t/p/w342"
+    /// One page of Overseerr's requests in one state, by when they were added.
+    static func requests(_ overseerr: KeyedClient, filter: String, take: Int) async throws -> JSON {
+        try await overseerr.get("/request", query: ["filter": filter, "take": String(take), "sort": "added"])
+    }
+
+    /// A request's "movie" or "tv", whichever field Overseerr put it in.
+    static func requestKind(_ request: JSON) -> String {
+        request["type"].nonEmpty ?? request["media"]["mediaType"].nonEmpty ?? "movie"
+    }
 
     static func pendingRequests(_ overseerr: KeyedClient) async throws -> [MediaRequest] {
-        let payload = try await overseerr.get("/request", query: ["filter": "pending", "take": "20", "sort": "added"])
+        let payload = try await requests(overseerr, filter: "pending", take: 20)
         let results = payload["results"].array
         return await withTaskGroup(of: (Int, MediaRequest).self) { group in
             for (index, request) in results.enumerated() {
@@ -66,7 +74,7 @@ enum DashboardCards {
     /// from a second lookup, which Overseerr answers from its own cache.
     static func describe(_ request: JSON, overseerr: KeyedClient) async -> MediaRequest {
         let media = request["media"]
-        let kind = request["type"].nonEmpty ?? media["mediaType"].nonEmpty ?? "movie"
+        let kind = requestKind(request)
         var title = "", year: String?, poster: String?
         if let tmdb = media["tmdbId"].nonZero {
             // a missing title must not drop the request
@@ -74,9 +82,7 @@ enum DashboardCards {
             title = details["title"].nonEmpty ?? details["name"].nonEmpty ?? ""
             let date = details["releaseDate"].nonEmpty ?? details["firstAirDate"].nonEmpty
             year = date.map { String($0.prefix(4)) }
-            if let path = details["posterPath"].nonEmpty {
-                poster = Artwork.normalise(tmdbPoster + path)
-            }
+            poster = Artwork.tmdbPoster(details["posterPath"].string)
         }
         return MediaRequest(
             created_at: request["createdAt"].string,
@@ -412,7 +418,7 @@ enum DashboardCards {
             let surname = String(author.reversed().drop { $0 == "," }.reversed())
             return RecentItem(
                 app: "readarr", date: record["date"].string ?? "", library_id: id,
-                poster: DashboardPort.bookCover(book["images"]), subtitle: surname.isEmpty ? nil : surname,
+                poster: Artwork.bookCover(book["images"]), subtitle: surname.isEmpty ? nil : surname,
                 title: book["title"].string ?? ""
             )
         }

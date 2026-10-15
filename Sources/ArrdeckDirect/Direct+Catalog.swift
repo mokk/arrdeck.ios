@@ -34,13 +34,6 @@ enum Catalog {
         return result
     }
 
-    /// Overseerr hands out bare TMDB paths. The server asked for w342 and its
-    /// proxy clamped that to the poster size; `normalise` does the same.
-    static func tmdbPoster(_ path: String?) -> String? {
-        guard let path, !path.isEmpty else { return nil }
-        return Artwork.normalise("https://image.tmdb.org/t/p/w342" + path)
-    }
-
     /// Readarr's foreign ids are digits in a string; anything else is no id.
     static func numeric(_ value: JSON) -> Int? {
         guard let raw = value.string, !raw.isEmpty, raw.allSatisfy(\.isASCII), raw.allSatisfy(\.isNumber) else {

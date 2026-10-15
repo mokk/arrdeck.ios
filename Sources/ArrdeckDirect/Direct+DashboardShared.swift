@@ -251,7 +251,7 @@ enum DashboardPort {
                 CalendarItem(
                     app: app.rawValue, date: book["releaseDate"].string, extra: book["author"]["authorName"].string,
                     has_file: (book["statistics"]["bookFileCount"].int ?? 0) > 0, item_id: book["id"].int,
-                    poster: bookCover(book["images"]), title: book["title"].string ?? ""
+                    poster: Artwork.bookCover(book["images"]), title: book["title"].string ?? ""
                 )
             }
         case .lidarr:
@@ -263,16 +263,6 @@ enum DashboardPort {
                 )
             }
         }
-    }
-
-    /// Readarr calls the poster a cover; the first of either, in Readarr's
-    /// order, with an address the device can load.
-    static func bookCover(_ images: JSON) -> String? {
-        for image in images.array where ["cover", "poster"].contains(image["coverType"].string) {
-            let url = image["remoteUrl"].string ?? image["url"].string ?? ""
-            return url.hasPrefix("http://") || url.hasPrefix("https://") ? Artwork.normalise(url) : nil
-        }
-        return nil
     }
 
     // MARK: - Python's ways

@@ -108,26 +108,13 @@ enum CatalogMusic {
         .sorted { ($0.medium ?? 1, $0.absolute ?? 0) < ($1.medium ?? 1, $1.absolute ?? 0) }
     }
 
-    /// What the arrs record, in the words the history rows use.
-    static let eventLabels = [
-        "grabbed": "fetched", "downloadFolderImported": "imported", "downloadFailed": "failed",
-        "downloadIgnored": "ignored", "movieFileDeleted": "deleted", "episodeFileDeleted": "deleted",
-        "movieFileRenamed": "renamed", "episodeFileRenamed": "renamed",
-        "bookFileImported": "imported", "bookImportIncomplete": "incomplete", "bookFileDeleted": "deleted",
-        "bookFileRenamed": "renamed", "bookFileRetagged": "renamed",
-        "trackFileImported": "imported", "downloadImported": "imported", "artistFolderImported": "imported",
-        "albumImportIncomplete": "incomplete", "trackFileDeleted": "deleted", "trackFileRenamed": "renamed",
-        "trackFileRetagged": "renamed",
-    ]
-
     /// An album's history as events. Lidarr records an import per track, so
     /// one download comes down to one event of each kind.
     static func history(_ records: [JSON], limit: Int = 12) -> [HistoryEvent] {
         var seen: Set<String> = []
         var out: [HistoryEvent] = []
         for record in records {
-            let raw = record["eventType"].string ?? ""
-            let label = eventLabels[raw] ?? raw
+            let label = DashboardPort.label(record)
             let date = record["date"].string ?? ""
             let key = label + "\u{1F}" + (record["downloadId"].nonEmpty ?? String(date.prefix(16)))
             guard seen.insert(key).inserted else { continue }

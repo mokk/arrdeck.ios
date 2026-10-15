@@ -69,18 +69,12 @@ extension DirectBackend: ManageAPI {
     public func libraryBooks() async throws -> [LibraryBook] {
         try await call {
             let readarr = try registry.arr("readarr")
-            // Readarr's book rows do not embed the author, and the list needs one name per book
-            async let authors = cached("readarr:authors", ttl: 60) {
-                try await readarr.get("/author").array.reduce(into: [Int: JSON]()) { all, author in
-                    if let id = author["id"].int { all[id] = author }
-                }
-            }
+            async let authors = readarrAuthors(readarr)
             let books = try await readarr.get("/book").array
             let byID = try await authors
-            let rows = books.compactMap { Shelf.book($0, authors: byID) }
-            // Adding an author lists their whole bibliography, unmonitored. The
-            // library is what was asked for or is on disk.
-            return rows.filter { $0.monitored == true || $0.has_file == true }
+            return books.filter { $0["id"].int != nil }
+                .map { LibraryShapes.bookRow($0, authors: byID, cover: { Artwork.musicCover($0) }) }
+                .filter { LibraryShapes.inLibrary(monitored: $0.monitored, hasFile: $0.has_file) }
                 .sorted { a, b in
                     let (authorA, authorB) = ((a.author ?? "").lowercased(), (b.author ?? "").lowercased())
                     return authorA != authorB ? authorA < authorB : (a.title ?? "").lowercased() < (b.title ?? "").lowercased()
@@ -341,22 +335,4 @@ private enum Shelf {
         )
     }
 
-    /// A book with its author's name and quality profile: Readarr keeps the
-    /// profile on the author, not the book.
-    static func book(_ book: JSON, authors: [Int: JSON]) -> LibraryBook? {
-        guard let id = book["id"].int else { return nil }
-        let author = book["authorId"].int.flatMap { authors[$0] } ?? .null
-        let stats = book["statistics"]
-        return LibraryBook(
-            added: book["added"].date, author: author["authorName"].string, author_id: book["authorId"].int,
-            foreign_book_id: book["foreignBookId"].string, genres: book["genres"].array.compactMap(\.string),
-            has_file: (stats["bookFileCount"].int ?? 0) > 0, id: id, monitored: book["monitored"].bool ?? false,
-            page_count: book["pageCount"].nonZero,
-            // Readarr calls the poster a cover
-            poster: Artwork.musicCover(book["images"]), quality_profile_id: author["qualityProfileId"].int,
-            rating: book["ratings"]["value"].double.flatMap { $0 == 0 ? nil : $0 },
-            series_title: book["seriesTitle"].nonEmpty, size_on_disk: stats["sizeOnDisk"].int ?? 0,
-            slug: book["titleSlug"].string, title: book["title"].string, year: book["releaseDate"].year
-        )
-    }
 }

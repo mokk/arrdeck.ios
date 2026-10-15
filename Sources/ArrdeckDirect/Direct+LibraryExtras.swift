@@ -83,7 +83,7 @@ extension DirectBackend {
             monitored: book["monitored"].bool ?? false,
             overview: book["overview"].string,
             page_count: book["pageCount"].nonZero,
-            poster: LibraryShapes.bookCover(book["images"]),
+            poster: Artwork.bookCover(book["images"]),
             quality_profile_id: author["qualityProfileId"].int,
             rating: ratings["value"].double,
             rating_votes: ratings["votes"].int,
@@ -111,6 +111,12 @@ extension DirectBackend {
         async let books = readarr.get("/book")
         let mine = try await books.array.filter { $0["authorId"].int == author }
         return LibraryShapes.seriesRows(try await series.array, books: mine.byID)
+    }
+
+    /// Authors by id, kept a minute: the library's and the shelf's book rows
+    /// need a name each, and Readarr's do not embed the author.
+    func readarrAuthors(_ readarr: KeyedClient) async throws -> [Int: JSON] {
+        try await cached("readarr:authors", ttl: 60) { try await readarr.get("/author").array.byID }
     }
 
     /// A book's own flag goes on the book; quality is the author's setting,

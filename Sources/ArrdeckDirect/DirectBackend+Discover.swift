@@ -67,7 +67,7 @@ extension DirectBackend: DiscoverAPI {
                 let held = try await heldMovies(try registry.arr("radarr"))
                 return popular.map { movie in
                     let result = SearchResult(
-                        kind: "movie", overview: movie["overview"].string, poster: Catalog.tmdbPoster(movie["posterPath"].string),
+                        kind: "movie", overview: movie["overview"].string, poster: Artwork.tmdbPoster(movie["posterPath"].string),
                         remote_id: movie["id"].int ?? 0, title: movie["title"].string ?? "", tmdb_id: movie["id"].int,
                         year: movie["releaseDate"].year
                     )
@@ -104,7 +104,7 @@ extension DirectBackend: DiscoverAPI {
                     }
                     return (index, SearchResult(
                         imdb_id: external["imdbId"].string, kind: "series", overview: show["overview"].string,
-                        poster: Catalog.tmdbPoster(show["posterPath"].string), remote_id: tvdb,
+                        poster: Artwork.tmdbPoster(show["posterPath"].string), remote_id: tvdb,
                         title: show["name"].string ?? "", tmdb_id: tmdb, year: show["firstAirDate"].year
                     ))
                 }

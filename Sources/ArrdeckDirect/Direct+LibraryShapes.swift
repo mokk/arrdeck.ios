@@ -8,37 +8,9 @@ import Foundation
 enum LibraryShapes {
     // MARK: - History
 
-    /// The arrs' event names in the app's words; Readarr and Lidarr name the
-    /// same events their own way. Anything else goes through as it came.
-    static let eventLabels: [String: String] = [
-        "grabbed": "fetched",
-        "downloadFolderImported": "imported",
-        "downloadFailed": "failed",
-        "downloadIgnored": "ignored",
-        "movieFileDeleted": "deleted",
-        "episodeFileDeleted": "deleted",
-        "movieFileRenamed": "renamed",
-        "episodeFileRenamed": "renamed",
-        "bookFileImported": "imported",
-        "bookImportIncomplete": "incomplete",
-        "bookFileDeleted": "deleted",
-        "bookFileRenamed": "renamed",
-        "bookFileRetagged": "renamed",
-        "trackFileImported": "imported",
-        "downloadImported": "imported",
-        "artistFolderImported": "imported",
-        "albumImportIncomplete": "incomplete",
-        "trackFileDeleted": "deleted",
-        "trackFileRenamed": "renamed",
-        "trackFileRetagged": "renamed",
-    ]
-
     /// A detail page's last dozen events, newest first as the arr sent them.
     static func history(_ records: [JSON]) -> [HistoryEvent] {
-        records.prefix(12).map { record in
-            let raw = record["eventType"].string ?? ""
-            return HistoryEvent(date: record["date"].string ?? "", _type: eventLabels[raw] ?? raw)
-        }
+        records.prefix(12).map { HistoryEvent(date: $0["date"].string ?? "", _type: DashboardPort.label($0)) }
     }
 
     // MARK: - Ratings
@@ -58,22 +30,17 @@ enum LibraryShapes {
 
     // MARK: - Readarr
 
-    /// Readarr calls the poster a cover. The first one decides, as on the
-    /// server; only an address the device can load as is counts.
-    static func bookCover(_ images: JSON) -> String? {
-        guard let image = images.array.first(where: { ["cover", "poster"].contains($0["coverType"].string ?? "") })
-        else { return nil }
-        let url = image["remoteUrl"].string ?? image["url"].string ?? ""
-        return url.hasPrefix("http://") || url.hasPrefix("https://") ? Artwork.normalise(url) : nil
-    }
-
     static func hasFile(_ book: JSON) -> Bool {
         (book["statistics"]["bookFileCount"].int ?? 0) > 0
     }
 
     /// A book as the library lists it, with its author's name and profile:
-    /// Readarr's book rows do not embed the author.
-    static func bookRow(_ book: JSON, authors: [Int: JSON]) -> LibraryBook {
+    /// Readarr's book rows do not embed the author. The Books tab looks past
+    /// a cover the device cannot load to one it can (`Artwork.musicCover`);
+    /// the other book pages keep books.py's first-one-decides.
+    static func bookRow(
+        _ book: JSON, authors: [Int: JSON], cover: (JSON) -> String? = Artwork.bookCover
+    ) -> LibraryBook {
         let author = book["authorId"].int.flatMap { authors[$0] } ?? .null
         return LibraryBook(
             added: book["added"].date,
@@ -85,7 +52,7 @@ enum LibraryShapes {
             id: book["id"].int ?? 0,
             monitored: book["monitored"].bool ?? false,
             page_count: book["pageCount"].nonZero,
-            poster: bookCover(book["images"]),
+            poster: cover(book["images"]),
             quality_profile_id: author["qualityProfileId"].int,
             rating: book["ratings"]["value"].double.flatMap { $0 == 0 ? nil : $0 },
             series_title: book["seriesTitle"].nonEmpty,
@@ -112,7 +79,7 @@ enum LibraryShapes {
             monitor_new_items: author["monitorNewItems"].string,
             monitored: author["monitored"].bool ?? false,
             name: author["authorName"].string,
-            poster: bookCover(author["images"]),
+            poster: Artwork.bookCover(author["images"]),
             quality_profile_id: author["qualityProfileId"].int,
             size_on_disk: stats["sizeOnDisk"].int ?? 0
         )
@@ -130,7 +97,7 @@ enum LibraryShapes {
                     has_file: hasFile(book),
                     monitored: book["monitored"].bool ?? false,
                     position: link["position"].string,
-                    poster: bookCover(book["images"]),
+                    poster: Artwork.bookCover(book["images"]),
                     title: book["title"].string,
                     year: book["releaseDate"].year
                 )
