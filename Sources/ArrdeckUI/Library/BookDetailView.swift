@@ -124,9 +124,11 @@ public struct BookDetailView: View {
     }
 
     /// arrdeck proxies the file from our Readarr fork; the session cookie in
-    /// the shared jar authenticates the request like every other call.
+    /// the shared jar authenticates the request like every other call. With
+    /// no server, Readarr hands it out itself.
     func fileURL(book: Int, file: Int) -> URL {
-        baseURL.appending(path: "api/v1/library/books/\(book)/files/\(file)")
+        if let files = api as? any FileAddressAPI, let url = files.bookFileURL(book: book, file: file) { return url }
+        return baseURL.appending(path: "api/v1/library/books/\(book)/files/\(file)")
     }
 
     var actionFailed: Binding<Bool> {
