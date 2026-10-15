@@ -55,7 +55,7 @@ extension DirectBackend: DownloadsAPI {
                     try await qbit.post("/api/v2/transfer/toggleSpeedLimitsMode")
                 }
             case .transmission:
-                _ = try await registry.transmission().rpc("session-set", ["alt-speed-enabled": .bool(enabled)])
+                try await registry.transmission().rpc("session-set", ["alt-speed-enabled": .bool(enabled)])
             }
         }
     }
@@ -67,7 +67,7 @@ extension DirectBackend: DownloadsAPI {
                 try await qbittorrentRenamed(ids, current: "stop", old: "pause")
             case .transmission:
                 let ids = try TorrentCalls.transmissionIDs(ids)
-                _ = try await registry.transmission().rpc("torrent-stop", ["ids": ids])
+                try await registry.transmission().rpc("torrent-stop", ["ids": ids])
             }
         }
     }
@@ -79,7 +79,7 @@ extension DirectBackend: DownloadsAPI {
                 try await qbittorrentRenamed(ids, current: "start", old: "resume")
             case .transmission:
                 let ids = try TorrentCalls.transmissionIDs(ids)
-                _ = try await registry.transmission().rpc("torrent-start", ["ids": ids])
+                try await registry.transmission().rpc("torrent-start", ["ids": ids])
             }
         }
     }
@@ -93,7 +93,7 @@ extension DirectBackend: DownloadsAPI {
                 )
             case .transmission:
                 let ids = try TorrentCalls.transmissionIDs(ids)
-                _ = try await registry.transmission().rpc("torrent-remove", ["ids": ids, "delete-local-data": .bool(deleteData)])
+                try await registry.transmission().rpc("torrent-remove", ["ids": ids, "delete-local-data": .bool(deleteData)])
             }
         }
     }
@@ -105,7 +105,7 @@ extension DirectBackend: DownloadsAPI {
                 try await TorrentCalls.qbittorrent(registry.qbittorrent(), "recheck", ids)
             case .transmission:
                 let ids = try TorrentCalls.transmissionIDs(ids)
-                _ = try await registry.transmission().rpc("torrent-verify", ["ids": ids])
+                try await registry.transmission().rpc("torrent-verify", ["ids": ids])
             }
         }
     }

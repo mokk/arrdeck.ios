@@ -122,7 +122,7 @@ extension DirectBackend: ExtrasAPI {
                 try await qbit.post("/api/v2/torrents/setUploadLimit", form: ["hashes": id, "limit": "\(uploadKiB * 1024)"])
             case .transmission:
                 let ids = try TorrentCalls.transmissionIDs([id])
-                _ = try await registry.transmission().rpc("torrent-set", [
+                try await registry.transmission().rpc("torrent-set", [
                     "ids": ids,
                     "downloadLimit": JSON(downloadKiB),
                     "downloadLimited": .bool(downloadKiB > 0),
@@ -146,7 +146,7 @@ extension DirectBackend: ExtrasAPI {
                 try await TorrentCalls.qbittorrent(registry.qbittorrent(), action, ids)
             case .transmission:
                 let ids = try TorrentCalls.transmissionIDs(ids)
-                _ = try await registry.transmission().rpc("queue-move-\(position.rawValue)", ["ids": ids])
+                try await registry.transmission().rpc("queue-move-\(position.rawValue)", ["ids": ids])
             }
         }
     }
@@ -233,13 +233,9 @@ extension DirectBackend: ExtrasAPI {
         var keys = [app == .radarr ? "library_map:movie" : "library_map:series"]
         if authors { keys.append("readarr:authors") }
         if app == .lidarr { keys += ["lidarr:artists", "library_map:music"] }
-        // the cache has no removal; a value of no type anyone reads makes
-        // both the fresh and the stale lookup miss, as the server's None did
-        for key in keys { cache.set(key, Forgotten()) }
+        cache.remove(keys)
     }
 }
-
-private struct Forgotten: Sendable {}
 
 /// An arr's release as the search sheet lists it, from releases.py.
 private enum Releases {

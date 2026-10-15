@@ -43,6 +43,14 @@ final class BlockCache: Sendable {
         }
     }
 
+    /// After a change that makes an entry wrong: the next read goes upstream,
+    /// and a failing one has no stale value to fall back on.
+    func remove(_ keys: [String]) {
+        entries.withLock { all in
+            for key in keys { all[key] = nil }
+        }
+    }
+
     func clear() {
         entries.withLock { $0.removeAll() }
     }

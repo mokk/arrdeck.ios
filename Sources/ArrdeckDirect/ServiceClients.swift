@@ -160,6 +160,7 @@ public actor TransmissionClient {
         self.http = http
     }
 
+    @discardableResult
     public func rpc(_ method: String, _ arguments: JSON = [:]) async throws -> JSON {
         let body: JSON = ["method": .string(method), "arguments": arguments]
         func build() throws -> URLRequest {
