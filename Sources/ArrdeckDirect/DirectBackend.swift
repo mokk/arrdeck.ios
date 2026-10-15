@@ -27,7 +27,7 @@ public final class DirectBackend: Sendable {
     /// /about, so whatever is not listed simply does not show.
     public static let features: Set<Feature> = [
         .diagnose, .credits, .qualityProfiles, .scheduledTasks, .arrBackups, .blocklist, .popular, .calendar,
-        .wanted, .books, .interactiveSearch, .subtitles, .vpn,
+        .wanted, .books, .interactiveSearch, .subtitles, .vpn, .manualImport,
     ]
 
     public static var info: BackendInfo {
