@@ -66,11 +66,11 @@ extension DirectBackend: ActivityAPI {
         switch client {
         case .qbittorrent:
             guard let qbittorrent = try? registry.qbittorrent(),
-                  let torrents = try? await DashboardPort.qbittorrentTorrents(qbittorrent) else { return [] }
+                  let torrents = try? await TorrentCalls.qbittorrentTorrents(qbittorrent) else { return [] }
             return Self.finishedTorrents(client, torrents, since: since, done: "completion_on")
         case .transmission:
             guard let transmission = try? registry.transmission(),
-                  let torrents = try? await DashboardPort.transmissionTorrents(transmission) else { return [] }
+                  let torrents = try? await TorrentCalls.transmissionTorrents(transmission) else { return [] }
             return Self.finishedTorrents(client, torrents, since: since, done: "doneDate")
         }
     }

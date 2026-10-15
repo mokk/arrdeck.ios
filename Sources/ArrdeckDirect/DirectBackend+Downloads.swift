@@ -13,22 +13,20 @@ extension DirectBackend: DownloadsAPI {
         let resolve: TorrentRows.Resolve = { names.resolve(host: $0, hash: $1) }
         async let qbittorrent = guarded("torrents:qbit") {
             let qbit = try registry.qbittorrent()
-            async let items = qbit.get("/api/v2/torrents/info")
-            async let transfer = qbit.get("/api/v2/transfer/info")
-            let totals = try await transfer
+            async let items = TorrentCalls.qbittorrentTorrents(qbit)
+            async let speeds = TorrentCalls.qbittorrentSpeeds(qbit)
+            let totals = try await speeds
             return TorrentRows.select(
-                TorrentRows.qbittorrent(try await items, resolve: resolve), query,
-                download: totals["dl_info_speed"].int ?? 0, upload: totals["up_info_speed"].int ?? 0
+                TorrentRows.qbittorrent(try await items, resolve: resolve), query, download: totals.down, upload: totals.up
             )
         }
         async let transmission = guarded("torrents:tm") {
             let tm = try registry.transmission()
-            async let items = tm.rpc("torrent-get", ["fields": TorrentRows.transmissionFields])
-            async let stats = tm.rpc("session-stats")
-            let totals = try await stats
+            async let items = TorrentCalls.transmissionTorrents(tm)
+            async let speeds = TorrentCalls.transmissionSpeeds(tm)
+            let totals = try await speeds
             return TorrentRows.select(
-                TorrentRows.transmission(try await items["torrents"], resolve: resolve), query,
-                download: totals["downloadSpeed"].int ?? 0, upload: totals["uploadSpeed"].int ?? 0
+                TorrentRows.transmission(try await items, resolve: resolve), query, download: totals.down, upload: totals.up
             )
         }
         let groups: [TorrentClient: Block<TorrentGroup>] = await [.qbittorrent: qbittorrent, .transmission: transmission]

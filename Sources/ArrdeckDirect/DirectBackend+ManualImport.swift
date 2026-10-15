@@ -293,7 +293,7 @@ extension DirectBackend {
         case .transmission:
             let id: JSON = numeric ? (Int(torrentID).map { JSON($0) } ?? .string(torrentID)) : .string(torrentID)
             let found = try await registry.transmission()
-                .rpc("torrent-get", ["ids": [id], "fields": DashboardPort.transmissionFields])["torrents"].array
+                .rpc("torrent-get", ["ids": [id], "fields": TorrentRows.transmissionFields])["torrents"].array
             guard let torrent = found.first else { throw APIError.refused("torrent not found") }
             done = (torrent["percentDone"].double ?? 0) >= 1
             savePath = torrent["downloadDir"].string ?? ""

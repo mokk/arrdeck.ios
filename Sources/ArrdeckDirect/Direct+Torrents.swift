@@ -2,8 +2,8 @@ import ArrdeckData
 import Foundation
 
 /// qBittorrent's and Transmission's torrents in the one shape the screens
-/// read, ported from the server's torrents.py. Internal rather than private:
-/// the dashboard's torrent summary maps the same rows.
+/// read, ported from the server's torrents.py: the Downloads list and the
+/// dashboard's summary map the same rows, as the server's two routes did.
 enum TorrentRows {
     /// qBittorrent's states folded into the handful the filter offers. Its
     /// paused-after-finishing states read "completed", not "paused", so a
@@ -55,6 +55,9 @@ enum TorrentRows {
 
     typealias Resolve = @Sendable (_ host: String?, _ hash: String) -> String?
 
+    /// The announce host as it is, for the summary, which names no indexers.
+    static let hostOnly: Resolve = { host, _ in host }
+
     /// The announce host, without the "tracker." or "www." most trackers put
     /// in front of their name.
     static func trackerHost(_ url: String?) -> String? {
@@ -67,8 +70,8 @@ enum TorrentRows {
         return host
     }
 
-    static func qbittorrent(_ items: JSON, resolve: Resolve) -> [Torrent] {
-        items.array.map { t in
+    static func qbittorrent(_ items: [JSON], resolve: Resolve) -> [Torrent] {
+        items.map { t in
             let hash = t["hash"].string ?? ""
             let state = t["state"].string
             let eta = t["eta"].int
@@ -95,8 +98,8 @@ enum TorrentRows {
         }
     }
 
-    static func transmission(_ items: JSON, resolve: Resolve) -> [Torrent] {
-        items.array.map { t in
+    static func transmission(_ items: [JSON], resolve: Resolve) -> [Torrent] {
+        items.map { t in
             let error = t["errorString"].nonEmpty
             let eta = t["eta"].int ?? -1
             let done = t["doneDate"].int ?? 0
@@ -107,7 +110,8 @@ enum TorrentRows {
                 dl_speed: t["rateDownload"].int ?? 0,
                 error: error,
                 eta: eta > 0 ? eta : nil,
-                id: t["id"].int.map(String.init) ?? "",
+                // the server's str(None) for a torrent without one
+                id: t["id"].int.map(String.init) ?? "None",
                 name: t["name"].string ?? "",
                 progress: t["percentDone"].double ?? 0,
                 ratio: t["uploadRatio"].double,
@@ -223,9 +227,29 @@ extension TrackerNames {
     }
 }
 
-/// The torrent clients' write calls, shared by the Downloads screen's actions
-/// and the detail sheet's.
+/// The torrent clients' calls: the lists and speeds the Downloads screen, the
+/// dashboard and Activity read, and the writes the Downloads screen's actions
+/// and the detail sheet's share.
 enum TorrentCalls {
+    static func qbittorrentTorrents(_ qbit: QbittorrentClient) async throws -> [JSON] {
+        try await qbit.get("/api/v2/torrents/info").array
+    }
+
+    static func transmissionTorrents(_ tm: TransmissionClient) async throws -> [JSON] {
+        try await tm.rpc("torrent-get", ["fields": TorrentRows.transmissionFields])["torrents"].array
+    }
+
+    /// Both directions' speed right now, in bytes a second.
+    static func qbittorrentSpeeds(_ qbit: QbittorrentClient) async throws -> (down: Int, up: Int) {
+        let transfer = try await qbit.get("/api/v2/transfer/info")
+        return (transfer["dl_info_speed"].int ?? 0, transfer["up_info_speed"].int ?? 0)
+    }
+
+    static func transmissionSpeeds(_ tm: TransmissionClient) async throws -> (down: Int, up: Int) {
+        let stats = try await tm.rpc("session-stats")
+        return (stats["downloadSpeed"].int ?? 0, stats["uploadSpeed"].int ?? 0)
+    }
+
     /// qBittorrent's per-torrent actions all take their hashes joined by "|".
     static func qbittorrent(
         _ qbit: QbittorrentClient, _ action: String, _ hashes: [String], _ extra: [String: String] = [:]

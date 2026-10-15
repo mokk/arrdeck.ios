@@ -211,7 +211,7 @@ struct TorrentSummaryTests {
         let torrent = try #require(summary.active?.first)
         #expect(torrent.id == "4" && torrent.state == "error" && torrent.error == "tracker gone" && torrent.eta == nil)
         #expect(torrent.tracker == "tracker.net")
-        #expect(try body(transport.requests.first)["arguments"]["fields"] == DashboardPort.transmissionFields)
+        #expect(try body(transport.requests.first)["arguments"]["fields"] == TorrentRows.transmissionFields)
     }
 
     @Test func speedsAreAveragedOverTheLastMinute() async throws {

@@ -186,28 +186,22 @@ extension DirectBackend: DashboardAPI {
 extension DirectBackend {
     private func qbittorrentSummary() async throws -> TorrentSummary {
         let client = try registry.qbittorrent()
-        async let torrents = DashboardPort.qbittorrentTorrents(client)
-        async let transfer = client.get("/api/v2/transfer/info")
+        async let torrents = TorrentCalls.qbittorrentTorrents(client)
+        async let transfer = TorrentCalls.qbittorrentSpeeds(client)
         let (items, speeds) = try await (torrents, transfer)
         return DashboardCards.summary(
-            items.map(DashboardCards.qbittorrentTorrent),
-            totals: averagedTotals(
-                .qbittorrent,
-                down: speeds["dl_info_speed"].whole ?? 0, up: speeds["up_info_speed"].whole ?? 0
-            )
+            TorrentRows.qbittorrent(items, resolve: TorrentRows.hostOnly),
+            totals: averagedTotals(.qbittorrent, down: speeds.down, up: speeds.up)
         )
     }
 
     private func transmissionSummary() async throws -> TorrentSummary {
         let client = try registry.transmission()
-        let items = try await DashboardPort.transmissionTorrents(client)
-        let stats = try await client.rpc("session-stats")
+        let items = try await TorrentCalls.transmissionTorrents(client)
+        let speeds = try await TorrentCalls.transmissionSpeeds(client)
         return DashboardCards.summary(
-            items.map(DashboardCards.transmissionTorrent),
-            totals: averagedTotals(
-                .transmission,
-                down: stats["downloadSpeed"].whole ?? 0, up: stats["uploadSpeed"].whole ?? 0
-            )
+            TorrentRows.transmission(items, resolve: TorrentRows.hostOnly),
+            totals: averagedTotals(.transmission, down: speeds.down, up: speeds.up)
         )
     }
 

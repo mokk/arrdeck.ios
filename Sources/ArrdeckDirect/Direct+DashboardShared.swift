@@ -275,24 +275,6 @@ enum DashboardPort {
         return nil
     }
 
-    // MARK: - Torrent clients
-
-    /// The fields the server asked Transmission for, so a torrent maps the
-    /// same here.
-    static let transmissionFields: JSON = [
-        "doneDate", "id", "hashString", "name", "status", "percentDone", "totalSize", "rateDownload",
-        "rateUpload", "eta", "uploadRatio", "uploadedEver", "errorString", "downloadDir", "peersConnected",
-        "addedDate", "trackers",
-    ]
-
-    static func qbittorrentTorrents(_ client: QbittorrentClient) async throws -> [JSON] {
-        try await client.get("/api/v2/torrents/info").array
-    }
-
-    static func transmissionTorrents(_ client: TransmissionClient) async throws -> [JSON] {
-        try await client.rpc("torrent-get", ["fields": transmissionFields])["torrents"].array
-    }
-
     // MARK: - Python's ways
 
     /// `current or new`: keep an id once a record supplied a non-zero one.
