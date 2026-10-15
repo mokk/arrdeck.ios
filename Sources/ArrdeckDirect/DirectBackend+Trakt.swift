@@ -31,7 +31,7 @@ extension DirectBackend: TraktAPI {
     /// title is not looked up again for a day; a failed lookup is not kept,
     /// so the next load tries again.
     private func traktPosters(_ rows: [SearchResult], kind: String, arr: KeyedClient, lookup: String) async -> [String?] {
-        await boundedMap(rows.map(\.remote_id), width: rows.count) { remote in
+        await boundedMap(rows.map(\.remote_id), width: lookupWidth) { remote in
             let poster = try? await self.cached("trakt:poster:\(kind):\(remote)", ttl: TraktLists.posterTTL) {
                 let term = kind == "movie" ? "tmdb:\(remote)" : "tvdb:\(remote)"
                 return TraktLists.lookupPoster(try await arr.get(lookup, query: ["term": term]).array) ?? ""

@@ -27,7 +27,8 @@ public enum JSON: Sendable, Equatable {
         if case let .string(value) = self { value } else { nil }
     }
 
-    /// Whole numbers only; a fractional one is not an id or a count.
+    /// A number cut down to a whole one, as Python's `int()` does; nil when it
+    /// is out of range (or not a number), rather than a crash.
     public var int: Int? {
         if case let .number(value) = self, let whole = Int(exactly: value.rounded(.towardZero)) { whole } else { nil }
     }
@@ -159,10 +160,9 @@ extension JSON {
     }
 
     /// A whole number, or a fractional one cut down: Prowlarr's averages and
-    /// the torrent clients' counters are not always integral.
-    var whole: Int? {
-        int ?? double.map { Int($0) }
-    }
+    /// the torrent clients' counters are not always integral. (`int` already
+    /// cuts down; this name says the caller expects fractions.)
+    var whole: Int? { int }
 
     /// The year at the front of a date the services write as text, when its
     /// first four characters are digits.

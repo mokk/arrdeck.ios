@@ -93,7 +93,7 @@ extension DirectBackend: DiscoverAPI {
     /// left out.
     private func withTvdbIDs(_ shows: [JSON], _ overseerr: KeyedClient) async -> [SearchResult] {
         let shows = shows.filter { $0["id"].int != nil }
-        return await boundedMap(shows, width: shows.count) { show -> SearchResult? in
+        return await boundedMap(shows, width: lookupWidth) { show -> SearchResult? in
             let tmdb = show["id"].int ?? 0
             let details = try? await self.cached("tvdetails:\(tmdb)", ttl: 86400) {
                 try await overseerr.get("/tv/\(tmdb)")

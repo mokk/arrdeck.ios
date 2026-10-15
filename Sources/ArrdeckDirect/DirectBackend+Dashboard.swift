@@ -91,8 +91,6 @@ extension DirectBackend: DashboardAPI {
         }
     }
 
-    /// Shared with the server's diagnosis under one key, so asking why
-    /// something has not arrived does not ask Prowlarr three more times.
     public func indexerStats() async throws -> Block<IndexerStats> {
         await guarded("indexers:block") {
             try await cached("indexers:stats", ttl: 300) { try await DashboardCards.indexerStats(try registry.arr("prowlarr")) }

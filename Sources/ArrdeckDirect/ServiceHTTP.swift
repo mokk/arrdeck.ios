@@ -225,6 +225,11 @@ extension URLRequest {
 /// items' order. A narrow width is for the fan-outs that would otherwise ask
 /// a service hundreds of things at once; the next starts as one finishes, so
 /// a slow one holds a slot rather than a batch.
+/// How many lookups one screen sends a service at once: enough to hide the
+/// round trips, few enough that a home server's arr is not swamped by a
+/// list of twenty.
+let lookupWidth = 6
+
 func boundedMap<Item: Sendable, Mapped: Sendable>(
     _ items: [Item], width: Int, _ transform: @escaping @Sendable (Item) async -> Mapped
 ) async -> [Mapped] {

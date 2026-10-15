@@ -59,7 +59,12 @@ final class BlockCache: Sendable {
 extension DirectBackend {
     /// One service's slice of an aggregate. Never throws: a dead service
     /// becomes an offline block, with its last good value when there is one.
+    ///
+    /// The last good value is kept under a key of its own: a fetch that is
+    /// itself `cached` under the same name would otherwise have its entry
+    /// renewed on every read, and never fetch afresh while a screen polls.
     func guarded<T: Sendable & Equatable>(_ key: String?, _ fetch: () async throws -> T) async -> Block<T> {
+        let key = key.map { "block:" + $0 }
         do {
             let value = try await fetch()
             if let key { cache.set(key, value) }

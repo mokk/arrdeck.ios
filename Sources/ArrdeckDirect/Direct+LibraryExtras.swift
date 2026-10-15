@@ -293,7 +293,7 @@ extension DirectBackend {
         async let identity = Plex.machine(plex)
         let sections = try await Plex.sections(plex)
         let machine = await identity
-        let contents = await boundedMap(sections, width: sections.count) { try? await Plex.items(plex, in: $0) }
+        let contents = await boundedMap(sections, width: lookupWidth) { try? await Plex.items(plex, in: $0) }
         var items: [String: WatchedItem] = [:]
         for (section, entries) in zip(sections, contents) {
             // a section Plex could not list is left out, not the whole map
