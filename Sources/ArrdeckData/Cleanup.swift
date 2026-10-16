@@ -18,56 +18,9 @@ public protocol SeasonRemoveAPI: Sendable {
     func removeSeasons(series: Int, seasons: [Int]) async throws
 }
 
-extension LiveAPI: SeasonRemoveAPI {
-    public func removeSeasons(series: Int, seasons: [Int]) async throws {
-        try await call {
-            switch try await client.remove_seasons_api_v1_library_series__series_id__seasons_remove_post(
-                path: .init(series_id: series), body: .json(.init(seasons: seasons))
-            ) {
-            case .ok: ()
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-}
-
 /// Open Overseerr requests keyed for the library: "movie:tmdb:1", "tv:tvdb:2".
 public protocol RequestsMapAPI: Sendable {
     func requestMap() async throws -> [String: RequestState]
-}
-
-extension LiveAPI: CleanupAPI, RequestsMapAPI {
-    public func cleanup(watchedDays: Int) async throws -> CleanupLists {
-        try await call {
-            switch try await client.cleanup_api_v1_cleanup_get(query: .init(watched_days: watchedDays)) {
-            case let .ok(ok): try ok.body.json
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-
-    public func deleteForCleanup(_ app: LibraryApp, ids: [Int], exclude: Bool) async throws {
-        try await call {
-            switch try await client.library_bulk_delete_api_v1_library__kind__bulk_delete_post(
-                path: .init(kind: app.libraryKind), body: .json(.init(delete_files: true, exclude: exclude, ids: ids))
-            ) {
-            case .noContent: ()
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-
-    public func requestMap() async throws -> [String: RequestState] {
-        try await call {
-            switch try await client.request_map_api_v1_requests_map_get() {
-            case let .ok(ok): try ok.body.json.data?.additionalProperties ?? [:]
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
 }
 
 public enum RequestLookup {
@@ -192,28 +145,5 @@ public final class CleanupModel {
         } catch {
             self.error = (error as? APIError)?.description ?? error.localizedDescription
         }
-    }
-}
-
-/// When the disk fills at the pace of the samples: a least-squares line
-/// through free space over time. Needs a week of history.
-public enum DiskForecast: Equatable, Sendable {
-    case unknown, steady
-    case full(days: Double, perDay: Double)
-
-    public static func compute(_ samples: [StatsSample]) -> DiskForecast {
-        let points = samples.compactMap { s -> (Double, Double)? in
-            guard let free = s.disk_free_bytes, free > 0 else { return nil }
-            return (Double(s.ts) / 86_400, Double(free))
-        }
-        guard points.count >= 10, let first = points.first, let last = points.last, last.0 - first.0 >= 7 else { return .unknown }
-        let n = Double(points.count)
-        let mx = points.reduce(0) { $0 + $1.0 } / n
-        let my = points.reduce(0) { $0 + $1.1 } / n
-        let sxy = points.reduce(0) { $0 + ($1.0 - mx) * ($1.1 - my) }
-        let sxx = points.reduce(0) { $0 + ($1.0 - mx) * ($1.0 - mx) }
-        let slope = sxx == 0 ? 0 : sxy / sxx
-        guard slope < 0 else { return .steady }
-        return .full(days: last.1 / -slope, perDay: -slope)
     }
 }

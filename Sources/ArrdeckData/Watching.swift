@@ -14,27 +14,6 @@ public protocol WatchingAPI: Sendable {
     func plexWatchlist() async throws -> [SearchResult]
 }
 
-extension LiveAPI: WatchingAPI {
-    public func watchStats(days: Int, timeZone: String) async throws -> Block<WatchStats> {
-        try await call {
-            switch try await client.watch_stats_api_v1_plex_stats_get(query: .init(days: days, tz: timeZone)) {
-            case let .ok(ok): Block(try ok.body.json)
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-
-    public func plexWatchlist() async throws -> [SearchResult] {
-        try await call {
-            switch try await client.plex_watchlist_api_v1_plex_watchlist_get() {
-            case let .ok(ok): try ok.body.json.ofKnownKinds
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-}
-
 /// The periods the Watching view offers; 0 days is all time.
 public enum WatchWindow: Int, CaseIterable, Sendable {
     case week = 7, month = 30, year = 365, all = 0

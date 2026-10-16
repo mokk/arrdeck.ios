@@ -5,11 +5,11 @@
 // macOS so `swift test` runs on a machine with only Command Line Tools — the
 // Xcode app target (App/) merely consumes it.
 //
-// ArrdeckAPI is the generated client: swift-openapi-generator runs as a build
-// plugin over Sources/ArrdeckAPI/openapi.json, which Scripts/derive-spec.sh
-// derives from the pinned submodule's spec (see Scripts/derive-spec.jq for the
-// one rewrite it applies). The 125 routes are typed, and drift from the pinned
-// backend is a compile error rather than a runtime surprise.
+// ArrdeckAPI is the domain values, generated: swift-openapi-generator runs as
+// a build plugin over Sources/ArrdeckAPI/openapi.json, which
+// Scripts/derive-spec.sh derives from the pinned submodule's spec (see
+// Scripts/derive-spec.jq for the one rewrite it applies). Types only — no
+// client: the app talks to the services themselves.
 import PackageDescription
 
 let package = Package(
@@ -26,10 +26,6 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
-        .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0"),
-        // For the routing transport and the tests' stub; the runtime already
-        // depends on it.
-        .package(url: "https://github.com/apple/swift-http-types", from: "1.0.0"),
         // Transitive via the OpenAPI runtime, pinned here on purpose: 1.7.0's
         // ContainersPreview needs a Swift runtime (swift_initBorrow) newer than
         // the iOS 26.3 simulator ships, and the app died in dyld before main.
@@ -39,10 +35,7 @@ let package = Package(
         .target(name: "ArrdeckKit"),
         .target(
             name: "ArrdeckAPI",
-            dependencies: [
-                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
-                .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
-            ],
+            dependencies: [.product(name: "OpenAPIRuntime", package: "swift-openapi-runtime")],
             plugins: [
                 .plugin(name: "OpenAPIGenerator", package: "swift-openapi-generator")
             ]
@@ -56,9 +49,6 @@ let package = Package(
                 "ArrdeckAPI",
                 "ArrdeckGlance",
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
-                .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
-                // the routing transport's request type
-                .product(name: "HTTPTypes", package: "swift-http-types"),
             ]
         ),
         // The server's work done on the device, for a profile with no arrdeck
@@ -74,17 +64,13 @@ let package = Package(
         // small (WidgetKit holds it to a tight memory limit) and has neither
         // a network client nor credentials. The app writes, the widgets read.
         .target(name: "ArrdeckGlance"),
-        .testTarget(
-            name: "ArrdeckKitTests",
-            dependencies: ["ArrdeckKit", "ArrdeckAPI"]
-        ),
+        .testTarget(name: "ArrdeckKitTests", dependencies: ["ArrdeckKit"]),
         .testTarget(name: "ArrdeckGlanceTests", dependencies: ["ArrdeckGlance"]),
         .testTarget(name: "ArrdeckDirectTests", dependencies: ["ArrdeckDirect", "ArrdeckData", "ArrdeckKit"]),
         .testTarget(
             name: "ArrdeckDataTests",
             dependencies: [
                 "ArrdeckData", "ArrdeckAPI", "ArrdeckGlance",
-                .product(name: "HTTPTypes", package: "swift-http-types"),
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
             ]
         ),

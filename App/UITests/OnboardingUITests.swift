@@ -1,11 +1,10 @@
 import XCTest
 
-/// Drives the real app in the simulator against a real backend — the only
-/// place the ATS exception, the local-network permission and the probe meet
-/// the actual iOS network stack. Opt-in: pass the backend as
-/// TEST_RUNNER_ARRDECK_LIVE_URL to xcodebuild (the TEST_RUNNER_ prefix is how
-/// env vars reach the test runner process); skipped when absent, so CI passes
-/// without a backend.
+/// Drives the real app in the simulator against real services — the only
+/// place the ATS exception and the local-network permission meet the actual
+/// iOS network stack. Opt-in: pass the services' connections as
+/// TEST_RUNNER_ARRDECK_CONNECTIONS to xcodebuild (see `launchWithServices`);
+/// skipped when absent, so CI passes without them.
 final class OnboardingUITests: XCTestCase {
     /// With TEST_RUNNER_ARRDECK_SCREENSHOT_DIR set, drops a PNG of the current
     /// screen there — the simulator has no other way to reach a screen that
@@ -16,30 +15,9 @@ final class OnboardingUITests: XCTestCase {
         try? XCUIScreen.main.screenshot().pngRepresentation.write(to: url)
     }
 
-    /// Opens Movies on the live backend, the way the end-to-end test does.
-    func openMovies(_ app: XCUIApplication, live: String) {
-        app.launchArguments = ["--reset-profiles"]
-        app.launch()
-        addUIInterruptionMonitor(withDescription: "local network") { alert in
-            for label in ["Allow", "Tillad"] where alert.buttons[label].exists {
-                alert.buttons[label].tap()
-                return true
-            }
-            return false
-        }
-        app.buttons["add-server"].tap()
-        let field = app.textFields["server-address"]
-        XCTAssert(field.waitForExistence(timeout: 5))
-        field.tap()
-        field.typeText(live.replacingOccurrences(of: "http://", with: ""))
-        app.buttons["connect"].tap()
-        app.tap()
-        let outcome = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'no sign-in needed'")).firstMatch
-        XCTAssert(outcome.waitForExistence(timeout: 15), "probe never reported reachable")
-        app.buttons["save-server"].tap()
-        let row = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'arrdeck '")).firstMatch
-        XCTAssert(row.waitForExistence(timeout: 5))
-        row.tap()
+    /// Opens Movies on the real services, the way the end-to-end test does.
+    func openMovies(_ app: XCUIApplication) throws {
+        try launchWithServices(app, english: false)
         let any = app.descendants(matching: .any)
         XCTAssert(any["tab-movies"].waitForExistence(timeout: 15), "tab bar never appeared")
         any["tab-movies"].tap()
@@ -49,11 +27,8 @@ final class OnboardingUITests: XCTestCase {
     /// iOS 26 goes back on a swipe from anywhere in the page, not only the
     /// edge; on a title page that swipe must not step to the previous title.
     func testSwipingRightGoesBack() throws {
-        guard let live = ProcessInfo.processInfo.environment["ARRDECK_LIVE_URL"] else {
-            throw XCTSkip("set TEST_RUNNER_ARRDECK_LIVE_URL to run against a real backend")
-        }
         let app = XCUIApplication()
-        openMovies(app, live: live)
+        try openMovies(app)
         let any = app.descendants(matching: .any)
         let window = app.windows.firstMatch
         func swipeRight(from x: CGFloat) {
@@ -101,11 +76,8 @@ final class OnboardingUITests: XCTestCase {
     /// The import sheet opens over a finished torrent's sheet and shows what the
     /// arr finds in its folder. Read-only: it never taps Import.
     func testImportSheetOpensFromAFinishedTorrent() throws {
-        guard let live = ProcessInfo.processInfo.environment["ARRDECK_LIVE_URL"] else {
-            throw XCTSkip("set TEST_RUNNER_ARRDECK_LIVE_URL to run against a real backend")
-        }
         let app = XCUIApplication()
-        openMovies(app, live: live)
+        try openMovies(app)
         let any = app.descendants(matching: .any)
         any["tab-activity"].tap()
         app.buttons["Queue"].tap()
@@ -130,52 +102,32 @@ final class OnboardingUITests: XCTestCase {
         snap("import-sheet-from-torrent")
     }
 
-    func testAddingTheLANServerEndToEnd() throws {
-        guard let live = ProcessInfo.processInfo.environment["ARRDECK_LIVE_URL"] else {
-            throw XCTSkip("set TEST_RUNNER_ARRDECK_LIVE_URL to run against a real backend")
-        }
-
+    /// A new profile has no services yet, so its connections open by
+    /// themselves. Needs nothing to talk to.
+    func testANewProfileOpensItsConnections() throws {
         let app = XCUIApplication()
         // UI tests start from a clean slate; the simulator's Keychain outlives
         // an uninstall.
         app.launchArguments = ["--reset-profiles"]
         app.launch()
+        app.buttons["get-started"].tap()
+        let save = app.buttons["save-profile"]
+        XCTAssert(save.waitForExistence(timeout: 5), "add sheet never appeared")
+        save.tap()
+        XCTAssert(app.staticTexts["Connections"].waitForExistence(timeout: 15), "connections never opened")
+        snap("new-profile-connections")
+    }
 
-        // The local-network permission prompt can appear on first connect; iOS
-        // only shows it once per install. Answer it if it does.
-        addUIInterruptionMonitor(withDescription: "local network") { alert in
-            for label in ["Allow", "Tillad"] where alert.buttons[label].exists {
-                alert.buttons[label].tap()
-                return true
-            }
-            return false
-        }
+    func testEveryTabEndToEnd() throws {
+        let app = XCUIApplication()
+        try launchWithServices(app, english: false)
 
-        app.buttons["add-server"].tap()
-        let field = app.textFields["server-address"]
-        XCTAssert(field.waitForExistence(timeout: 5))
-        field.tap()
-        field.typeText(live.replacingOccurrences(of: "http://", with: ""))
-        app.buttons["connect"].tap()
-        app.tap() // nudge, so a pending interruption monitor gets its chance
-
-        // The probe's verdict on a LAN backend: reachable, no sign-in needed.
-        let outcome = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'no sign-in needed'")).firstMatch
-        XCTAssert(outcome.waitForExistence(timeout: 15), "probe never reported reachable")
-        app.buttons["save-server"].tap()
-
-        // Back on the list, the saved profile shows its version line, which
-        // only exists when the probe's BackendInfo was carried into the store.
-        let row = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'arrdeck '")).firstMatch
-        XCTAssert(row.waitForExistence(timeout: 5), "saved profile lost its capabilities")
-        row.tap()
-
-        // Movies: the tab bar appears once /services has answered, and the
-        // library renders cards from /library/movies.
+        // Movies: the tab bar appears once the services have answered, and
+        // the library renders cards from Radarr.
         let any = app.descendants(matching: .any)
         XCTAssert(any["tab-movies"].waitForExistence(timeout: 15), "tab bar never appeared")
-        // Readarr is configured on this backend, so Books is the first tab.
-        XCTAssert(any["tab-books"].exists, "Books must appear when Readarr is configured")
+        // Books is the first tab whenever Readarr is configured.
+        if any["tab-books"].exists {
         any["tab-books"].tap()
         XCTAssert(app.waitForPage("library-readarr"), "books page never appeared")
         XCTAssert(any["library-card"].firstMatch.waitForExistence(timeout: 20), "no book cards rendered")
@@ -185,6 +137,7 @@ final class OnboardingUITests: XCTestCase {
         XCTAssert(app.buttons["Search now"].waitForExistence(timeout: 15), "book detail never loaded its actions")
         snap("book-detail")
         try app.goBack()
+        }
 
         app.tab("movies").tap()
         XCTAssert(app.waitForPage("library-radarr"), "movies page never appeared")
@@ -259,18 +212,16 @@ final class OnboardingUITests: XCTestCase {
         try app.goBack()
         XCTAssert(app.waitForPage("settings", timeout: 5), "did not return to Settings from Overview")
         snap("settings-after-overview")
-        // Statistics → Watching, when Plex is set up: Plex's play history.
-        app.buttons["manage-stats"].tap()
-        XCTAssert(any["stats"].waitForExistence(timeout: 10), "statistics never appeared")
-        if app.buttons["Watching"].exists {
-            app.buttons["Watching"].tap()
+        // Statistics, when Plex is set up: Plex's play history.
+        if app.buttons["manage-stats"].exists {
+            app.buttons["manage-stats"].tap()
+            XCTAssert(any["stats"].waitForExistence(timeout: 10), "statistics never appeared")
             XCTAssert(app.staticTexts["Plays"].waitForExistence(timeout: 20)
                 || app.staticTexts["Nothing watched in this period."].exists, "watch stats never loaded")
             snap("stats-watching")
-            app.buttons["Library"].tap()
+            try app.goBack()
+            XCTAssert(app.waitForPage("settings", timeout: 5), "did not return to Settings from Statistics")
         }
-        try app.goBack()
-        XCTAssert(app.waitForPage("settings", timeout: 5), "did not return to Settings from Statistics")
         let connections = app.buttons["manage-connections"]
         // It is the last row. Under the tab bar it still counts as hittable, so
         // scroll to the bottom first rather than until it "can" be tapped.
@@ -300,6 +251,6 @@ final class OnboardingUITests: XCTestCase {
         app.launchArguments = []
         app.launch()
         XCTAssert(any["tab-movies"].waitForExistence(timeout: 15), "profile did not survive a relaunch")
-        XCTAssertFalse(app.staticTexts["Could not read saved servers"].exists, "keychain read failed after relaunch")
+        XCTAssertFalse(app.staticTexts["Could not read saved profiles"].exists, "keychain read failed after relaunch")
     }
 }

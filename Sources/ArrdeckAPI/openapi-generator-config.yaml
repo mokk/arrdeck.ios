@@ -1,5 +1,5 @@
-# Types and client only (no server); public so the app targets can import it.
+# Types only: the schemas are the app's domain values. There is no client —
+# the app talks to the services themselves, never to an arrdeck server.
 generate:
   - types
-  - client
 accessModifier: public

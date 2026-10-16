@@ -26,13 +26,6 @@ actor FakeHistoryAPI: HistoryAPI {
         log("clear-\(app.rawValue)")
         blocked.removeAll { $0.arr == app }
     }
-    func statsHistory(days: Int) async throws -> [StatsSample] {
-        log("stats-\(days)")
-        return [
-            .init(disk_free_bytes: 100, indexer_grabs: 10, library_bytes: 1000, movies: 5, torrents_qbit: 3, torrents_tm: 4, ts: 1_700_000_000),
-            .init(disk_free_bytes: 90, indexer_grabs: 15, library_bytes: 1500, movies: 6, torrents_qbit: 3, torrents_tm: 5, ts: 1_700_086_400),
-        ]
-    }
 }
 
 @MainActor
@@ -79,45 +72,5 @@ actor FakeHistoryAPI: HistoryAPI {
         await model.clearBlocklist(.radarr)
         #expect(model.blocklist.value?.isEmpty == true)
         #expect(model.blockedApps.isEmpty)
-    }
-
-    @Test func statsSeriesAndWindows() async throws {
-        let api = FakeHistoryAPI(pages: [:])
-        let model = StatsModel(api: api, onSessionLost: {})
-        await model.load()
-        #expect(await api.count("stats-30") == 1)
-        let series = model.series
-        // series, episode files and queries are in no sample: unknown, so not
-        // charted (they once showed as flat lines at zero)
-        #expect(series.map(\.id) == ["library", "free", "movies", "torrents", "grabs"])
-        let torrents = series[3]
-        #expect(torrents.values == [7, 8], "both clients summed")
-        #expect(torrents.delta == 1)
-        #expect(series[1].delta == -10)
-        #expect(series[0].format(1500) == Format.bytes(1500))
-        #expect(model.range?.0 == Date(timeIntervalSince1970: 1_700_000_000))
-
-        model.window = .year
-        try await Task.sleep(for: .milliseconds(100))
-        #expect(await api.count("stats-365") == 1)
-        #expect(StatsSeriesBuilder.series(from: [], locale: .current).allSatisfy { $0.values.isEmpty })
-    }
-}
-
-@Suite struct StatsGapTests {
-    @Test func aSampleWithAServiceDownIsSkippedNotDrawnAsZero() {
-        let samples = [
-            StatsSample(library_bytes: 2_000, movies: 130, torrents_qbit: 5, ts: 1_000),
-            StatsSample(library_bytes: nil, movies: nil, torrents_qbit: 6, ts: 2_000),
-            StatsSample(library_bytes: 2_100, movies: 0, torrents_qbit: nil, torrents_tm: nil, ts: 3_000),
-        ]
-        let all = Dictionary(uniqueKeysWithValues: StatsSeriesBuilder.series(from: samples).map { ($0.id, $0) })
-        #expect(all["library"]?.values == [2_000, 2_100])
-        #expect(all["library"]?.delta == 100)
-        #expect(all["movies"]?.values == [130, 0], "a real zero stays")
-        #expect(all["torrents"]?.values == [5, 6], "unknown only when neither client answered")
-        #expect(all["library"]?.range?.1 == Date(timeIntervalSince1970: 3_000))
-        #expect(all["torrents"]?.range?.1 == Date(timeIntervalSince1970: 2_000), "each chart spans its own known samples")
-        #expect(all["free"]?.values.isEmpty == true)
     }
 }

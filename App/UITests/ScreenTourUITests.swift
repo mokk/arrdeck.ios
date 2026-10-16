@@ -2,9 +2,9 @@ import XCTest
 
 /// Visits every tab and every Settings page and screenshots each, so the
 /// screens can be compared side by side — headings, segment pickers, toolbars.
-/// Asserts nothing about data: it runs against any backend, even one whose
-/// services are all offline. Opt-in like OnboardingUITests: needs
-/// TEST_RUNNER_ARRDECK_LIVE_URL and TEST_RUNNER_ARRDECK_SCREENSHOT_DIR.
+/// Asserts nothing about data: it runs against any services, even ones that
+/// are all offline. Opt-in like OnboardingUITests: needs
+/// TEST_RUNNER_ARRDECK_CONNECTIONS and TEST_RUNNER_ARRDECK_SCREENSHOT_DIR.
 @MainActor
 final class ScreenTourUITests: XCTestCase {
     func snap(_ name: String) {
@@ -14,34 +14,12 @@ final class ScreenTourUITests: XCTestCase {
     }
 
     func testTourEveryScreen() throws {
-        guard let live = ProcessInfo.processInfo.environment["ARRDECK_LIVE_URL"],
-              ProcessInfo.processInfo.environment["ARRDECK_SCREENSHOT_DIR"] != nil
-        else { throw XCTSkip("set TEST_RUNNER_ARRDECK_LIVE_URL and TEST_RUNNER_ARRDECK_SCREENSHOT_DIR") }
+        guard ProcessInfo.processInfo.environment["ARRDECK_SCREENSHOT_DIR"] != nil
+        else { throw XCTSkip("set TEST_RUNNER_ARRDECK_SCREENSHOT_DIR") }
 
         let app = XCUIApplication()
         // English whatever the simulator's language, so rows are found by label
-        app.launchArguments = ["--reset-profiles", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
-        app.launch()
-        addUIInterruptionMonitor(withDescription: "permission") { alert in
-            for label in ["Allow", "Tillad", "Don’t Allow"] where alert.buttons[label].exists {
-                alert.buttons[label].tap()
-                return true
-            }
-            return false
-        }
-
-        app.buttons["add-server"].tap()
-        let field = app.textFields["server-address"]
-        XCTAssert(field.waitForExistence(timeout: 5))
-        field.tap()
-        field.typeText(live.replacingOccurrences(of: "http://", with: ""))
-        app.buttons["connect"].tap()
-        app.tap()
-        XCTAssert(app.buttons["save-server"].waitForExistence(timeout: 15))
-        app.buttons["save-server"].tap()
-        let row = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'arrdeck '")).firstMatch
-        XCTAssert(row.waitForExistence(timeout: 5))
-        row.tap()
+        try launchWithServices(app)
 
         let any = app.descendants(matching: .any)
         XCTAssert(any["tab-settings"].waitForExistence(timeout: 15), "tab bar never appeared")
@@ -63,8 +41,7 @@ final class ScreenTourUITests: XCTestCase {
         // Every Settings page reachable from the hub, by its row's label.
         let pages = [
             "Display", "Popular releases", "Statistics", "Overview", "Cleanup", "Wanted", "Indexers",
-            "System", "Subtitles", "Connections", "Calendar subscription", "Exclusions", "Release name tester",
-            "Reading apps", "Notifications",
+            "System", "Subtitles", "Connections", "Exclusions", "Release name tester",
         ]
         for page in pages {
             app.tab("settings").tap()

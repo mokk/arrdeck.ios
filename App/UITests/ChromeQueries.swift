@@ -55,3 +55,29 @@ extension XCUIApplication {
         return any["tab-\(name)"]
     }
 }
+
+extension XCTestCase {
+    /// Launches into a profile with real services: their connections as JSON
+    /// in TEST_RUNNER_ARRDECK_CONNECTIONS (the TEST_RUNNER_ prefix is how env
+    /// vars reach the test runner process), e.g.
+    /// `{"radarr": {"url": "http://10.0.0.5:7878", "apiKey": "…"}}`. Skipped
+    /// without it, so CI passes with no services to talk to.
+    func launchWithServices(_ app: XCUIApplication, english: Bool = true) throws {
+        guard let connections = ProcessInfo.processInfo.environment["ARRDECK_CONNECTIONS"] else {
+            throw XCTSkip("set TEST_RUNNER_ARRDECK_CONNECTIONS to run against real services")
+        }
+        app.launchArguments = ["--reset-profiles", "--seed-profile"]
+            + (english ? ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"] : [])
+        app.launchEnvironment["ARRDECK_CONNECTIONS"] = connections
+        app.launch()
+        // The local-network permission prompt can appear on first connect; iOS
+        // only shows it once per install. Answer it if it does.
+        addUIInterruptionMonitor(withDescription: "permission") { alert in
+            for label in ["Allow", "Tillad", "Don’t Allow"] where alert.buttons[label].exists {
+                alert.buttons[label].tap()
+                return true
+            }
+            return false
+        }
+    }
+}

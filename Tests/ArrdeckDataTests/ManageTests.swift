@@ -322,16 +322,6 @@ extension FakeManageAPI: ExtrasAPI {
 }
 
 @Suite struct CleanupAndRequestsTests {
-    @Test func forecastProjectsASteadyLoss() {
-        let day = 86_400
-        let losing = (0..<30).map { StatsSample(disk_free_bytes: 1_000_000_000_000 - $0 * 10_000_000_000, ts: 1_790_000_000 + $0 * day) }
-        guard case let .full(days, perDay) = DiskForecast.compute(losing) else { Issue.record("expected a date"); return }
-        #expect(Int(perDay / 1e9) == 10 && Int(days.rounded()) == 71)
-        let flat = (0..<30).map { StatsSample(disk_free_bytes: 500_000_000_000, ts: 1_790_000_000 + $0 * day) }
-        #expect(DiskForecast.compute(flat) == .steady)
-        #expect(DiskForecast.compute(Array(losing.prefix(5))) == .unknown)
-    }
-
     @Test func requestsAreFoundByKindAndId() {
         let pending = RequestState(request_id: 1, requested_by: "mokk", status: 1)
         let map = ["movie:tmdb:5": pending, "tv:tvdb:9": RequestState(request_id: 2, status: 2)]
@@ -358,12 +348,9 @@ struct FakeCleanupAPI: CleanupAPI {
 }
 
 @Suite struct ReadingTests {
-    @Test func statusesAndTheCatalogueAddress() {
+    @Test func statuses() {
         #expect(ReadingStatus(rawValue: "to_read") == .toRead)
         #expect(Reading(status: .reading, updated_at: 1).readingStatus == .reading)
-        let base = URL(string: "http://10.0.0.154:3500")!
-        #expect(OpdsSettings(enabled: true, token: "abc").url(on: base)?.absoluteString == "http://10.0.0.154:3500/opds/abc")
-        #expect(OpdsSettings(enabled: false).url(on: base) == nil)
     }
 }
 

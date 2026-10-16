@@ -1,11 +1,10 @@
 import ArrdeckData
 import SwiftUI
 
-/// Settings → Display: how the app looks and behaves, on every device that uses this server. The sort
-/// menu changes the same layouts; this is every choice in one place.
+/// Settings → Display: how the app looks and behaves on this device. The
+/// sort menu changes the same layouts; this is every choice in one place.
 struct DisplaySettingsView: View {
     let configured: Set<String>
-    let notifications: (any NotificationsAPI)?
 
     @AppStorage(DisplayKeys.startTab) private var startTab = ""
     @AppStorage(DisplayKeys.tabOrder) private var tabOrder = ""
@@ -112,16 +111,9 @@ struct DisplaySettingsView: View {
             } footer: {
                 Text("While arrdeck is open and something is downloading, its progress shows on the Lock Screen and in the Dynamic Island. Set on this device only.")
             }
-            if let notifications {
-                Section {
-                    NavigationLink {
-                        NotificationSettingsView(api: notifications)
-                    } label: { Label("Notifications", systemImage: "bell") }
-                }
-            }
             Section {
             } footer: {
-                Text("These choices follow you to your other devices on this server, except the language, which is set per device. Drag the tabs to reorder them.")
+                Text("Drag the tabs to reorder them.")
             }
         }
         .alwaysEditing()
@@ -152,127 +144,6 @@ private struct LibraryDisplaySection: View {
                 ForEach(UnmonitoredMode.allCases, id: \.self) { Text($0.label).tag($0) }
             }
         }
-    }
-}
-
-/// The server's push settings. This app cannot receive web push itself; these
-/// are the defaults every browser subscribed to arrdeck follows.
-struct NotificationSettingsView: View {
-    @State private var model: NotificationSettingsModel
-    @State private var quietOn = false
-    @State private var quietStart = Date()
-    @State private var quietEnd = Date()
-    /// The delay as the stepper shows it; saved a moment after the last tap
-    /// so stepping from 10 to 30 is one save, not twenty.
-    @State private var downMinutes: Int?
-
-    init(api: any NotificationsAPI) {
-        _model = State(initialValue: NotificationSettingsModel(api: api))
-    }
-
-    static let clock: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        f.locale = Locale(identifier: "en_US_POSIX")
-        return f
-    }()
-
-    var body: some View {
-        Form {
-            ListPageHeading(title: String(localized: "Notifications"))
-            switch model.events {
-            case .loading: LoadingRow()
-            case let .failed(reason): ErrorNote(reason)
-            case let .loaded(events):
-                Section {
-                    ForEach(events.available, id: \.key) { event in
-                        Toggle(event.label, isOn: Binding(
-                            get: { model.enabled.contains(event.key) },
-                            set: { on in Task { await model.set(event.key, on: on) } }
-                        ))
-                    }
-                } header: {
-                    Text("Events")
-                } footer: {
-                    Text("What arrdeck pushes to the browsers subscribed to it. This app cannot receive web push itself.")
-                }
-                if model.hasServiceAlerts {
-                    Section {
-                        Stepper(value: Binding(
-                            get: { downMinutes ?? model.serviceDownMinutes },
-                            set: { downMinutes = $0 }
-                        ), in: NotificationSettingsModel.serviceDownRange) {
-                            Text("After \(downMinutes ?? model.serviceDownMinutes) min without an answer")
-                        }
-                    } header: {
-                        Text("Service alerts")
-                    } footer: {
-                        Text("Every service is checked once a minute: one notification when one has not answered for this long, one when it is back. During quiet hours they wait until the window ends.")
-                    }
-                }
-                Section {
-                    Toggle("Quiet hours", isOn: $quietOn)
-                    if quietOn {
-                        DatePicker("From", selection: $quietStart, displayedComponents: .hourAndMinute)
-                        DatePicker("Until", selection: $quietEnd, displayedComponents: .hourAndMinute)
-                    }
-                } footer: {
-                    Text("Nothing is pushed in this window; it follows this device's time zone.")
-                }
-                if model.enabled.contains("digest") {
-                    Section {
-                        Picker("Day", selection: Binding(
-                            get: { model.digestDay },
-                            set: { day in Task { await model.setDigest(day: day, time: model.digestTime) } }
-                        )) {
-                            ForEach(0..<7, id: \.self) { Text(Self.weekday($0)).tag($0) }
-                        }
-                        DatePicker("Time", selection: Binding(
-                            get: { Self.clock.date(from: model.digestTime) ?? .now },
-                            set: { date in Task { await model.setDigest(day: model.digestDay, time: Self.clock.string(from: date)) } }
-                        ), displayedComponents: .hourAndMinute)
-                    } header: {
-                        Text("Weekly digest")
-                    } footer: {
-                        Text("What arrived this week and what is coming up next week. Switch the Weekly digest event off to stop it.")
-                    }
-                }
-            }
-        }
-        .themedList()
-        .chromePage()
-        .navigationTitle("Notifications")
-        .pageTitle()
-        .task {
-            await model.load()
-            if let rules = model.rules, let start = rules.quiet_start, !start.isEmpty,
-               let from = Self.clock.date(from: start), let until = Self.clock.date(from: rules.quiet_end ?? "") {
-                quietStart = from
-                quietEnd = until
-                quietOn = true
-            }
-        }
-        .task(id: downMinutes) {
-            guard let minutes = downMinutes else { return }
-            try? await Task.sleep(for: .milliseconds(600))
-            guard !Task.isCancelled else { return }
-            await model.setServiceDownMinutes(minutes)
-        }
-        .onChange(of: quietOn) { _, _ in saveQuiet() }
-        .onChange(of: quietStart) { _, _ in if quietOn { saveQuiet() } }
-        .onChange(of: quietEnd) { _, _ in if quietOn { saveQuiet() } }
-    }
-
-    /// The server counts Monday as 0; 1 January 2024 was a Monday.
-    static func weekday(_ day: Int) -> String {
-        let date = Calendar(identifier: .gregorian).date(from: DateComponents(year: 2024, month: 1, day: 1 + day)) ?? .now
-        return date.formatted(.dateTime.weekday(.wide))
-    }
-
-    func saveQuiet() {
-        let start = quietOn ? Self.clock.string(from: quietStart) : ""
-        let end = quietOn ? Self.clock.string(from: quietEnd) : ""
-        Task { await model.setQuiet(start: start, end: end) }
     }
 }
 

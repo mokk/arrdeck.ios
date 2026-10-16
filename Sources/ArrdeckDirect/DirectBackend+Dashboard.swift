@@ -97,12 +97,6 @@ extension DirectBackend: DashboardAPI {
         }
     }
 
-    /// The server samples the library every six hours while nobody looks;
-    /// the device keeps no such record, so there is no history to chart.
-    public func statsHistory(days: Int) async throws -> [StatsSample] {
-        []
-    }
-
     public func act(on requestID: Int, _ action: RequestAction) async throws {
         try await call {
             try await registry.overseerr().send("POST", "/request/\(requestID)/\(action.rawValue)")

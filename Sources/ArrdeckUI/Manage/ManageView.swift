@@ -3,66 +3,44 @@ import ArrdeckKit
 import SwiftUI
 
 /// The Manage tab: a settings-style hub into the two libraries, the indexers,
-/// the arrs' system pages and the connection settings. The PWA used sub-tabs;
+/// the arrs' system pages and the services' connections. The PWA used sub-tabs;
 /// on iOS a list of destinations reads better and leaves room to grow.
 public struct ManageView: View {
     let model: DashboardModel
     let api: any LibraryPageAPI & IndexerAddAPI & HistoryAPI & DownloadsAPI & CalendarAPI
     let baseURL: URL
-    /// For addresses handed to other apps (calendar feeds, the book
-    /// catalogue): the profile's primary, which works away from home too,
-    /// where `baseURL` may be the home address in use right now.
-    let shareURL: URL
-    let serverName: String
-    let sessionLabel: String
+    let profileName: String
     let onSessionLost: @MainActor () -> Void
-    let onSwitchServer: () -> Void
-    let onShowConnection: () -> Void
-    /// What the backend said it can do, for screens whose endpoints older
-    /// servers lack; nil until it has said.
-    let backend: BackendInfo?
+    let onSwitchProfile: () -> Void
 
     public init(
         model: DashboardModel,
         api: any LibraryPageAPI & IndexerAddAPI & HistoryAPI & DownloadsAPI & CalendarAPI,
-        baseURL: URL, shareURL: URL? = nil, serverName: String, sessionLabel: String,
-        backend: BackendInfo? = nil,
+        baseURL: URL, profileName: String,
         onSessionLost: @escaping @MainActor () -> Void,
-        onSwitchServer: @escaping () -> Void, onShowConnection: @escaping () -> Void
+        onSwitchProfile: @escaping () -> Void
     ) {
-        self.backend = backend
         self.model = model
         self.api = api
         self.baseURL = baseURL
-        self.shareURL = shareURL ?? baseURL
-        self.serverName = serverName
-        self.sessionLabel = sessionLabel
+        self.profileName = profileName
         self.onSessionLost = onSessionLost
-        self.onSwitchServer = onSwitchServer
-        self.onShowConnection = onShowConnection
+        self.onSwitchProfile = onSwitchProfile
     }
 
     var hasPlex: Bool { model.has("plex") }
 
     public var body: some View {
         List {
-            Section("Server") {
-                Button(action: onSwitchServer) {
+            Section("Profile") {
+                Button(action: onSwitchProfile) {
                     HStack {
-                        Label(serverName, systemImage: "server.rack")
+                        Label(profileName, systemImage: "person.crop.circle")
                         Spacer()
                         Text("Switch").foregroundStyle(.secondary)
                     }
                 }
-                .accessibilityIdentifier("servers")
-                Button(action: onShowConnection) {
-                    HStack {
-                        Label("Connection", systemImage: "info.circle")
-                        Spacer()
-                        Text(sessionLabel).foregroundStyle(.secondary)
-                    }
-                }
-                .accessibilityIdentifier("connection")
+                .accessibilityIdentifier("profiles")
             }
             if let expiry = ServerView.expiry {
                 Section {
@@ -78,7 +56,7 @@ public struct ManageView: View {
             }
             Section {
                 NavigationLink {
-                    DisplaySettingsView(configured: model.configured, notifications: api as? any NotificationsAPI)
+                    DisplaySettingsView(configured: model.configured)
                 } label: { Label("Display", systemImage: "paintpalette") }
                 .accessibilityIdentifier("settings-display")
             }
@@ -88,24 +66,21 @@ public struct ManageView: View {
                         PopularView(api: api, onSessionLost: onSessionLost)
                     } label: { Label("Popular releases", systemImage: "flame") }
                 }
+                if hasPlex, let watching = api as? any WatchingAPI {
+                    NavigationLink {
+                        StatsScreen(api: watching, baseURL: baseURL)
+                    } label: { Label("Statistics", systemImage: "chart.line.uptrend.xyaxis") }
+                    .accessibilityIdentifier("manage-stats")
+                }
                 NavigationLink {
-                    StatsScreen(api: api, watching: model.has("plex") ? api as? any WatchingAPI : nil,
-                                baseURL: baseURL, onSessionLost: onSessionLost)
-                } label: { Label("Statistics", systemImage: "chart.line.uptrend.xyaxis") }
-                .accessibilityIdentifier("manage-stats")
-                NavigationLink {
-                    DashboardView(model: model, baseURL: baseURL, shareURL: shareURL, api: api, onSessionLost: onSessionLost)
+                    DashboardView(model: model, baseURL: baseURL, api: api, onSessionLost: onSessionLost)
                         .navigationTitle("Overview")
                         .pageTitle()
                 } label: { Label("Overview", systemImage: "square.grid.2x2") }
                 .accessibilityIdentifier("overview")
                 if model.hasArr, let cleanup = api as? any CleanupAPI {
                     NavigationLink {
-                        CleanupView(
-                            api: cleanup,
-                            rules: backend?.supports(.cleanupRules) == true ? api as? any CleanupRulesAPI : nil,
-                            tags: api, baseURL: baseURL
-                        )
+                        CleanupView(api: cleanup, baseURL: baseURL)
                     } label: { Label("Cleanup", systemImage: "eraser") }
                 }
                 if model.hasArr {
@@ -144,16 +119,6 @@ public struct ManageView: View {
                         } label: { Label("Subtitles", systemImage: "captions.bubble") }
                         .accessibilityIdentifier("manage-subtitles")
                     }
-                    if model.hasArr, let ical = api as? any IcalAPI {
-                        NavigationLink {
-                            IcalSettingsView(api: ical, baseURL: shareURL)
-                        } label: { Label("Calendar subscription", systemImage: "calendar.badge.plus") }
-                    }
-                    if model.has("readarr"), let opds = api as? any OpdsAPI {
-                        NavigationLink {
-                            OpdsSettingsView(api: opds, baseURL: shareURL)
-                        } label: { Label("Reading apps (OPDS)", systemImage: "books.vertical") }
-                    }
                 }
             }
             Section {
@@ -162,7 +127,7 @@ public struct ManageView: View {
                 } label: { Label("Connections", systemImage: "link") }
                 .accessibilityIdentifier("manage-connections")
             } footer: {
-                Text("Where arrdeck finds each service. Changing these affects every screen.")
+                Text("Where arrdeck finds each service, kept on this device. Away from home they need to be reachable from where you are, through a VPN such as Tailscale.")
             }
         }
         .dashboardListStyle()

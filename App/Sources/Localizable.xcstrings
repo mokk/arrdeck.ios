@@ -51,26 +51,6 @@
         }
       }
     },
-    "%@ is started again.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ startes igen."
-          }
-        }
-      }
-    },
-    "%@ is switched on: the change applies from the next run.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ er slået til: ændringen gælder fra næste kørsel."
-          }
-        }
-      }
-    },
     "%@ overdue": {
       "localizations": {
         "da": {
@@ -111,63 +91,13 @@
         }
       }
     },
-    "%@ restarted": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ genstartet"
-          }
-        }
-      }
-    },
-    "%@ started": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ startet"
-          }
-        }
-      }
-    },
-    "%@ stops answering while it restarts.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ svarer ikke, mens den genstarter."
-          }
-        }
-      }
-    },
     "%@ · %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · %@"
-          }
-        }
-      }
-    },
-    "%@ · %lld d grace": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · %lld d frist"
-          }
-        }
-      }
-    },
-    "%@ — %lld scheduled": {
       "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ — %lld planlagt"
+            "value": "%@ · %@"
           }
         }
       }
@@ -192,42 +122,12 @@
         }
       }
     },
-    "%@: what it marked is released at the next run.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@: det, den har markeret, frigives ved næste kørsel."
-          }
-        }
-      }
-    },
-    "%@: what it matches is marked at the next run and deleted %lld days later, unless it stops matching or you keep it.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@: det, den matcher, markeres ved næste kørsel og slettes %lld dage senere, medmindre det ikke længere matcher, eller du beholder det."
-          }
-        }
-      }
-    },
     "%lld active of %lld torrents · Show all": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "%lld aktive af %lld torrents · Vis alle"
-          }
-        }
-      }
-    },
-    "%lld added recently": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld tilføjet for nylig"
           }
         }
       }
@@ -252,16 +152,6 @@
         }
       }
     },
-    "%lld days": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld dage"
-          }
-        }
-      }
-    },
     "%lld days ago": {
       "localizations": {
         "da": {
@@ -278,16 +168,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld downloads: %@."
-          }
-        }
-      }
-    },
-    "%lld due, waiting for the next run (limit per run)": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld forfaldne venter på næste kørsel (grænse pr. kørsel)"
           }
         }
       }
@@ -328,16 +208,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld emner"
-          }
-        }
-      }
-    },
-    "%lld kept": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld beholdt"
           }
         }
       }
@@ -402,16 +272,6 @@
         }
       }
     },
-    "%lld of %lld containers running": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld af %lld containere kører"
-          }
-        }
-      }
-    },
     "%lld of %lld in the library": {
       "localizations": {
         "da": {
@@ -448,16 +308,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld af %lld numre på disken"
-          }
-        }
-      }
-    },
-    "%lld per run": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld pr. kørsel"
           }
         }
       }
@@ -508,16 +358,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld udgivelser på %lld t"
-          }
-        }
-      }
-    },
-    "%lld requested": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld anmodet"
           }
         }
       }
@@ -653,16 +493,6 @@
         }
       }
     },
-    "1 title · %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1 titel · %@"
-          }
-        }
-      }
-    },
     "1 track": {
       "localizations": {
         "da": {
@@ -683,16 +513,6 @@
         }
       }
     },
-    "10.0.0.154:3500": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "10.0.0.154:3500"
-          }
-        }
-      }
-    },
     "30 days": {
       "localizations": {
         "da": {
@@ -709,36 +529,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "7 dage"
-          }
-        }
-      }
-    },
-    "90 days": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "90 dage"
-          }
-        }
-      }
-    },
-    "> %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "> %@"
-          }
-        }
-      }
-    },
-    "A cleanup run is already going.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En oprydningskørsel er allerede i gang."
           }
         }
       }
@@ -769,36 +559,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "En udgivelse blev hentet og afvist, så den prøves ikke igen: {release} fra {indexer}."
-          }
-        }
-      }
-    },
-    "A server keeps at most %lld rules.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En server har højst %lld regler."
-          }
-        }
-      }
-    },
-    "A test run shows what a run would do now and changes nothing.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En prøvekørsel viser, hvad en kørsel ville gøre nu, og ændrer intet."
-          }
-        }
-      }
-    },
-    "A title must meet every condition that is ticked.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En titel skal opfylde alle de betingelser, der er sat flueben ved."
           }
         }
       }
@@ -943,22 +703,12 @@
         }
       }
     },
-    "Add rule": {
+    "Add profile": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tilføj regel"
-          }
-        }
-      }
-    },
-    "Add server": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tilføj server"
+            "value": "Tilføj profil"
           }
         }
       }
@@ -989,6 +739,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tilføj torrent"
+          }
+        }
+      }
+    },
+    "Add your services": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj dine tjenester"
           }
         }
       }
@@ -1029,16 +789,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tilføjer…"
-          }
-        }
-      }
-    },
-    "After %lld min without an answer": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Efter %lld min uden svar"
           }
         }
       }
@@ -1133,16 +883,6 @@
         }
       }
     },
-    "Allow %lld deletions per run": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tillad %lld sletninger pr. kørsel"
-          }
-        }
-      }
-    },
     "Allow again": {
       "localizations": {
         "da": {
@@ -1210,26 +950,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alle"
-          }
-        }
-      }
-    },
-    "Anyone with this address can download your books — treat it like a password.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alle med adressen kan hente dine bøger — behandl den som en adgangskode."
-          }
-        }
-      }
-    },
-    "Anyone with this address can see what is coming up — treat it like a password.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alle med denne adresse kan se, hvad der er på vej — behandl den som en adgangskode."
           }
         }
       }
@@ -1334,46 +1054,6 @@
         }
       }
     },
-    "Asking Plex and the libraries…": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spørger Plex og bibliotekerne…"
-          }
-        }
-      }
-    },
-    "At home · %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hjemme · %@"
-          }
-        }
-      }
-    },
-    "At least 3 days. Titles stay in “Leaving soon” this long before they go.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mindst 3 dage. Titler bliver i “Forsvinder snart” så længe, før de fjernes."
-          }
-        }
-      }
-    },
-    "At the pace of this period: %@ a day": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "I periodens tempo: %@ om dagen"
-          }
-        }
-      }
-    },
     "Author": {
       "localizations": {
         "da": {
@@ -1410,26 +1090,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Auto"
-          }
-        }
-      }
-    },
-    "Automatic cleanup": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Automatisk oprydning"
-          }
-        }
-      }
-    },
-    "Away · %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ude · %@"
           }
         }
       }
@@ -1624,17 +1284,8 @@
         }
       }
     },
-    "Calendar address": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kalenderadresse"
-          }
-        }
-      }
-    },
     "Calendar subscription": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -1664,16 +1315,6 @@
         }
       }
     },
-    "Catalogue address": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Katalogets adresse"
-          }
-        }
-      }
-    },
     "Category": {
       "localizations": {
         "da": {
@@ -1690,26 +1331,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Skift"
-          }
-        }
-      }
-    },
-    "Check and save": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tjek og gem"
-          }
-        }
-      }
-    },
-    "Checking…": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kontrollerer…"
           }
         }
       }
@@ -1835,16 +1456,6 @@
         }
       }
     },
-    "Clear the keep list": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ryd listen over beholdte"
-          }
-        }
-      }
-    },
     "Client": {
       "localizations": {
         "da": {
@@ -1895,72 +1506,12 @@
         }
       }
     },
-    "Conditions": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Betingelser"
-          }
-        }
-      }
-    },
-    "Connect": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forbind"
-          }
-        }
-      }
-    },
-    "Connect to my services directly": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forbind direkte til mine tjenester"
-          }
-        }
-      }
-    },
-    "Connected directly to your services": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forbundet direkte til dine tjenester"
-          }
-        }
-      }
-    },
-    "Connected — arrdeck %@, no sign-in needed here": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forbundet — arrdeck %@, ingen indlogning nødvendig herfra"
-          }
-        }
-      }
-    },
     "Connecting…": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Forbinder…"
-          }
-        }
-      }
-    },
-    "Connection": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forbindelse"
           }
         }
       }
@@ -2006,42 +1557,12 @@
         }
       }
     },
-    "Copy address": {
+    "Could not read saved profiles": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kopiér adresse"
-          }
-        }
-      }
-    },
-    "Could not ask every service.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kunne ikke spørge alle tjenester."
-          }
-        }
-      }
-    },
-    "Could not ask every service: %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kunne ikke spørge alle tjenester: %@"
-          }
-        }
-      }
-    },
-    "Could not reach it: %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kunne ikke nå den: %@"
+            "value": "Kunne ikke læse gemte profiler"
           }
         }
       }
@@ -2052,6 +1573,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kunne ikke opdatere — %@"
+          }
+        }
+      }
+    },
+    "Could not save profiles": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunne ikke gemme profiler"
           }
         }
       }
@@ -2116,16 +1647,6 @@
         }
       }
     },
-    "Daily": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Daglig"
-          }
-        }
-      }
-    },
     "Dark": {
       "localizations": {
         "da": {
@@ -2162,16 +1683,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Datoer (20. sep.)"
-          }
-        }
-      }
-    },
-    "Day": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dag"
           }
         }
       }
@@ -2277,16 +1788,6 @@
         }
       }
     },
-    "Delete rule": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slet regel"
-          }
-        }
-      }
-    },
     "Delete the album's files": {
       "localizations": {
         "da": {
@@ -2358,26 +1859,6 @@
         }
       }
     },
-    "Deleted (%lld)": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slettet (%lld)"
-          }
-        }
-      }
-    },
-    "Deletes at most": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sletter højst"
-          }
-        }
-      }
-    },
     "Delete…": {
       "localizations": {
         "da": {
@@ -2428,16 +1909,6 @@
         }
       }
     },
-    "Direct to your services": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Direkte til dine tjenester"
-          }
-        }
-      }
-    },
     "Direction": {
       "localizations": {
         "da": {
@@ -2464,16 +1935,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Disk %lld · %@"
-          }
-        }
-      }
-    },
-    "Disk space": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Diskplads"
           }
         }
       }
@@ -2600,12 +2061,12 @@
         }
       }
     },
-    "E-reader apps such as KOReader, Moon+ Reader or Thorium can browse the books on disk here and download them. Add the address to the app as an OPDS catalogue.": {
+    "Drag the tabs to reorder them.": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "E-bogsapps som KOReader, Moon+ Reader eller Thorium kan gennemse bøgerne på disken her og hente dem. Tilføj adressen i appen som et OPDS-katalog."
+            "value": "Træk fanerne for at ændre rækkefølgen."
           }
         }
       }
@@ -2616,16 +2077,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "EP'er"
-          }
-        }
-      }
-    },
-    "Each run may delete more titles.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hver kørsel må slette flere titler."
           }
         }
       }
@@ -2657,16 +2108,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Redigér %@"
-          }
-        }
-      }
-    },
-    "Edit rule": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Redigér regel"
           }
         }
       }
@@ -2731,16 +2172,6 @@
         }
       }
     },
-    "Episode files": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Afsnitsfiler"
-          }
-        }
-      }
-    },
     "Episodes": {
       "localizations": {
         "da": {
@@ -2761,32 +2192,12 @@
         }
       }
     },
-    "Events": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hændelser"
-          }
-        }
-      }
-    },
     "Every action": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Alle handlinger"
-          }
-        }
-      }
-    },
-    "Every service is checked once a minute: one notification when one has not answered for this long, one when it is back. During quiet hours they wait until the window ends.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alle tjenester tjekkes én gang i minuttet: én notifikation, når en ikke har svaret så længe, og én, når den er tilbage. I stille timer venter de, til perioden slutter."
           }
         }
       }
@@ -2852,16 +2263,6 @@
         }
       }
     },
-    "Features": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Funktioner"
-          }
-        }
-      }
-    },
     "File": {
       "localizations": {
         "da": {
@@ -2893,16 +2294,6 @@
       }
     },
     "Film": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Film"
-          }
-        }
-      }
-    },
-    "Films": {
       "localizations": {
         "da": {
           "stringUnit": {
@@ -2988,28 +2379,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Filtrér sprog"
-          }
-        }
-      }
-    },
-    "Filter movies…": {
-      "extractionState": "manual",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Filtrér film…"
-          }
-        }
-      }
-    },
-    "Filter series…": {
-      "extractionState": "manual",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Filtrér serier…"
           }
         }
       }
@@ -3134,42 +2503,13 @@
         }
       }
     },
-    "Found an arrdeck — it will ask you to sign in": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fandt en arrdeck — den vil bede dig logge ind"
-          }
-        }
-      }
-    },
     "Free space": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Ledig plads"
-          }
-        }
-      }
-    },
-    "Free space is not shrinking": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Den ledige plads bliver ikke mindre"
-          }
-        }
-      }
-    },
-    "From": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fra"
           }
         }
       }
@@ -3180,26 +2520,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fra Plex' afspilningshistorik. Timerne er et skøn: hver afspilning tæller filmens længde eller seriens normale afsnitslængde."
-          }
-        }
-      }
-    },
-    "Full in about %lld days": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fuld om cirka %lld dage"
-          }
-        }
-      }
-    },
-    "Full in about %lld weeks": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fuld om cirka %lld uger"
           }
         }
       }
@@ -3274,26 +2594,6 @@
         }
       }
     },
-    "Grabs": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hentninger"
-          }
-        }
-      }
-    },
-    "Grace period": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Frist"
-          }
-        }
-      }
-    },
     "Group by": {
       "localizations": {
         "da": {
@@ -3310,16 +2610,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hardlinkes eller kopieres, så torrenten bliver ved med at seede."
-          }
-        }
-      }
-    },
-    "Held back: %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Holdt tilbage: %@"
           }
         }
       }
@@ -3380,27 +2670,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Historik"
-          }
-        }
-      }
-    },
-    "Home": {
-      "extractionState": "manual",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hjem"
-          }
-        }
-      }
-    },
-    "Home address": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hjemmeadresse"
           }
         }
       }
@@ -3506,16 +2775,6 @@
         }
       }
     },
-    "Include": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Medtag"
-          }
-        }
-      }
-    },
     "Indexers": {
       "localizations": {
         "da": {
@@ -3556,72 +2815,12 @@
         }
       }
     },
-    "It was restarted a moment ago. Try again in %lld s.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Den blev genstartet for et øjeblik siden. Prøv igen om %lld s."
-          }
-        }
-      }
-    },
-    "It was restarted a moment ago. Try again shortly.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Den blev genstartet for et øjeblik siden. Prøv igen om lidt."
-          }
-        }
-      }
-    },
     "Jump to letter": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Hop til bogstav"
-          }
-        }
-      }
-    },
-    "Keep": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Behold"
-          }
-        }
-      }
-    },
-    "Keep %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Behold %@"
-          }
-        }
-      }
-    },
-    "Keep list": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beholdte"
-          }
-        }
-      }
-    },
-    "Kept (%lld)": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beholdt (%lld)"
           }
         }
       }
@@ -3676,16 +2875,6 @@
         }
       }
     },
-    "Larger than": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Større end"
-          }
-        }
-      }
-    },
     "Largest": {
       "localizations": {
         "da": {
@@ -3702,16 +2891,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sidst set %@"
-          }
-        }
-      }
-    },
-    "Last watched %lld days ago": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sidst set for %lld dage siden"
           }
         }
       }
@@ -3766,46 +2945,6 @@
         }
       }
     },
-    "Leaves at the next run": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forsvinder ved næste kørsel"
-          }
-        }
-      }
-    },
-    "Leaves in %lld days": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forsvinder om %lld dage"
-          }
-        }
-      }
-    },
-    "Leaves in 1 day": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forsvinder om 1 dag"
-          }
-        }
-      }
-    },
-    "Leaving soon": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forsvinder snart"
-          }
-        }
-      }
-    },
     "Level": {
       "localizations": {
         "da": {
@@ -3817,21 +2956,12 @@
       }
     },
     "Library": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Bibliotek"
-          }
-        }
-      }
-    },
-    "Library size": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Biblioteksstørrelse"
           }
         }
       }
@@ -3886,16 +3016,6 @@
         }
       }
     },
-    "Lists": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lister"
-          }
-        }
-      }
-    },
     "Live Activity": {
       "localizations": {
         "da": {
@@ -3946,33 +3066,12 @@
         }
       }
     },
-    "Looks at": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gælder"
-          }
-        }
-      }
-    },
     "Magnet link or torrent URL": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Magnet-link eller torrent-URL"
-          }
-        }
-      }
-    },
-    "Manage": {
-      "extractionState": "manual",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Administrér"
           }
         }
       }
@@ -3993,16 +3092,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Manuel import…"
-          }
-        }
-      }
-    },
-    "Marked (%lld)": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Markeret (%lld)"
           }
         }
       }
@@ -4143,17 +3232,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Overvåget"
-          }
-        }
-      }
-    },
-    "Month": {
-      "extractionState": "manual",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Måned"
           }
         }
       }
@@ -4338,42 +3416,12 @@
         }
       }
     },
-    "Never touched: anything added in the last 30 days, anything with an open request, and anything you keep. If Plex, Radarr, Sonarr or Overseerr can't be reached, the day's run is skipped, and no run deletes more than the limit below.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Røres aldrig: alt tilføjet de seneste 30 dage, alt med en åben anmodning og alt, du beholder. Kan Plex, Radarr, Sonarr eller Overseerr ikke nås, springes dagens kørsel over, og ingen kørsel sletter mere end grænsen nedenfor."
-          }
-        }
-      }
-    },
     "Never watched": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Aldrig set"
-          }
-        }
-      }
-    },
-    "Never watched, added %lld days ago": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aldrig set, tilføjet for %lld dage siden"
-          }
-        }
-      }
-    },
-    "Never watched, added more than": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aldrig set, tilføjet for mere end"
           }
         }
       }
@@ -4385,16 +3433,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nyt"
-          }
-        }
-      }
-    },
-    "New address": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ny adresse"
           }
         }
       }
@@ -4419,33 +3457,12 @@
         }
       }
     },
-    "New rule": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ny regel"
-          }
-        }
-      }
-    },
     "Newest": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Nyeste"
-          }
-        }
-      }
-    },
-    "Next": {
-      "extractionState": "manual",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Næste"
           }
         }
       }
@@ -4467,26 +3484,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ingen aktivitet endnu"
-          }
-        }
-      }
-    },
-    "No arrdeck server: the app talks to each service itself, at the addresses under Settings › Connections. Away from home, they need to be reachable from where you are — through a VPN such as Tailscale, for instance.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ingen arrdeck-server: appen taler selv med hver tjeneste, på adresserne under Indstillinger › Forbindelser. Væk hjemmefra skal de kunne nås derfra, hvor du er — for eksempel gennem en VPN som Tailscale."
-          }
-        }
-      }
-    },
-    "No arrdeck server?": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ingen arrdeck-server?"
           }
         }
       }
@@ -4571,36 +3568,6 @@
         }
       }
     },
-    "No rule will match these again.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ingen regel matcher disse igen."
-          }
-        }
-      }
-    },
-    "No rules yet. A new rule starts switched off.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ingen regler endnu. En ny regel starter slået fra."
-          }
-        }
-      }
-    },
-    "No runs yet.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ingen kørsler endnu."
-          }
-        }
-      }
-    },
     "No services configured": {
       "localizations": {
         "da": {
@@ -4617,16 +3584,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ingen serier endnu."
-          }
-        }
-      }
-    },
-    "No sign-in is needed at home, but %@ asks for one. Sign in now and the app keeps working when you leave.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hjemme skal du ikke logge ind, men %@ kræver det. Log ind nu, så virker appen også, når du går hjemmefra."
           }
         }
       }
@@ -4668,16 +3625,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sendes ikke (%lld)"
-          }
-        }
-      }
-    },
-    "Not an arrdeck: %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ikke en arrdeck: %@"
           }
         }
       }
@@ -4742,16 +3689,6 @@
         }
       }
     },
-    "Not with these tags": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ikke med disse tags"
-          }
-        }
-      }
-    },
     "Nothing downloading": {
       "extractionState": "manual",
       "localizations": {
@@ -4794,52 +3731,12 @@
         }
       }
     },
-    "Nothing is leaving.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Intet forsvinder."
-          }
-        }
-      }
-    },
     "Nothing is out today.": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Der udkommer ikke noget i dag."
-          }
-        }
-      }
-    },
-    "Nothing is pushed in this window; it follows this device's time zone.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Intet sendes i dette tidsrum; det følger enhedens tidszone."
-          }
-        }
-      }
-    },
-    "Nothing kept.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Intet beholdt."
-          }
-        }
-      }
-    },
-    "Nothing matches right now.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Intet matcher lige nu."
           }
         }
       }
@@ -4886,16 +3783,6 @@
         }
       }
     },
-    "Nothing to do.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Intet at gøre."
-          }
-        }
-      }
-    },
     "Nothing today": {
       "localizations": {
         "da": {
@@ -4907,6 +3794,7 @@
       }
     },
     "Notifications": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -4932,16 +3820,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fra"
-          }
-        }
-      }
-    },
-    "Off, as it starts: nothing is marked or deleted, whatever the rules say. Previews and test runs still work.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slået fra fra start: intet markeres eller slettes, uanset hvad reglerne siger. Forhåndsvisninger og prøvekørsler virker stadig."
           }
         }
       }
@@ -4976,26 +3854,6 @@
         }
       }
     },
-    "On your home network the app talks to this address directly, with no sign-in, and uses %@ everywhere else. Add it while you are at home.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "På dit hjemmenetværk bruger appen denne adresse direkte uden login og %@ alle andre steder. Tilføj den, mens du er hjemme."
-          }
-        }
-      }
-    },
-    "On. Turning it off releases everything that is leaving.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Til. Slås den fra, frigives alt, der er ved at forsvinde."
-          }
-        }
-      }
-    },
     "One download: %@.": {
       "localizations": {
         "da": {
@@ -5012,16 +3870,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kun titler uden profil (%lld)"
-          }
-        }
-      }
-    },
-    "Only with these tags": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kun med disse tags"
           }
         }
       }
@@ -5131,16 +3979,6 @@
         }
       }
     },
-    "Opens the server's sign-in page in Safari, where passkeys work, then asks you to pair this phone.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Åbner serverens indlogningsside i Safari, hvor adgangsnøgler virker, og beder dig derefter parre telefonen."
-          }
-        }
-      }
-    },
     "Or a .torrent file": {
       "localizations": {
         "da": {
@@ -5167,16 +4005,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Overblik"
-          }
-        }
-      }
-    },
-    "Pairing failed (HTTP %lld).": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parring mislykkedes (HTTP %lld)."
           }
         }
       }
@@ -5312,17 +4140,6 @@
         }
       }
     },
-    "Previous": {
-      "extractionState": "manual",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forrige"
-          }
-        }
-      }
-    },
     "Previous title": {
       "localizations": {
         "da": {
@@ -5339,6 +4156,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Profil"
+          }
+        }
+      }
+    },
+    "Profiles": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profiler"
           }
         }
       }
@@ -5383,32 +4210,12 @@
         }
       }
     },
-    "Queries": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Forespørgsler"
-          }
-        }
-      }
-    },
     "Queue": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Kø"
-          }
-        }
-      }
-    },
-    "Quiet hours": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stille timer"
           }
         }
       }
@@ -5463,43 +4270,12 @@
         }
       }
     },
-    "Rated %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bedømt %@"
-          }
-        }
-      }
-    },
-    "Rating below": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bedømmelse under"
-          }
-        }
-      }
-    },
     "Read": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Læst"
-          }
-        }
-      }
-    },
-    "Readarr support is on its way.": {
-      "extractionState": "manual",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Understøttelse af Readarr er på vej."
           }
         }
       }
@@ -5515,21 +4291,12 @@
       }
     },
     "Reading apps": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Læseapps"
-          }
-        }
-      }
-    },
-    "Reading apps (OPDS)": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Læseapps (OPDS)"
           }
         }
       }
@@ -5685,16 +4452,6 @@
         }
       }
     },
-    "Released (%lld)": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Frigivet (%lld)"
-          }
-        }
-      }
-    },
     "Releases": {
       "localizations": {
         "da": {
@@ -5805,36 +4562,6 @@
         }
       }
     },
-    "Restart": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Genstart"
-          }
-        }
-      }
-    },
-    "Restart %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Genstart %@"
-          }
-        }
-      }
-    },
-    "Restart buttons need the host helper, which is not set up. Install it on the server (host-helper/README.md), then add its token under Connections → Host helper.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Genstartknapperne kræver værtshjælperen, som ikke er sat op. Installér den på serveren (host-helper/README.md), og tilføj dens token under Forbindelser → Værtshjælper."
-          }
-        }
-      }
-    },
     "Resume": {
       "localizations": {
         "da": {
@@ -5866,46 +4593,6 @@
         }
       }
     },
-    "Rules": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Regler"
-          }
-        }
-      }
-    },
-    "Run": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kør"
-          }
-        }
-      }
-    },
-    "Run log": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kørselslog"
-          }
-        }
-      }
-    },
-    "Run now": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kør nu"
-          }
-        }
-      }
-    },
     "Save": {
       "localizations": {
         "da": {
@@ -5922,26 +4609,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gem først"
-          }
-        }
-      }
-    },
-    "Save rule": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gem regel"
-          }
-        }
-      }
-    },
-    "Save server": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gem server"
           }
         }
       }
@@ -6370,32 +5037,12 @@
         }
       }
     },
-    "Servers": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Servere"
-          }
-        }
-      }
-    },
     "Service": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Tjeneste"
-          }
-        }
-      }
-    },
-    "Service alerts": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tjenestealarmer"
           }
         }
       }
@@ -6456,16 +5103,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Indstillinger"
-          }
-        }
-      }
-    },
-    "Share": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Del"
           }
         }
       }
@@ -6590,72 +5227,12 @@
         }
       }
     },
-    "Sign in": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Log ind"
-          }
-        }
-      }
-    },
-    "Sign in for away from home": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Log ind til brug ude"
-          }
-        }
-      }
-    },
-    "Sign-in required": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Indlogning kræves"
-          }
-        }
-      }
-    },
     "Signature expires": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Signaturen udløber"
-          }
-        }
-      }
-    },
-    "Signed in — arrdeck %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Logget ind — arrdeck %@"
-          }
-        }
-      }
-    },
-    "Signed in — older backend": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Logget ind — ældre backend"
-          }
-        }
-      }
-    },
-    "Signed out — the session expired or was revoked": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Logget ud — sessionen udløb eller blev tilbagekaldt"
           }
         }
       }
@@ -6697,36 +5274,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Størrelser"
-          }
-        }
-      }
-    },
-    "Skipped: %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sprunget over: %@"
-          }
-        }
-      }
-    },
-    "Skipped: a service could not be reached": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sprunget over: en tjeneste kunne ikke nås"
-          }
-        }
-      }
-    },
-    "Skipped: automatic cleanup is off": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sprunget over: automatisk oprydning er slået fra"
           }
         }
       }
@@ -6801,26 +5348,6 @@
         }
       }
     },
-    "Start": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start"
-          }
-        }
-      }
-    },
-    "Start %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start %@"
-          }
-        }
-      }
-    },
     "Start paused": {
       "localizations": {
         "da": {
@@ -6871,36 +5398,6 @@
         }
       }
     },
-    "Subscribe": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abonnér"
-          }
-        }
-      }
-    },
-    "Subscribe in Calendar": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abonnér i Kalender"
-          }
-        }
-      }
-    },
-    "Subscribe to what Radarr, Sonarr, Readarr and Lidarr have coming in Calendar, Google Calendar or Outlook — one calendar for all of them.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abonnér på det, Radarr, Sonarr, Readarr og Lidarr har på vej, i Kalender, Google Kalender eller Outlook — én kalender for dem alle."
-          }
-        }
-      }
-    },
     "Subtitles": {
       "localizations": {
         "da": {
@@ -6921,36 +5418,6 @@
         }
       }
     },
-    "Switch the rule on": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slå reglen til"
-          }
-        }
-      }
-    },
-    "Switched off": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slået fra"
-          }
-        }
-      }
-    },
-    "Switched-on rules start marking titles at the next run. They are deleted after their grace period unless you keep them.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Regler, der er slået til, begynder at markere titler ved næste kørsel. De slettes efter fristen, medmindre du beholder dem."
-          }
-        }
-      }
-    },
     "Tab": {
       "localizations": {
         "da": {
@@ -6967,56 +5434,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Faner"
-          }
-        }
-      }
-    },
-    "Tagged": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Med tag"
-          }
-        }
-      }
-    },
-    "Take %@ off the keep list": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fjern %@ fra beholdte"
-          }
-        }
-      }
-    },
-    "Take off the keep list": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fjern fra beholdte"
-          }
-        }
-      }
-    },
-    "Test run": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prøvekørsel"
-          }
-        }
-      }
-    },
-    "Test run — nothing was changed": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prøvekørsel — intet blev ændret"
           }
         }
       }
@@ -7071,26 +5488,6 @@
         }
       }
     },
-    "The calendar needs Radarr, Sonarr, Readarr or Lidarr.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kalenderen kræver Radarr, Sonarr, Readarr eller Lidarr."
-          }
-        }
-      }
-    },
-    "The catalogue needs arrdeck's build of Readarr, which can serve book files.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kataloget kræver arrdecks udgave af Readarr, som kan udlevere bogfiler."
-          }
-        }
-      }
-    },
     "The download failed and is stuck in the queue: {reason}": {
       "localizations": {
         "da": {
@@ -7122,92 +5519,12 @@
         }
       }
     },
-    "The host helper could not be reached.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Værtshjælperen kunne ikke nås."
-          }
-        }
-      }
-    },
-    "The host helper could not be reached: %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Værtshjælperen kunne ikke nås: %@"
-          }
-        }
-      }
-    },
-    "The host helper is not set up.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Værtshjælperen er ikke sat op."
-          }
-        }
-      }
-    },
     "The library isn't available.": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Biblioteket er ikke tilgængeligt."
-          }
-        }
-      }
-    },
-    "The old address stops working; every calendar app needs the new one.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Den gamle adresse holder op med at virke; alle kalenderapps skal have den nye."
-          }
-        }
-      }
-    },
-    "The old address stops working; every reading app needs the new one.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Den gamle adresse holder op med at virke; alle læseapps skal have den nye."
-          }
-        }
-      }
-    },
-    "The pairing code was refused or expired. Sign in again.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parringskoden blev afvist eller er udløbet. Log ind igen."
-          }
-        }
-      }
-    },
-    "The rules may match these titles again.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reglerne kan matche disse titler igen."
-          }
-        }
-      }
-    },
-    "The sign-in page did not hand back a pairing code.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Indlogningssiden sendte ingen parringskode tilbage."
           }
         }
       }
@@ -7228,58 +5545,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tema"
-          }
-        }
-      }
-    },
-    "These choices are kept on this device only.": {
-      "extractionState": "manual",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Valgene gemmes kun på denne enhed."
-          }
-        }
-      }
-    },
-    "These choices are kept on this device only. Drag the tabs to reorder them.": {
-      "extractionState": "manual",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Valgene gemmes kun på denne enhed. Træk fanerne for at ændre rækkefølgen."
-          }
-        }
-      }
-    },
-    "These choices follow you to your other devices on this server, except the language, which is set per device. Drag the tabs to reorder them.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Disse valg følger dig til dine andre enheder på denne server, undtagen sproget, som vælges på hver enhed. Træk fanerne for at ændre rækkefølgen."
-          }
-        }
-      }
-    },
-    "This address asks for sign-in, so it is not a home address the app can use": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Denne adresse kræver login, så appen kan ikke bruge den som hjemmeadresse"
-          }
-        }
-      }
-    },
-    "This needs the arrdeck server.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Det kræver arrdeck-serveren."
           }
         }
       }
@@ -7324,26 +5589,6 @@
         }
       }
     },
-    "Tick at least one condition — a rule without any matches nothing.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sæt flueben ved mindst én betingelse — en regel uden matcher intet."
-          }
-        }
-      }
-    },
-    "Time": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tidspunkt"
-          }
-        }
-      }
-    },
     "Title": {
       "localizations": {
         "da": {
@@ -7360,16 +5605,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Titler, som arr-lister og forslag ikke tilføjer igen — fra Oprydning, Ikke interesseret eller arr-apperne selv."
-          }
-        }
-      }
-    },
-    "Titles whose date has passed, and that still match, are deleted now.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Titler, hvis dato er passeret, og som stadig matcher, slettes nu."
           }
         }
       }
@@ -7400,16 +5635,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "I dag: %@."
-          }
-        }
-      }
-    },
-    "Too many failed attempts. Wait a few minutes and try again.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "For mange mislykkede forsøg. Vent et par minutter, og prøv igen."
           }
         }
       }
@@ -7474,66 +5699,6 @@
         }
       }
     },
-    "Trends (30 days)": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tendenser (30 dage)"
-          }
-        }
-      }
-    },
-    "Try again": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prøv igen"
-          }
-        }
-      }
-    },
-    "Turn off": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slå fra"
-          }
-        }
-      }
-    },
-    "Turn on automatic cleanup": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slå automatisk oprydning til"
-          }
-        }
-      }
-    },
-    "Turn on the calendar": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slå kalenderen til"
-          }
-        }
-      }
-    },
-    "Turn on the catalogue": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slå kataloget til"
-          }
-        }
-      }
-    },
     "Unblock": {
       "localizations": {
         "da": {
@@ -7580,26 +5745,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uovervågede titler"
-          }
-        }
-      }
-    },
-    "Unreachable: %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kan ikke nås: %@"
-          }
-        }
-      }
-    },
-    "Until": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Til"
           }
         }
       }
@@ -7786,63 +5931,13 @@
         }
       }
     },
-    "Watched, last played more than": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Set, sidst afspillet for mere end"
-          }
-        }
-      }
-    },
     "Watching": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Afspilning"
-          }
-        }
-      }
-    },
-    "Week": {
       "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Uge"
-          }
-        }
-      }
-    },
-    "Weekly digest": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ugentlig oversigt"
-          }
-        }
-      }
-    },
-    "What arrdeck pushes to the browsers subscribed to it. This app cannot receive web push itself.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hvad arrdeck sender til de browsere, der abonnerer. Denne app kan ikke selv modtage web push."
-          }
-        }
-      }
-    },
-    "What arrived this week and what is coming up next week. Switch the Weekly digest event off to stop it.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hvad der kom i denne uge, og hvad der kommer i næste uge. Slå hændelsen Ugentlig oversigt fra for at stoppe den."
+            "value": "Afspilning"
           }
         }
       }
@@ -7901,22 +5996,12 @@
         }
       }
     },
-    "When on, the rules below are checked once a day. A title that matches is marked as leaving, shown in Plex in a “Leaving soon” collection, and announced by a push notification (the Cleanup event). When its grace period is over it is checked again with fresh data, and only if it still matches are its files deleted through Radarr or Sonarr, which also keep it off their import lists.": {
+    "Where arrdeck finds each service, kept on this device. Away from home they need to be reachable from where you are, through a VPN such as Tailscale.": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Når den er slået til, tjekkes reglerne nedenfor én gang om dagen. En titel, der matcher, markeres som på vej ud, vises i Plex i samlingen “Forsvinder snart” og meldes med en push-notifikation (hændelsen Oprydning). Når fristen er gået, tjekkes den igen med friske data, og kun hvis den stadig matcher, slettes dens filer via Radarr eller Sonarr, som også holder den ude af deres importlister."
-          }
-        }
-      }
-    },
-    "Where arrdeck finds each service. Changing these affects every screen.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hvor arrdeck finder hver tjeneste. Ændringer her påvirker alle skærme."
+            "value": "Hvor arrdeck finder hver tjeneste, gemt på denne enhed. Hjemmefra skal de kunne nås derfra, hvor du er, gennem en VPN som Tailscale."
           }
         }
       }
@@ -7961,36 +6046,6 @@
         }
       }
     },
-    "Window": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Periode"
-          }
-        }
-      }
-    },
-    "Without the tags": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Uden disse tags"
-          }
-        }
-      }
-    },
-    "Would leave if it ran now": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ville forsvinde, hvis den kørte nu"
-          }
-        }
-      }
-    },
     "Year": {
       "localizations": {
         "da": {
@@ -8012,32 +6067,12 @@
         }
       }
     },
-    "added recently": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "tilføjet for nylig"
-          }
-        }
-      }
-    },
     "and %lld more": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "og %lld til"
-          }
-        }
-      }
-    },
-    "arrdeck %@ — no sign-in needed here": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "arrdeck %@ — ingen indlogning nødvendig herfra"
           }
         }
       }
@@ -8062,26 +6097,6 @@
         }
       }
     },
-    "arrdeck goes away for a moment while it restarts.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "arrdeck er væk et øjeblik, mens den genstarter."
-          }
-        }
-      }
-    },
-    "arrdeck is restarting — back in a moment": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "arrdeck genstarter — tilbage om lidt"
-          }
-        }
-      }
-    },
     "arrdeck is signed out. Open the app and sign in again.": {
       "localizations": {
         "da": {
@@ -8102,12 +6117,12 @@
         }
       }
     },
-    "automatic cleanup switched off": {
+    "arrdeck talks to Sonarr, Radarr, qBittorrent and the rest itself, with nothing else to host.": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "automatisk oprydning slået fra"
+            "value": "arrdeck taler selv med Sonarr, Radarr, qBittorrent og resten, uden andet at hoste."
           }
         }
       }
@@ -8165,16 +6180,6 @@
         }
       }
     },
-    "direct": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "direkte"
-          }
-        }
-      }
-    },
     "disabled": {
       "extractionState": "manual",
       "localizations": {
@@ -8182,16 +6187,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "deaktiveret"
-          }
-        }
-      }
-    },
-    "down %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "nede %@"
           }
         }
       }
@@ -8213,16 +6208,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "downloader"
-          }
-        }
-      }
-    },
-    "e.g. Watched long ago": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "fx Set for længe siden"
           }
         }
       }
@@ -8344,16 +6329,6 @@
         }
       }
     },
-    "kept": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "beholdt"
-          }
-        }
-      }
-    },
     "monitored": {
       "extractionState": "manual",
       "localizations": {
@@ -8361,36 +6336,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "overvåget"
-          }
-        }
-      }
-    },
-    "no conditions": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ingen betingelser"
-          }
-        }
-      }
-    },
-    "no longer in the library": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ikke længere i biblioteket"
-          }
-        }
-      }
-    },
-    "no longer matches": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "matcher ikke længere"
           }
         }
       }
@@ -8457,17 +6402,8 @@
         }
       }
     },
-    "older backend": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ældre backend"
-          }
-        }
-      }
-    },
     "open": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -8520,27 +6456,6 @@
         }
       }
     },
-    "rating < %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "bedømmelse < %@"
-          }
-        }
-      }
-    },
-    "rejected: %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "afvist: %@"
-          }
-        }
-      }
-    },
     "renamed": {
       "extractionState": "manual",
       "localizations": {
@@ -8548,26 +6463,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "omdøbt"
-          }
-        }
-      }
-    },
-    "requested": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "anmodet"
-          }
-        }
-      }
-    },
-    "rule off or deleted": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "regel slået fra eller slettet"
           }
         }
       }
@@ -8594,16 +6489,6 @@
         }
       }
     },
-    "signed in": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "logget ind"
-          }
-        }
-      }
-    },
     "stalled": {
       "extractionState": "manual",
       "localizations": {
@@ -8616,6 +6501,7 @@
       }
     },
     "tags": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
@@ -8637,21 +6523,12 @@
       }
     },
     "unmonitored": {
+      "extractionState": "manual",
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "ikke overvåget"
-          }
-        }
-      }
-    },
-    "unwatched > %lld d": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "uset > %lld d"
           }
         }
       }
@@ -8688,16 +6565,6 @@
         }
       }
     },
-    "watched > %lld d": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "set > %lld d"
-          }
-        }
-      }
-    },
     "{count} indexer problem reported: {message}": {
       "localizations": {
         "da": {
@@ -8724,16 +6591,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "· %lld sider"
-          }
-        }
-      }
-    },
-    "…and %lld more": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "…og %lld mere"
           }
         }
       }

@@ -1,37 +1,30 @@
 import ArrdeckData
-import ArrdeckKit
 import Foundation
 
-/// What the arrdeck server did, done on the device: the same domain answers
-/// the screens get from `LiveAPI`, worked out by asking Sonarr, Radarr,
-/// qBittorrent and the rest directly. The server's Python is the reference
-/// for each answer; what only a server can do (push, feeds for other apps,
-/// sampling while nobody looks) is left out, and its screens with it.
+/// What answers the screens: the domain answers the arrdeck server's API gave
+/// the web app, worked out on the device by asking Sonarr, Radarr,
+/// qBittorrent and the rest directly. The server's Python (the pinned
+/// submodule) is the reference for each answer; what only a server can do
+/// (push, feeds for other apps, sampling while nobody looks) has no place in
+/// the app.
 ///
 /// One conformance per file (`DirectBackend+Dashboard.swift` and so on), each
 /// following the server module it ports.
 public final class DirectBackend: Sendable {
     public let registry: Registry
+    let readingStore: any ReadingStore
     let cache = BlockCache()
 
-    public init(registry: Registry) {
+    public init(registry: Registry, reading: any ReadingStore = InMemoryReadingStore()) {
         self.registry = registry
+        readingStore = reading
     }
 
     public convenience init(profileID: UUID) {
-        self.init(registry: Registry(store: KeychainConnectionStore(profileID: profileID)))
-    }
-
-    /// What this build can do without a server, in the server's feature
-    /// names. The screens gate on these the way they do on a server's
-    /// /about, so whatever is not listed simply does not show.
-    public static let features: Set<Feature> = [
-        .diagnose, .credits, .qualityProfiles, .scheduledTasks, .arrBackups, .blocklist, .popular, .calendar,
-        .wanted, .books, .interactiveSearch, .subtitles, .vpn, .manualImport,
-    ]
-
-    public static var info: BackendInfo {
-        BackendInfo(version: "direct", features: Set(features.map(\.rawValue)))
+        self.init(
+            registry: Registry(store: KeychainConnectionStore(profileID: profileID)),
+            reading: DefaultsReadingStore(profileID: profileID)
+        )
     }
 
     /// Runs a request on behalf of a screen, putting a service's failure in

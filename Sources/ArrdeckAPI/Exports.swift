@@ -1,4 +1,3 @@
-// The generated Client needs these two at every call site; re-exporting spares
-// each screen the three-import preamble.
+// The generated types use the runtime's containers and date coding;
+// re-exporting spares every file that names one a second import.
 @_exported import OpenAPIRuntime
-@_exported import OpenAPIURLSession

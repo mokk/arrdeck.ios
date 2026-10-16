@@ -9,20 +9,6 @@ public protocol ActivityAPI: Sendable {
     func activitySince(_ since: Date) async throws -> ActivitySince
 }
 
-extension LiveAPI: ActivityAPI {
-    public func activitySince(_ since: Date) async throws -> ActivitySince {
-        try await call {
-            switch try await client.activity_since_api_v1_activity_since_get(
-                query: .init(since: since.formatted(.iso8601))
-            ) {
-            case let .ok(ok): try ok.body.json
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-}
-
 /// What happened since the Activity tab was last opened. Polled for the badge
 /// on the tab; History marks what is newer than the mark and moves it once
 /// it has been shown.

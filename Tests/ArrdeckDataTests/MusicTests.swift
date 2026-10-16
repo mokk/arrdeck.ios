@@ -77,61 +77,6 @@ enum MusicFixtures {
     """
 }
 
-@Suite struct MusicDecodingTests {
-    func api(_ routes: [String: StubTransport.Route]) -> LiveAPI {
-        LiveAPI(client: Client(serverURL: URL(string: "http://stub")!, transport: StubTransport(routes: routes)))
-    }
-
-    @Test func artistsBecomeTheMusicTabsRows() async throws {
-        let api = api(["/api/v1/library/artists": .init(body: MusicFixtures.artists)])
-        let rows = try await api.libraryArtists().map(LibraryRow.init)
-        #expect(rows.map(\.ref) == [.artist(1), .artist(6), .artist(7)])
-        let boc = rows[0]
-        #expect(boc.title == "Boards of Canada")
-        #expect(boc.status == "downloaded", "anything on disk counts")
-        #expect(boc.dot == .complete && boc.onDisk)
-        #expect(boc.albums == 5 && boc.trackFiles == 21 && boc.tracks == 94)
-        #expect(boc.genre == "Idm" && boc.disambiguation == "Scottish electronic duo")
-        #expect(boc.poster == "/api/v1/library/artists/1/image/poster-250.jpg?v=639272944815209895",
-                "relative, loaded through the server like every poster")
-        #expect(rows[1].status == "wanted" && rows[1].dot == .wanted && !rows[1].onDisk)
-        #expect(rows[2].isUnmonitored && rows[2].tags == [3])
-    }
-
-    @Test func theArtistPageGroupsAlbumsByType() async throws {
-        let api = api(["/api/v1/library/artists/1": .init(body: MusicFixtures.artist)])
-        let artist = try await api.artistDetail(1)
-        #expect(artist.fanart?.hasPrefix("/api/v1/library/artists/1/image/fanart") == true)
-        #expect(artist.state == "downloaded")
-        #expect(artist.path == "/music/Boards of Canada")
-        let groups = MusicLayout.byType(artist.albums ?? [])
-        #expect(groups.map(\.type) == ["Album", "EP", "Broadcast", "Demo"], "Lidarr's order, unknown types after")
-        #expect(groups[0].albums.map(\.title) == ["Geogaddi", "Music Has the Right to Children"], "newest first, as sent")
-        #expect(groups[0].albums.map(\.state) == ["wanted", "downloaded"])
-        #expect(groups[1].albums[0].state == "unmonitored")
-        #expect(groups[3].label == "Demo")
-        let links = MusicLayout.links(.artist, slug: artist.slug, links: artist.links)
-        #expect(links.map(\.label) == ["MusicBrainz", "Discogs", "AllMusic", "Last.fm", "Wikidata", "Bandcamp"],
-                "MusicBrainz, then the allowlist in its order, six at most")
-        #expect(links[0].url.absoluteString == "https://musicbrainz.org/artist/69158f97-4c07-4c4e-baf8-4e4ab1ed666e")
-        #expect(Format.rating(artist.ratings![0], locale: Locale(identifier: "en_US")).display == "MusicBrainz 9.6")
-    }
-
-    @Test func theAlbumPageHasItsTracksAndFiles() async throws {
-        let api = api(["/api/v1/library/albums/1/detail": .init(body: MusicFixtures.album)])
-        let album = try await api.albumDetail(1)
-        #expect(album.state == "wanted")
-        let discs = MusicLayout.discs(album)
-        #expect(discs.count == 1)
-        #expect(discs[0].label == "Cassette")
-        #expect(discs[0].tracks.map(\.number) == ["A1", "A2", "A4"], "a cassette's sides keep their names")
-        #expect(discs[0].tracks.compactMap(\.file_id) == [22, 2])
-        #expect(album.history?.map(\._type) == ["deleted", "imported"])
-        #expect(MusicLayout.links(.releaseGroup, slug: album.slug, links: album.links).map(\.url.absoluteString)
-                == ["https://musicbrainz.org/release-group/8183834a-6c8a-39ef-a7bc-a82f79b929e9", "https://www.discogs.com/master/2129"])
-    }
-}
-
 @Suite struct MusicLayoutTests {
     @Test func tracksSplitByDiscWithTheirMediumsLabel() {
         let album = AlbumDetail(
@@ -205,65 +150,6 @@ enum MusicFixtures {
         #expect(hits.map(\.group) == [.movies, .artists], "artists last")
         #expect(hits.last?.subtitle == "Scottish electronic duo")
         #expect(hits.last?.ref == .artist(1))
-    }
-}
-
-/// Every action reaches the route the server has for it, with what it needs.
-@Suite struct MusicWireTests {
-    func api(_ transport: ImportRecordingTransport) -> LiveAPI {
-        LiveAPI(client: Client(serverURL: URL(string: "http://stub")!, transport: transport))
-    }
-
-    func json(_ text: String) throws -> NSDictionary {
-        try JSONSerialization.jsonObject(with: Data(text.utf8)) as! NSDictionary
-    }
-
-    @Test func anArtistIsSearchedAsTheBulkActionDoesNotAsAnAlbum() async throws {
-        let transport = ImportRecordingTransport(routes: [
-            "/api/v1/library/artists/bulk-search": .init(status: 204, body: ""),
-            "/api/v1/library/lidarr/5/search": .init(status: 204, body: ""),
-        ])
-        let api = api(transport)
-        try await api.triggerSearch(.artist(3))
-        try await api.triggerSearch(.album(5))
-        #expect(transport.requests.map(\.path) == ["/api/v1/library/artists/bulk-search", "/api/v1/library/lidarr/5/search"])
-        #expect(try json(transport.requests[0].body)["ids"] as? [Int] == [3])
-    }
-
-    @Test func monitoringDeletingAndEditingReachTheirRoutes() async throws {
-        let transport = ImportRecordingTransport(routes: [
-            "/api/v1/library/artists/1": .init(body: #"{"id": 1, "name": "Boards of Canada"}"#),
-            "/api/v1/library/albums/4": .init(body: #"{"id": 4, "monitored": false}"#),
-            "/api/v1/library/artists/1?delete_files=true": .init(status: 204, body: ""),
-            "/api/v1/library/artists/1/refresh": .init(status: 204, body: ""),
-            "/api/v1/library/albums/4/files": .init(status: 204, body: ""),
-            "/api/v1/library/albums/4/files/22": .init(status: 204, body: ""),
-            "/api/v1/releases/album/4": .init(body: "[]"),
-            "/api/v1/library/artists/bulk": .init(status: 204, body: ""),
-        ])
-        let api = api(transport)
-        try await api.update(.artist(1), monitored: false, qualityProfile: nil)
-        try await api.update(.album(4), monitored: false, qualityProfile: nil)
-        try await api.updateArtist(1, ArtistChanges(monitorNewItems: .new, path: "/music/x", moveFiles: true, tags: []))
-        try await api.updateArtist(1, ArtistChanges(qualityProfile: 2))
-        try await api.delete(.artist(1), deleteFiles: true)
-        try await api.refreshArtist(1)
-        try await api.deleteAlbumFiles(album: 4, file: nil)
-        try await api.deleteAlbumFiles(album: 4, file: 22)
-        #expect(try await api.releases(.album(4)).isEmpty)
-        try await api.bulkEdit(.lidarr, ids: [1, 6], monitored: true, qualityProfile: nil, tags: nil, tagChange: nil)
-        let requests = transport.requests
-        #expect(requests.map(\.path) == [
-            "/api/v1/library/artists/1", "/api/v1/library/albums/4", "/api/v1/library/artists/1", "/api/v1/library/artists/1",
-            "/api/v1/library/artists/1?delete_files=true", "/api/v1/library/artists/1/refresh",
-            "/api/v1/library/albums/4/files", "/api/v1/library/albums/4/files/22", "/api/v1/releases/album/4",
-            "/api/v1/library/artists/bulk",
-        ])
-        #expect(try json(requests[0].body) == ["monitored": false])
-        #expect(try json(requests[1].body) == ["monitored": false])
-        #expect(try json(requests[2].body) == ["monitor_new_items": "new", "path": "/music/x", "move_files": true, "tags": []])
-        #expect(try json(requests[3].body) == ["quality_profile_id": 2], "no move without a new folder")
-        await #expect(throws: APIError.self) { try await api.delete(.album(4), deleteFiles: false) }
     }
 }
 
@@ -454,35 +340,5 @@ actor FakeMusicAPI: LibraryAPI, MusicLibraryAPI, ManageAPI {
         #expect(SearchResult(in_library: true, kind: "artist", library_id: 1, remote_id: 0, title: "x").ref == .artist(1))
         #expect(SearchResult(in_library: true, kind: "album", library_id: 4, remote_id: 0, title: "x").ref == .album(4))
         #expect(SearchResult(kind: "album", remote_id: 0, title: "x").ref == nil)
-    }
-}
-
-@Suite struct AddMusicWireTests {
-    @Test func searchAndAddReachLidarrsRoutes() async throws {
-        let transport = ImportRecordingTransport(routes: [
-            "/api/v1/search/music?q=boards": .init(body: """
-            [{"kind": "album", "title": "Boards", "year": 2020, "remote_id": 0, "foreign_id": "bd8ea9e2",
-              "in_library": false, "artist": "Cale Parks", "album_type": "EP"},
-             {"kind": "artist", "title": "Boards of Canada", "remote_id": 0, "foreign_id": "69158f97",
-              "poster": "/api/v1/library/artists/1/image/poster-250.jpg?v=1", "in_library": true, "library_id": 1,
-              "monitored": true, "quality_profile_id": 1, "has_file": true}]
-            """),
-            "/api/v1/artists": .init(status: 201, body: #"{"id": 9, "title": "Boards of Canada"}"#),
-            "/api/v1/albums": .init(status: 201, body: #"{"id": 10, "title": "Boards"}"#),
-        ])
-        let api = LiveAPI(client: Client(serverURL: URL(string: "http://stub")!, transport: transport))
-        let found = try await api.search(.music, query: "boards")
-        #expect(found.map(\.searchKind) == [.album, .artist])
-        #expect(Set(found.map(\.id)).count == 2, "rows apart by MusicBrainz id, though remote_id is 0 for both")
-        try await api.addArtist(found[1], qualityProfile: 1, rootFolder: "/music", metadataProfile: 2, monitor: .latest)
-        try await api.add(found[0], qualityProfile: 1, rootFolder: "/music", metadataProfile: 2, edition: nil)
-        let bodies = try transport.requests.dropFirst().map {
-            try JSONSerialization.jsonObject(with: Data($0.body.utf8)) as! NSDictionary
-        }
-        #expect(bodies[0] == ["foreign_artist_id": "69158f97", "title": "Boards of Canada", "quality_profile_id": 1,
-                              "metadata_profile_id": 2, "root_folder_path": "/music", "monitor": "latest",
-                              "search_now": true] as NSDictionary)
-        #expect(bodies[1] == ["foreign_album_id": "bd8ea9e2", "title": "Boards", "quality_profile_id": 1,
-                              "metadata_profile_id": 2, "root_folder_path": "/music"] as NSDictionary)
     }
 }

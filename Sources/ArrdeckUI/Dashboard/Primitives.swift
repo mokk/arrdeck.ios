@@ -176,29 +176,6 @@ struct CoverPlaceholder: View {
     }
 }
 
-/// A trend at a glance, as the PWA draws it: min-to-max, no axes.
-struct Sparkline: View {
-    let values: [Double]
-
-    var body: some View {
-        Canvas { context, size in
-            guard values.count >= 2 else { return }
-            let low = values.min() ?? 0
-            let span = max((values.max() ?? 0) - low, 1)
-            let inset: CGFloat = 3
-            var path = Path()
-            for (index, value) in values.enumerated() {
-                let x = size.width * CGFloat(index) / CGFloat(values.count - 1)
-                let y = size.height - inset - (size.height - 2 * inset) * CGFloat((value - low) / span)
-                if index == 0 { path.move(to: CGPoint(x: x, y: y)) } else { path.addLine(to: CGPoint(x: x, y: y)) }
-            }
-            context.stroke(path, with: .color(Color.accent), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-        }
-        .frame(minHeight: 28)
-        .accessibilityHidden(true)
-    }
-}
-
 /// The floating bar select mode puts above the tab bar. A `.bottomBar`
 /// toolbar item would render behind the tabs inside a TabView.
 struct BulkBarChrome<Content: View>: View {

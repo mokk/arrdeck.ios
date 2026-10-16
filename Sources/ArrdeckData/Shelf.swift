@@ -7,17 +7,6 @@ public protocol BookShelfAPI: Sendable {
     func bookShelf() async throws -> [ShelfSeries]
 }
 
-extension LiveAPI: BookShelfAPI {
-    public func bookShelf() async throws -> [ShelfSeries] {
-        try await call {
-            switch try await client.book_shelf_api_v1_library_books_shelf_get() {
-            case let .ok(ok): try ok.body.json
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-}
-
 extension ShelfSeries {
     /// Books on disk out of the whole series.
     public var have: Int { (books ?? []).filter { $0.has_file == true }.count }

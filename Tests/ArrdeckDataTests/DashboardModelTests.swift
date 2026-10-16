@@ -55,7 +55,6 @@ actor FakeAPI: DashboardAPI {
         try log("indexers")
         return .healthy(.init(enabled: 1, health: [], stats: [], total: 1))
     }
-    func statsHistory(days: Int) async throws -> [StatsSample] { try log("trends"); return [] }
 
     func act(on requestID: Int, _ action: RequestAction) async throws {
         try log("act-\(requestID)-\(action.rawValue)")
@@ -87,7 +86,6 @@ actor FakeAPI: DashboardAPI {
         #expect(model.indexers == .loading)
         // ungated: always fetched
         #expect(model.recent == .loaded([]))
-        #expect(model.trends == .loaded([]))
         #expect(await api.count("sessions") == 0)
         #expect(await api.count("queue") == 1)
     }

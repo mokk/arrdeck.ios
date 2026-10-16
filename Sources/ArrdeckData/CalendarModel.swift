@@ -19,23 +19,6 @@ public protocol CalendarAPI: Sendable {
     func calendar(start: String, days: Int) async throws -> [ArrApp: Block<[CalendarItem]>]
 }
 
-extension LiveAPI: CalendarAPI {
-    public func calendar(start: String, days: Int) async throws -> [ArrApp: Block<[CalendarItem]>] {
-        try await call {
-            switch try await client.calendar_api_v1_calendar_get(query: .init(days: days, start_date: start)) {
-            case let .ok(ok):
-                let body = try ok.body.json
-                var out: [ArrApp: Block<[CalendarItem]>] = [.radarr: Block(body.radarr), .sonarr: Block(body.sonarr)]
-                if let readarr = body.readarr { out[.readarr] = Block(readarr) }
-                if let lidarr = body.lidarr { out[.lidarr] = Block(lidarr) }
-                return out.mapValues { $0.fromKnownArrs() }
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-}
-
 extension CalendarItem {
     /// The library title an entry opens: the film, the episode's show, the
     /// book, the album.

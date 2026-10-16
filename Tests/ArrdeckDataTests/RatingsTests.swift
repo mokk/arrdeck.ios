@@ -4,23 +4,6 @@ import Foundation
 import Testing
 
 @Suite struct RatingsTests {
-    @Test func aMovieDetailDecodesEverySourceIncludingNullVotes() async throws {
-        let body = """
-        {"id": 182, "title": "50 First Dates", "ratings": [
-          {"source": "imdb", "value": 6.8, "votes": 420894},
-          {"source": "rottenTomatoes", "value": 45.0, "votes": null},
-          {"source": "trakt", "value": 7.13652, "votes": 11603}]}
-        """
-        let api = LiveAPI(client: Client(
-            serverURL: URL(string: "http://stub")!,
-            transport: StubTransport(routes: ["/api/v1/library/movies/182/detail": .init(body: body)])
-        ))
-        let ratings = try await api.movieDetail(182).ratings ?? []
-        #expect(ratings.map(\.source) == ["imdb", "rottenTomatoes", "trakt"])
-        #expect(ratings[1].votes == nil)
-        #expect(ratings.map { Format.rating($0, locale: Locale(identifier: "en_US")).display } == ["IMDb 6.8", "RT 45%", "Trakt 7.1"])
-    }
-
     let english = Locale(identifier: "en_US")
 
     func chip(_ source: String, _ value: Double, votes: Int? = nil, locale: Locale? = nil) -> RatingChip {

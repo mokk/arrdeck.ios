@@ -5,15 +5,9 @@ import SwiftUI
 /// quality profiles, backups and logs.
 struct SystemView: View {
     @State private var model: SystemModel
-    /// Restart buttons, on a server that has the endpoint.
-    @State private var control: ServiceControlModel?
-    @Environment(\.confirmCenter) private var confirmCenter
 
     init(configured: Set<String>, api: any ManageAPI, onSessionLost: @escaping @MainActor () -> Void) {
         _model = State(initialValue: SystemModel(configured: configured, api: api, onSessionLost: onSessionLost))
-        _control = State(initialValue: (api as? any ServiceControlAPI).map {
-            ServiceControlModel(api: $0, onSessionLost: onSessionLost)
-        })
     }
 
     var body: some View {
@@ -33,25 +27,11 @@ struct SystemView: View {
         .chromePage()
         .navigationTitle("System")
         .pageTitle()
-        .task { await load() }
-        .refreshable { await load() }
-        .alert("Action failed", isPresented: Binding(
-            get: { control?.error != nil }, set: { if !$0 { control?.error = nil } }
-        )) {
-            Button("OK") { control?.error = nil }
-        } message: { Text(control?.error ?? "") }
+        .task { await model.load() }
+        .refreshable { await model.load() }
     }
 
-    func load() async {
-        await withDiscardingTaskGroup { group in
-            group.addTask { await model.load() }
-            if let control { group.addTask { await control.load() } }
-        }
-    }
-
-    /// Each service's reachability and how long it has been down, with a
-    /// restart (or a start, when its containers are stopped) where the host
-    /// helper lists it.
+    /// Each service's reachability and how long it has been down.
     var statusSection: some View {
         Section {
             switch model.status {
@@ -68,9 +48,7 @@ struct SystemView: View {
                         // An available update is worth knowing but is not a fault:
                         // flaky wins the dot, since a service that keeps dropping
                         // matters more than a version.
-                        if let down = status.downFor() {
-                            Text(down).font(.caption.weight(.semibold)).foregroundStyle(Color.danger).lineLimit(1)
-                        } else if !status.ok {
+                        if !status.ok {
                             Text(status.error ?? "offline").font(.caption).foregroundStyle(Color.danger).lineLimit(1)
                         } else if status.isFlaky {
                             Text("flaky · \(status.retries ?? 0) retries").font(.caption).foregroundStyle(Color.warning)
@@ -80,80 +58,12 @@ struct SystemView: View {
                                 Text("↑ \(update)").font(.caption).foregroundStyle(Color.warning)
                             }
                         }
-                        if let project = control?.project(for: status.service) {
-                            restartButton(project)
-                        }
                     }
                 }
-                if let control {
-                    ForEach(control.unmatched(services: Set(list.map(\.service))), id: \.name) { project in
-                        HStack(spacing: 8) {
-                            Circle()
-                                .fill(project.running == true ? Color.success : Color.danger)
-                                .frame(width: 8, height: 8)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(project.label).font(.subheadline.weight(.medium))
-                                Text("\(project.running_containers ?? 0) of \(project.containers ?? 0) containers running")
-                                    .font(.caption).foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            restartButton(project)
-                        }
-                    }
-                }
-            }
-            if let note = control?.note {
-                Text(note).font(.caption).foregroundStyle(.secondary)
             }
         } header: {
             Text("Services")
-        } footer: {
-            helperFooter
         }
-    }
-
-    /// Restart buttons need the host helper; without it the section says so
-    /// rather than leaving the buttons out unexplained.
-    @ViewBuilder var helperFooter: some View {
-        switch control?.helper {
-        case .notConfigured:
-            Text("Restart buttons need the host helper, which is not set up. Install it on the server (host-helper/README.md), then add its token under Connections → Host helper.")
-        case let .unreachable(error):
-            Text("The host helper could not be reached: \(error)").foregroundStyle(Color.warning)
-        case let .failed(reason):
-            Text(reason).foregroundStyle(Color.warning)
-        default:
-            EmptyView()
-        }
-    }
-
-    func restartButton(_ project: RestartableProject) -> some View {
-        let restart = project.action == .restart
-        let title = restart ? String(localized: "Restart") : String(localized: "Start")
-        let action = restart ? String(localized: "Restart \(project.label)") : String(localized: "Start \(project.label)")
-        return Button {
-            let subject = project.isSelf
-                ? String(localized: "arrdeck goes away for a moment while it restarts.")
-                : restart
-                    ? String(localized: "\(project.label) stops answering while it restarts.")
-                    : String(localized: "\(project.label) is started again.")
-            // always destructive: a restart cuts off whatever the service is doing
-            ask(confirmCenter, action, subject: subject, destructive: true, always: true) {
-                guard let control else { return }
-                if await control.act(project), !project.isSelf { await model.load() }
-            }
-        } label: {
-            if control?.working.contains(project.name) == true {
-                ProgressView().controlSize(.small)
-            } else {
-                Text(title)
-            }
-        }
-        .buttonStyle(.bordered)
-        .controlSize(.small)
-        .tint(restart ? nil : Color.accent)
-        .disabled(control?.working.contains(project.name) == true)
-        .accessibilityLabel(Text(action))
     }
 
     /// "Why hasn't anything been grabbed?" is usually answered by "RSS sync

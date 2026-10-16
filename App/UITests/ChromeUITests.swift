@@ -4,7 +4,7 @@ import XCTest
 /// page scrolls down and comes back after a deliberate scroll up, the page's
 /// actions float at the bottom right, and a pushed page goes back by its
 /// floating button or a swipe from the edge. Opt-in like OnboardingUITests:
-/// needs TEST_RUNNER_ARRDECK_LIVE_URL.
+/// needs TEST_RUNNER_ARRDECK_CONNECTIONS.
 @MainActor
 final class ChromeUITests: XCTestCase {
     func snap(_ name: String) {
@@ -14,31 +14,8 @@ final class ChromeUITests: XCTestCase {
     }
 
     func openMovies() throws -> XCUIApplication {
-        guard let live = ProcessInfo.processInfo.environment["ARRDECK_LIVE_URL"] else {
-            throw XCTSkip("set TEST_RUNNER_ARRDECK_LIVE_URL to run against a real backend")
-        }
         let app = XCUIApplication()
-        app.launchArguments = ["--reset-profiles", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
-        app.launch()
-        addUIInterruptionMonitor(withDescription: "local network") { alert in
-            for label in ["Allow", "Tillad"] where alert.buttons[label].exists {
-                alert.buttons[label].tap()
-                return true
-            }
-            return false
-        }
-        app.buttons["add-server"].tap()
-        let field = app.textFields["server-address"]
-        XCTAssert(field.waitForExistence(timeout: 5))
-        field.tap()
-        field.typeText(live.replacingOccurrences(of: "http://", with: ""))
-        app.buttons["connect"].tap()
-        app.tap()
-        XCTAssert(app.buttons["save-server"].waitForExistence(timeout: 15))
-        app.buttons["save-server"].tap()
-        let row = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'arrdeck '")).firstMatch
-        XCTAssert(row.waitForExistence(timeout: 5))
-        row.tap()
+        try launchWithServices(app)
         let any = app.descendants(matching: .any)
         XCTAssert(any["tab-movies"].waitForExistence(timeout: 15), "tab bar never appeared")
         any["tab-movies"].tap()

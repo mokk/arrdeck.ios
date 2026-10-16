@@ -8,18 +8,6 @@ public protocol WatchedEpisodesAPI: Sendable {
     func watchedEpisodes(key: String) async throws -> Set<String>
 }
 
-extension LiveAPI: WatchedEpisodesAPI {
-    public func watchedEpisodes(key: String) async throws -> Set<String> {
-        try await call {
-            switch try await client.watched_episodes_api_v1_watched_episodes_get(query: .init(key: key)) {
-            case let .ok(ok): Set((try ok.body.json.data ?? []).map { SpoilerGuard.key(season: $0.season, episode: $0.episode) })
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-}
-
 public enum SpoilerGuard {
     public static func key(season: Int, episode: Int) -> String { "\(season)x\(episode)" }
 

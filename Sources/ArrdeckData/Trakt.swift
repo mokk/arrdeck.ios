@@ -17,17 +17,3 @@ public enum TraktList: String, CaseIterable, Sendable {
         }
     }
 }
-
-extension LiveAPI: TraktAPI {
-    public func traktList(movies: Bool, list: TraktList) async throws -> [SearchResult] {
-        try await call {
-            switch try await client.trakt_list_api_v1_discover_trakt_get(
-                query: .init(kind: movies ? .movie : .series, which: .init(rawValue: list.rawValue) ?? .trending)
-            ) {
-            case let .ok(ok): try ok.body.json.ofKnownKinds
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-}

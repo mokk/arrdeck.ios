@@ -33,20 +33,6 @@ import Testing
     }
 }
 
-@Suite struct IcalSettingsTests {
-    let base = URL(string: "http://10.0.0.154:3500")!
-
-    @Test func addressIsNilWhileOffAndNarrowsToTheChosenApps() {
-        let off = IcalSettings(apps: ["radarr", "sonarr"], enabled: false, token: nil)
-        #expect(off.url(on: base) == nil)
-        let on = IcalSettings(apps: ["radarr", "sonarr", "readarr"], enabled: true, token: "T")
-        #expect(on.url(on: base)?.absoluteString == "http://10.0.0.154:3500/ical/T/arrdeck.ics")
-        #expect(on.url(on: base, apps: ["radarr", "sonarr", "readarr"])?.query == nil)
-        #expect(on.url(on: base, apps: ["sonarr", "radarr"])?.query == "apps=radarr,sonarr")
-        #expect(on.webcal(on: base)?.absoluteString == "webcal://10.0.0.154:3500/ical/T/arrdeck.ics")
-    }
-}
-
 @Suite struct WatchingTests {
     @Test func peakIsTheBusiestBucketAndNilWhenNothingWasWatched() {
         #expect(WatchStats.peak([0, 3, 7, 7, 1]) == 2)

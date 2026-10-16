@@ -10,7 +10,6 @@ public struct Cadence: Sendable, Equatable {
     public var medium: TimeInterval = 30
     public var slow: TimeInterval = 300
     public var recent: TimeInterval = 60
-    public var trends: TimeInterval = 600
 
     public init() {}
 
@@ -24,7 +23,6 @@ public struct Cadence: Sendable, Equatable {
         cadence.medium *= factor
         cadence.slow *= factor
         cadence.recent *= factor
-        cadence.trends *= factor
         return cadence
     }
 }

@@ -6,58 +6,41 @@ import SwiftUI
 import UIKit
 #endif
 
-/// Everything behind a saved server: its tabs whenever the session works, the
-/// connection screen whenever it does not. One controller decides which, so a
-/// card's 401 and a completed sign-in both flip it.
+/// Everything behind a saved profile: its tabs, answered by the services
+/// themselves.
 ///
 /// Tabs: Books · Movies · Shows · Music · Activity · Calendar · Settings, each only
 /// while its service is configured. Each tab has its own navigation stack.
 public struct ServerView: View {
-    @State private var controller: SessionController
+    let profile: ServerProfile
     @State private var model: DashboardModel
-    @State private var showingConnection = false
-    /// Connections, opened by itself for a direct profile with none yet.
+    /// Connections, opened by itself for a profile with none yet.
     @State private var settingUp = false
-    /// State, not a plain let: SwiftUI re-runs init whenever the server list
-    /// re-renders (every profile update does), and a fresh client would be
-    /// bound to that throwaway init's router rather than the controller's.
+    /// State, not a plain let: SwiftUI re-runs init whenever the profile list
+    /// re-renders, and a fresh backend would start with an empty cache.
     @State private var api: any Backend
     private let onSwitch: () -> Void
 
-    public init(
-        profile: ServerProfile,
-        transport: any HTTPTransport = ArrdeckKit.URLSessionTransport(),
-        onUpdate: @escaping (ServerProfile) -> Void,
-        onSwitch: @escaping () -> Void
-    ) {
-        let controller = SessionController(profile: profile, transport: transport, onUpdate: onUpdate)
-        let api = ServerView.backend(for: profile, router: controller.router)
+    public init(profile: ServerProfile, onSwitch: @escaping () -> Void) {
+        self.profile = profile
+        let api = ServerView.backend(for: profile)
         _api = State(initialValue: api)
         self.onSwitch = onSwitch
-        _controller = State(initialValue: controller)
-        _model = State(initialValue: DashboardModel(
-            api: api,
-            onSessionLost: { controller.sessionLost() }
-        ))
-        _feed = State(initialValue: ActivityFeedModel(api: api, onSessionLost: { controller.sessionLost() }))
-        _prefsSync = State(initialValue: PrefsSyncModel(api: api, profileID: profile.id, onApplied: { ThemeStore.shared.reload() }))
+        _model = State(initialValue: DashboardModel(api: api, onSessionLost: {}))
+        _feed = State(initialValue: ActivityFeedModel(api: api, onSessionLost: {}))
     }
 
     /// What happened since Activity was last opened — the badge on its tab.
     @State private var feed: ActivityFeedModel
-    /// Settings → Display, kept in step with the server's copy so the choices
-    /// follow you to your other devices.
-    @State private var prefsSync: PrefsSyncModel
 
-    var sessionLost: @MainActor () -> Void {
-        { [controller] in controller.sessionLost() }
-    }
+    var sessionLost: @MainActor () -> Void { {} }
+
+    /// For relative addresses, of which the services' answers have none: every
+    /// artwork address is absolute.
+    var baseURL: URL { URL(string: "arrdeck-direct:\(profile.id.uuidString)")! }
 
     public var body: some View {
         Group {
-            if case .unknown = controller.session {
-                ProgressView("Connecting…")
-            } else if controller.isUsable {
                 tabs
                     .confirmDialog(confirmCenter)
                     .onContinueUserActivity(spotlightActivity) { activity in
@@ -68,7 +51,7 @@ public struct ServerView: View {
                     }
                     .sheet(item: $spotlit) { target in
                         NavigationStack {
-                            MediaDestination(ref: target.ref, api: api, baseURL: controller.activeURL,
+                            MediaDestination(ref: target.ref, api: api, baseURL: baseURL,
                                              hasPlex: model.has("plex"), onSessionLost: sessionLost)
                                 .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Done") { spotlit = nil } } }
                         }
@@ -79,23 +62,15 @@ public struct ServerView: View {
                     .task { await model.run() }
                     .task { await feed.run() }
                     // the widgets' snapshot and the Live Activity, from the same polls
-                    .background { GlanceFeed(model: model, server: controller.profile.name, baseURL: controller.activeURL, api: api) }
-            } else {
-                NavigationStack {
-                    ProfileView(controller: controller)
-                        .navigationTitle(controller.profile.name)
-                        .toolbar { serversButton }
-                }
-            }
+                    .background { GlanceFeed(model: model, server: profile.name, baseURL: baseURL, api: api) }
         }
-        .task { await controller.refresh() }
         .task {
-            LastProfile.record(controller.profile)
+            LastProfile.record(profile)
             if let expiry = Self.expiry { await ExpiryReminder.schedule(expiry) }
         }
-        // a new direct profile has nothing to show until its services are in
+        // a new profile has nothing to show until its services are in
         .onChange(of: model.servicesKnown) { _, known in
-            if known, controller.profile.isDirect, model.configured.isEmpty { settingUp = true }
+            if known, model.configured.isEmpty { settingUp = true }
         }
         .sheet(isPresented: $settingUp, onDismiss: { Task { await model.refresh() } }) {
             NavigationStack {
@@ -103,34 +78,6 @@ public struct ServerView: View {
                     .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { settingUp = false } } }
             }
         }
-        .sheet(isPresented: $showingConnection) {
-            NavigationStack {
-                ProfileView(controller: controller)
-                    .navigationTitle("Connection")
-            }
-        }
-        .task { await controller.watchNetwork() }
-        .task(id: syncsPrefs) {
-            guard syncsPrefs else { return }
-            await prefsSync.run()
-        }
-        .onChange(of: scenePhase) { _, phase in
-            // back from the background, perhaps somewhere else
-            if phase == .active {
-                controller.reroute()
-                prefsSync.refreshIfStale()
-            }
-        }
-    }
-
-    @Environment(\.scenePhase) private var scenePhase
-
-    /// Whether the display preferences are kept in step with the server: while
-    /// the backend answers this device (until then there is no copy to read and
-    /// a request would only fail), and when it has the endpoint. One that has
-    /// not reported its features yet is tried anyway; a failure changes nothing.
-    var syncsPrefs: Bool {
-        controller.isUsable && (controller.profile.lastKnown?.supports(.prefs) ?? true)
     }
 
     @State private var selectedTab: AppTab = .movies
@@ -209,7 +156,7 @@ public struct ServerView: View {
             } else {
                 HStack(spacing: 0) {
                     if layout == .sidebar {
-                        AppSidebar(title: controller.profile.name, tabs: available, selected: selectedTab,
+                        AppSidebar(title: profile.name, tabs: available, selected: selectedTab,
                                    badges: [.activity: feed.count], tap: tap, expiry: expiry)
                         Divider().ignoresSafeArea()
                     }
@@ -277,12 +224,12 @@ public struct ServerView: View {
                     if action != nil { takeLaunch(available) }
                 }
                 .sheet(isPresented: $launchAdd) {
-                    AddView(configured: model.configured, api: api, baseURL: controller.activeURL,
+                    AddView(configured: model.configured, api: api, baseURL: baseURL,
                             hasPlex: model.has("plex"), onSessionLost: sessionLost) { launchAdd = false }
                 }
                 .sheet(isPresented: $launchSearch) {
                     GlobalSearchSheet(api: api, apps: LibraryApp.allCases.filter { model.has($0.rawValue) },
-                                      baseURL: controller.activeURL, hasPlex: model.has("plex"),
+                                      baseURL: baseURL, hasPlex: model.has("plex"),
                                       onSessionLost: sessionLost) { launchSearch = false }
                 }
             }
@@ -290,10 +237,10 @@ public struct ServerView: View {
     }
 
     /// Acts on a waiting quick action or "open" intent. A sheet already up
-    /// (a Spotlight title, the connection screen) keeps the screen: stacking
+    /// (a Spotlight title, the connections) keeps the screen: stacking
     /// another over it would hide what was just asked for.
     func takeLaunch(_ available: [AppTab]) {
-        guard spotlit == nil, !showingConnection, !launchAdd, !launchSearch, let action = router.take() else { return }
+        guard spotlit == nil, !settingUp, !launchAdd, !launchSearch, let action = router.take() else { return }
         switch action {
         case .activity where available.contains(.activity): selectedTab = .activity
         case .calendar where available.contains(.calendar): selectedTab = .calendar
@@ -307,53 +254,31 @@ public struct ServerView: View {
     @ViewBuilder func tabContent(_ tab: AppTab) -> some View {
         switch tab {
         case .books:
-            LibraryPage(app: .readarr, dashboard: model, api: api, baseURL: controller.activeURL, onSessionLost: sessionLost)
+            LibraryPage(app: .readarr, dashboard: model, api: api, baseURL: baseURL, onSessionLost: sessionLost)
         case .movies:
-            LibraryPage(app: .radarr, dashboard: model, api: api, baseURL: controller.activeURL, onSessionLost: sessionLost)
+            LibraryPage(app: .radarr, dashboard: model, api: api, baseURL: baseURL, onSessionLost: sessionLost)
         case .shows:
-            LibraryPage(app: .sonarr, dashboard: model, api: api, baseURL: controller.activeURL, onSessionLost: sessionLost)
+            LibraryPage(app: .sonarr, dashboard: model, api: api, baseURL: baseURL, onSessionLost: sessionLost)
         case .music:
-            LibraryPage(app: .lidarr, dashboard: model, api: api, baseURL: controller.activeURL, onSessionLost: sessionLost)
+            LibraryPage(app: .lidarr, dashboard: model, api: api, baseURL: baseURL, onSessionLost: sessionLost)
         case .activity:
             ActivityView(api: api, feed: feed, clients: model.torrentClients, hasArr: model.hasArr,
                          arrs: ArrApp.allCases.filter { model.has($0.rawValue) },
-                         baseURL: controller.activeURL, hasPlex: model.has("plex"), onSessionLost: sessionLost)
+                         baseURL: baseURL, hasPlex: model.has("plex"), onSessionLost: sessionLost)
         case .calendar:
-            CalendarScreen(api: api, baseURL: controller.activeURL, shareURL: controller.profile.baseURL,
-                           hasPlex: model.has("plex"), onSessionLost: sessionLost)
+            CalendarScreen(api: api, baseURL: baseURL, hasPlex: model.has("plex"), onSessionLost: sessionLost)
         case .settings:
             ManageView(
-                model: model, api: api, baseURL: controller.activeURL, shareURL: controller.profile.baseURL,
-                serverName: controller.profile.name, sessionLabel: sessionLabel,
-                backend: controller.profile.lastKnown,
-                onSessionLost: sessionLost, onSwitchServer: onSwitch, onShowConnection: { showingConnection = true }
+                model: model, api: api, baseURL: baseURL, profileName: profile.name,
+                onSessionLost: sessionLost, onSwitchProfile: onSwitch
             )
         }
     }
 
-    /// What answers this profile's screens: its arrdeck server, routed to the
-    /// home address while that answers and the primary otherwise — or, with
-    /// no server, the services themselves. Without a router (Siri), the
-    /// primary address.
-    public static func backend(for profile: ServerProfile, router: AddressRouter? = nil) -> any Backend {
-        if profile.isDirect { return DirectBackend(profileID: profile.id) }
-        return router.map { LiveAPI(router: $0) } ?? LiveAPI(baseURL: profile.baseURL)
-    }
-
-    var sessionLabel: String {
-        switch controller.session {
-        case .open where controller.profile.isDirect: String(localized: "direct")
-        case .open: String(localized: "open")
-        case .paired, .legacy: String(localized: "signed in")
-        default: ""
-        }
-    }
-
-    var serversButton: some View {
-        Button(action: onSwitch) {
-            Label("Servers", systemImage: "server.rack")
-        }
-        .accessibilityIdentifier("servers")
+    /// What answers a profile's screens: the services themselves, at the
+    /// addresses and with the keys kept for it in the Keychain.
+    public static func backend(for profile: ServerProfile) -> any Backend {
+        DirectBackend(profileID: profile.id)
     }
 }
 

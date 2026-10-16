@@ -8,8 +8,6 @@ import SwiftUI
 public struct DashboardView: View {
     let model: DashboardModel
     let baseURL: URL
-    /// The calendar feed's address: see ManageView.shareURL.
-    let shareURL: URL
     let api: any DownloadsAPI & CalendarAPI & HistoryAPI & LibraryPageAPI
     let onSessionLost: @MainActor () -> Void
     /// Pushed programmatically: a NavigationLink nested in the poster strip's
@@ -17,13 +15,12 @@ public struct DashboardView: View {
     @State private var opened: MediaRef?
 
     public init(
-        model: DashboardModel, baseURL: URL, shareURL: URL? = nil,
+        model: DashboardModel, baseURL: URL,
         api: any DownloadsAPI & CalendarAPI & HistoryAPI & LibraryPageAPI,
         onSessionLost: @escaping @MainActor () -> Void
     ) {
         self.model = model
         self.baseURL = baseURL
-        self.shareURL = shareURL ?? baseURL
         self.api = api
         self.onSessionLost = onSessionLost
     }
@@ -47,7 +44,7 @@ public struct DashboardView: View {
             QueueSection(model: model)
             if model.hasArr {
                 CalendarSection(model: model) {
-                    CalendarScreen(api: api, baseURL: baseURL, shareURL: shareURL, hasPlex: model.has("plex"),
+                    CalendarScreen(api: api, baseURL: baseURL, hasPlex: model.has("plex"),
                                    onSessionLost: onSessionLost)
                 }
                 StorageSection(model: model)
@@ -58,7 +55,6 @@ public struct DashboardView: View {
                 HistorySection(model: model) { HistoryScreen(api: api, apps: ArrApp.allCases.filter { model.has($0.rawValue) }, onSessionLost: onSessionLost) }
             }
             if model.has("prowlarr") { IndexerSection(model: model) }
-            TrendsSection(model: model) { StatsScreen(api: api, onSessionLost: onSessionLost) }
         }
         .dashboardListStyle()
         .chromePage()
@@ -663,46 +659,6 @@ struct IndexerSection: View {
                         Spacer()
                         Text("\(indexer.avg_response_ms ?? 0) ms").font(.caption).foregroundStyle(.secondary)
                     }
-                }
-            }
-        }
-    }
-}
-
-struct TrendsSection<Destination: View>: View {
-    let model: DashboardModel
-    @ViewBuilder let destination: () -> Destination
-
-    var body: some View {
-        if let samples = model.trends.value, samples.count >= 2 {
-            // Each tile from the samples where its value is known: a sample
-            // taken while an arr was down has a gap there, not an empty library.
-            let all = Dictionary(uniqueKeysWithValues: StatsSeriesBuilder.series(from: samples).map { ($0.id, $0) })
-            let tiles: [(String, String, [Double])] = ["library", "movies", "series", "grabs"].compactMap { id in
-                guard let series = all[id] else { return nil }
-                return (series.label, series.values.isEmpty ? "–" : series.format(series.last), series.values)
-            }
-            Section {
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                    ForEach(tiles, id: \.0) { label, value, values in
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(label).font(.caption).foregroundStyle(.secondary)
-                            Text(value).font(.headline)
-                            Sparkline(values: values)
-                        }
-                        .padding(12)
-                        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 12))
-                    }
-                }
-                .padding(.vertical, 4)
-            } header: {
-                HStack {
-                    Text("Trends (30 days)")
-                    Spacer()
-                    NavigationLink { destination() } label: {
-                        Text("See all →").font(.caption.weight(.semibold)).textCase(nil)
-                    }
-                    .accessibilityIdentifier("stats-link")
                 }
             }
         }

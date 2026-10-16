@@ -23,9 +23,8 @@ public final class InMemoryProfileStore: ProfileStore, @unchecked Sendable {
     }
 }
 
-/// Profiles as one JSON blob in the Keychain rather than UserDefaults: a base
-/// URL names where a session cookie is valid, which is worth device-encryption
-/// and exclusion from unencrypted backups.
+/// Profiles as one JSON blob in the Keychain, beside each profile's service
+/// keys, rather than in UserDefaults.
 public struct KeychainProfileStore: ProfileStore {
     let service: String
 
@@ -54,7 +53,22 @@ public struct KeychainProfileStore: ProfileStore {
         guard status == errSecSuccess, let data = result as? Data else {
             throw KeychainError.status(status)
         }
-        return try JSONDecoder().decode([ServerProfile].self, from: data)
+        return try Self.decode(data)
+    }
+
+    /// Profiles as stored, by this build or an older one. Older builds also
+    /// kept profiles for an arrdeck server, at its address; the app no longer
+    /// talks to one, so those are left out. Theirs was a `baseURL` naming the
+    /// server, where a profile of the services themselves named only itself.
+    static func decode(_ data: Data) throws -> [ServerProfile] {
+        struct Stored: Decodable {
+            let id: UUID
+            let name: String
+            let baseURL: URL?
+        }
+        return try JSONDecoder().decode([Stored].self, from: data)
+            .filter { $0.baseURL == nil || $0.baseURL?.scheme == "arrdeck-direct" }
+            .map { ServerProfile(id: $0.id, name: $0.name) }
     }
 
     public func save(_ profiles: [ServerProfile]) throws {
@@ -65,8 +79,8 @@ public struct KeychainProfileStore: ProfileStore {
         SecItemDelete(query as CFDictionary)
         var attributes = query
         attributes[kSecValueData as String] = data
-        // Readable after first unlock so a background push handler can resolve
-        // which profile a notification belongs to.
+        // Readable after first unlock, as the connections are: Siri asks with
+        // the phone locked.
         attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
         let status = SecItemAdd(attributes as CFDictionary, nil)
         guard status == errSecSuccess else { throw KeychainError.status(status) }

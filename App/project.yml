@@ -41,21 +41,19 @@ targets:
         UILaunchScreen: {}
         # the download progress the app shows while open; see DownloadsLiveActivity
         NSSupportsLiveActivities: true
-        # arrdeck://open/<tab> from a widget or the Live Activity. The sign-in
-        # callback (arrdeck://paired) shares the scheme but never needed it
-        # registered: the browser sheet catches its own callback first.
+        # arrdeck://open/<tab> from a widget or the Live Activity.
         CFBundleURLTypes:
           - CFBundleURLName: dk.thrawn.arrdeck
             CFBundleURLSchemes: [arrdeck]
         # Two separate iOS gates with the same silent-timeout symptom, both
-        # required for a LAN profile like http://10.0.0.154:3500 —
+        # required for a service on the LAN like http://10.0.0.5:8989 —
         # NSAllowsLocalNetworking lifts ATS's plain-HTTP block for local hosts
-        # only (remote profiles still require TLS), and the usage description
+        # only (anything else still requires TLS), and the usage description
         # is what makes iOS show the local-network permission prompt at all.
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
         NSLocalNetworkUsageDescription: >-
-          Arrdeck connects to your media server on your home network.
+          Arrdeck connects to Sonarr, Radarr and your other services on your home network.
     settings:
       groups: [appGroup]
       base:

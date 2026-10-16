@@ -108,59 +108,6 @@ public protocol WantedAPI: Sendable {
     func searchAlbum(_ id: Int) async throws
 }
 
-extension LiveAPI: WantedAPI {
-    public func wanted(_ app: ArrApp, kind: WantedKind, page: Int) async throws -> WantedPage {
-        try await call {
-            switch try await client.wanted_api_v1_wanted__app__get(
-                path: .init(app: app.rawValue), query: .init(kind: kind.rawValue, page: page)
-            ) {
-            case let .ok(ok):
-                var page = try ok.body.json
-                page.items = page.items.fromKnownArrs
-                return page
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-
-    public func searchAllWanted(_ app: ArrApp, kind: WantedKind) async throws {
-        try await call {
-            switch try await client.wanted_search_all_api_v1_wanted__app__search_all_post(
-                path: .init(app: app.rawValue), query: .init(kind: kind.rawValue)
-            ) {
-            case .noContent: ()
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-
-    public func searchAlbum(_ id: Int) async throws {
-        try await call {
-            switch try await client.trigger_search_api_v1_library__app___item_id__search_post(
-                path: .init(app: ArrApp.lidarr.rawValue, item_id: id)
-            ) {
-            case .noContent: ()
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-
-    public func diagnose(_ app: ArrApp, id: Int) async throws -> Diagnosis {
-        try await call {
-            switch try await client.diagnose_api_v1_diagnose__app___item_id__get(
-                path: .init(app: app.rawValue, item_id: id)
-            ) {
-            case let .ok(ok): try ok.body.json
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-}
-
 /// One arr's wanted list under one filter, paged. Changing either resets the
 /// list; paging appends. Not polled — the page is opened deliberately and the
 /// answer is cached server-side.

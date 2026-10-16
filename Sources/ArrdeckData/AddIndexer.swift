@@ -126,46 +126,6 @@ public protocol IndexerAddAPI: Sendable {
     func addIndexer(schema: String, displayName: String, values: [String: IndexerFieldValue]) async throws
 }
 
-extension LiveAPI: IndexerAddAPI {
-    public func indexerSchemas() async throws -> [IndexerSchema] {
-        try await call {
-            switch try await client.indexer_schemas_api_v1_indexers_schemas_get() {
-            case let .ok(ok): try ok.body.json.compactMap { IndexerSchema($0.additionalProperties) }
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-
-    private func body(schema: String, displayName: String, values: [String: IndexerFieldValue]) throws -> Components.Schemas.AddIndexerIn {
-        let raw: [String: (any Sendable)?] = values.mapValues { $0.raw }
-        return .init(
-            display_name: displayName,
-            field_values: .init(additionalProperties: try OpenAPIObjectContainer(unvalidatedValue: raw)),
-            schema_name: schema
-        )
-    }
-
-    public func testNewIndexer(schema: String, displayName: String, values: [String: IndexerFieldValue]) async throws {
-        try await call {
-            switch try await client.test_new_indexer_api_v1_indexers_test_new_post(body: .json(try body(schema: schema, displayName: displayName, values: values))) {
-            case .noContent: ()
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-
-    public func addIndexer(schema: String, displayName: String, values: [String: IndexerFieldValue]) async throws {
-        try await call {
-            switch try await client.add_indexer_api_v1_indexers_post(body: .json(try body(schema: schema, displayName: displayName, values: values))) {
-            case .created: ()
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-}
-
 /// Two steps: pick a definition from Prowlarr's 600-odd, then fill its
 /// fields, test, add.
 @MainActor @Observable

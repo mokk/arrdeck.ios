@@ -1,7 +1,6 @@
 import ArrdeckAPI
 import ArrdeckData
 import Foundation
-import HTTPTypes
 import OpenAPIRuntime
 import Testing
 
@@ -305,89 +304,6 @@ actor FakeImportAPI: ManualImportAPI {
         model.picks.toggleLanguage(2, for: file)
         #expect(model.qualityName(file) == "Bluray-1080p")
         #expect(model.languageNames(file) == ["English", "Danish"])
-    }
-}
-
-/// Keeps every request's path and JSON body, and answers from a table.
-final class ImportRecordingTransport: ClientTransport, @unchecked Sendable {
-    struct Route: Sendable {
-        var status = 200
-        var body: String
-    }
-
-    let routes: [String: Route]
-    private let lock = NSLock()
-    private var sent: [(String, String)] = []
-
-    init(routes: [String: Route]) { self.routes = routes }
-
-    var requests: [(path: String, body: String)] {
-        lock.withLock { sent.map { (path: $0.0, body: $0.1) } }
-    }
-
-    func send(
-        _ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String
-    ) async throws -> (HTTPResponse, HTTPBody?) {
-        let path = request.path ?? ""
-        let text = if let body { try await String(collecting: body, upTo: 1 << 20) } else { "" }
-        lock.withLock { sent.append((path, text)) }
-        let route = routes[path] ?? Route(status: 404, body: #"{"detail": "Not Found"}"#)
-        var response = HTTPResponse(status: .init(code: route.status))
-        response.headerFields[.contentType] = "application/json"
-        return (response, HTTPBody(route.body))
-    }
-}
-
-@Suite struct ManualImportWireTests {
-    func api(_ transport: ImportRecordingTransport) -> LiveAPI {
-        LiveAPI(client: Client(serverURL: URL(string: "http://stub")!, transport: transport))
-    }
-
-    func json(_ text: String) throws -> NSDictionary {
-        try JSONSerialization.jsonObject(with: Data(text.utf8)) as! NSDictionary
-    }
-
-    @Test func eachRequestReachesItsEndpointWithItsPayload() async throws {
-        let command = #"{"app": "radarr", "id": 5, "status": "queued", "done": false}"#
-        let transport = ImportRecordingTransport(routes: [
-            "/api/v1/manual-import/radarr": .init(body: command),
-            "/api/v1/manual-import/sonarr/assign": .init(body: command),
-            "/api/v1/manual-import/readarr/torrent": .init(body: command),
-        ])
-        let api = api(transport)
-        _ = try await api.startImport(.plain(.radarr, .init(item_id: 3, mode: .auto, paths: ["/a"])))
-        _ = try await api.startImport(.assign(.sonarr, .init(
-            files: [.init(episode_ids: [1, 2], path: "/b", series_id: 4)], item_id: 9, mode: .move
-        )))
-        _ = try await api.startImport(.torrent(.readarr, .init(
-            client: .qbittorrent, files: [.init(book_id: 6, path: "/c", quality_id: 2)], mode: .copy, torrent_id: "ff"
-        )))
-        let sent = transport.requests
-        #expect(sent.map(\.path) == [
-            "/api/v1/manual-import/radarr", "/api/v1/manual-import/sonarr/assign", "/api/v1/manual-import/readarr/torrent",
-        ])
-        #expect(try json(sent[0].body) == ["item_id": 3, "mode": "auto", "paths": ["/a"]] as NSDictionary)
-        #expect(try json(sent[1].body) == [
-            "item_id": 9, "mode": "move", "files": [["path": "/b", "series_id": 4, "episode_ids": [1, 2]]],
-        ] as NSDictionary)
-        #expect(try json(sent[2].body) == [
-            "client": "qbittorrent", "torrent_id": "ff", "mode": "copy",
-            "files": [["path": "/c", "book_id": 6, "quality_id": 2]],
-        ] as NSDictionary)
-    }
-
-    @Test func aConflictCarriesTheServersSentence() async {
-        let transport = ImportRecordingTransport(routes: [
-            "/api/v1/manual-import/radarr/torrent/transmission/12": .init(
-                status: 409, body: #"{"detail": "the torrent has not finished downloading"}"#
-            ),
-            "/api/v1/manual-import/sonarr/command/3": .init(status: 502, body: "Bad Gateway"),
-        ])
-        let api = api(transport)
-        await #expect(throws: APIError.refused("the torrent has not finished downloading")) {
-            try await api.importCandidates(.torrent(app: .radarr, client: .transmission, torrentID: "12"))
-        }
-        await #expect(throws: APIError.unexpectedStatus(502)) { try await api.importCommand(app: .sonarr, id: 3) }
     }
 }
 

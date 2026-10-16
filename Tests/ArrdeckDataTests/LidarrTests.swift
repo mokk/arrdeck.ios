@@ -55,7 +55,6 @@ struct OpenNamesContractTests {
         #expect(LibraryApp(.lidarr) == .lidarr)
         #expect(LibraryApp.allCases.map(\.arr) == [.radarr, .sonarr, .readarr, .lidarr])
         #expect(LibraryApp.lidarr.libraryKind == "artists", "the Music tab's bulk actions address artists")
-        #expect(DisplaySync.keys.isSuperset(of: ["layout.music", "unmonitored.music"]))
     }
 
     @Test func lidarrAloneGivesMusicActivityAndCalendar() {
@@ -66,78 +65,6 @@ struct OpenNamesContractTests {
     @Test func connectionsTakeAnAddressAndAKey() {
         #expect(ServiceField.fields(for: "lidarr") == [.url, .apiKey])
         #expect(serviceOrder.firstIndex(of: "lidarr")! < serviceOrder.firstIndex(of: "prowlarr")!, "with the arrs")
-    }
-}
-
-/// The answers as the server writes them once Lidarr is configured.
-@Suite struct LidarrDecodingTests {
-    func api(_ routes: [String: StubTransport.Route]) -> LiveAPI {
-        LiveAPI(client: Client(serverURL: URL(string: "http://stub")!, transport: StubTransport(routes: routes)))
-    }
-
-    @Test func lidarrSlicesArriveBesideTheOthers() async throws {
-        let api = api([
-            "/api/v1/queue": .init(body: """
-            {"radarr": {"ok": true, "data": []}, "sonarr": {"ok": true, "data": []},
-             "lidarr": {"ok": true, "data": [
-               {"app": "lidarr", "id": 12, "title": "Boards of Canada — Geogaddi", "status": "completed",
-                "tracked_state": "importBlocked", "size": 300, "size_left": 0, "needs_attention": true}]}}
-            """),
-            "/api/v1/calendar": .init(body: """
-            {"radarr": {"ok": true, "data": []}, "sonarr": {"ok": true, "data": []},
-             "lidarr": {"ok": true, "data": [
-               {"app": "lidarr", "title": "Inferno", "date": "2026-10-16T00:00:00Z", "has_file": false,
-                "extra": "Boards of Canada", "item_id": 5, "poster": "/api/v1/poster?u=x"}]}}
-            """),
-            "/api/v1/history": .init(body: """
-            {"radarr": {"ok": true, "data": []}, "sonarr": {"ok": true, "data": []},
-             "lidarr": {"ok": false, "data": null, "error": "lidarr: 502"}}
-            """),
-            "/api/v1/status": .init(body: """
-            [{"service": "lidarr", "ok": true, "version": "2.13.3", "update_available": "2.14.0"}]
-            """),
-            "/api/v1/services": .init(body: """
-            [{"service": "lidarr", "configured": true, "web_url": "http://lidarr.local:8686"}]
-            """),
-        ])
-        let queue = try await api.queue()
-        let item = try #require(queue[.lidarr]?.value?.first)
-        #expect(item.arr == .lidarr)
-        #expect(item.importable)
-        let calendar = try await api.calendar()
-        #expect(calendar[.lidarr]?.value?.first?.extra == "Boards of Canada")
-        #expect(try await api.history()[.lidarr] == .offline("lidarr: 502"))
-        let status = try await api.status()
-        #expect(status.first?.service == "lidarr" && status.first?.update_available == "2.14.0")
-        #expect(try await api.services().map(\.service) == ["lidarr"])
-    }
-
-    @Test func artistsAndTheirAlbums() async throws {
-        let api = api([
-            "/api/v1/library/artists": .init(body: """
-            [{"id": 1, "name": "Boards of Canada", "sort_name": "boards of canada", "monitored": true,
-              "album_count": 5, "track_file_count": 40, "poster": null},
-             {"id": 2, "name": "Autechre", "album_count": 15}]
-            """),
-            "/api/v1/library/artists/1/albums": .init(body: """
-            [{"id": 5, "title": "Inferno", "artist_id": 1, "artist": "Boards of Canada", "year": 2026,
-              "release_date": "2026-10-16T00:00:00Z", "album_type": "Album", "monitored": true,
-              "track_count": 19, "track_file_count": 0, "poster": null},
-             {"id": 1, "title": "Geogaddi", "artist_id": 1, "year": 2002, "album_type": "Album", "track_count": 24}]
-            """),
-        ])
-        let artists = try await api.libraryArtists()
-        #expect(artists.map(\.name) == ["Boards of Canada", "Autechre"])
-        #expect(ImportTargetSearch.artists(artists, query: "boards").map(\.id) == [1])
-        let albums = try await api.artistAlbums(1)
-        #expect(albums.map(\.title) == ["Inferno", "Geogaddi"], "the server's order, newest first")
-        #expect(ImportTargetSearch.albums(albums, query: "geo").map(\.id) == [1])
-        #expect(ImportTargetSearch.albumLabel(artist: "Boards of Canada", album: albums[1]) == "Boards of Canada — Geogaddi")
-    }
-
-    @Test func anAlbumIsSearchedThroughTheLibraryRoute() async throws {
-        let api = api(["/api/v1/library/lidarr/5/search": .init(status: 204, body: "")])
-        try await api.searchAlbum(5)
     }
 }
 
@@ -251,23 +178,6 @@ struct OpenNamesContractTests {
             client: .qbittorrent, files: [.init(album_id: 1, path: files[0].path, quality_id: 4)],
             mode: .copy, torrent_id: "ab"
         )))
-    }
-
-    @Test func theWireCarriesAlbumIDAndNoLanguages() async throws {
-        let command = #"{"app": "lidarr", "id": 5, "status": "queued", "done": false}"#
-        let transport = ImportRecordingTransport(routes: [
-            "/api/v1/manual-import/lidarr/assign": .init(body: command),
-            "/api/v1/manual-import/lidarr/options": .init(body: #"{"qualities": [{"id": 9, "name": "MP3-320"}], "languages": []}"#),
-        ])
-        let api = LiveAPI(client: Client(serverURL: URL(string: "http://stub")!, transport: transport))
-        let started = try await api.startImport(.assign(.lidarr, .init(
-            files: [.init(album_id: 1, path: "/a.mp3")], item_id: 4, mode: .auto
-        )))
-        #expect(started.app == "lidarr")
-        let body = try JSONSerialization.jsonObject(with: Data(transport.requests[0].body.utf8)) as! NSDictionary
-        #expect(body == ["item_id": 4, "mode": "auto", "files": [["path": "/a.mp3", "album_id": 1]]] as NSDictionary)
-        let options = try await api.importOptions(.lidarr)
-        #expect(options.languages?.isEmpty == true && options.qualities?.count == 1)
     }
 
     @MainActor @Test func theSheetSaysTheAlbumGoesToAllOnlyForSeveralUnplacedTracks() async {

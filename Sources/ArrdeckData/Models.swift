@@ -18,7 +18,6 @@ public typealias SubtitleItem = Components.Schemas.SubtitleItemOut
 public typealias HistoryItem = Components.Schemas.HistoryItemOut
 public typealias HistoryEvent = Components.Schemas.HistoryEventOut
 public typealias IndexerStats = Components.Schemas.IndexerStatsOut
-public typealias StatsSample = Components.Schemas.StatsSampleOut
 
 extension Components.Schemas.ServiceBlock_list_PlaySessionOut__: ServiceBlockShape {}
 extension Components.Schemas.ServiceBlock_list_HealthWarningOut__: ServiceBlockShape {}

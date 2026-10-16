@@ -31,36 +31,6 @@ public protocol SeriesAddAPI: Sendable {
                    monitor: SeriesMonitor, seasons: [Int]?) async throws
 }
 
-extension LiveAPI: SeriesAddAPI {
-    public func seriesSeasons(tvdbID: Int) async throws -> [Int] {
-        try await call {
-            switch try await client.series_seasons_api_v1_search_series__tvdb_id__seasons_get(path: .init(tvdb_id: tvdbID)) {
-            case let .ok(ok): try ok.body.json
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-
-    public func addSeries(_ result: SearchResult, qualityProfile: Int, rootFolder: String,
-                          monitor: SeriesMonitor, seasons: [Int]?) async throws {
-        let preset = monitor == .pick ? nil : Components.Schemas.AddSeriesIn.monitorPayload(rawValue: monitor.rawValue)
-        let body = Components.Schemas.AddSeriesIn(
-            monitor: preset,
-            quality_profile_id: qualityProfile, root_folder_path: rootFolder,
-            search_now: SeriesMonitorPick.searches(monitor: monitor, seasons: seasons),
-            seasons: seasons, title: result.title, tvdb_id: result.remote_id
-        )
-        try await call {
-            switch try await client.add_series_api_v1_series_post(body: .json(body)) {
-            case .created: ()
-            case .unprocessableContent: throw APIError.unexpectedStatus(422)
-            case let .undocumented(code, _): throw APIError.status(code)
-            }
-        }
-    }
-}
-
 /// The rules the add sheet follows for a picked set of seasons.
 public enum SeriesMonitorPick {
     /// Every regular season, which is where a fresh pick starts.

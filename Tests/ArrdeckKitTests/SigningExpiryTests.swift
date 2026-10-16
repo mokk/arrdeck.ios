@@ -57,8 +57,8 @@ struct SigningExpiryTests {
 private final class Marker {}
 
 struct LastProfileTests {
-    let home = ServerProfile(baseURL: URL(string: "http://10.0.0.154:3500")!, name: "Home")
-    let remote = ServerProfile(baseURL: URL(string: "https://deck.example.com")!, name: "Remote")
+    let home = ServerProfile(name: "Home")
+    let remote = ServerProfile(name: "Remote")
 
     func defaults() -> UserDefaults {
         let suite = "last-profile-\(UUID().uuidString)"

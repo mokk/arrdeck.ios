@@ -13,7 +13,7 @@ import Observation
 public final class DashboardModel {
     public enum Card: CaseIterable, Sendable, Hashable {
         case sessions, health, requests, recent, torrents, queue, calendar
-        case diskSpace, vpn, subtitles, history, indexers, trends
+        case diskSpace, vpn, subtitles, history, indexers
     }
 
     public private(set) var configured: Set<String> = []
@@ -33,7 +33,6 @@ public final class DashboardModel {
     public private(set) var subtitles: Loadable<Block<Subtitles>> = .loading
     public private(set) var history: Loadable<[ArrApp: Block<[HistoryItem]>]> = .loading
     public private(set) var indexers: Loadable<Block<IndexerStats>> = .loading
-    public private(set) var trends: Loadable<[StatsSample]> = .loading
 
     /// The most recent failure to reach arrdeck itself — a timeout, no route,
     /// a body that was not JSON. Cleared by the next call that gets through,
@@ -87,7 +86,6 @@ public final class DashboardModel {
             .subtitles: runner(.subtitles, \.subtitles, enabled: { [unowned self] in has("bazarr") }, every: { _ in c.slow }) { try await api.subtitles() },
             .history: runner(.history, \.history, enabled: { [unowned self] in hasArr }, every: { _ in c.medium }) { try await api.history() },
             .indexers: runner(.indexers, \.indexers, enabled: { [unowned self] in has("prowlarr") }, every: { _ in c.slow }) { try await api.indexerStats() },
-            .trends: runner(.trends, \.trends, every: { _ in c.trends }) { try await api.statsHistory(days: 30) },
         ]
     }
 
