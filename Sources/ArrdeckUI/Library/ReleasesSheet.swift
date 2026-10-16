@@ -18,10 +18,10 @@ struct ReleasesSheet: View {
     @State private var minGB = ""
     @State private var maxGB = ""
 
-    init(target: ReleaseTarget, title: String, api: any ExtrasAPI, onSessionLost: @escaping @MainActor () -> Void, dismiss: @escaping () -> Void) {
+    init(target: ReleaseTarget, title: String, api: any ExtrasAPI, dismiss: @escaping () -> Void) {
         self.title = title
         self.dismiss = dismiss
-        _model = State(initialValue: ReleasesModel(target: target, api: api, onSessionLost: onSessionLost))
+        _model = State(initialValue: ReleasesModel(target: target, api: api))
     }
 
     var body: some View {
@@ -187,8 +187,8 @@ struct ReleasesSheet: View {
 struct RenameCard: View {
     @State private var model: RenameModel
 
-    init(ref: MediaRef, api: any ExtrasAPI, onSessionLost: @escaping @MainActor () -> Void) {
-        _model = State(initialValue: RenameModel(ref: ref, api: api, onSessionLost: onSessionLost))
+    init(ref: MediaRef, api: any ExtrasAPI) {
+        _model = State(initialValue: RenameModel(ref: ref, api: api))
     }
 
     var body: some View {

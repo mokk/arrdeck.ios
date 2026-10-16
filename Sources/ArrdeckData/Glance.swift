@@ -221,7 +221,7 @@ extension GlanceSnapshot {
 }
 
 /// A title the app has loaded from a library: what the Activity widget calls
-/// a history row, and where its poster is (relative to the server).
+/// a history row, and where its poster is.
 public struct GlanceTitle: Sendable, Equatable {
     public var title: String
     public var poster: String?

@@ -181,16 +181,14 @@ public final class AddModel {
     public var actionError: String?
 
     private let api: any DiscoverAPI
-    private let onSessionLost: @MainActor () -> Void
     private var debounce: Task<Void, Never>?
     private var generation = 0
 
-    public init(configured: Set<String>, api: any DiscoverAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(configured: Set<String>, api: any DiscoverAPI) {
         tabs = AddTab.allCases.filter { configured.contains($0.service) }
         canDiscover = configured.contains("overseerr")
         tab = tabs.first ?? .movies
         self.api = api
-        self.onSessionLost = onSessionLost
     }
 
     /// Two or more characters, as the PWA requires before it asks.
@@ -251,7 +249,7 @@ public final class AddModel {
                 results = .loaded(found)
             } catch {
                 guard mine == generation else { return }
-                if let reason = failure(error) { results = .failed(reason) }
+                results = .failed(failure(error))
             }
         case .releases:
             releases = .loading
@@ -261,7 +259,7 @@ public final class AddModel {
                 releases = .loaded(found)
             } catch {
                 guard mine == generation else { return }
-                if let reason = failure(error) { releases = .failed(reason) }
+                releases = .failed(failure(error))
             }
         case .collections:
             break
@@ -274,7 +272,7 @@ public final class AddModel {
         do {
             discover[kind] = .loaded(try await api.discover(kind))
         } catch {
-            if let reason = failure(error) { discover[kind] = .failed(reason) }
+            discover[kind] = .failed(failure(error))
         }
     }
 
@@ -282,7 +280,7 @@ public final class AddModel {
         do {
             collections = .loaded(try await api.collections())
         } catch {
-            if let reason = failure(error), collections.value == nil { collections = .failed(reason) }
+            if collections.value == nil { collections = .failed(failure(error)) }
         }
     }
 
@@ -296,9 +294,8 @@ public final class AddModel {
         await loadCollections()
     }
 
-    private func failure(_ error: any Error) -> String? {
-        if case .some(.unauthorized) = error as? APIError { onSessionLost(); return nil }
-        return (error as? APIError)?.description ?? error.localizedDescription
+    private func failure(_ error: any Error) -> String {
+        (error as? APIError)?.description ?? error.localizedDescription
     }
 
     private func perform(_ key: String, _ work: @Sendable () async throws -> Void) async {
@@ -307,8 +304,6 @@ public final class AddModel {
         actionError = nil
         do {
             try await work()
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             actionError = (error as? APIError)?.description ?? error.localizedDescription
         }
@@ -342,12 +337,10 @@ public final class MediaSheetModel {
     public var error: String?
 
     private let api: any DiscoverAPI & LibraryAPI
-    private let onSessionLost: @MainActor () -> Void
 
-    public init(result: SearchResult, api: any DiscoverAPI & LibraryAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(result: SearchResult, api: any DiscoverAPI & LibraryAPI) {
         self.result = result
         self.api = api
-        self.onSessionLost = onSessionLost
     }
 
     public var canAdd: Bool {
@@ -455,8 +448,6 @@ public final class MediaSheetModel {
         do {
             try await work()
             done = true
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             self.error = (error as? APIError)?.description ?? error.localizedDescription
         }
@@ -490,11 +481,9 @@ public final class PopularModel {
     public var actionError: String?
 
     private let api: any DiscoverAPI
-    private let onSessionLost: @MainActor () -> Void
 
-    public init(api: any DiscoverAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(api: any DiscoverAPI) {
         self.api = api
-        self.onSessionLost = onSessionLost
     }
 
     public func releases(of indexer: PopularIndexer) -> [PopularRelease] {
@@ -505,7 +494,6 @@ public final class PopularModel {
         do {
             snapshot = .loaded(try await api.popular(hours: PopularModel.hours, limit: 10))
         } catch {
-            if case .some(.unauthorized) = error as? APIError { onSessionLost(); return }
             if snapshot.value == nil { snapshot = .failed((error as? APIError)?.description ?? error.localizedDescription) }
         }
     }
@@ -517,8 +505,6 @@ public final class PopularModel {
         do {
             try await api.grab(guid: guid, indexerID: indexer)
             grabbed.insert(guid)
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             actionError = (error as? APIError)?.description ?? error.localizedDescription
         }

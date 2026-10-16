@@ -251,16 +251,13 @@ public final class ArtistDetailModel {
     public var actionError: String?
 
     private let api: any LibraryAPI & MusicLibraryAPI & ManageAPI
-    private let onSessionLost: @MainActor () -> Void
     private let settle: Duration
 
     /// `settle`: how long Lidarr gets to refresh before the page reads the artist again.
-    public init(id: Int, api: any LibraryAPI & MusicLibraryAPI & ManageAPI, settle: Duration = .seconds(5),
-                onSessionLost: @escaping @MainActor () -> Void) {
+    public init(id: Int, api: any LibraryAPI & MusicLibraryAPI & ManageAPI, settle: Duration = .seconds(5)) {
         self.id = id
         self.api = api
         self.settle = settle
-        self.onSessionLost = onSessionLost
     }
 
     public var groups: [MusicLayout.TypeGroup] { MusicLayout.byType(artist.value?.albums ?? []) }
@@ -280,8 +277,6 @@ public final class ArtistDetailModel {
     func reload() async {
         do {
             artist = .loaded(try await api.artistDetail(id))
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             if artist.value == nil { artist = .failed(describe(error)) }
         }
@@ -338,8 +333,6 @@ public final class ArtistDetailModel {
         do {
             try await work()
             return true
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             actionError = describe(error)
         }
@@ -362,12 +355,10 @@ public final class AlbumDetailModel {
     public var actionError: String?
 
     private let api: any LibraryAPI & MusicLibraryAPI
-    private let onSessionLost: @MainActor () -> Void
 
-    public init(id: Int, api: any LibraryAPI & MusicLibraryAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(id: Int, api: any LibraryAPI & MusicLibraryAPI) {
         self.id = id
         self.api = api
-        self.onSessionLost = onSessionLost
     }
 
     public var discs: [MusicLayout.Disc] { album.value.map(MusicLayout.discs) ?? [] }
@@ -386,8 +377,6 @@ public final class AlbumDetailModel {
     public func load() async {
         do {
             album = .loaded(try await api.albumDetail(id))
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             if album.value == nil { album = .failed(describe(error)) }
         }
@@ -423,8 +412,6 @@ public final class AlbumDetailModel {
         do {
             try await work()
             return true
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             actionError = describe(error)
         }

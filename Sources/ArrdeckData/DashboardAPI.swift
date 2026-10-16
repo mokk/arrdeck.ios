@@ -9,35 +9,25 @@ public enum SubtitleKind: String, Sendable {
     case movie, episode
 }
 
-/// Why a call to arrdeck itself failed. Not to be confused with a Block's
-/// offline reason, which arrdeck reports about a service behind it.
+/// Why a call failed. Not to be confused with a Block's offline reason,
+/// which reports about one service behind an answer.
 public enum APIError: Error, Equatable, Sendable, CustomStringConvertible {
-    /// The session cookie is gone or was revoked. The next move is the
-    /// pairing screen, not a retry.
-    case unauthorized
     case unexpectedStatus(Int)
-    case transport(String)
-    /// arrdeck answered, and said in words why not: "the torrent has not
-    /// finished downloading". Shown as is; a status code would hide it.
+    /// The call was turned down, in words: "the torrent has not finished
+    /// downloading". Shown as is; a status code would hide it.
     case refused(String)
 
     public var description: String {
         switch self {
-        case .unauthorized: "signed out"
         case let .unexpectedStatus(code): "HTTP \(code)"
-        case let .transport(reason): reason
         case let .refused(reason): reason
         }
-    }
-
-    static func status(_ code: Int) -> APIError {
-        code == 401 ? .unauthorized : .unexpectedStatus(code)
     }
 }
 
 /// Everything the dashboard asks of the backend, in domain terms. The model
-/// depends on this rather than on the generated client so tests can feed it
-/// canned answers; `LiveAPI` is the one real implementation.
+/// depends on this rather than on a concrete backend so tests can feed it
+/// canned answers; `DirectBackend` is the one real implementation.
 public protocol DashboardAPI: Sendable {
     func services() async throws -> [ServiceInfo]
     func playSessions() async throws -> Block<[PlaySession]>

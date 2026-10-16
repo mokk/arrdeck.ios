@@ -54,7 +54,7 @@ actor FakeExtrasAPI: ExtrasAPI {
 
     @Test func releasesLoadAndGrab() async {
         let api = FakeExtrasAPI()
-        let model = ReleasesModel(target: .movie(180), api: api, onSessionLost: {})
+        let model = ReleasesModel(target: .movie(180), api: api)
         await model.load()
         #expect(model.releases.value?.count == 2)
         await model.grab(model.releases.value![0])
@@ -68,7 +68,7 @@ actor FakeExtrasAPI: ExtrasAPI {
 
     @Test func renameCardShowsThenClears() async {
         let api = FakeExtrasAPI()
-        let model = RenameModel(ref: .movie(180), api: api, onSessionLost: {})
+        let model = RenameModel(ref: .movie(180), api: api)
         await model.load()
         #expect(model.previews.count == 2)
         await model.renameAll()
@@ -79,7 +79,7 @@ actor FakeExtrasAPI: ExtrasAPI {
 
     @Test func addTorrentNeedsAUrlAndLoadsQbitCategories() async {
         let api = FakeExtrasAPI()
-        let model = AddTorrentModel(clients: [.qbittorrent, .transmission], api: api, onSessionLost: {})
+        let model = AddTorrentModel(clients: [.qbittorrent, .transmission], api: api)
         #expect(!model.canSubmit)
         await model.loadCategories()
         #expect(model.categories == ["movies", "tv"])
@@ -99,7 +99,7 @@ actor FakeExtrasAPI: ExtrasAPI {
     @Test func torrentExtrasTrackLimitsCategoryAndTags() async {
         let api = FakeExtrasAPI()
         let torrent = Torrent(client: .qbittorrent, dl_speed: 0, id: "h1", name: "n", progress: 1, size: 1, state: "seeding", tags: ["keep"], ul_speed: 0)
-        let model = TorrentExtrasModel(torrent: torrent, api: api, onSessionLost: {})
+        let model = TorrentExtrasModel(torrent: torrent, api: api)
         model.apply(.init(categories: ["movies", "tv"], category: "movies", dl_limit_kib: 100, files: [], ul_limit_kib: 0))
         #expect(model.downloadKiB == "100")
         #expect(!model.limitsDirty)

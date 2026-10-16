@@ -6,13 +6,11 @@ import SwiftUI
 /// is where one of those gets monitored again.
 public struct AuthorDetailView: View {
     @State private var model: AuthorDetailModel
-    let baseURL: URL
     let api: any LibraryAPI
 
-    public init(id: Int, api: any LibraryAPI, baseURL: URL, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(id: Int, api: any LibraryAPI) {
         self.api = api
-        self.baseURL = baseURL
-        _model = State(initialValue: AuthorDetailModel(id: id, api: api, onSessionLost: onSessionLost))
+        _model = State(initialValue: AuthorDetailModel(id: id, api: api))
     }
 
     public var body: some View {
@@ -24,7 +22,7 @@ public struct AuthorDetailView: View {
                 Section { ErrorNote(reason) }
             case let .loaded(author):
                 Section {
-                    DetailHero(poster: author.poster, baseURL: baseURL, overview: author.overview, links: []) {
+                    DetailHero(poster: author.poster, overview: author.overview, links: []) {
                         Text("\(author.available_count ?? 0) of \(author.book_count ?? 0) books on disk")
                         if let size = author.size_on_disk, size > 0 { Text("· \(Format.bytes(size))") }
                     }

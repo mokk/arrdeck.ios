@@ -22,7 +22,7 @@ actor FakeActivityAPI: ActivityAPI {
     }
 
     @Test @MainActor func aFreshInstallBadgesTheLastDayOnly() async {
-        let model = ActivityFeedModel(api: FakeActivityAPI(), defaults: defaults(), onSessionLost: {})
+        let model = ActivityFeedModel(api: FakeActivityAPI(), defaults: defaults())
         let age = Date.now.timeIntervalSince(model.lastSeen)
         #expect(age > 23 * 3600 && age < 25 * 3600)
         await model.refresh()
@@ -32,7 +32,7 @@ actor FakeActivityAPI: ActivityAPI {
 
     @Test @MainActor func showingHistoryMovesTheMarkClearsTheBadgeAndPersists() async {
         let store = defaults()
-        let model = ActivityFeedModel(api: FakeActivityAPI(), defaults: store, onSessionLost: {})
+        let model = ActivityFeedModel(api: FakeActivityAPI(), defaults: store)
         await model.refresh()
         #expect(model.count == 2)
         let seen = Date.now
@@ -41,7 +41,7 @@ actor FakeActivityAPI: ActivityAPI {
         #expect(model.count == 0, "the tab badge clears at once")
         model.markSeen(at: seen.addingTimeInterval(-3600))
         #expect(model.lastSeen == seen, "an older moment never moves the mark back")
-        let again = ActivityFeedModel(api: FakeActivityAPI(), defaults: store, onSessionLost: {})
+        let again = ActivityFeedModel(api: FakeActivityAPI(), defaults: store)
         #expect(again.lastSeen == seen, "survives a relaunch")
     }
 

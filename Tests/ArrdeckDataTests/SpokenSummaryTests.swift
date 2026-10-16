@@ -55,8 +55,7 @@ struct SpokenSummaryTests {
         #expect(SpokenSummary.today([], today: "2026-10-09") == "Nothing is out today.")
     }
 
-    @Test func aSignedOutServerIsToldApart() {
-        #expect(SpokenSummary.failure(APIError.unauthorized).contains("signed out"))
+    @Test func aFailureSaysTheServicesWereNotReached() {
         #expect(SpokenSummary.failure(URLError(.timedOut)).contains("could not reach"))
     }
 }

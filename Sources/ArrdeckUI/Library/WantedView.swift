@@ -8,19 +8,14 @@ public struct WantedView: View {
     @State private var diagnosing: WantedItem?
     @State private var searching: WantedItem?
     let api: any WantedAPI & TitleScreensAPI
-    let baseURL: URL
     let hasPlex: Bool
-    let onSessionLost: @MainActor () -> Void
 
     public init(
-        api: any WantedAPI & TitleScreensAPI, apps: [ArrApp], baseURL: URL, hasPlex: Bool,
-        onSessionLost: @escaping @MainActor () -> Void
+        api: any WantedAPI & TitleScreensAPI, apps: [ArrApp], hasPlex: Bool
     ) {
         self.api = api
-        self.baseURL = baseURL
         self.hasPlex = hasPlex
-        self.onSessionLost = onSessionLost
-        _model = State(initialValue: WantedModel(api: api, apps: apps, onSessionLost: onSessionLost))
+        _model = State(initialValue: WantedModel(api: api, apps: apps))
     }
 
     public var body: some View {
@@ -54,7 +49,7 @@ public struct WantedView: View {
                     EmptyNote("Nothing here — the library is complete")
                 }
                 ForEach(model.items, id: \.id) { item in
-                    WantedRow(item: item, baseURL: baseURL, model: model, diagnose: { diagnosing = item }, search: { searching = item })
+                    WantedRow(item: item, model: model, diagnose: { diagnosing = item }, search: { searching = item })
                 }
                 if model.hasMore {
                     Button(model.loading ? "Loading…" : "Load more") { Task { await model.loadMore() } }
@@ -76,7 +71,7 @@ public struct WantedView: View {
         .navigationTitle("Wanted")
         .pageTitle()
         .navigationDestination(for: MediaRef.self) { ref in
-            TitleDetail(ref: ref, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+            TitleDetail(ref: ref, api: api, hasPlex: hasPlex)
         }
         .task { await model.load(reset: true) }
         .refreshable { await model.load(reset: true) }
@@ -91,7 +86,7 @@ public struct WantedView: View {
                 ReleasesSheet(
                     target: target,
                     title: [item.title, item.subtitle].compactMap { $0 }.joined(separator: " "),
-                    api: api, onSessionLost: onSessionLost
+                    api: api
                 ) { searching = nil }
             }
         }
@@ -112,7 +107,6 @@ extension WantedItem: Identifiable {}
 
 struct WantedRow: View {
     let item: WantedItem
-    let baseURL: URL
     let model: WantedModel
     let diagnose: () -> Void
     let search: () -> Void
@@ -130,7 +124,7 @@ struct WantedRow: View {
         HStack(spacing: 10) {
             NavigationLink(value: item.ref) {
                 HStack(spacing: 10) {
-                    Poster(path: item.poster, baseURL: baseURL, width: 36, cornerRadius: 6)
+                    Poster(path: item.poster, width: 36, cornerRadius: 6)
                     VStack(alignment: .leading, spacing: 3) {
                         Text(item.title).font(.subheadline.weight(.medium)).lineLimit(1)
                         Text(subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(1)

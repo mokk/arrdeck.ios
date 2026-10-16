@@ -10,12 +10,9 @@ public struct ArtistDetailView: View {
     @State private var confirmingDelete = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.confirmCenter) private var confirmCenter
-    let baseURL: URL
 
-    public init(id: Int, api: any LibraryAPI & MusicLibraryAPI & ManageAPI, baseURL: URL,
-                onSessionLost: @escaping @MainActor () -> Void) {
-        self.baseURL = baseURL
-        _model = State(initialValue: ArtistDetailModel(id: id, api: api, onSessionLost: onSessionLost))
+    public init(id: Int, api: any LibraryAPI & MusicLibraryAPI & ManageAPI) {
+        _model = State(initialValue: ArtistDetailModel(id: id, api: api))
     }
 
     public var body: some View {
@@ -26,9 +23,9 @@ public struct ArtistDetailView: View {
             case let .failed(reason):
                 Section { ErrorNote(reason) }
             case let .loaded(artist):
-                BackdropSection(path: artist.fanart, baseURL: baseURL)
+                BackdropSection(path: artist.fanart)
                 Section {
-                    DetailHero(poster: artist.poster, baseURL: baseURL, overview: artist.overview, links: model.links,
+                    DetailHero(poster: artist.poster, overview: artist.overview, links: model.links,
                                ratings: artist.ratings ?? [], square: true) {
                         StateBadge(state: artist.state)
                         if let disambiguation = artist.disambiguation, !disambiguation.isEmpty { Text(disambiguation) }
@@ -43,7 +40,7 @@ public struct ArtistDetailView: View {
                 ForEach(model.groups, id: \.type) { group in
                     Section("\(group.label) (\(group.albums.count))") {
                         ForEach(group.albums, id: \.id) { album in
-                            ArtistAlbumRow(album: album, baseURL: baseURL, model: model)
+                            ArtistAlbumRow(album: album, model: model)
                         }
                     }
                 }
@@ -111,7 +108,6 @@ public struct ArtistDetailView: View {
 /// monitors it or stops.
 struct ArtistAlbumRow: View {
     let album: LibraryAlbum
-    let baseURL: URL
     let model: ArtistDetailModel
     @Environment(\.confirmCenter) private var confirmCenter
 
@@ -124,7 +120,7 @@ struct ArtistAlbumRow: View {
         HStack(spacing: 10) {
             NavigationLink(value: MediaRef.album(album.id)) {
                 HStack(spacing: 10) {
-                    Poster(path: album.poster, baseURL: baseURL, width: 40, cornerRadius: 6, title: album.title, square: true)
+                    Poster(path: album.poster, width: 40, cornerRadius: 6, title: album.title, square: true)
                     VStack(alignment: .leading, spacing: 3) {
                         HStack(spacing: 4) {
                             Text(album.title ?? "").font(.subheadline).lineLimit(2)
@@ -276,16 +272,11 @@ public struct AlbumDetailView: View {
     @State private var model: AlbumDetailModel
     @State private var searching = false
     @Environment(\.confirmCenter) private var confirmCenter
-    let baseURL: URL
     let api: any LibraryAPI & MusicLibraryAPI & ExtrasAPI
-    let onSessionLost: @MainActor () -> Void
 
-    public init(id: Int, api: any LibraryAPI & MusicLibraryAPI & ExtrasAPI, baseURL: URL,
-                onSessionLost: @escaping @MainActor () -> Void) {
-        self.baseURL = baseURL
+    public init(id: Int, api: any LibraryAPI & MusicLibraryAPI & ExtrasAPI) {
         self.api = api
-        self.onSessionLost = onSessionLost
-        _model = State(initialValue: AlbumDetailModel(id: id, api: api, onSessionLost: onSessionLost))
+        _model = State(initialValue: AlbumDetailModel(id: id, api: api))
     }
 
     public var body: some View {
@@ -296,9 +287,9 @@ public struct AlbumDetailView: View {
             case let .failed(reason):
                 Section { ErrorNote(reason) }
             case let .loaded(album):
-                BackdropSection(path: album.poster, baseURL: baseURL, blurred: true)
+                BackdropSection(path: album.poster, blurred: true)
                 Section {
-                    DetailHero(poster: album.poster, baseURL: baseURL, overview: album.overview, links: model.links,
+                    DetailHero(poster: album.poster, overview: album.overview, links: model.links,
                                ratings: album.ratings ?? [], square: true) {
                         StateBadge(state: album.state)
                         // Lidarr's own word for it: Album, EP, Single…
@@ -334,7 +325,7 @@ public struct AlbumDetailView: View {
         .task { await model.load() }
         .refreshable { await model.load() }
         .sheet(isPresented: $searching) {
-            ReleasesSheet(target: .album(model.id), title: model.fullTitle, api: api, onSessionLost: onSessionLost) { searching = false }
+            ReleasesSheet(target: .album(model.id), title: model.fullTitle, api: api) { searching = false }
         }
         .alert("Action failed", isPresented: Binding(get: { model.actionError != nil }, set: { if !$0 { model.actionError = nil } })) {
             Button("OK") { model.actionError = nil }

@@ -11,8 +11,8 @@ import UserNotifications
 /// Where the app was asked to go from outside it: a home-screen quick action,
 /// a Siri / Shortcuts "open" intent, or a tap on a widget or the Live
 /// Activity. Any of them can arrive before a server is on screen — at a cold
-/// launch the profiles, the session and /services all load first — so the
-/// request waits here until the tabs exist to take it.
+/// launch the profiles and /services load first — so the request waits
+/// here until the tabs exist to take it.
 public enum LaunchAction: String, CaseIterable, Sendable {
     case add, search, activity, calendar
     /// Only from the Free space widget: Storage is under Settings.

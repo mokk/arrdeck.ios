@@ -6,8 +6,8 @@ import SwiftUI
 struct SystemView: View {
     @State private var model: SystemModel
 
-    init(configured: Set<String>, api: any ManageAPI, onSessionLost: @escaping @MainActor () -> Void) {
-        _model = State(initialValue: SystemModel(configured: configured, api: api, onSessionLost: onSessionLost))
+    init(configured: Set<String>, api: any ManageAPI) {
+        _model = State(initialValue: SystemModel(configured: configured, api: api))
     }
 
     var body: some View {

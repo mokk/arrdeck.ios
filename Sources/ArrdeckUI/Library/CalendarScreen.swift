@@ -9,19 +9,14 @@ public struct CalendarScreen: View {
     @State private var opened = false
     @AppStorage(DisplayKeys.spoilers) private var spoilers: Spoilers = .off
     let api: any CalendarAPI & LibraryPageAPI
-    let baseURL: URL
     let hasPlex: Bool
-    let onSessionLost: @MainActor () -> Void
 
     public init(
-        api: any CalendarAPI & LibraryPageAPI, baseURL: URL, hasPlex: Bool,
-        onSessionLost: @escaping @MainActor () -> Void
+        api: any CalendarAPI & LibraryPageAPI, hasPlex: Bool
     ) {
-        _model = State(initialValue: CalendarModel(api: api, onSessionLost: onSessionLost))
+        _model = State(initialValue: CalendarModel(api: api))
         self.api = api
-        self.baseURL = baseURL
         self.hasPlex = hasPlex
-        self.onSessionLost = onSessionLost
     }
 
     public var body: some View {
@@ -45,7 +40,7 @@ public struct CalendarScreen: View {
                                 MonthDivider(title: month(of: day.day))
                             }
                             DaySection(day: day.day, entries: day.entries, today: model.today,
-                                       baseURL: baseURL, hideEpisodeTitles: spoilers != .off)
+                                       hideEpisodeTitles: spoilers != .off)
                                 .id(day.day)
                         }
                         Button("Show later") { Task { await model.showLater() } }
@@ -73,7 +68,7 @@ public struct CalendarScreen: View {
             }
         }
         .navigationDestination(for: MediaRef.self) { ref in
-            MediaDestination(ref: ref, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+            MediaDestination(ref: ref, api: api, hasPlex: hasPlex)
         }
         .task { await model.load() }
         .refreshable { await model.load() }
@@ -142,7 +137,6 @@ private struct DaySection: View {
     let day: String
     let entries: [CalendarEntry]
     let today: String
-    let baseURL: URL
     let hideEpisodeTitles: Bool
 
     var date: Date { CalendarDay.date(day) ?? .now }
@@ -177,10 +171,10 @@ private struct DaySection: View {
                 }
                 ForEach(entries) { entry in
                     if let ref = entry.item.ref {
-                        NavigationLink(value: ref) { EntryRow(entry: entry, baseURL: baseURL, hideEpisodeTitle: hideEpisodeTitles) }
+                        NavigationLink(value: ref) { EntryRow(entry: entry, hideEpisodeTitle: hideEpisodeTitles) }
                             .buttonStyle(.plain)
                     } else {
-                        EntryRow(entry: entry, baseURL: baseURL, hideEpisodeTitle: hideEpisodeTitles)
+                        EntryRow(entry: entry, hideEpisodeTitle: hideEpisodeTitles)
                     }
                 }
             }
@@ -194,7 +188,6 @@ private struct DaySection: View {
 
 private struct EntryRow: View {
     let entry: CalendarEntry
-    let baseURL: URL
     let hideEpisodeTitle: Bool
 
     var item: CalendarItem { entry.item }
@@ -220,7 +213,7 @@ private struct EntryRow: View {
     var body: some View {
         HStack(spacing: 10) {
             Rectangle().fill(CalendarColors.stripe(item.arr ?? .sonarr)).frame(width: 4)
-            Poster(path: item.poster, baseURL: baseURL, width: 34, cornerRadius: 5, title: item.title)
+            Poster(path: item.poster, width: 34, cornerRadius: 5, title: item.title)
                 .padding(.vertical, 8)
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.title).font(.subheadline.weight(.semibold)).lineLimit(1)

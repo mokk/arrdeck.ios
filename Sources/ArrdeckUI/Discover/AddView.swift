@@ -16,27 +16,23 @@ public struct AddView: View {
     @State private var trakt: [SearchResult] = []
     @AppStorage("add.traktList") private var traktList: TraktList = .trending
     let api: any DiscoverAPI & TitleScreensAPI
-    let baseURL: URL
     let hasPlex: Bool
     let hasTrakt: Bool
-    let onSessionLost: @MainActor () -> Void
     /// Set when the page is scoped to one library: no kind picker, and a
     /// Cancel button because it is presented as a sheet.
     let fixed: AddTab?
     let dismiss: (() -> Void)?
 
     public init(
-        configured: Set<String>, api: any DiscoverAPI & TitleScreensAPI, baseURL: URL, hasPlex: Bool,
-        fixed: AddTab? = nil, onSessionLost: @escaping @MainActor () -> Void, dismiss: (() -> Void)? = nil
+        configured: Set<String>, api: any DiscoverAPI & TitleScreensAPI, hasPlex: Bool,
+        fixed: AddTab? = nil, dismiss: (() -> Void)? = nil
     ) {
         self.api = api
-        self.baseURL = baseURL
         self.hasPlex = hasPlex
         hasTrakt = configured.contains("trakt")
         self.fixed = fixed
         self.dismiss = dismiss
-        self.onSessionLost = onSessionLost
-        let model = AddModel(configured: configured, api: api, onSessionLost: onSessionLost)
+        let model = AddModel(configured: configured, api: api)
         if let fixed { model.tab = fixed }
         _model = State(initialValue: model)
     }
@@ -79,16 +75,16 @@ public struct AddView: View {
         .onSubmit(of: .search) { Task { await model.submit() } }
         .task { await model.load() }
         .sheet(item: $selected) { result in
-            MediaSheet(result: result, api: api, baseURL: baseURL) {
+            MediaSheet(result: result, api: api) {
                 selected = nil
                 Task { await model.submit() }
             }
         }
         .sheet(item: $collection) { item in
-            CollectionSheet(collection: item, api: api, baseURL: baseURL) { collection = nil }
+            CollectionSheet(collection: item, api: api) { collection = nil }
         }
         .navigationDestination(item: $opened) { ref in
-            TitleDetail(ref: ref, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+            TitleDetail(ref: ref, api: api, hasPlex: hasPlex)
         }
         .alert("Action failed", isPresented: Binding(get: { model.actionError != nil }, set: { if !$0 { model.actionError = nil } })) {
             Button("OK") { model.actionError = nil }
@@ -177,7 +173,7 @@ public struct AddView: View {
                     ForEach(trakt, id: \.remote_id) { result in
                         Button { selected = result } label: {
                             VStack(alignment: .leading, spacing: 3) {
-                                Poster(path: result.poster, baseURL: baseURL, width: 90, cornerRadius: 10, title: result.title)
+                                Poster(path: result.poster, width: 90, cornerRadius: 10, title: result.title)
                                 Text(result.title).font(.caption.weight(.medium)).lineLimit(1)
                                 Text(result.in_library == true ? String(localized: "In library") : result.year.map(String.init) ?? "")
                                     .font(.caption2).foregroundStyle(.secondary)
@@ -203,7 +199,7 @@ public struct AddView: View {
                     ForEach(rows, id: \.remote_id) { result in
                         Button { selected = result } label: {
                             VStack(alignment: .leading, spacing: 3) {
-                                Poster(path: result.poster, baseURL: baseURL, width: 90, cornerRadius: 10, title: result.title)
+                                Poster(path: result.poster, width: 90, cornerRadius: 10, title: result.title)
                                 Text(result.title).font(.caption.weight(.medium)).lineLimit(1)
                                 Text(result.year.map(String.init) ?? "").font(.caption2).foregroundStyle(.secondary)
                             }
@@ -233,7 +229,7 @@ public struct AddView: View {
                     ForEach(recommendations.prefix(20), id: \.remote_id) { result in
                         Button { selected = result } label: {
                             VStack(alignment: .leading, spacing: 3) {
-                                Poster(path: result.poster, baseURL: baseURL, width: 90, cornerRadius: 10, title: result.title)
+                                Poster(path: result.poster, width: 90, cornerRadius: 10, title: result.title)
                                 Text(result.title).font(.caption.weight(.medium)).lineLimit(1)
                                 Text(result.year.map(String.init) ?? "").font(.caption2).foregroundStyle(.secondary)
                             }
@@ -269,7 +265,7 @@ public struct AddView: View {
             case let .failed(reason)?: ErrorNote(reason)
             case let .loaded(results)?:
                 if results.isEmpty { EmptyNote("No matches") }
-                PosterGrid(results: results, baseURL: baseURL) { result in
+                PosterGrid(results: results) { result in
                     if result.searchKind?.isMusic == true, result.in_library == true, let ref = result.ref {
                         opened = ref
                     } else {
@@ -294,7 +290,7 @@ public struct AddView: View {
                 ForEach(model.shownCollections, id: \.id) { item in
                     Button { collection = item } label: {
                         HStack(spacing: 10) {
-                            Poster(path: item.poster, baseURL: baseURL, width: 36, cornerRadius: 6)
+                            Poster(path: item.poster, width: 36, cornerRadius: 6)
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(item.title ?? "").font(.subheadline.weight(.medium)).lineLimit(1)
                                 Text("\((item.movie_count ?? 0) - (item.missing_count ?? 0)) of \(item.movie_count ?? 0) movies")
@@ -366,7 +362,6 @@ struct ReleaseRow: View {
 
 struct PosterGrid: View {
     let results: [SearchResult]
-    let baseURL: URL
     let open: (SearchResult) -> Void
 
     /// The year; for an album its artist too, and for an artist the word.
@@ -385,10 +380,10 @@ struct PosterGrid: View {
                     VStack(alignment: .leading, spacing: 4) {
                         if result.searchKind?.isMusic == true {
                             // a coloured tile with the name when there is no cover
-                            Poster(path: result.poster, baseURL: baseURL, width: 100, cornerRadius: 12,
+                            Poster(path: result.poster, width: 100, cornerRadius: 12,
                                    title: result.title, subtitle: result.artist, square: true)
                         } else if result.poster != nil {
-                            Poster(path: result.poster, baseURL: baseURL, width: 100, cornerRadius: 12)
+                            Poster(path: result.poster, width: 100, cornerRadius: 12)
                         } else {
                             Text(result.title).font(.caption2).foregroundStyle(.secondary)
                                 .multilineTextAlignment(.center)
@@ -423,13 +418,11 @@ struct MediaSheet: View {
     @AppStorage("add.seriesMonitor") private var storedMonitor: SeriesMonitor = .all
     /// The same for a new artist's albums, under the PWA's name.
     @AppStorage("add.artistMonitor") private var storedArtistMonitor: ArtistMonitor = .all
-    let baseURL: URL
     let dismiss: () -> Void
 
-    init(result: SearchResult, api: any DiscoverAPI & LibraryAPI, baseURL: URL, dismiss: @escaping () -> Void) {
-        self.baseURL = baseURL
+    init(result: SearchResult, api: any DiscoverAPI & LibraryAPI, dismiss: @escaping () -> Void) {
         self.dismiss = dismiss
-        _model = State(initialValue: MediaSheetModel(result: result, api: api, onSessionLost: {}))
+        _model = State(initialValue: MediaSheetModel(result: result, api: api))
     }
 
     var result: SearchResult { model.result }
@@ -440,7 +433,7 @@ struct MediaSheet: View {
         NavigationStack {
             List {
                 Section {
-                    DetailHero(poster: result.poster, baseURL: baseURL, overview: result.overview ?? "No description available.",
+                    DetailHero(poster: result.poster, overview: result.overview ?? "No description available.",
                                links: result.externalLinks, square: result.searchKind?.isMusic == true) {
                         Text(result.kindLabel)
                         if let author = result.author { Text("· \(author)") }
@@ -584,7 +577,6 @@ struct MediaSheet: View {
 struct CollectionSheet: View {
     let collection: Collection
     let api: any DiscoverAPI & LibraryAPI
-    let baseURL: URL
     let dismiss: () -> Void
     @State private var detail: Loadable<CollectionDetail> = .loading
     @State private var selected: SearchResult?
@@ -607,7 +599,7 @@ struct CollectionSheet: View {
                         ForEach(movies) { movie in
                             Button { selected = movie } label: {
                                 HStack(spacing: 10) {
-                                    Poster(path: movie.poster, baseURL: baseURL, width: 36, cornerRadius: 6)
+                                    Poster(path: movie.poster, width: 36, cornerRadius: 6)
                                     VStack(alignment: .leading, spacing: 3) {
                                         HStack(spacing: 4) {
                                             Text(movie.title).font(.subheadline.weight(.medium)).lineLimit(1)
@@ -633,7 +625,7 @@ struct CollectionSheet: View {
                 catch { detail = .failed((error as? APIError)?.description ?? error.localizedDescription) }
             }
             .sheet(item: $selected) { movie in
-                MediaSheet(result: movie, api: api, baseURL: baseURL) { selected = nil }
+                MediaSheet(result: movie, api: api) { selected = nil }
             }
         }
         .outsideChrome()

@@ -227,7 +227,7 @@ actor FakeMusicAPI: LibraryAPI, MusicLibraryAPI, ManageAPI {
 @MainActor @Suite struct MusicModelTests {
     @Test func theArtistPageLoadsWithLidarrsProfilesAndTags() async {
         let api = FakeMusicAPI()
-        let model = ArtistDetailModel(id: 1, api: api, settle: .zero, onSessionLost: {})
+        let model = ArtistDetailModel(id: 1, api: api, settle: .zero)
         await model.load()
         #expect(model.artist.value?.name == "Boards of Canada")
         #expect(model.groups.map(\.type) == ["Album"])
@@ -238,7 +238,7 @@ actor FakeMusicAPI: LibraryAPI, MusicLibraryAPI, ManageAPI {
 
     @Test func theArtistsActionsReachTheArtistAndItsAlbums() async {
         let api = FakeMusicAPI()
-        let model = ArtistDetailModel(id: 1, api: api, settle: .zero, onSessionLost: {})
+        let model = ArtistDetailModel(id: 1, api: api, settle: .zero)
         await model.setMonitored(false)
         await model.search()
         #expect(model.notice == "Search started")
@@ -256,7 +256,7 @@ actor FakeMusicAPI: LibraryAPI, MusicLibraryAPI, ManageAPI {
 
     @Test func aFailedActionSaysSoAndKeepsThePage() async {
         let api = FakeMusicAPI()
-        let model = ArtistDetailModel(id: 1, api: api, settle: .zero, onSessionLost: {})
+        let model = ArtistDetailModel(id: 1, api: api, settle: .zero)
         await model.load()
         await api.set(failure: .unexpectedStatus(500))
         #expect(await model.save(ArtistChanges(qualityProfile: 2)) == false, "the sheet stays open")
@@ -266,19 +266,9 @@ actor FakeMusicAPI: LibraryAPI, MusicLibraryAPI, ManageAPI {
         #expect(!model.deleted)
     }
 
-    @Test func unauthorizedEndsTheSession() async {
-        let api = FakeMusicAPI()
-        await api.set(failure: .unauthorized)
-        var lost = 0
-        let model = AlbumDetailModel(id: 1, api: api, onSessionLost: { lost += 1 })
-        await model.load()
-        #expect(lost == 1)
-        #expect(model.album == .loading)
-    }
-
     @Test func theAlbumsActionsReachTheAlbumAndItsFiles() async {
         let api = FakeMusicAPI()
-        let model = AlbumDetailModel(id: 4, api: api, onSessionLost: {})
+        let model = AlbumDetailModel(id: 4, api: api)
         await model.load()
         #expect(model.fullTitle == "Boards of Canada — Geogaddi")
         #expect(model.discs.first?.tracks.count == 2)
@@ -300,7 +290,7 @@ actor FakeMusicAPI: LibraryAPI, MusicLibraryAPI, ManageAPI {
 @MainActor @Suite struct AddMusicTests {
     @Test func musicIsATabOnceLidarrIsConfiguredAndSearchesLidarr() async throws {
         let api = FakeDiscoverAPI()
-        let model = AddModel(configured: ["radarr", "lidarr", "prowlarr"], api: api, onSessionLost: {})
+        let model = AddModel(configured: ["radarr", "lidarr", "prowlarr"], api: api)
         #expect(model.tabs == [.movies, .music, .collections, .releases])
         model.tab = .music
         await model.load()
@@ -314,7 +304,7 @@ actor FakeMusicAPI: LibraryAPI, MusicLibraryAPI, ManageAPI {
     @Test func anArtistIsAddedWithTheMonitorChoiceAndNoneDoesNotSearch() async {
         let api = FakeDiscoverAPI()
         let artist = SearchResult(foreign_id: "69158f97", kind: "artist", remote_id: 0, title: "Boards of Canada")
-        let sheet = MediaSheetModel(result: artist, api: api, onSessionLost: {})
+        let sheet = MediaSheetModel(result: artist, api: api)
         await sheet.load()
         #expect(sheet.usesMetadataProfile)
         #expect(sheet.addSearches)
@@ -330,7 +320,7 @@ actor FakeMusicAPI: LibraryAPI, MusicLibraryAPI, ManageAPI {
         let album = SearchResult(album_type: "EP", artist: "Cale Parks", foreign_id: "bd8ea9e2", kind: "album", remote_id: 0, title: "Boards")
         #expect(album.kindLabel == "EP", "Lidarr's own word for it")
         #expect(album.app == .lidarr && album.externalLinks.isEmpty)
-        let sheet = MediaSheetModel(result: album, api: api, onSessionLost: {})
+        let sheet = MediaSheetModel(result: album, api: api)
         await sheet.load()
         await sheet.add()
         #expect(await api.count("add-0-4-/movies") == 1)

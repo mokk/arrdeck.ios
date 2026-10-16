@@ -26,7 +26,7 @@ actor FakeCalendarAPI: CalendarAPI {
     let now = Date(timeIntervalSince1970: 1_790_139_600) // 2026-09-23
 
     func model(_ api: FakeCalendarAPI) -> CalendarModel {
-        CalendarModel(api: api, calendar: utc, now: { now }, onSessionLost: {})
+        CalendarModel(api: api, calendar: utc, now: { now })
     }
 
     @Test func groupsByDayOpensAtTodayAndFoldsASeasonDrop() async {
@@ -87,17 +87,11 @@ actor FakeCalendarAPI: CalendarAPI {
         #expect(CalendarItem(app: "readarr", title: "no id").ref == nil)
     }
 
-    @Test func failuresAndUnauthorized() async {
+    @Test func failuresReport() async {
         let api = FakeCalendarAPI(items: [])
         await api.set(failure: .unexpectedStatus(500))
         let model = model(api)
         await model.load()
         #expect(model.blocks == .failed("HTTP 500"))
-
-        await api.set(failure: .unauthorized)
-        var lost = 0
-        let gone = CalendarModel(api: api, calendar: utc, now: { now }, onSessionLost: { lost += 1 })
-        await gone.load()
-        #expect(lost == 1)
     }
 }

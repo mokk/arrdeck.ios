@@ -88,19 +88,16 @@ public final class ReleasesModel {
     public var actionError: String?
 
     private let api: any ExtrasAPI
-    private let onSessionLost: @MainActor () -> Void
 
-    public init(target: ReleaseTarget, api: any ExtrasAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(target: ReleaseTarget, api: any ExtrasAPI) {
         self.target = target
         self.api = api
-        self.onSessionLost = onSessionLost
     }
 
     public func load() async {
         do {
             releases = .loaded(try await api.releases(target))
         } catch {
-            if case .some(.unauthorized) = error as? APIError { onSessionLost(); return }
             releases = .failed((error as? APIError)?.description ?? error.localizedDescription)
         }
     }
@@ -111,8 +108,6 @@ public final class ReleasesModel {
         do {
             try await api.grabArrRelease(target.app, guid: release.guid, indexerID: release.indexer_id)
             grabbed.insert(release.guid)
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             actionError = (error as? APIError)?.description ?? error.localizedDescription
         }
@@ -130,12 +125,10 @@ public final class RenameModel {
     public var actionError: String?
 
     private let api: any ExtrasAPI
-    private let onSessionLost: @MainActor () -> Void
 
-    public init(ref: MediaRef, api: any ExtrasAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(ref: MediaRef, api: any ExtrasAPI) {
         self.ref = ref
         self.api = api
-        self.onSessionLost = onSessionLost
     }
 
     public func load() async {
@@ -149,8 +142,6 @@ public final class RenameModel {
             try await api.renameFiles(ref, fileIDs: previews.map(\.file_id))
             started = true
             previews = []
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             actionError = (error as? APIError)?.description ?? error.localizedDescription
         }
@@ -176,13 +167,11 @@ public final class AddTorrentModel {
     public var error: String?
 
     private let api: any ExtrasAPI
-    private let onSessionLost: @MainActor () -> Void
 
-    public init(clients: [TorrentClient], api: any ExtrasAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(clients: [TorrentClient], api: any ExtrasAPI) {
         self.clients = clients
         client = clients.first ?? .qbittorrent
         self.api = api
-        self.onSessionLost = onSessionLost
     }
 
     public var canSubmit: Bool { (fileData != nil || !url.trimmingCharacters(in: .whitespaces).isEmpty) && !busy }
@@ -212,8 +201,6 @@ public final class AddTorrentModel {
                 try await api.addTorrent(client, url: url.trimmingCharacters(in: .whitespaces), category: category, paused: paused)
             }
             done = true
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             self.error = (error as? APIError)?.description ?? error.localizedDescription
         }
@@ -237,13 +224,11 @@ public final class TorrentExtrasModel {
     public var actionError: String?
 
     private let api: any ExtrasAPI
-    private let onSessionLost: @MainActor () -> Void
 
-    public init(torrent: Torrent, api: any ExtrasAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(torrent: Torrent, api: any ExtrasAPI) {
         self.torrent = torrent
         tags = Set(torrent.tags ?? [])
         self.api = api
-        self.onSessionLost = onSessionLost
     }
 
     public var isQbit: Bool { torrent.torrentClient == .qbittorrent }
@@ -298,8 +283,6 @@ public final class TorrentExtrasModel {
         actionError = nil
         do {
             try await work()
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             actionError = (error as? APIError)?.description ?? error.localizedDescription
         }

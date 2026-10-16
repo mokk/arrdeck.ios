@@ -6,8 +6,8 @@ import SwiftUI
 public struct PopularView: View {
     @State private var model: PopularModel
 
-    public init(api: any DiscoverAPI, onSessionLost: @escaping @MainActor () -> Void) {
-        _model = State(initialValue: PopularModel(api: api, onSessionLost: onSessionLost))
+    public init(api: any DiscoverAPI) {
+        _model = State(initialValue: PopularModel(api: api))
     }
 
     public var body: some View {

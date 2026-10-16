@@ -51,12 +51,12 @@ final class GlancePosters {
 
     /// Fetches what these entries are missing, from the library's poster
     /// paths, and drops the files no entry shows any more.
-    func update(for entries: [GlanceSnapshot.Activity.Entry], titles: [MediaRef: GlanceTitle], baseURL: URL) {
+    func update(for entries: [GlanceSnapshot.Activity.Entry], titles: [MediaRef: GlanceTitle]) {
         let wanted = Set(entries.compactMap(\.key))
         for entry in entries where !entry.hasPoster {
             guard let key = entry.key, !stored.contains(key), !fetching.contains(key), !failed.contains(key),
                   let path = titles.first(where: { $0.key.glanceKey == key })?.value.poster,
-                  let url = URL(string: path, relativeTo: baseURL), let file = store.posterURL(key)
+                  let url = URL(string: path), let file = store.posterURL(key)
             else { continue }
             fetching.insert(key)
             Task {
@@ -75,9 +75,7 @@ final class GlancePosters {
         }
     }
 
-    /// Off the main actor: the download, the resize and the write. The shared
-    /// session, so the sign-in cookie goes along as it does for the app's own
-    /// posters.
+    /// Off the main actor: the download, the resize and the write.
     nonisolated private static func fetch(_ url: URL, to file: URL) async -> Bool {
         #if canImport(UIKit)
         guard let (data, response) = try? await URLSession.shared.data(from: url),

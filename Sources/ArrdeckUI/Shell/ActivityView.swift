@@ -27,22 +27,18 @@ public struct ActivityView: View {
     let feed: ActivityFeedModel
     let api: any DownloadsAPI & HistoryAPI & TitleScreensAPI
     let hasArr: Bool
-    let baseURL: URL
     let hasPlex: Bool
-    let onSessionLost: @MainActor () -> Void
 
     public init(
         api: any DownloadsAPI & HistoryAPI & TitleScreensAPI, feed: ActivityFeedModel, clients: [TorrentClient], hasArr: Bool,
-        arrs: [ArrApp] = [], baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void
+        arrs: [ArrApp] = [], hasPlex: Bool
     ) {
         self.api = api
         self.feed = feed
         self.hasArr = hasArr
-        self.baseURL = baseURL
         self.hasPlex = hasPlex
-        self.onSessionLost = onSessionLost
         _model = State(initialValue: DownloadsModel(
-            api: api, clients: clients, hasArr: hasArr, arrs: arrs, onSessionLost: onSessionLost
+            api: api, clients: clients, hasArr: hasArr, arrs: arrs
         ))
         _newSince = State(initialValue: feed.lastSeen)
     }
@@ -85,12 +81,12 @@ public struct ActivityView: View {
             }
             switch segment {
             case .downloading:
-                DownloadingList(model: model, api: api, newSince: newSince, onSessionLost: onSessionLost) { segment = .queue }
+                DownloadingList(model: model, api: api, newSince: newSince) { segment = .queue }
             case .queue:
-                DownloadsView(model: model, api: api, newSince: newSince, onSessionLost: onSessionLost)
+                DownloadsView(model: model, api: api, newSince: newSince)
             case .history:
                 HistoryScreen(api: api, apps: model.arrs, newSince: newSince, onShown: { feed.markSeen(at: .now) },
-                              titled: false, onSessionLost: onSessionLost)
+                              titled: false)
             }
         }
         .safeAreaInset(edge: .top, spacing: 0) {
@@ -102,7 +98,7 @@ public struct ActivityView: View {
         .navigationTitle("Activity")
         .pageTitle()
         .navigationDestination(for: MediaRef.self) { ref in
-            TitleDetail(ref: ref, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+            TitleDetail(ref: ref, api: api, hasPlex: hasPlex)
         }
         .task { await model.run() }
         .accessibilityIdentifier("activity")
@@ -115,7 +111,6 @@ struct DownloadingList: View {
     let model: DownloadsModel
     let api: any DownloadsAPI & ExtrasAPI
     let newSince: Date?
-    let onSessionLost: @MainActor () -> Void
     let showAll: () -> Void
     @State private var adding = false
     @State private var selected: Torrent?
@@ -135,9 +130,6 @@ struct DownloadingList: View {
 
     var body: some View {
         List {
-            if let error = model.connectionError {
-                Section { Label(error, systemImage: "wifi.slash").font(.subheadline).foregroundStyle(Color.warning) }
-            }
             if model.attentionCount > 0 {
                 NeedsAttentionSection(model: model) { importing = $0 }
             }
@@ -218,17 +210,16 @@ struct DownloadingList: View {
             }
         }
         .sheet(item: $selected) { torrent in
-            TorrentDetailSheet(torrent: torrent, model: model, api: api, onSessionLost: onSessionLost) { selected = nil }
+            TorrentDetailSheet(torrent: torrent, model: model, api: api) { selected = nil }
         }
         .sheet(isPresented: $adding) {
-            AddTorrentSheet(clients: model.clients, api: api, onSessionLost: onSessionLost) {
+            AddTorrentSheet(clients: model.clients, api: api) {
                 adding = false
                 Task { await model.refresh() }
             }
         }
         .sheet(item: $importing) { job in
-            ImportSheet(job: job, api: api, onSessionLost: onSessionLost,
-                        onFinished: { Task { await model.refreshQueue() } }) { importing = nil }
+            ImportSheet(job: job, api: api, onFinished: { Task { await model.refreshQueue() } }) { importing = nil }
         }
         .accessibilityIdentifier("downloading")
     }

@@ -5,9 +5,7 @@ public struct SeriesDetailView: View {
     @State private var model: SeriesDetailModel
     @State private var searching: ReleaseSearch?
     @Environment(\.dismiss) private var dismiss
-    let baseURL: URL
     let api: any LibraryAPI & ExtrasAPI
-    let onSessionLost: @MainActor () -> Void
 
     struct ReleaseSearch: Identifiable {
         let target: ReleaseTarget
@@ -15,11 +13,9 @@ public struct SeriesDetailView: View {
         var id: ReleaseTarget { target }
     }
 
-    public init(id: Int, api: any LibraryAPI & ExtrasAPI, baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
-        self.baseURL = baseURL
+    public init(id: Int, api: any LibraryAPI & ExtrasAPI, hasPlex: Bool) {
         self.api = api
-        self.onSessionLost = onSessionLost
-        _model = State(initialValue: SeriesDetailModel(id: id, api: api, hasPlex: hasPlex, onSessionLost: onSessionLost))
+        _model = State(initialValue: SeriesDetailModel(id: id, api: api, hasPlex: hasPlex))
     }
 
     @AppStorage(DisplayKeys.spoilers) private var spoilers: Spoilers = .off
@@ -32,9 +28,9 @@ public struct SeriesDetailView: View {
             case let .failed(reason):
                 Section { ErrorNote(reason) }
             case let .loaded(series):
-                BackdropSection(path: series.fanart, baseURL: baseURL)
+                BackdropSection(path: series.fanart)
                 Section {
-                    DetailHero(poster: series.poster, baseURL: baseURL, overview: series.overview, links: model.links,
+                    DetailHero(poster: series.poster, overview: series.overview, links: model.links,
                                ratings: series.ratings ?? []) {
                         StateBadge(state: series.monitored == true ? "ok" : "unmonitored")
                         if let status = series.status { Text(status.capitalized) }
@@ -44,7 +40,7 @@ public struct SeriesDetailView: View {
                     }
                 }
                 RequestBannerSection(api: api, movieTMDB: nil, showTVDB: series.tvdb_id)
-                RenameCard(ref: .series(series.id), api: api, onSessionLost: onSessionLost)
+                RenameCard(ref: .series(series.id), api: api)
                 DetailActions(model: model, monitored: series.monitored ?? false) { EmptyView() }
                 // A series has no single file, so the movie page's file card
                 // becomes the ratio of episodes on disk. total_episode_count
@@ -83,7 +79,7 @@ public struct SeriesDetailView: View {
             Text(model.actionError ?? "")
         }
         .sheet(item: $searching) { search in
-            ReleasesSheet(target: search.target, title: search.title, api: api, onSessionLost: onSessionLost) { searching = nil }
+            ReleasesSheet(target: search.target, title: search.title, api: api) { searching = nil }
         }
         .accessibilityIdentifier("series-detail")
     }

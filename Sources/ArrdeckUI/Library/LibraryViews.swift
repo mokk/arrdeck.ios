@@ -12,22 +12,20 @@ public typealias TitleScreensAPI = LibraryAPI & ExtrasAPI & MusicLibraryAPI & Ma
 struct TitleDetail: View {
     let ref: MediaRef
     let api: any TitleScreensAPI
-    let baseURL: URL
     let hasPlex: Bool
-    let onSessionLost: @MainActor () -> Void
 
     var body: some View {
         switch ref {
         case let .movie(id):
-            MovieDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+            MovieDetailView(id: id, api: api, hasPlex: hasPlex)
         case let .series(id):
-            SeriesDetailView(id: id, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+            SeriesDetailView(id: id, api: api, hasPlex: hasPlex)
         case let .book(id):
-            BookDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
+            BookDetailView(id: id, api: api)
         case let .artist(id):
-            ArtistDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
+            ArtistDetailView(id: id, api: api)
         case let .album(id):
-            AlbumDetailView(id: id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
+            AlbumDetailView(id: id, api: api)
         }
     }
 }
@@ -37,19 +35,14 @@ struct TitleDetail: View {
 /// horizontal swipe — in place, so Back still returns to the list.
 struct MediaDestination: View {
     let api: any LibraryPageAPI
-    let baseURL: URL
     let hasPlex: Bool
     let sequence: [MediaRef]
-    let onSessionLost: @MainActor () -> Void
     @State private var current: MediaRef
 
-    init(ref: MediaRef, api: any LibraryPageAPI, baseURL: URL, hasPlex: Bool, sequence: [MediaRef] = [],
-         onSessionLost: @escaping @MainActor () -> Void) {
+    init(ref: MediaRef, api: any LibraryPageAPI, hasPlex: Bool, sequence: [MediaRef] = []) {
         self.api = api
-        self.baseURL = baseURL
         self.hasPlex = hasPlex
         self.sequence = sequence
-        self.onSessionLost = onSessionLost
         _current = State(initialValue: ref)
     }
 
@@ -76,7 +69,7 @@ struct MediaDestination: View {
     }
 
     var detail: some View {
-        TitleDetail(ref: current, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+        TitleDetail(ref: current, api: api, hasPlex: hasPlex)
     }
 }
 
@@ -97,7 +90,6 @@ struct Completion: View {
 /// nothing on the calendar fold away below.
 struct UpNextList: View {
     let rows: [LibraryRow]
-    let baseURL: URL
     @State private var showIdle = false
 
     var body: some View {
@@ -121,7 +113,7 @@ struct UpNextList: View {
     func card(_ rows: [LibraryRow]) -> some View {
         LazyVStack(spacing: 0) {
             ForEach(rows) { row in
-                NavigationLink(value: row.ref) { UpNextRow(row: row, baseURL: baseURL) }
+                NavigationLink(value: row.ref) { UpNextRow(row: row) }
                     .buttonStyle(.plain)
                 if row.id != rows.last?.id { Divider().padding(.leading, 12) }
             }
@@ -132,7 +124,6 @@ struct UpNextList: View {
 
 private struct UpNextRow: View {
     let row: LibraryRow
-    let baseURL: URL
     // an episode that has not aired cannot have been watched, so any spoiler
     // setting hides its title here
     @AppStorage(DisplayKeys.spoilers) private var spoilers: Spoilers = .off
@@ -144,7 +135,7 @@ private struct UpNextRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Poster(path: row.poster, baseURL: baseURL, width: 44, cornerRadius: 6, title: row.title)
+            Poster(path: row.poster, width: 44, cornerRadius: 6, title: row.title)
             VStack(alignment: .leading, spacing: 3) {
                 Text(row.title).font(.subheadline.weight(.semibold)).lineLimit(1)
                 if let code {
@@ -191,7 +182,6 @@ struct ShelfView: View {
     let rows: [LibraryRow]
     let query: String
     let api: any BookShelfAPI
-    let baseURL: URL
     @AppStorage("shelf.grouping") private var grouping: Grouping = .series
     @State private var shelf: Loadable<[ShelfSeries]> = .loading
 
@@ -231,7 +221,7 @@ struct ShelfView: View {
                         NavigationLink(value: MediaRef.book(book.book_id)) {
                             ShelfTile(title: book.title ?? "", poster: book.poster, position: book.position,
                                       owned: book.has_file == true || book.monitored == true,
-                                      onDisk: book.has_file == true, baseURL: baseURL)
+                                      onDisk: book.has_file == true)
                         }
                         .buttonStyle(.plain)
                     }
@@ -249,7 +239,7 @@ struct ShelfView: View {
                 ForEach(books) { book in
                     NavigationLink(value: book.ref) {
                         ShelfTile(title: book.title, poster: book.poster, position: nil, owned: true,
-                                  onDisk: book.status == "downloaded", baseURL: baseURL)
+                                  onDisk: book.status == "downloaded")
                     }
                     .buttonStyle(.plain)
                 }
@@ -289,12 +279,11 @@ private struct ShelfTile: View {
     let position: String?
     let owned: Bool
     let onDisk: Bool
-    let baseURL: URL
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             if owned {
-                Poster(path: poster, baseURL: baseURL, width: 90, cornerRadius: 10, title: title)
+                Poster(path: poster, width: 90, cornerRadius: 10, title: title)
                     .opacity(onDisk ? 1 : 0.6)
                     .overlay(alignment: .topLeading) {
                         if let position {
@@ -325,7 +314,6 @@ private struct ShelfTile: View {
 /// Radarr's collections as the Movies tab's view, each with how complete it is.
 struct CollectionsLibraryList: View {
     let api: any DiscoverAPI & LibraryAPI
-    let baseURL: URL
     let query: String
     @State private var collections: Loadable<[ArrdeckData.Collection]> = .loading
     @State private var open: ArrdeckData.Collection?
@@ -350,7 +338,7 @@ struct CollectionsLibraryList: View {
         }
         .task { await load() }
         .sheet(item: $open) { item in
-            CollectionSheet(collection: item, api: api, baseURL: baseURL) { open = nil; Task { await load() } }
+            CollectionSheet(collection: item, api: api) { open = nil; Task { await load() } }
         }
     }
 
@@ -358,7 +346,7 @@ struct CollectionsLibraryList: View {
         let total = item.movie_count ?? 0
         let have = total - (item.missing_count ?? 0)
         return HStack(spacing: 12) {
-            Poster(path: item.poster, baseURL: baseURL, width: 40, cornerRadius: 6, title: item.title ?? "")
+            Poster(path: item.poster, width: 40, cornerRadius: 6, title: item.title ?? "")
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.title ?? "").font(.subheadline.weight(.semibold)).lineLimit(1)
                 Text("\(have) of \(total) movies").font(.caption).foregroundStyle(.secondary)

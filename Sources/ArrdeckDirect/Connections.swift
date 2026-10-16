@@ -32,8 +32,8 @@ public struct ServiceConnection: Codable, Hashable, Sendable {
 }
 
 /// The services a direct profile can be connected to, and what each needs
-/// before it counts as set up. Mirrors the server's registry, less the parts
-/// that only make sense on a server (its host helper).
+/// before it counts as set up. Mirrors the server's registry, less its host
+/// helper, which restarts containers on the server's own host.
 public enum DirectServices {
     public static let all = [
         "radarr", "sonarr", "readarr", "lidarr", "prowlarr", "qbittorrent", "transmission",

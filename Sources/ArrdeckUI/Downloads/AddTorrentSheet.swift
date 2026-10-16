@@ -11,9 +11,9 @@ struct AddTorrentSheet: View {
 
     private static let torrentType = UTType(filenameExtension: "torrent") ?? .data
 
-    init(clients: [TorrentClient], api: any ExtrasAPI, onSessionLost: @escaping @MainActor () -> Void, dismiss: @escaping () -> Void) {
+    init(clients: [TorrentClient], api: any ExtrasAPI, dismiss: @escaping () -> Void) {
         self.dismiss = dismiss
-        _model = State(initialValue: AddTorrentModel(clients: clients, api: api, onSessionLost: onSessionLost))
+        _model = State(initialValue: AddTorrentModel(clients: clients, api: api))
     }
 
     var body: some View {

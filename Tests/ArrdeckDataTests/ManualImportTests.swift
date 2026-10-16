@@ -217,7 +217,7 @@ actor FakeImportAPI: ManualImportAPI {
         polls += 1
         if pollFailures > 0 {
             pollFailures -= 1
-            throw APIError.transport("offline")
+            throw APIError.refused("offline")
         }
         return states.isEmpty ? ImportCommand(app: "radarr", done: true, id: id, ok: true) : states.removeFirst()
     }
@@ -225,7 +225,7 @@ actor FakeImportAPI: ManualImportAPI {
 
 @MainActor @Suite struct ImportModelTests {
     func model(_ api: FakeImportAPI, source: ImportSource = .queue(app: .radarr, itemID: 5)) -> ImportModel {
-        ImportModel(source: source, api: api, pollInterval: .zero, maxPolls: 20, onSessionLost: {})
+        ImportModel(source: source, api: api, pollInterval: .zero, maxPolls: 20)
     }
 
     @Test func startsThePickedRequestAndPollsUntilDone() async {
@@ -323,7 +323,7 @@ extension FakeDownloadsAPI: ManualImportAPI {
 @MainActor @Suite struct DownloadsAttentionTests {
     @Test func needsAttentionIsFetchedWithTheQueue() async {
         let api = FakeDownloadsAPI(groups: [:])
-        let model = DownloadsModel(api: api, clients: [], hasArr: true, arrs: [.radarr], onSessionLost: {})
+        let model = DownloadsModel(api: api, clients: [], hasArr: true, arrs: [.radarr])
         #expect(model.attentionCount == 0)
         await model.refreshQueue()
         #expect(model.attentionCount == 1)

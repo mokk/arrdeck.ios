@@ -86,7 +86,7 @@ actor FakeWantedAPI: WantedAPI {
             1: .init(has_more: true, items: [item(1), item(2)], total: 3),
             2: .init(has_more: false, items: [item(3)], total: 3),
         ])
-        let model = WantedModel(api: api, apps: [.radarr, .sonarr], onSessionLost: {})
+        let model = WantedModel(api: api, apps: [.radarr, .sonarr])
         #expect(model.app == .radarr, "the first configured arr is the default")
         await model.load(reset: true)
         #expect(model.items.map(\.id) == [1, 2])
@@ -110,7 +110,7 @@ actor FakeWantedAPI: WantedAPI {
 
     @Test func searchPicksTheRightEndpointPerArr() async {
         let api = FakeWantedAPI(pages: [:])
-        let model = WantedModel(api: api, apps: [.sonarr], onSessionLost: {})
+        let model = WantedModel(api: api, apps: [.sonarr])
         await model.search(item(4404, app: .sonarr))
         await model.search(item(180, app: .radarr))
         #expect(await api.count("search-episodes-4404") == 1)
@@ -126,7 +126,7 @@ actor FakeWantedAPI: WantedAPI {
 
     @Test func lidarrListsMissingAndCutoffAlbumsAndSearchesThemAll() async throws {
         let api = FakeWantedAPI(pages: [1: .init(has_more: false, items: [item(12, app: .lidarr)], total: 1)])
-        let model = WantedModel(api: api, apps: [.lidarr], onSessionLost: {})
+        let model = WantedModel(api: api, apps: [.lidarr])
         #expect(model.app == .lidarr)
         await model.load(reset: true)
         #expect(model.items.map(\.arr) == [.lidarr])
@@ -143,19 +143,12 @@ actor FakeWantedAPI: WantedAPI {
         #expect(await api.count("diagnose-12") == 1, "an album is diagnosed by its own id")
     }
 
-    @Test func failuresReportAndUnauthorizedEndsTheSession() async {
+    @Test func failuresReport() async {
         let api = FakeWantedAPI(pages: [:])
         await api.set(failure: .unexpectedStatus(500))
-        let model = WantedModel(api: api, apps: [.radarr], onSessionLost: {})
+        let model = WantedModel(api: api, apps: [.radarr])
         await model.load(reset: true)
         #expect(model.error == "HTTP 500")
         #expect(!model.loading)
-
-        await api.set(failure: .unauthorized)
-        var lost = 0
-        let gone = WantedModel(api: api, apps: [.radarr], onSessionLost: { lost += 1 })
-        await gone.load(reset: true)
-        #expect(lost == 1)
-        #expect(gone.error == nil)
     }
 }

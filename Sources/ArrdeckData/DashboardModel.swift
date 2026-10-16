@@ -6,9 +6,8 @@ import Observation
 /// are configured.
 ///
 /// A card's loop never blanks what it has. A failed poll keeps the last
-/// answer on screen and raises `connectionError`; only a card that has never
-/// loaded shows `failed`. A 401 ends everything — the session is gone, and
-/// `onSessionLost` sends the user back to pairing.
+/// answer on screen and notes the failure in `cardErrors`; only a card that
+/// has never loaded shows `failed`.
 @MainActor @Observable
 public final class DashboardModel {
     public enum Card: CaseIterable, Sendable, Hashable {
@@ -34,10 +33,9 @@ public final class DashboardModel {
     public private(set) var history: Loadable<[ArrApp: Block<[HistoryItem]>]> = .loading
     public private(set) var indexers: Loadable<Block<IndexerStats>> = .loading
 
-    /// The most recent failure to reach arrdeck itself — a timeout, no route,
-    /// a body that was not JSON. Cleared by the next call that gets through,
-    /// whichever card makes it. An endpoint answering 500 is that card's
-    /// problem, not the connection's, and stays out of here.
+    /// The most recent failure to list the services, which every card waits
+    /// on. Cleared by the next call that gets through, whichever card makes
+    /// it. A card's own failure is that card's problem and stays out of here.
     public private(set) var connectionError: String?
     /// Each card's most recent poll failure while it still shows older data;
     /// cleared by that card's next success.
@@ -52,7 +50,6 @@ public final class DashboardModel {
 
     private let api: any DashboardAPI
     private let cadence: Cadence
-    private let onSessionLost: @MainActor () -> Void
     private var cards: [Card: Runner] = [:]
 
     private struct Runner: Sendable {
@@ -63,12 +60,10 @@ public final class DashboardModel {
 
     public init(
         api: any DashboardAPI,
-        cadence: Cadence = .standard,
-        onSessionLost: @escaping @MainActor () -> Void
+        cadence: Cadence = .standard
     ) {
         self.api = api
         self.cadence = cadence
-        self.onSessionLost = onSessionLost
         let c = cadence
         cards = [
             .sessions: runner(.sessions, \.sessions, enabled: { [unowned self] in has("plex") },
@@ -104,14 +99,8 @@ public final class DashboardModel {
     /// that would all fail the same way.
     public func run() async {
         while !Task.isCancelled {
-            switch await loadServices() {
-            case .ok: break
-            case .signedOut: return
-            case .retry:
-                try? await Task.sleep(for: .seconds(cadence.medium))
-                continue
-            }
-            break
+            if await loadServices() { break }
+            try? await Task.sleep(for: .seconds(cadence.medium))
         }
         guard !Task.isCancelled else { return }
         await withDiscardingTaskGroup { group in
@@ -124,7 +113,7 @@ public final class DashboardModel {
 
     /// One pass over everything enabled, for pull-to-refresh.
     public func refresh() async {
-        guard await loadServices() != .signedOut else { return }
+        await loadServices()
         await step(cards.keys)
     }
 
@@ -137,9 +126,9 @@ public final class DashboardModel {
         }
     }
 
-    private enum ServicesOutcome { case ok, retry, signedOut }
-
-    private func loadServices() async -> ServicesOutcome {
+    /// Whether the services answered.
+    @discardableResult
+    private func loadServices() async -> Bool {
         do {
             let list = try await api.services()
             configured = Set(list.filter(\.configured).map(\.service))
@@ -148,13 +137,10 @@ public final class DashboardModel {
             }
             servicesKnown = true
             connectionError = nil
-            return .ok
-        } catch APIError.unauthorized {
-            onSessionLost()
-            return .signedOut
+            return true
         } catch {
             connectionError = describe(error)
-            return .retry
+            return false
         }
     }
 
@@ -162,7 +148,7 @@ public final class DashboardModel {
         while !Task.isCancelled {
             try? await Task.sleep(for: .seconds(cadence.slow))
             guard !Task.isCancelled else { return }
-            if await loadServices() == .signedOut { return }
+            await loadServices()
         }
     }
 
@@ -195,9 +181,6 @@ public final class DashboardModel {
                 return interval(value)
             } catch is CancellationError {
                 return nil
-            } catch APIError.unauthorized {
-                onSessionLost()
-                return nil
             } catch {
                 let reason = describe(error)
                 if case .loading = self[keyPath: keyPath] {
@@ -205,7 +188,6 @@ public final class DashboardModel {
                 } else {
                     cardErrors[card] = reason
                 }
-                if case .transport = error as? APIError { connectionError = reason }
                 return cadence.medium
             }
         }
@@ -247,8 +229,6 @@ public final class DashboardModel {
         defer { pending.remove(key) }
         do {
             try await work()
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             actionError = describe(error)
         }

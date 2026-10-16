@@ -105,13 +105,13 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
 @Suite struct AddModelTests {
     @Test func tabsFollowConfiguredServicesAndDiscoverNeedsOverseerr() async {
         let api = FakeDiscoverAPI()
-        let model = AddModel(configured: ["radarr", "prowlarr"], api: api, onSessionLost: {})
+        let model = AddModel(configured: ["radarr", "prowlarr"], api: api)
         #expect(model.tabs == [.movies, .collections, .releases])
         #expect(!model.canDiscover)
         await model.load()
         #expect(await api.count("discover-movies") == 0)
 
-        let withOverseerr = AddModel(configured: ["radarr", "sonarr", "overseerr"], api: api, onSessionLost: {})
+        let withOverseerr = AddModel(configured: ["radarr", "sonarr", "overseerr"], api: api)
         await withOverseerr.load()
         #expect(withOverseerr.discover[.movies]?.value?.first?.title == "Popular")
         await withOverseerr.load()
@@ -120,7 +120,7 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
 
     @Test func typingIsDebouncedAndTabChangeClears() async throws {
         let api = FakeDiscoverAPI()
-        let model = AddModel(configured: ["radarr", "sonarr", "prowlarr"], api: api, onSessionLost: {})
+        let model = AddModel(configured: ["radarr", "sonarr", "prowlarr"], api: api)
         model.input = "s"
         #expect(!model.searching, "one character is not a query")
         model.input = "sl"
@@ -148,7 +148,7 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
 
     @Test func collectionsFilterLocallyAndToggleRefetches() async {
         let api = FakeDiscoverAPI()
-        let model = AddModel(configured: ["radarr"], api: api, onSessionLost: {})
+        let model = AddModel(configured: ["radarr"], api: api)
         model.tab = .collections
         await model.load()
         #expect(model.shownCollections.map(\.title) == ["Alien", "Bond"])
@@ -164,7 +164,7 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
     @Test func mediaSheetDefaultsAndAdds() async {
         let api = FakeDiscoverAPI()
         let result = SearchResult(kind: "movie", remote_id: 77, title: "New")
-        let sheet = MediaSheetModel(result: result, api: api, onSessionLost: {})
+        let sheet = MediaSheetModel(result: result, api: api)
         #expect(!sheet.canAdd)
         await sheet.load()
         #expect(sheet.qualityProfile == 4)
@@ -175,7 +175,7 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
         #expect(sheet.done)
 
         let owned = SearchResult(in_library: true, kind: "series", library_id: 63, monitored: true, quality_profile_id: 1, remote_id: 1, title: "Have")
-        let edit = MediaSheetModel(result: owned, api: api, onSessionLost: {})
+        let edit = MediaSheetModel(result: owned, api: api)
         await edit.load()
         #expect(edit.qualityProfile == 1, "the library's own profile wins over the default")
         await edit.setMonitored(false)
@@ -185,7 +185,7 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
 
     @Test func popularFiltersByKindAndGrabs() async {
         let api = FakeDiscoverAPI()
-        let model = PopularModel(api: api, onSessionLost: {})
+        let model = PopularModel(api: api)
         await model.load()
         let indexer = model.snapshot.value!.value!.indexers![0]
         #expect(model.releases(of: indexer).count == 2)
@@ -224,7 +224,7 @@ extension FakeDiscoverAPI: MusicAddAPI {
 @Suite struct SeriesMonitorTests {
     @Test @MainActor func pickedSeasonsStartAtEveryRegularSeasonAndAreSent() async {
         let api = FakeDiscoverAPI()
-        let sheet = MediaSheetModel(result: SearchResult(kind: "series", remote_id: 5, title: "Show"), api: api, onSessionLost: {})
+        let sheet = MediaSheetModel(result: SearchResult(kind: "series", remote_id: 5, title: "Show"), api: api)
         sheet.monitor = .pick
         #expect(!sheet.canAdd, "not before the seasons are known")
         await sheet.load()
@@ -240,7 +240,7 @@ extension FakeDiscoverAPI: MusicAddAPI {
 
     @Test @MainActor func aPresetGoesThroughAndNoneDoesNotSearch() async {
         let api = FakeDiscoverAPI()
-        let sheet = MediaSheetModel(result: SearchResult(kind: "series", remote_id: 6, title: "Show"), api: api, onSessionLost: {})
+        let sheet = MediaSheetModel(result: SearchResult(kind: "series", remote_id: 6, title: "Show"), api: api)
         sheet.monitor = .none
         await sheet.load()
         await sheet.loadSeasons()
@@ -253,11 +253,11 @@ extension FakeDiscoverAPI: MusicAddAPI {
 
     @Test @MainActor func theLastPickedProfileIsTheDefaultWhileItExists() async {
         let api = FakeDiscoverAPI()
-        let known = MediaSheetModel(result: SearchResult(kind: "movie", remote_id: 1, title: "x"), api: api, onSessionLost: {})
+        let known = MediaSheetModel(result: SearchResult(kind: "movie", remote_id: 1, title: "x"), api: api)
         known.preferredQualityProfile = 1
         await known.load()
         #expect(known.qualityProfile == 1)
-        let gone = MediaSheetModel(result: SearchResult(kind: "movie", remote_id: 1, title: "x"), api: api, onSessionLost: {})
+        let gone = MediaSheetModel(result: SearchResult(kind: "movie", remote_id: 1, title: "x"), api: api)
         gone.preferredQualityProfile = 99
         await gone.load()
         #expect(gone.qualityProfile == 4, "a deleted profile falls back to the first")

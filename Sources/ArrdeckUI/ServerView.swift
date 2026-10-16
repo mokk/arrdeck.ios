@@ -26,18 +26,12 @@ public struct ServerView: View {
         let api = ServerView.backend(for: profile)
         _api = State(initialValue: api)
         self.onSwitch = onSwitch
-        _model = State(initialValue: DashboardModel(api: api, onSessionLost: {}))
-        _feed = State(initialValue: ActivityFeedModel(api: api, onSessionLost: {}))
+        _model = State(initialValue: DashboardModel(api: api))
+        _feed = State(initialValue: ActivityFeedModel(api: api))
     }
 
     /// What happened since Activity was last opened — the badge on its tab.
     @State private var feed: ActivityFeedModel
-
-    var sessionLost: @MainActor () -> Void { {} }
-
-    /// For relative addresses, of which the services' answers have none: every
-    /// artwork address is absolute.
-    var baseURL: URL { URL(string: "arrdeck-direct:\(profile.id.uuidString)")! }
 
     public var body: some View {
         Group {
@@ -51,8 +45,7 @@ public struct ServerView: View {
                     }
                     .sheet(item: $spotlit) { target in
                         NavigationStack {
-                            MediaDestination(ref: target.ref, api: api, baseURL: baseURL,
-                                             hasPlex: model.has("plex"), onSessionLost: sessionLost)
+                            MediaDestination(ref: target.ref, api: api, hasPlex: model.has("plex"))
                                 .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Done") { spotlit = nil } } }
                         }
                     }
@@ -62,7 +55,7 @@ public struct ServerView: View {
                     .task { await model.run() }
                     .task { await feed.run() }
                     // the widgets' snapshot and the Live Activity, from the same polls
-                    .background { GlanceFeed(model: model, server: profile.name, baseURL: baseURL, api: api) }
+                    .background { GlanceFeed(model: model, server: profile.name, api: api) }
         }
         .task {
             LastProfile.record(profile)
@@ -74,7 +67,7 @@ public struct ServerView: View {
         }
         .sheet(isPresented: $settingUp, onDismiss: { Task { await model.refresh() } }) {
             NavigationStack {
-                ServicesView(api: api, onSessionLost: sessionLost)
+                ServicesView(api: api)
                     .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { settingUp = false } } }
             }
         }
@@ -224,13 +217,11 @@ public struct ServerView: View {
                     if action != nil { takeLaunch(available) }
                 }
                 .sheet(isPresented: $launchAdd) {
-                    AddView(configured: model.configured, api: api, baseURL: baseURL,
-                            hasPlex: model.has("plex"), onSessionLost: sessionLost) { launchAdd = false }
+                    AddView(configured: model.configured, api: api, hasPlex: model.has("plex")) { launchAdd = false }
                 }
                 .sheet(isPresented: $launchSearch) {
                     GlobalSearchSheet(api: api, apps: LibraryApp.allCases.filter { model.has($0.rawValue) },
-                                      baseURL: baseURL, hasPlex: model.has("plex"),
-                                      onSessionLost: sessionLost) { launchSearch = false }
+                                      hasPlex: model.has("plex")) { launchSearch = false }
                 }
             }
         }
@@ -254,23 +245,21 @@ public struct ServerView: View {
     @ViewBuilder func tabContent(_ tab: AppTab) -> some View {
         switch tab {
         case .books:
-            LibraryPage(app: .readarr, dashboard: model, api: api, baseURL: baseURL, onSessionLost: sessionLost)
+            LibraryPage(app: .readarr, dashboard: model, api: api)
         case .movies:
-            LibraryPage(app: .radarr, dashboard: model, api: api, baseURL: baseURL, onSessionLost: sessionLost)
+            LibraryPage(app: .radarr, dashboard: model, api: api)
         case .shows:
-            LibraryPage(app: .sonarr, dashboard: model, api: api, baseURL: baseURL, onSessionLost: sessionLost)
+            LibraryPage(app: .sonarr, dashboard: model, api: api)
         case .music:
-            LibraryPage(app: .lidarr, dashboard: model, api: api, baseURL: baseURL, onSessionLost: sessionLost)
+            LibraryPage(app: .lidarr, dashboard: model, api: api)
         case .activity:
             ActivityView(api: api, feed: feed, clients: model.torrentClients, hasArr: model.hasArr,
-                         arrs: ArrApp.allCases.filter { model.has($0.rawValue) },
-                         baseURL: baseURL, hasPlex: model.has("plex"), onSessionLost: sessionLost)
+                         arrs: ArrApp.allCases.filter { model.has($0.rawValue) }, hasPlex: model.has("plex"))
         case .calendar:
-            CalendarScreen(api: api, baseURL: baseURL, hasPlex: model.has("plex"), onSessionLost: sessionLost)
+            CalendarScreen(api: api, hasPlex: model.has("plex"))
         case .settings:
             ManageView(
-                model: model, api: api, baseURL: baseURL, profileName: profile.name,
-                onSessionLost: sessionLost, onSwitchProfile: onSwitch
+                model: model, api: api, profileName: profile.name, onSwitchProfile: onSwitch
             )
         }
     }

@@ -90,7 +90,7 @@ struct OpenNamesContractTests {
     }
 
     @Test func albumsLandOnTheirReleaseDayAndOpenTheAlbum() async throws {
-        let model = CalendarModel(api: Fake(), calendar: utc, now: { Date(timeIntervalSince1970: 1_791_720_000) }, onSessionLost: {})
+        let model = CalendarModel(api: Fake(), calendar: utc, now: { Date(timeIntervalSince1970: 1_791_720_000) })
         defer { model.hiddenApps = [] }
         await model.load()
         #expect(model.apps == [.radarr, .sonarr, .lidarr])
@@ -118,7 +118,7 @@ struct OpenNamesContractTests {
 
     @Test func queueActionsGoToLidarr() async {
         let api = FakeDownloadsAPI(groups: [:])
-        let model = DownloadsModel(api: api, clients: [], hasArr: true, arrs: [.lidarr], onSessionLost: {})
+        let model = DownloadsModel(api: api, clients: [], hasArr: true, arrs: [.lidarr])
         await model.forceImport(album)
         await model.blocklistRetry(album)
         await model.removeFromQueue(album)
@@ -182,21 +182,19 @@ struct OpenNamesContractTests {
 
     @MainActor @Test func theSheetSaysTheAlbumGoesToAllOnlyForSeveralUnplacedTracks() async {
         let several = ImportModel(source: .queue(app: .lidarr, itemID: 4),
-                                  api: FakeImportAPI(candidates: [track(1), track(2), track(3, placed: true)], states: []),
-                                  onSessionLost: {})
+                                  api: FakeImportAPI(candidates: [track(1), track(2), track(3, placed: true)], states: []))
         await several.load()
         #expect(several.albumForAll)
         several.assign(.album(1, label: "x"), to: several.list[1])
         #expect(several.chosenCount == 2)
 
         let one = ImportModel(source: .queue(app: .lidarr, itemID: 4),
-                              api: FakeImportAPI(candidates: [track(1), track(2, placed: true)], states: []),
-                              onSessionLost: {})
+                              api: FakeImportAPI(candidates: [track(1), track(2, placed: true)], states: []))
         await one.load()
         #expect(!one.albumForAll)
 
         let films = ImportModel(source: .queue(app: .radarr, itemID: 4),
-                                api: FakeImportAPI(candidates: [track(1), track(2)], states: []), onSessionLost: {})
+                                api: FakeImportAPI(candidates: [track(1), track(2)], states: []))
         await films.load()
         #expect(!films.albumForAll)
     }

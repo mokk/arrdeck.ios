@@ -6,9 +6,9 @@ struct AddIndexerSheet: View {
     @State private var model: AddIndexerModel
     let dismiss: () -> Void
 
-    init(api: any IndexerAddAPI, onSessionLost: @escaping @MainActor () -> Void, dismiss: @escaping () -> Void) {
+    init(api: any IndexerAddAPI, dismiss: @escaping () -> Void) {
         self.dismiss = dismiss
-        _model = State(initialValue: AddIndexerModel(api: api, onSessionLost: onSessionLost))
+        _model = State(initialValue: AddIndexerModel(api: api))
     }
 
     var body: some View {

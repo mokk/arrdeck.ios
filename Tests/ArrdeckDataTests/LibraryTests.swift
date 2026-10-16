@@ -89,7 +89,7 @@ actor FakeLibraryAPI: LibraryAPI {
 @Suite struct DetailModelTests {
     @Test func movieLoadsEverythingAndOnlyAsksPlexWhenConfigured() async {
         let api = FakeLibraryAPI()
-        let model = MovieDetailModel(id: 180, api: api, hasPlex: false, onSessionLost: {})
+        let model = MovieDetailModel(id: 180, api: api, hasPlex: false)
         await model.load()
         #expect(model.movie.value?.title == "Film")
         #expect(model.credits?.cast?.first?.name == "A B")
@@ -97,14 +97,14 @@ actor FakeLibraryAPI: LibraryAPI {
         #expect(await api.count("options-radarr") == 1)
         #expect(await api.count("watched") == 0)
 
-        let plexModel = MovieDetailModel(id: 180, api: api, hasPlex: true, onSessionLost: {})
+        let plexModel = MovieDetailModel(id: 180, api: api, hasPlex: true)
         await plexModel.load()
         #expect(await api.count("watched") == 1)
     }
 
     @Test func actionsRefetchAndDeleteMarksTheTitleGone() async {
         let api = FakeLibraryAPI()
-        let model = MovieDetailModel(id: 180, api: api, hasPlex: false, onSessionLost: {})
+        let model = MovieDetailModel(id: 180, api: api, hasPlex: false)
         await model.load()
 
         await model.setMonitored(false)
@@ -125,7 +125,7 @@ actor FakeLibraryAPI: LibraryAPI {
 
     @Test func refusedActionsReportAndKeepTheTitle() async {
         let api = FakeLibraryAPI()
-        let model = MovieDetailModel(id: 180, api: api, hasPlex: false, onSessionLost: {})
+        let model = MovieDetailModel(id: 180, api: api, hasPlex: false)
         await model.load()
         await api.set(failure: .unexpectedStatus(409))
         await model.delete(deleteFiles: false)
@@ -136,7 +136,7 @@ actor FakeLibraryAPI: LibraryAPI {
 
     @Test func seriesExpandsSeasonsOnDemand() async {
         let api = FakeLibraryAPI()
-        let model = SeriesDetailModel(id: 63, api: api, hasPlex: false, onSessionLost: {})
+        let model = SeriesDetailModel(id: 63, api: api, hasPlex: false)
         await model.load()
         #expect(model.series.value?.seasons.count == 1)
         #expect(model.episodes.isEmpty)
@@ -162,15 +162,5 @@ actor FakeLibraryAPI: LibraryAPI {
         #expect(await api.count("series") == 2)
         await model.searchSeason(season)
         #expect(await api.count("season-search-1") == 1)
-    }
-
-    @Test func unauthorizedReportsOnce() async {
-        let api = FakeLibraryAPI()
-        await api.set(failure: .unauthorized)
-        var lost = 0
-        let model = SeriesDetailModel(id: 63, api: api, hasPlex: false, onSessionLost: { lost += 1 })
-        await model.load()
-        #expect(lost >= 1)
-        #expect(model.series == .loading, "a 401 is not a load failure to render")
     }
 }

@@ -10,15 +10,11 @@ public struct BookDetailView: View {
     @State private var downloader = FileDownloadModel()
     @State private var sharing: URL?
     @Environment(\.dismiss) private var dismiss
-    let baseURL: URL
     let api: any LibraryAPI & ExtrasAPI
-    let onSessionLost: @MainActor () -> Void
 
-    public init(id: Int, api: any LibraryAPI & ExtrasAPI, baseURL: URL, onSessionLost: @escaping @MainActor () -> Void) {
-        self.baseURL = baseURL
+    public init(id: Int, api: any LibraryAPI & ExtrasAPI) {
         self.api = api
-        self.onSessionLost = onSessionLost
-        _model = State(initialValue: BookDetailModel(id: id, api: api, onSessionLost: onSessionLost))
+        _model = State(initialValue: BookDetailModel(id: id, api: api))
     }
 
     public var body: some View {
@@ -29,14 +25,14 @@ public struct BookDetailView: View {
             case let .failed(reason):
                 Section { ErrorNote(reason) }
             case let .loaded(book):
-                BackdropSection(path: book.poster, baseURL: baseURL, blurred: true)
+                BackdropSection(path: book.poster, blurred: true)
                 Section {
-                    DetailHero(poster: book.poster, baseURL: baseURL, overview: book.overview, links: model.links) {
+                    DetailHero(poster: book.poster, overview: book.overview, links: model.links) {
                         StateBadge(state: book.has_file == true ? "downloaded" : (book.monitored == true ? "wanted" : "unmonitored"))
                         if let author = book.author {
                             if let authorID = book.author_id {
                                 NavigationLink {
-                                    AuthorDetailView(id: authorID, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
+                                    AuthorDetailView(id: authorID, api: api)
                                 } label: { Text(author).foregroundStyle(Color.accent) }
                                 .buttonStyle(.plain)
                                 .accessibilityIdentifier("book-author")
@@ -108,7 +104,7 @@ public struct BookDetailView: View {
         }
         #endif
         .sheet(isPresented: $searching) {
-            ReleasesSheet(target: .book(model.ref.id), title: title, api: api, onSessionLost: onSessionLost) { searching = false }
+            ReleasesSheet(target: .book(model.ref.id), title: title, api: api) { searching = false }
         }
         .alert("Action failed", isPresented: actionFailed) {
             Button("OK") { model.actionError = nil }
@@ -123,12 +119,9 @@ public struct BookDetailView: View {
         return [book.title, book.year.map(String.init)].compactMap { $0 }.joined(separator: " ")
     }
 
-    /// arrdeck proxies the file from our Readarr fork; the session cookie in
-    /// the shared jar authenticates the request like every other call. With
-    /// no server, Readarr hands it out itself.
-    func fileURL(book: Int, file: Int) -> URL {
-        if let files = api as? any FileAddressAPI, let url = files.bookFileURL(book: book, file: file) { return url }
-        return baseURL.appending(path: "api/v1/library/books/\(book)/files/\(file)")
+    /// Our Readarr fork hands the file out itself.
+    func fileURL(book: Int, file: Int) -> URL? {
+        (api as? any FileAddressAPI)?.bookFileURL(book: book, file: file)
     }
 
     var actionFailed: Binding<Bool> {
@@ -168,7 +161,7 @@ struct BookFileRow: View {
     let fallbackName: String
     let downloadable: Bool
     let downloader: FileDownloadModel
-    let url: URL
+    let url: URL?
 
     var details: String {
         [file.format, Format.bytes(file.size)].compactMap { $0 }.joined(separator: " · ")
@@ -181,7 +174,7 @@ struct BookFileRow: View {
                 Text(details).font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
-            if downloadable {
+            if downloadable, let url {
                 switch downloader.state {
                 case .downloading:
                     ProgressView()

@@ -16,14 +16,11 @@ public class DetailModelBase {
 
     let api: any LibraryAPI
     let hasPlex: Bool
-    let onSessionLost: @MainActor () -> Void
-    var stopped = false
 
-    init(ref: MediaRef, api: any LibraryAPI, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
+    init(ref: MediaRef, api: any LibraryAPI, hasPlex: Bool) {
         self.ref = ref
         self.api = api
         self.hasPlex = hasPlex
-        self.onSessionLost = onSessionLost
     }
 
     public var qualityProfiles: [QualityProfile] { options?.quality_profiles ?? [] }
@@ -68,9 +65,6 @@ public class DetailModelBase {
         do {
             try await work()
             return true
-        } catch APIError.unauthorized {
-            stopped = true
-            onSessionLost()
         } catch {
             actionError = describe(error)
         }
@@ -79,15 +73,6 @@ public class DetailModelBase {
 
     func describe(_ error: any Error) -> String {
         (error as? APIError)?.description ?? error.localizedDescription
-    }
-
-    func failure(_ error: any Error) -> String? {
-        if case .some(.unauthorized) = error as? APIError {
-            stopped = true
-            onSessionLost()
-            return nil
-        }
-        return describe(error)
     }
 }
 
@@ -98,8 +83,8 @@ public final class MovieDetailModel: DetailModelBase {
     /// nil until Bazarr answered; stays nil when it is not configured.
     public private(set) var subtitles: TitleSubtitles?
 
-    public init(id: Int, api: any LibraryAPI, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
-        super.init(ref: .movie(id), api: api, hasPlex: hasPlex, onSessionLost: onSessionLost)
+    public init(id: Int, api: any LibraryAPI, hasPlex: Bool) {
+        super.init(ref: .movie(id), api: api, hasPlex: hasPlex)
     }
 
     public var watched: Watched? {
@@ -134,7 +119,7 @@ public final class MovieDetailModel: DetailModelBase {
         do {
             movie = .loaded(try await api.movieDetail(ref.id))
         } catch {
-            if let reason = failure(error), movie.value == nil { movie = .failed(reason) }
+            if movie.value == nil { movie = .failed(describe(error)) }
         }
     }
 
@@ -149,8 +134,8 @@ public final class MovieDetailModel: DetailModelBase {
 public final class BookDetailModel: DetailModelBase {
     public private(set) var book: Loadable<BookDetail> = .loading
 
-    public init(id: Int, api: any LibraryAPI, onSessionLost: @escaping @MainActor () -> Void) {
-        super.init(ref: .book(id), api: api, hasPlex: false, onSessionLost: onSessionLost)
+    public init(id: Int, api: any LibraryAPI) {
+        super.init(ref: .book(id), api: api, hasPlex: false)
     }
 
     public var links: [ExternalLink] { book.value.map(ExternalLink.links(for:)) ?? [] }
@@ -166,7 +151,7 @@ public final class BookDetailModel: DetailModelBase {
         do {
             book = .loaded(try await api.bookDetail(ref.id))
         } catch {
-            if let reason = failure(error), book.value == nil { book = .failed(reason) }
+            if book.value == nil { book = .failed(describe(error)) }
         }
     }
 }
@@ -181,8 +166,8 @@ public final class SeriesDetailModel: DetailModelBase {
     public private(set) var subtitles: [Int: TitleSubtitles] = [:]
     public private(set) var subtitlesKnown = false
 
-    public init(id: Int, api: any LibraryAPI, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
-        super.init(ref: .series(id), api: api, hasPlex: hasPlex, onSessionLost: onSessionLost)
+    public init(id: Int, api: any LibraryAPI, hasPlex: Bool) {
+        super.init(ref: .series(id), api: api, hasPlex: hasPlex)
     }
 
     /// The watched episodes, "SxE", once asked for; nil until Plex answers.
@@ -215,7 +200,7 @@ public final class SeriesDetailModel: DetailModelBase {
         do {
             series = .loaded(try await api.seriesDetail(ref.id))
         } catch {
-            if let reason = failure(error), series.value == nil { series = .failed(reason) }
+            if series.value == nil { series = .failed(describe(error)) }
         }
     }
 
@@ -233,7 +218,7 @@ public final class SeriesDetailModel: DetailModelBase {
         do {
             episodes[season] = .loaded(try await api.episodes(series: ref.id, season: season))
         } catch {
-            if let reason = failure(error), episodes[season]?.value == nil { episodes[season] = .failed(reason) }
+            if episodes[season]?.value == nil { episodes[season] = .failed(describe(error)) }
         }
     }
 
@@ -285,19 +270,15 @@ public final class AuthorDetailModel {
     public var actionError: String?
 
     private let api: any LibraryAPI
-    private let onSessionLost: @MainActor () -> Void
 
-    public init(id: Int, api: any LibraryAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(id: Int, api: any LibraryAPI) {
         self.id = id
         self.api = api
-        self.onSessionLost = onSessionLost
     }
 
     public func load() async {
         do {
             author = .loaded(try await api.authorDetail(id))
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             if author.value == nil { author = .failed((error as? APIError)?.description ?? error.localizedDescription) }
         }
@@ -321,8 +302,6 @@ public final class AuthorDetailModel {
         do {
             try await work()
             await load()
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             actionError = (error as? APIError)?.description ?? error.localizedDescription
         }

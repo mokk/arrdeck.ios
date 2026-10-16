@@ -4,9 +4,9 @@ import ArrdeckKit
 import ArrdeckUI
 
 /// Siri and the Shortcuts app. Thin on purpose: the sentences are built and
-/// tested in ArrdeckData (SpokenSummary); this only finds the server and asks.
-/// The server is the one last opened, or the only one saved.
-enum IntentServer {
+/// tested in ArrdeckData (SpokenSummary); this only finds the profile and asks.
+/// The profile is the one last opened, or the only one saved.
+enum IntentProfile {
     static func api() -> (any Backend)? {
         guard let profiles = try? KeychainProfileStore().load(),
               let profile = LastProfile.pick(from: profiles)
@@ -15,7 +15,7 @@ enum IntentServer {
     }
 
     static func answer(_ ask: (any Backend) async throws -> String) async -> String {
-        guard let api = api() else { return SpokenSummary.noServer }
+        guard let api = api() else { return SpokenSummary.noProfile }
         do {
             return try await ask(api)
         } catch {
@@ -31,7 +31,7 @@ struct WhatsDownloadingIntent: AppIntent {
     static let authenticationPolicy = IntentAuthenticationPolicy.requiresAuthentication
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        let said = await IntentServer.answer { try await SpokenSummary.downloading(api: $0) }
+        let said = await IntentProfile.answer { try await SpokenSummary.downloading(api: $0) }
         return .result(dialog: "\(said)")
     }
 }
@@ -42,7 +42,7 @@ struct WhatsOnTodayIntent: AppIntent {
     static let authenticationPolicy = IntentAuthenticationPolicy.requiresAuthentication
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        let said = await IntentServer.answer { try await SpokenSummary.today(api: $0) }
+        let said = await IntentProfile.answer { try await SpokenSummary.today(api: $0) }
         return .result(dialog: "\(said)")
     }
 }

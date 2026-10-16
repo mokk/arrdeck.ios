@@ -11,7 +11,6 @@ public struct DownloadsView: View {
     @State private var confirmingBulkDelete = false
     @State private var importing: ImportJob?
     let api: any DownloadsAPI & ExtrasAPI
-    let onSessionLost: @MainActor () -> Void
     /// Inside the Activity tab the model is shared and already polling.
     private var embedded = false
     @State private var searching = false
@@ -20,22 +19,18 @@ public struct DownloadsView: View {
     public init(
         api: any DownloadsAPI & ExtrasAPI,
         clients: [TorrentClient],
-        hasArr: Bool,
-        onSessionLost: @escaping @MainActor () -> Void
+        hasArr: Bool
     ) {
         self.api = api
-        self.onSessionLost = onSessionLost
         _model = State(initialValue: DownloadsModel(
-            api: api, clients: clients, hasArr: hasArr, onSessionLost: onSessionLost
+            api: api, clients: clients, hasArr: hasArr
         ))
     }
 
     /// Embedded in the Activity tab, sharing its model with the Downloading
     /// segment, and marking what finished since the visit's cutoff NEW.
-    init(model: DownloadsModel, api: any DownloadsAPI & ExtrasAPI, newSince: Date?,
-         onSessionLost: @escaping @MainActor () -> Void) {
+    init(model: DownloadsModel, api: any DownloadsAPI & ExtrasAPI, newSince: Date?) {
         self.api = api
-        self.onSessionLost = onSessionLost
         self.embedded = true
         self.newSince = newSince
         _model = State(initialValue: model)
@@ -43,11 +38,6 @@ public struct DownloadsView: View {
 
     public var body: some View {
         List {
-            if let error = model.connectionError {
-                Section {
-                    Label(error, systemImage: "wifi.slash").font(.subheadline).foregroundStyle(Color.warning)
-                }
-            }
             ForEach(model.clients, id: \.self) { client in
                 if let reason = model.offlineReason(client) {
                     Section { ErrorNote("\(Services.label(client.rawValue)) offline — \(reason)") }
@@ -165,14 +155,13 @@ public struct DownloadsView: View {
         }
         .chromeSearch(text: $model.searchText, isPresented: $searching, prompt: Text("Filter by name…"))
         .sheet(item: $selected) { torrent in
-            TorrentDetailSheet(torrent: torrent, model: model, api: api, onSessionLost: onSessionLost) { selected = nil }
+            TorrentDetailSheet(torrent: torrent, model: model, api: api) { selected = nil }
         }
         .sheet(item: $importing) { job in
-            ImportSheet(job: job, api: api, onSessionLost: onSessionLost,
-                        onFinished: { Task { await model.refreshQueue() } }) { importing = nil }
+            ImportSheet(job: job, api: api, onFinished: { Task { await model.refreshQueue() } }) { importing = nil }
         }
         .sheet(isPresented: $adding) {
-            AddTorrentSheet(clients: model.clients, api: api, onSessionLost: onSessionLost) {
+            AddTorrentSheet(clients: model.clients, api: api) {
                 adding = false
                 Task { await model.refresh() }
             }

@@ -141,11 +141,9 @@ public final class AddIndexerModel {
     public private(set) var done = false
 
     private let api: any IndexerAddAPI
-    private let onSessionLost: @MainActor () -> Void
 
-    public init(api: any IndexerAddAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(api: any IndexerAddAPI) {
         self.api = api
-        self.onSessionLost = onSessionLost
     }
 
     /// Case-insensitive name filter, capped so the list stays scrollable.
@@ -158,7 +156,6 @@ public final class AddIndexerModel {
         do {
             schemas = .loaded(try await api.indexerSchemas())
         } catch {
-            if case .some(.unauthorized) = error as? APIError { onSessionLost(); return }
             schemas = .failed((error as? APIError)?.description ?? error.localizedDescription)
         }
     }
@@ -194,8 +191,6 @@ public final class AddIndexerModel {
             try await work()
             noteOK = true
             note = nil
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             noteOK = false
             note = (error as? APIError)?.description ?? error.localizedDescription

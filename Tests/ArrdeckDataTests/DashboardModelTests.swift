@@ -6,7 +6,6 @@ import Testing
 /// Canned answers per call, plus a log of what was asked.
 actor FakeAPI: DashboardAPI {
     var services: [ServiceInfo]
-    var servicesError: APIError?
     var queueBlocks: [ArrApp: Block<[QueueItem]>] = [.radarr: .healthy([]), .sonarr: .healthy([])]
     var queueError: APIError?
     var vpnBlock: Block<VpnStatus> = .healthy(.init(public_ip: "1.2.3.4", status: "running"))
@@ -20,7 +19,6 @@ actor FakeAPI: DashboardAPI {
     }
 
     func set(queueError: APIError?) { self.queueError = queueError }
-    func set(servicesError: APIError?) { self.servicesError = servicesError }
     func set(actionError: APIError?) { self.actionError = actionError }
     func set(queue: [ArrApp: Block<[QueueItem]>]) { queueBlocks = queue }
     func set(outage: APIError?) { self.outage = outage }
@@ -33,7 +31,6 @@ actor FakeAPI: DashboardAPI {
 
     func services() async throws -> [ServiceInfo] {
         try log("services")
-        if let servicesError { throw servicesError }
         return services
     }
     func playSessions() async throws -> Block<[PlaySession]> { try log("sessions"); return .healthy([]) }
@@ -72,7 +69,7 @@ actor FakeAPI: DashboardAPI {
 @Suite struct DashboardModelTests {
     @Test func refreshLoadsOnlyTheConfiguredCards() async {
         let api = FakeAPI(configured: ["radarr", "gluetun"])
-        let model = DashboardModel(api: api, onSessionLost: {})
+        let model = DashboardModel(api: api)
         await model.refresh()
 
         #expect(model.servicesKnown)
@@ -92,7 +89,7 @@ actor FakeAPI: DashboardAPI {
 
     @Test func failedPollKeepsTheLastAnswerAndFlagsTheCard() async {
         let api = FakeAPI(configured: ["sonarr"])
-        let model = DashboardModel(api: api, onSessionLost: {})
+        let model = DashboardModel(api: api)
         await model.refresh()
         #expect(model.queue.value != nil)
         #expect(model.cardErrors.isEmpty)
@@ -110,11 +107,11 @@ actor FakeAPI: DashboardAPI {
 
     @Test func anOutageRaisesTheConnectionBannerUntilAnythingGetsThrough() async {
         let api = FakeAPI(configured: ["sonarr", "gluetun"])
-        let model = DashboardModel(api: api, onSessionLost: {})
+        let model = DashboardModel(api: api)
         await model.refresh()
         #expect(model.connectionError == nil)
 
-        await api.set(outage: .transport("Could not connect to the server."))
+        await api.set(outage: .refused("Could not connect to the server."))
         await model.refresh()
         #expect(model.connectionError == "Could not connect to the server.")
         #expect(model.vpn.value?.value?.status == "running", "stale data stays on screen through an outage")
@@ -127,26 +124,16 @@ actor FakeAPI: DashboardAPI {
     @Test func aCardThatNeverLoadedShowsTheFailure() async {
         let api = FakeAPI(configured: ["sonarr"])
         await api.set(queueError: .unexpectedStatus(500))
-        let model = DashboardModel(api: api, onSessionLost: {})
+        let model = DashboardModel(api: api)
         await model.refresh()
         #expect(model.queue == .failed("HTTP 500"))
-    }
-
-    @Test func unauthorizedEndsTheSession() async {
-        let api = FakeAPI(configured: ["sonarr"])
-        await api.set(servicesError: .unauthorized)
-        var lost = 0
-        let model = DashboardModel(api: api, onSessionLost: { lost += 1 })
-        await model.refresh()
-        #expect(lost == 1)
-        #expect(await api.count("queue") == 0, "nothing else is asked once the session is gone")
     }
 
     @Test func runPollsAtTheCadenceUntilCancelled() async throws {
         let api = FakeAPI(configured: ["radarr"])
         let going = QueueItem(app: "radarr", id: 1, size: 10, size_left: 5, status: "downloading", title: "x")
         await api.set(queue: [.radarr: .healthy([going]), .sonarr: .healthy([])])
-        let model = DashboardModel(api: api, cadence: .scaled(by: 0.01), onSessionLost: {})
+        let model = DashboardModel(api: api, cadence: .scaled(by: 0.01))
 
         let task = Task { await model.run() }
         try await Task.sleep(for: .milliseconds(400))
@@ -163,7 +150,7 @@ actor FakeAPI: DashboardAPI {
 
     @Test func actionsRefetchTheirCardsAndReportRefusals() async {
         let api = FakeAPI(configured: ["overseerr", "sonarr"])
-        let model = DashboardModel(api: api, onSessionLost: {})
+        let model = DashboardModel(api: api)
         await model.refresh()
         let before = await api.count("queue")
 

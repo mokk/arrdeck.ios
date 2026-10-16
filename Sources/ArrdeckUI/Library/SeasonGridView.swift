@@ -5,7 +5,6 @@ import SwiftUI
 /// monitoring for many at once — tap a season, or "latest only" for a show.
 struct SeasonGridView: View {
     let api: any LibraryAPI
-    let baseURL: URL
     let query: String
     @State private var rows: Loadable<[SeasonGridRow]> = .loading
 
@@ -19,7 +18,7 @@ struct SeasonGridView: View {
                 let shown = all.filter { needle.isEmpty || ($0.title ?? "").lowercased().contains(needle) }
                 LazyVStack(spacing: 0) {
                     ForEach(shown, id: \.id) { row in
-                        GridRow(row: row, baseURL: baseURL) { season, on in await set(row.id, season, on) } latestOnly: {
+                        GridRow(row: row) { season, on in await set(row.id, season, on) } latestOnly: {
                             await latestOnly(row)
                         }
                         if row.id != shown.last?.id { Divider().padding(.leading, 12) }
@@ -56,14 +55,13 @@ struct SeasonGridView: View {
 
 private struct GridRow: View {
     let row: SeasonGridRow
-    let baseURL: URL
     let toggle: (Int, Bool) async -> Void
     let latestOnly: () async -> Void
 
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             NavigationLink(value: MediaRef.series(row.id)) {
-                Poster(path: row.poster, baseURL: baseURL, width: 36, cornerRadius: 5, title: row.title ?? "")
+                Poster(path: row.poster, width: 36, cornerRadius: 5, title: row.title ?? "")
             }
             .buttonStyle(.plain)
             VStack(alignment: .leading, spacing: 6) {

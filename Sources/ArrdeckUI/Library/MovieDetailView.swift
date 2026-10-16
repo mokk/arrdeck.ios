@@ -5,15 +5,11 @@ public struct MovieDetailView: View {
     @State private var model: MovieDetailModel
     @State private var searching = false
     @Environment(\.dismiss) private var dismiss
-    let baseURL: URL
     let api: any LibraryAPI & ExtrasAPI
-    let onSessionLost: @MainActor () -> Void
 
-    public init(id: Int, api: any LibraryAPI & ExtrasAPI, baseURL: URL, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
-        self.baseURL = baseURL
+    public init(id: Int, api: any LibraryAPI & ExtrasAPI, hasPlex: Bool) {
         self.api = api
-        self.onSessionLost = onSessionLost
-        _model = State(initialValue: MovieDetailModel(id: id, api: api, hasPlex: hasPlex, onSessionLost: onSessionLost))
+        _model = State(initialValue: MovieDetailModel(id: id, api: api, hasPlex: hasPlex))
     }
 
     public var body: some View {
@@ -24,9 +20,9 @@ public struct MovieDetailView: View {
             case let .failed(reason):
                 Section { ErrorNote(reason) }
             case let .loaded(movie):
-                BackdropSection(path: movie.fanart, baseURL: baseURL)
+                BackdropSection(path: movie.fanart)
                 Section {
-                    DetailHero(poster: movie.poster, baseURL: baseURL, overview: movie.overview, links: model.links,
+                    DetailHero(poster: movie.poster, overview: movie.overview, links: model.links,
                                ratings: movie.ratings ?? []) {
                         StateBadge(state: movie.has_file == true ? "downloaded" : (movie.monitored == true ? "wanted" : "unmonitored"))
                         if let status = movie.status { Text(status.capitalized) }
@@ -34,7 +30,7 @@ public struct MovieDetailView: View {
                     }
                 }
                 RequestBannerSection(api: api, movieTMDB: movie.tmdb_id, showTVDB: nil)
-                RenameCard(ref: .movie(movie.id), api: api, onSessionLost: onSessionLost)
+                RenameCard(ref: .movie(movie.id), api: api)
                 DetailActions(model: model, monitored: movie.monitored ?? false) {
                     Button("Interactive search") { searching = true }
                 }
@@ -61,7 +57,7 @@ public struct MovieDetailView: View {
                         }
                     }
                 }
-                CreditsSection(credits: model.credits, baseURL: baseURL)
+                CreditsSection(credits: model.credits)
                 DetailHistorySection(history: movie.history)
             }
         }
@@ -72,7 +68,7 @@ public struct MovieDetailView: View {
         .toolbar { WatchedDot(watched: model.watched) }
         .navigationDestination(for: PersonRef.self) { ref in
             if let people = api as? any PeopleAPI {
-                PersonView(ref: ref, api: people, adder: api as? any DiscoverAPI & LibraryAPI, baseURL: baseURL)
+                PersonView(ref: ref, api: people, adder: api as? any DiscoverAPI & LibraryAPI)
             }
         }
         .task { await model.load() }
@@ -83,7 +79,7 @@ public struct MovieDetailView: View {
             Text(model.actionError ?? "")
         }
         .sheet(isPresented: $searching) {
-            ReleasesSheet(target: .movie(model.ref.id), title: title, api: api, onSessionLost: onSessionLost) { searching = false }
+            ReleasesSheet(target: .movie(model.ref.id), title: title, api: api) { searching = false }
         }
         .accessibilityIdentifier("movie-detail")
     }

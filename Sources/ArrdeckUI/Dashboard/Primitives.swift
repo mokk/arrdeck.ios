@@ -115,11 +115,10 @@ struct ProgressBar: View {
     }
 }
 
-/// Posters come as `/api/v1/poster?u=…`, relative to the profile — the backend
-/// proxies them so the device never talks to the artwork CDN directly.
+/// Posters come as absolute addresses: the artwork CDN's, or a service's own
+/// copy with its key in the query, since the image loader cannot send a header.
 struct Poster: View {
     let path: String?
-    let baseURL: URL
     var width: CGFloat = 44
     var cornerRadius: CGFloat = 8
     /// When set, a missing or broken cover becomes a coloured tile carrying
@@ -129,7 +128,7 @@ struct Poster: View {
     /// Album covers and artist pictures are square, not a film poster's 2:3.
     var square = false
 
-    var url: URL? { path.flatMap { URL(string: $0, relativeTo: baseURL) } }
+    var url: URL? { path.flatMap { URL(string: $0) } }
 
     var body: some View {
         AsyncImage(url: url) { phase in

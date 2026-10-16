@@ -65,7 +65,7 @@ actor FakeIndexerAPI: IndexerAddAPI {
 @Suite struct AddIndexerModelTests {
     @Test func filtersPicksAndAdds() async {
         let api = FakeIndexerAPI()
-        let model = AddIndexerModel(api: api, onSessionLost: {})
+        let model = AddIndexerModel(api: api)
         await model.load()
         #expect(model.shown.map(\.name) == ["Alpha", "Beta"])
         model.filter = "be"

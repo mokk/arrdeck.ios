@@ -130,15 +130,13 @@ public final class WantedModel {
     public private(set) var pending: Set<String> = []
 
     private let api: any WantedAPI
-    private let onSessionLost: @MainActor () -> Void
     private var page = 1
     private var generation = 0
 
-    public init(api: any WantedAPI, apps: [ArrApp], onSessionLost: @escaping @MainActor () -> Void) {
+    public init(api: any WantedAPI, apps: [ArrApp]) {
         self.api = api
         self.apps = apps
         self.app = apps.first ?? .radarr
-        self.onSessionLost = onSessionLost
     }
 
     public func isPending(_ key: String) -> Bool { pending.contains(key) }
@@ -164,7 +162,6 @@ public final class WantedModel {
             error = nil
         } catch {
             guard mine == generation else { return }
-            if case .some(.unauthorized) = error as? APIError { onSessionLost(); return }
             self.error = describe(error)
         }
     }
@@ -207,8 +204,6 @@ public final class WantedModel {
         defer { pending.remove(key) }
         do {
             try await work()
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             actionError = describe(error)
         }

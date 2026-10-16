@@ -28,7 +28,7 @@ struct ImportSheet: View {
 
     /// `api` is whatever the presenting screen holds; the live client does
     /// all of them, a server without manual import shows a note instead.
-    init(job: ImportJob, api: any Sendable, onSessionLost: @escaping @MainActor () -> Void,
+    init(job: ImportJob, api: any Sendable,
          onFinished: @escaping () -> Void = {}, dismiss: @escaping () -> Void) {
         self.job = job
         library = api as? any ManageAPI
@@ -37,7 +37,7 @@ struct ImportSheet: View {
         self.onFinished = onFinished
         self.dismiss = dismiss
         _model = State(initialValue: (api as? any ManualImportAPI).map {
-            ImportModel(source: job.source, api: $0, onSessionLost: onSessionLost)
+            ImportModel(source: job.source, api: $0)
         })
     }
 
@@ -59,7 +59,7 @@ struct ImportSheet: View {
                             destination(route, model: model)
                         }
                 } else {
-                    List { ErrorNote(String(localized: "This server can't import files by hand.")) }
+                    List { ErrorNote(String(localized: "Files can't be imported by hand here.")) }
                 }
             }
             .navigationTitle(title)

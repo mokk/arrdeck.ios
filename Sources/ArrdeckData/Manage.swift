@@ -357,13 +357,11 @@ public final class LibraryListModel {
 
     private let api: any ManageAPI & LibraryAPI & ExtrasAPI
     private let hasPlex: Bool
-    private let onSessionLost: @MainActor () -> Void
 
-    public init(app: LibraryApp, api: any ManageAPI & LibraryAPI & ExtrasAPI, hasPlex: Bool, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(app: LibraryApp, api: any ManageAPI & LibraryAPI & ExtrasAPI, hasPlex: Bool) {
         self.app = app
         self.api = api
         self.hasPlex = hasPlex
-        self.onSessionLost = onSessionLost
     }
 
     public var shown: [LibraryRow] {
@@ -407,8 +405,6 @@ public final class LibraryListModel {
             }
             selecting = false
             await loadRows()
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             actionError = (error as? APIError)?.description ?? error.localizedDescription
         }
@@ -433,8 +429,6 @@ public final class LibraryListModel {
     private func act(_ work: @escaping () async throws -> Void) async {
         do {
             try await work()
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             actionError = (error as? APIError)?.description ?? error.localizedDescription
         }
@@ -462,7 +456,6 @@ public final class LibraryListModel {
             }
             self.rows = .loaded(rows)
         } catch {
-            if case .some(.unauthorized) = error as? APIError { onSessionLost(); return }
             if self.rows.value == nil { self.rows = .failed((error as? APIError)?.description ?? error.localizedDescription) }
         }
     }
@@ -477,11 +470,9 @@ public final class IndexersModel {
     public var actionError: String?
 
     private let api: any ManageAPI
-    private let onSessionLost: @MainActor () -> Void
 
-    public init(api: any ManageAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(api: any ManageAPI) {
         self.api = api
-        self.onSessionLost = onSessionLost
     }
 
     public var sorted: [Indexer] {
@@ -492,7 +483,6 @@ public final class IndexersModel {
         do {
             indexers = .loaded(try await api.indexers())
         } catch {
-            if case .some(.unauthorized) = error as? APIError { onSessionLost(); return }
             if indexers.value == nil { indexers = .failed((error as? APIError)?.description ?? error.localizedDescription) }
         }
     }
@@ -503,8 +493,6 @@ public final class IndexersModel {
         do {
             try await api.toggleIndexer(indexer.id, enable: enable)
             await load()
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             actionError = (error as? APIError)?.description ?? error.localizedDescription
         }
@@ -517,8 +505,6 @@ public final class IndexersModel {
         do {
             try await api.testIndexer(indexer.id)
             tested[indexer.id] = true
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             tested[indexer.id] = false
         }
@@ -543,19 +529,17 @@ public final class SystemModel {
     public private(set) var logs: Loadable<[LogEntry]> = .loading
 
     private let api: any ManageAPI
-    private let onSessionLost: @MainActor () -> Void
     private var logGeneration = 0
 
     /// `logApps` is every arr that has logs (Prowlarr included); `apps` are
     /// the two with quality profiles.
     public let logApps: [String]
 
-    public init(configured: Set<String>, api: any ManageAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(configured: Set<String>, api: any ManageAPI) {
         apps = [ArrApp.radarr, .sonarr].filter { configured.contains($0.rawValue) }
         logApps = ["radarr", "sonarr", "lidarr", "prowlarr"].filter { configured.contains($0) }
         logApp = logApps.first ?? "radarr"
         self.api = api
-        self.onSessionLost = onSessionLost
     }
 
     /// Overdue tasks are the reason to look at the card, so they show even
@@ -594,7 +578,6 @@ public final class SystemModel {
             logs = .loaded(entries)
         } catch {
             guard mine == logGeneration else { return }
-            if case .some(.unauthorized) = error as? APIError { onSessionLost(); return }
             logs = .failed((error as? APIError)?.description ?? error.localizedDescription)
         }
     }
@@ -605,7 +588,6 @@ public final class SystemModel {
         do {
             self[keyPath: keyPath] = .loaded(try await work())
         } catch {
-            if case .some(.unauthorized) = error as? APIError { onSessionLost(); return }
             if self[keyPath: keyPath].value == nil {
                 self[keyPath: keyPath] = .failed((error as? APIError)?.description ?? error.localizedDescription)
             }
@@ -667,11 +649,9 @@ public final class ServicesModel {
     public private(set) var status: [ServiceStatus] = []
 
     private let api: any ManageAPI
-    private let onSessionLost: @MainActor () -> Void
 
-    public init(api: any ManageAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(api: any ManageAPI) {
         self.api = api
-        self.onSessionLost = onSessionLost
     }
 
     public func load() async {
@@ -683,7 +663,6 @@ public final class ServicesModel {
             self.error = nil
             status = (try? await api.status()) ?? []
         } catch {
-            if case .some(.unauthorized) = error as? APIError { onSessionLost(); return }
             if forms.isEmpty { self.error = (error as? APIError)?.description ?? error.localizedDescription }
         }
     }
@@ -697,8 +676,6 @@ public final class ServicesModel {
             )
             form.markSaved(configured: configured)
             form.note(String(localized: configured ? "ok: saved" : "saved (disabled)"), ok: true)
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             form.note(String(localized: "error: \((error as? APIError)?.description ?? error.localizedDescription)"), ok: false)
         }
@@ -711,8 +688,6 @@ public final class ServicesModel {
         do {
             let version = try await api.testService(form.name)
             form.note(String(localized: "ok: v\(version)"), ok: true)
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             form.note(String(localized: "error: \((error as? APIError)?.description ?? error.localizedDescription)"), ok: false)
         }

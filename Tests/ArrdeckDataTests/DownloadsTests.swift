@@ -99,7 +99,7 @@ actor FakeDownloadsAPI: DownloadsAPI {
     }
 
     func model(_ api: FakeDownloadsAPI, clients: [TorrentClient] = [.qbittorrent, .transmission]) -> DownloadsModel {
-        DownloadsModel(api: api, clients: clients, hasArr: true, cadence: .scaled(by: 0.01), onSessionLost: {})
+        DownloadsModel(api: api, clients: clients, hasArr: true, cadence: .scaled(by: 0.01))
     }
 
     @Test func mergesBothClientsAndResortsGlobally() async {
@@ -185,19 +185,9 @@ actor FakeDownloadsAPI: DownloadsAPI {
         await model.delete(t, deleteData: true)
         #expect(await api.count("delete-abc-true") == 1)
 
-        await api.set(failure: .transport("timed out"))
+        await api.set(failure: .refused("timed out"))
         await model.refresh()
         #expect(model.shown.count == 1, "stale rows stay on screen")
         #expect(model.refreshError == "timed out")
-        #expect(model.connectionError == "timed out")
-    }
-
-    @Test func unauthorizedStopsAndReports() async {
-        let api = FakeDownloadsAPI(groups: [:])
-        await api.set(failure: .unauthorized)
-        var lost = 0
-        let model = DownloadsModel(api: api, clients: [.qbittorrent], hasArr: false, onSessionLost: { lost += 1 })
-        await model.refresh()
-        #expect(lost >= 1)
     }
 }

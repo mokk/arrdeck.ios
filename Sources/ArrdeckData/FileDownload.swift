@@ -1,9 +1,8 @@
 import Foundation
 
-/// Fetches a file through arrdeck with the session cookie and parks it in the
-/// app's temporary folder, where the share sheet can hand it to Books or
-/// Files. Books come from arrdeck's Readarr proxy; arrdeck never mounts the
-/// library, our Readarr fork serves the bytes.
+/// Fetches a file and parks it in the app's temporary folder, where the share
+/// sheet can hand it to Books or Files. Books come straight from our Readarr
+/// fork, which serves the bytes; its key is in the address.
 @MainActor @Observable
 public final class FileDownloadModel {
     public enum State: Equatable, Sendable {
@@ -16,9 +15,8 @@ public final class FileDownloadModel {
     public private(set) var state: State = .idle
     private let session: URLSession
 
-    public init(cookies: HTTPCookieStorage? = .shared) {
+    public init() {
         let config = URLSessionConfiguration.ephemeral
-        config.httpCookieStorage = cookies
         config.timeoutIntervalForRequest = 30
         session = URLSession(configuration: config)
     }

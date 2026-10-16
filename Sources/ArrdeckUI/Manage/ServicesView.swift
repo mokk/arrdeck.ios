@@ -5,8 +5,8 @@ import SwiftUI
 struct ServicesView: View {
     @State private var model: ServicesModel
 
-    init(api: any ManageAPI, onSessionLost: @escaping @MainActor () -> Void) {
-        _model = State(initialValue: ServicesModel(api: api, onSessionLost: onSessionLost))
+    init(api: any ManageAPI) {
+        _model = State(initialValue: ServicesModel(api: api))
     }
 
     var body: some View {

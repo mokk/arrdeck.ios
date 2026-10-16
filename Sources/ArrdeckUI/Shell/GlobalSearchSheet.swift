@@ -9,22 +9,17 @@ struct GlobalSearchSheet: View {
     @State private var model: GlobalSearchModel
     let api: any LibraryPageAPI
     let apps: [LibraryApp]
-    let baseURL: URL
     let hasPlex: Bool
-    let onSessionLost: @MainActor () -> Void
     let dismiss: () -> Void
 
-    init(api: any LibraryPageAPI, apps: [LibraryApp], baseURL: URL, hasPlex: Bool, query: String = "",
-         onSessionLost: @escaping @MainActor () -> Void, dismiss: @escaping () -> Void) {
+    init(api: any LibraryPageAPI, apps: [LibraryApp], hasPlex: Bool, query: String = "", dismiss: @escaping () -> Void) {
         let model = GlobalSearchModel(api: api, apps: apps)
         // carried over from a library's own search
         model.query = query
         _model = State(initialValue: model)
         self.api = api
         self.apps = apps
-        self.baseURL = baseURL
         self.hasPlex = hasPlex
-        self.onSessionLost = onSessionLost
         self.dismiss = dismiss
     }
 
@@ -70,10 +65,10 @@ struct GlobalSearchSheet: View {
             .navigationTitle("Search everything")
             .searchable(text: $model.query, placement: .alwaysVisible, prompt: Text(prompt))
             .navigationDestination(for: MediaRef.self) { ref in
-                MediaDestination(ref: ref, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+                MediaDestination(ref: ref, api: api, hasPlex: hasPlex)
             }
             .navigationDestination(for: AuthorRef.self) { ref in
-                AuthorDetailView(id: ref.id, api: api, baseURL: baseURL, onSessionLost: onSessionLost)
+                AuthorDetailView(id: ref.id, api: api)
             }
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Done", action: dismiss) } }
             .task { await model.load() }
@@ -83,7 +78,7 @@ struct GlobalSearchSheet: View {
 
     func row(_ hit: GlobalSearch.Hit) -> some View {
         HStack(spacing: 10) {
-            Poster(path: hit.poster, baseURL: baseURL, width: 30, cornerRadius: 4, title: hit.title, square: hit.group == .artists)
+            Poster(path: hit.poster, width: 30, cornerRadius: 4, title: hit.title, square: hit.group == .artists)
             VStack(alignment: .leading, spacing: 1) {
                 Text(hit.title).font(.subheadline.weight(.medium)).lineLimit(1)
                 if let subtitle = hit.subtitle { Text(subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(1) }

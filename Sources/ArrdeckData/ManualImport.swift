@@ -338,18 +338,15 @@ public final class ImportModel {
     private let api: any ManualImportAPI
     private let pollInterval: Duration
     private let maxPolls: Int
-    private let onSessionLost: @MainActor () -> Void
 
     public init(
         source: ImportSource, api: any ManualImportAPI,
-        pollInterval: Duration = .seconds(1), maxPolls: Int = 600,
-        onSessionLost: @escaping @MainActor () -> Void
+        pollInterval: Duration = .seconds(1), maxPolls: Int = 600
     ) {
         self.source = source
         self.api = api
         self.pollInterval = pollInterval
         self.maxPolls = maxPolls
-        self.onSessionLost = onSessionLost
     }
 
     public var app: ArrApp { source.app }
@@ -380,7 +377,6 @@ public final class ImportModel {
         do {
             candidates = .loaded(try await api.importCandidates(source))
         } catch {
-            if lostSession(error) { return }
             candidates = .failed(describe(error))
         }
     }
@@ -410,7 +406,6 @@ public final class ImportModel {
             starting = false
         } catch {
             starting = false
-            if lostSession(error) { return }
             actionError = describe(error)
             return
         }
@@ -429,7 +424,6 @@ public final class ImportModel {
                 command = try await api.importCommand(app: app, id: current.id)
                 failures = 0
             } catch {
-                if lostSession(error) { return }
                 failures += 1
                 if failures >= 3 {
                     actionError = describe(error)
@@ -454,12 +448,6 @@ public final class ImportModel {
                 : String(localized: "\(name) processed \(count) files"))
         }
         return .succeeded(command.message ?? String(localized: "\(name) finished the import"))
-    }
-
-    private func lostSession(_ error: any Error) -> Bool {
-        guard case .some(.unauthorized) = error as? APIError else { return false }
-        onSessionLost()
-        return true
     }
 
     private func describe(_ error: any Error) -> String {

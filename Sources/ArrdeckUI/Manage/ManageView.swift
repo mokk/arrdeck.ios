@@ -8,23 +8,18 @@ import SwiftUI
 public struct ManageView: View {
     let model: DashboardModel
     let api: any LibraryPageAPI & IndexerAddAPI & HistoryAPI & DownloadsAPI & CalendarAPI
-    let baseURL: URL
     let profileName: String
-    let onSessionLost: @MainActor () -> Void
     let onSwitchProfile: () -> Void
 
     public init(
         model: DashboardModel,
         api: any LibraryPageAPI & IndexerAddAPI & HistoryAPI & DownloadsAPI & CalendarAPI,
-        baseURL: URL, profileName: String,
-        onSessionLost: @escaping @MainActor () -> Void,
+        profileName: String,
         onSwitchProfile: @escaping () -> Void
     ) {
         self.model = model
         self.api = api
-        self.baseURL = baseURL
         self.profileName = profileName
-        self.onSessionLost = onSessionLost
         self.onSwitchProfile = onSwitchProfile
     }
 
@@ -63,30 +58,29 @@ public struct ManageView: View {
             Section("More") {
                 if model.has("prowlarr") {
                     NavigationLink {
-                        PopularView(api: api, onSessionLost: onSessionLost)
+                        PopularView(api: api)
                     } label: { Label("Popular releases", systemImage: "flame") }
                 }
                 if hasPlex, let watching = api as? any WatchingAPI {
                     NavigationLink {
-                        StatsScreen(api: watching, baseURL: baseURL)
+                        StatsScreen(api: watching)
                     } label: { Label("Statistics", systemImage: "chart.line.uptrend.xyaxis") }
                     .accessibilityIdentifier("manage-stats")
                 }
                 NavigationLink {
-                    DashboardView(model: model, baseURL: baseURL, api: api, onSessionLost: onSessionLost)
+                    DashboardView(model: model, api: api)
                         .navigationTitle("Overview")
                         .pageTitle()
                 } label: { Label("Overview", systemImage: "square.grid.2x2") }
                 .accessibilityIdentifier("overview")
                 if model.hasArr, let cleanup = api as? any CleanupAPI {
                     NavigationLink {
-                        CleanupView(api: cleanup, baseURL: baseURL)
+                        CleanupView(api: cleanup)
                     } label: { Label("Cleanup", systemImage: "eraser") }
                 }
                 if model.hasArr {
                     NavigationLink {
-                        WantedView(api: api, apps: ArrApp.allCases.filter { model.has($0.rawValue) },
-                                   baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+                        WantedView(api: api, apps: ArrApp.allCases.filter { model.has($0.rawValue) }, hasPlex: hasPlex)
                     } label: { Label("Wanted", systemImage: "magnifyingglass.circle") }
                 }
             }
@@ -94,12 +88,12 @@ public struct ManageView: View {
                 Section("Services") {
                     if model.has("prowlarr") {
                         NavigationLink {
-                            IndexersView(api: api, onSessionLost: onSessionLost)
+                            IndexersView(api: api)
                         } label: { Label("Indexers", systemImage: "antenna.radiowaves.left.and.right") }
                         .accessibilityIdentifier("manage-indexers")
                     }
                     NavigationLink {
-                        SystemView(configured: model.configured, api: api, onSessionLost: onSessionLost)
+                        SystemView(configured: model.configured, api: api)
                     } label: { Label("System", systemImage: "gearshape.2") }
                     .accessibilityIdentifier("manage-system")
                     if let tools = api as? any ToolsAPI {
@@ -123,7 +117,7 @@ public struct ManageView: View {
             }
             Section {
                 NavigationLink {
-                    ServicesView(api: api, onSessionLost: onSessionLost)
+                    ServicesView(api: api)
                 } label: { Label("Connections", systemImage: "link") }
                 .accessibilityIdentifier("manage-connections")
             } footer: {
@@ -135,7 +129,7 @@ public struct ManageView: View {
         .navigationTitle("Settings")
         .pageTitle()
         .navigationDestination(for: MediaRef.self) { ref in
-            TitleDetail(ref: ref, api: api, baseURL: baseURL, hasPlex: hasPlex, onSessionLost: onSessionLost)
+            TitleDetail(ref: ref, api: api, hasPlex: hasPlex)
         }
         .accessibilityIdentifier("settings")
     }
@@ -180,12 +174,10 @@ struct IndexersView: View {
     @State private var model: IndexersModel
     @State private var adding = false
     let api: any ManageAPI & IndexerAddAPI
-    let onSessionLost: @MainActor () -> Void
 
-    init(api: any ManageAPI & IndexerAddAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    init(api: any ManageAPI & IndexerAddAPI) {
         self.api = api
-        self.onSessionLost = onSessionLost
-        _model = State(initialValue: IndexersModel(api: api, onSessionLost: onSessionLost))
+        _model = State(initialValue: IndexersModel(api: api))
     }
 
     var body: some View {
@@ -232,7 +224,7 @@ struct IndexersView: View {
                 .accessibilityIdentifier("add-indexer")
         }
         .sheet(isPresented: $adding) {
-            AddIndexerSheet(api: api, onSessionLost: onSessionLost) {
+            AddIndexerSheet(api: api) {
                 adding = false
                 Task { await model.load() }
             }

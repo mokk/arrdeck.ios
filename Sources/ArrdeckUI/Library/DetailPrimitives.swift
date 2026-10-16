@@ -6,7 +6,6 @@ import SwiftUI
 /// caller supplies it rather than the view guessing from optional fields.
 struct DetailHero<Badges: View>: View {
     let poster: String?
-    let baseURL: URL
     let overview: String?
     let links: [ExternalLink]
     /// Every source's score, as chips under the metadata line.
@@ -30,7 +29,7 @@ struct DetailHero<Badges: View>: View {
             }
             HStack(alignment: .top, spacing: 14) {
                 if poster != nil {
-                    Poster(path: poster, baseURL: baseURL, width: 100, cornerRadius: 12, square: square)
+                    Poster(path: poster, width: 100, cornerRadius: 12, square: square)
                 }
                 if let overview, !overview.isEmpty {
                     Text(overview).font(.subheadline).foregroundStyle(.secondary)
@@ -171,7 +170,6 @@ struct DetailHistorySection: View {
 /// rather than an empty card.
 struct CreditsSection: View {
     let credits: Credits?
-    let baseURL: URL
 
     var body: some View {
         let cast = credits?.cast ?? []
@@ -183,10 +181,10 @@ struct CreditsSection: View {
                         HStack(alignment: .top, spacing: 12) {
                             ForEach(Array(cast.enumerated()), id: \.offset) { _, person in
                                 if let id = person.tmdb_id {
-                                    NavigationLink(value: PersonRef(id)) { PersonChip(person: person, baseURL: baseURL) }
+                                    NavigationLink(value: PersonRef(id)) { PersonChip(person: person) }
                                         .buttonStyle(.plain)
                                 } else {
-                                    PersonChip(person: person, baseURL: baseURL)
+                                    PersonChip(person: person)
                                 }
                             }
                         }
@@ -218,7 +216,6 @@ private func crewLine(_ person: CreditPerson) -> some View {
 
 struct PersonChip: View {
     let person: CreditPerson
-    let baseURL: URL
 
     /// A quarter of a cast list has no headshot on TMDB, and a grey box beside
     /// a photo reads as a broken image rather than a missing one.
@@ -229,7 +226,7 @@ struct PersonChip: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            if let image = person.image, let url = URL(string: image, relativeTo: baseURL) {
+            if let image = person.image, let url = URL(string: image) {
                 AsyncImage(url: url) { phase in
                     if let image = phase.image {
                         image.resizable().aspectRatio(contentMode: .fill)

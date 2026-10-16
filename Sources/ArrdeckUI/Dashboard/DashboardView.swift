@@ -7,22 +7,17 @@ import SwiftUI
 /// while there is something to act on.
 public struct DashboardView: View {
     let model: DashboardModel
-    let baseURL: URL
     let api: any DownloadsAPI & CalendarAPI & HistoryAPI & LibraryPageAPI
-    let onSessionLost: @MainActor () -> Void
     /// Pushed programmatically: a NavigationLink nested in the poster strip's
     /// horizontal ScrollView inside a List row never fires, a Button does.
     @State private var opened: MediaRef?
 
     public init(
-        model: DashboardModel, baseURL: URL,
-        api: any DownloadsAPI & CalendarAPI & HistoryAPI & LibraryPageAPI,
-        onSessionLost: @escaping @MainActor () -> Void
+        model: DashboardModel,
+        api: any DownloadsAPI & CalendarAPI & HistoryAPI & LibraryPageAPI
     ) {
         self.model = model
-        self.baseURL = baseURL
         self.api = api
-        self.onSessionLost = onSessionLost
     }
 
     public var body: some View {
@@ -38,21 +33,20 @@ public struct DashboardView: View {
             }
             NowPlayingSection(model: model)
             HealthSection(model: model)
-            RequestsSection(model: model, baseURL: baseURL)
-            RecentSection(model: model, baseURL: baseURL) { opened = $0 }
+            RequestsSection(model: model)
+            RecentSection(model: model) { opened = $0 }
             TorrentSection(model: model)
             QueueSection(model: model)
             if model.hasArr {
                 CalendarSection(model: model) {
-                    CalendarScreen(api: api, baseURL: baseURL, hasPlex: model.has("plex"),
-                                   onSessionLost: onSessionLost)
+                    CalendarScreen(api: api, hasPlex: model.has("plex"))
                 }
                 StorageSection(model: model)
             }
             if model.has("gluetun") { VpnSection(model: model) }
             if model.has("bazarr") { SubtitlesSection(model: model) }
             if model.hasArr {
-                HistorySection(model: model) { HistoryScreen(api: api, apps: ArrApp.allCases.filter { model.has($0.rawValue) }, onSessionLost: onSessionLost) }
+                HistorySection(model: model) { HistoryScreen(api: api, apps: ArrApp.allCases.filter { model.has($0.rawValue) }) }
             }
             if model.has("prowlarr") { IndexerSection(model: model) }
         }
@@ -68,8 +62,7 @@ public struct DashboardView: View {
             if model.hasArr {
                 NavigationLink {
                     WantedView(
-                        api: api, apps: ArrApp.allCases.filter { model.has($0.rawValue) },
-                        baseURL: baseURL, hasPlex: model.has("plex"), onSessionLost: onSessionLost
+                        api: api, apps: ArrApp.allCases.filter { model.has($0.rawValue) }, hasPlex: model.has("plex")
                     )
                 } label: {
                     Label("Wanted", systemImage: "magnifyingglass.circle")
@@ -93,7 +86,7 @@ public struct DashboardView: View {
     }
 
     func destination(_ ref: MediaRef) -> some View {
-        TitleDetail(ref: ref, api: api, baseURL: baseURL, hasPlex: model.has("plex"), onSessionLost: onSessionLost)
+        TitleDetail(ref: ref, api: api, hasPlex: model.has("plex"))
     }
 }
 
@@ -154,7 +147,6 @@ struct HealthSection: View {
 /// mean opening Overseerr.
 struct RequestsSection: View {
     let model: DashboardModel
-    let baseURL: URL
 
     var body: some View {
         if model.has("overseerr"), let requests = model.requests.value?.value, !requests.isEmpty {
@@ -162,7 +154,7 @@ struct RequestsSection: View {
                 ForEach(requests, id: \.id) { request in
                     HStack(spacing: 12) {
                         if request.poster != nil {
-                            Poster(path: request.poster, baseURL: baseURL)
+                            Poster(path: request.poster)
                         }
                         VStack(alignment: .leading, spacing: 3) {
                             HStack(spacing: 4) {
@@ -207,7 +199,6 @@ struct RequestsSection: View {
 
 struct RecentSection: View {
     let model: DashboardModel
-    let baseURL: URL
     let open: (MediaRef) -> Void
 
     var body: some View {
@@ -221,7 +212,7 @@ struct RecentSection: View {
                             } label: {
                             VStack(alignment: .leading, spacing: 4) {
                                 if item.poster != nil {
-                                    Poster(path: item.poster, baseURL: baseURL, width: 92, cornerRadius: 12)
+                                    Poster(path: item.poster, width: 92, cornerRadius: 12)
                                 } else {
                                     Text(item.title)
                                         .font(.caption2)

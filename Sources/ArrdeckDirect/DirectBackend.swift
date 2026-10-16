@@ -28,9 +28,8 @@ public final class DirectBackend: Sendable {
     }
 
     /// Runs a request on behalf of a screen, putting a service's failure in
-    /// the words the screens show. Never `.unauthorized`: that means "sign in
-    /// to arrdeck again", and there is no arrdeck to sign in to — a refused
-    /// key is the service's problem, and says so.
+    /// the words the screens show: a refused key is the service's problem,
+    /// and says so.
     func call<T>(_ body: () async throws -> T) async throws -> T {
         do {
             return try await body()

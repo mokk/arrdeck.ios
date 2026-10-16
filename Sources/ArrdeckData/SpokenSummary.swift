@@ -54,15 +54,12 @@ public enum SpokenSummary {
     }
 
     /// Why there is no answer, in words for the speaker.
-    public static func failure(_ error: Error) -> String {
-        if case APIError.unauthorized = error {
-            return String(localized: "arrdeck is signed out. Open the app and sign in again.")
-        }
-        return String(localized: "arrdeck could not reach the server.")
+    public static func failure(_: Error) -> String {
+        String(localized: "arrdeck could not reach your services.")
     }
 
-    public static var noServer: String {
-        String(localized: "Open arrdeck and choose a server first.")
+    public static var noProfile: String {
+        String(localized: "Open arrdeck and add your services first.")
     }
 
     /// A release name as it would be said: "The.Show.S03E08.1080p.WEB-GRP" is

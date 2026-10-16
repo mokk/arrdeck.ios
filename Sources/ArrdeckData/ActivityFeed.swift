@@ -22,15 +22,12 @@ public final class ActivityFeedModel {
     private let api: any ActivityAPI
     private let defaults: UserDefaults
     private let cadence: Cadence
-    private let onSessionLost: @MainActor () -> Void
     private static let key = "activity.lastSeen"
 
-    public init(api: any ActivityAPI, defaults: UserDefaults = .standard, cadence: Cadence = .standard,
-                onSessionLost: @escaping @MainActor () -> Void) {
+    public init(api: any ActivityAPI, defaults: UserDefaults = .standard, cadence: Cadence = .standard) {
         self.api = api
         self.defaults = defaults
         self.cadence = cadence
-        self.onSessionLost = onSessionLost
         if let stored = defaults.object(forKey: Self.key) as? Date {
             lastSeen = stored
         } else {
@@ -44,8 +41,6 @@ public final class ActivityFeedModel {
         if feed == nil { feed = .loading }
         do {
             feed = .loaded(try await api.activitySince(lastSeen))
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             if feed?.value == nil { feed = .failed((error as? APIError)?.description ?? error.localizedDescription) }
         }

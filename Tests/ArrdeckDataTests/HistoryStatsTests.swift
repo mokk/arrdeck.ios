@@ -39,7 +39,7 @@ actor FakeHistoryAPI: HistoryAPI {
             1: .init(has_more: true, items: [item(.radarr, ["fetched", "imported"]), item(.sonarr, ["fetched"])]),
             2: .init(has_more: false, items: [item(.sonarr, ["failed"])]),
         ])
-        let model = HistoryModel(api: api, onSessionLost: {})
+        let model = HistoryModel(api: api)
         await model.load()
         #expect(model.items.count == 2)
         #expect(model.hasMore)
@@ -62,7 +62,7 @@ actor FakeHistoryAPI: HistoryAPI {
 
     @Test func blocklistUnblockAndClearRefetch() async {
         let api = FakeHistoryAPI(pages: [:])
-        let model = HistoryModel(api: api, onSessionLost: {})
+        let model = HistoryModel(api: api)
         await model.loadBlocklist()
         #expect(model.blocklist.value?.count == 2)
         #expect(model.blockedApps == [.radarr])

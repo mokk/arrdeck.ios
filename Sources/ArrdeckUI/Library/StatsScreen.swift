@@ -6,17 +6,15 @@ import SwiftUI
 /// can take, so they are not here.
 public struct StatsScreen: View {
     let api: any WatchingAPI
-    let baseURL: URL
 
-    public init(api: any WatchingAPI, baseURL: URL) {
+    public init(api: any WatchingAPI) {
         self.api = api
-        self.baseURL = baseURL
     }
 
     public var body: some View {
         List {
             ListPageHeading(title: String(localized: "Statistics"))
-            WatchingSections(api: api, baseURL: baseURL)
+            WatchingSections(api: api)
         }
         .dashboardListStyle()
         .chromePage()

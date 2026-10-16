@@ -5,7 +5,6 @@ import SwiftUI
 /// when. Hours are an estimate; Plex does not record how long a play lasted.
 struct WatchingSections: View {
     let api: any WatchingAPI
-    let baseURL: URL
     @AppStorage("watching.window") private var window: WatchWindow = .month
     @State private var stats: Loadable<Block<WatchStats>> = .loading
 
@@ -46,10 +45,10 @@ struct WatchingSections: View {
             .listRowInsets(EdgeInsets())
         }
         if let shows = data.top_shows, !shows.isEmpty {
-            Section("Most watched shows") { TitleStrip(rows: shows, movies: false, baseURL: baseURL) }
+            Section("Most watched shows") { TitleStrip(rows: shows, movies: false) }
         }
         if let movies = data.top_movies, !movies.isEmpty {
-            Section("Most watched movies") { TitleStrip(rows: movies, movies: true, baseURL: baseURL) }
+            Section("Most watched movies") { TitleStrip(rows: movies, movies: true) }
         }
         Section {
             Bars(label: String(localized: "By weekday"), values: data.by_weekday ?? [], names: Self.weekdays)
@@ -113,7 +112,6 @@ private struct Tile: View {
 private struct TitleStrip: View {
     let rows: [WatchTitle]
     let movies: Bool
-    let baseURL: URL
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -121,7 +119,7 @@ private struct TitleStrip: View {
                 ForEach(rows, id: \.title) { row in
                     let ref: MediaRef? = movies ? row.movie_id.map(MediaRef.movie) : row.series_id.map(MediaRef.series)
                     let card = VStack(alignment: .leading, spacing: 3) {
-                        Poster(path: row.poster, baseURL: baseURL, width: 90, cornerRadius: 10, title: row.title)
+                        Poster(path: row.poster, width: 90, cornerRadius: 10, title: row.title)
                         Text(row.title).font(.caption.weight(.medium)).lineLimit(1)
                         Text("\(row.plays ?? 0) plays").font(.caption2).foregroundStyle(.secondary)
                     }

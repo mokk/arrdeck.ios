@@ -7,11 +7,9 @@ struct CleanupView: View {
     @State private var model: CleanupModel
     @State private var confirming = false
     @State private var exclude = true
-    let baseURL: URL
 
-    init(api: any CleanupAPI, baseURL: URL) {
+    init(api: any CleanupAPI) {
         _model = State(initialValue: CleanupModel(api: api))
-        self.baseURL = baseURL
     }
 
     var body: some View {
@@ -93,7 +91,7 @@ struct CleanupView: View {
             .accessibilityLabel(Text("Select \(item.title ?? "")"))
             NavigationLink(value: item.ref) {
                 HStack(spacing: 10) {
-                    Poster(path: item.poster, baseURL: baseURL, width: 34, cornerRadius: 5, title: item.title ?? "")
+                    Poster(path: item.poster, width: 34, cornerRadius: 5, title: item.title ?? "")
                     VStack(alignment: .leading, spacing: 2) {
                         Text(item.title ?? "").font(.subheadline.weight(.medium)).lineLimit(1)
                         Text(reason(item)).font(.caption).foregroundStyle(.secondary).lineLimit(1)

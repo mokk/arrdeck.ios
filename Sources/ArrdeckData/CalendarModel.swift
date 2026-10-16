@@ -90,17 +90,14 @@ public final class CalendarModel {
     let api: any CalendarAPI
     let calendar: Calendar
     let now: () -> Date
-    let onSessionLost: @MainActor () -> Void
     private var generation = 0
 
     public init(
-        api: any CalendarAPI, calendar: Calendar = .current, now: @escaping () -> Date = { .now },
-        onSessionLost: @escaping @MainActor () -> Void
+        api: any CalendarAPI, calendar: Calendar = .current, now: @escaping () -> Date = { .now }
     ) {
         self.api = api
         self.calendar = calendar
         self.now = now
-        self.onSessionLost = onSessionLost
     }
 
     public var today: String { CalendarDay.iso(now(), calendar: calendar) }
@@ -165,7 +162,6 @@ public final class CalendarModel {
             blocks = .loaded(result)
         } catch {
             guard mine == generation else { return }
-            if case .some(.unauthorized) = error as? APIError { onSessionLost(); return }
             if blocks.value == nil {
                 blocks = .failed((error as? APIError)?.description ?? error.localizedDescription)
             }

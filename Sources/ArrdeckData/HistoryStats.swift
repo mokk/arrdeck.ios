@@ -31,12 +31,10 @@ public final class HistoryModel {
     public private(set) var busy = false
 
     private let api: any HistoryAPI
-    private let onSessionLost: @MainActor () -> Void
     private var page = 0
 
-    public init(api: any HistoryAPI, onSessionLost: @escaping @MainActor () -> Void) {
+    public init(api: any HistoryAPI) {
         self.api = api
-        self.onSessionLost = onSessionLost
     }
 
     public var shown: [HistoryItem] {
@@ -68,7 +66,6 @@ public final class HistoryModel {
             hasMore = result.has_more ?? false
             error = nil
         } catch {
-            if case .some(.unauthorized) = error as? APIError { onSessionLost(); return }
             self.error = (error as? APIError)?.description ?? error.localizedDescription
         }
     }
@@ -77,7 +74,6 @@ public final class HistoryModel {
         do {
             blocklist = .loaded(try await api.blocklist().items ?? [])
         } catch {
-            if case .some(.unauthorized) = error as? APIError { onSessionLost(); return }
             if blocklist.value == nil { blocklist = .failed((error as? APIError)?.description ?? error.localizedDescription) }
         }
     }
@@ -100,8 +96,6 @@ public final class HistoryModel {
         defer { busy = false }
         do {
             try await work()
-        } catch APIError.unauthorized {
-            onSessionLost()
         } catch {
             actionError = (error as? APIError)?.description ?? error.localizedDescription
         }

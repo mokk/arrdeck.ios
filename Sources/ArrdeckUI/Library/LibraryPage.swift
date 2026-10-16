@@ -25,20 +25,15 @@ public struct LibraryPage: View {
     let app: LibraryApp
     let dashboard: DashboardModel
     let api: any LibraryPageAPI
-    let baseURL: URL
-    let onSessionLost: @MainActor () -> Void
 
     public init(
         app: LibraryApp, dashboard: DashboardModel,
-        api: any LibraryPageAPI,
-        baseURL: URL, onSessionLost: @escaping @MainActor () -> Void
+        api: any LibraryPageAPI
     ) {
         self.app = app
         self.dashboard = dashboard
         self.api = api
-        self.baseURL = baseURL
-        self.onSessionLost = onSessionLost
-        _model = State(initialValue: LibraryListModel(app: app, api: api, hasPlex: dashboard.has("plex"), onSessionLost: onSessionLost))
+        _model = State(initialValue: LibraryListModel(app: app, api: api, hasPlex: dashboard.has("plex")))
         _layout = AppStorage(wrappedValue: .posters, DisplayKeys.layout(app))
         _unmonitored = AppStorage(wrappedValue: .show, DisplayKeys.unmonitored(app))
     }
@@ -110,25 +105,25 @@ public struct LibraryPage: View {
                         ErrorNote(reason).padding()
                     case let .loaded(all):
                         if !nowReading.isEmpty {
-                            NowReadingStrip(rows: nowReading, baseURL: baseURL)
+                            NowReadingStrip(rows: nowReading)
                         }
                         if visible.isEmpty, layout != .collections, layout != .seasons {
                             emptyState(all: all)
                         }
                         if layout == .upNext {
-                            UpNextList(rows: visible, baseURL: baseURL).padding(.horizontal, .pageMargin).padding(.bottom, 16)
+                            UpNextList(rows: visible).padding(.horizontal, .pageMargin).padding(.bottom, 16)
                         } else if layout == .seasons {
-                            SeasonGridView(api: api, baseURL: baseURL, query: model.query)
+                            SeasonGridView(api: api, query: model.query)
                                 .padding(.horizontal, .pageMargin).padding(.bottom, 16)
                         } else if layout == .shelf {
-                            ShelfView(rows: visible, query: model.query, api: api, baseURL: baseURL)
+                            ShelfView(rows: visible, query: model.query, api: api)
                                 .padding(.horizontal, .pageMargin).padding(.bottom, 16)
                         } else if layout == .collections {
-                            CollectionsLibraryList(api: api, baseURL: baseURL, query: model.query)
+                            CollectionsLibraryList(api: api, query: model.query)
                                 .padding(.horizontal, .pageMargin).padding(.bottom, 16)
                         } else {
                             LibraryGrid(model: model, rows: visible, layout: layout, dimUnmonitored: unmonitored == .dim,
-                                        baseURL: baseURL, progress: dashboard.queueProgress,
+                                        progress: dashboard.queueProgress,
                                         webURL: dashboard.webURLs[app.rawValue], requests: requests,
                                         diagnose: { diagnosing = $0 }, delete: { deleting = $0 })
                                 .padding(.leading, .pageMargin)
@@ -181,19 +176,18 @@ public struct LibraryPage: View {
             .accessibilityIdentifier("library-search-everything")
         }
         .navigationDestination(for: MediaRef.self) { ref in
-            MediaDestination(ref: ref, api: api, baseURL: baseURL, hasPlex: dashboard.has("plex"),
-                             sequence: sequence, onSessionLost: onSessionLost)
+            MediaDestination(ref: ref, api: api, hasPlex: dashboard.has("plex"), sequence: sequence)
         }
         .sheet(isPresented: $adding) {
-            AddView(configured: dashboard.configured, api: api, baseURL: baseURL, hasPlex: dashboard.has("plex"),
-                    fixed: addTab, onSessionLost: onSessionLost) {
+            AddView(configured: dashboard.configured, api: api, hasPlex: dashboard.has("plex"),
+                    fixed: addTab) {
                 adding = false
                 Task { await model.load() }
             }
         }
         .sheet(isPresented: $searchingEverything) {
-            GlobalSearchSheet(api: api, apps: LibraryApp.allCases.filter { dashboard.has($0.rawValue) }, baseURL: baseURL,
-                              hasPlex: dashboard.has("plex"), query: model.query, onSessionLost: onSessionLost) { searchingEverything = false }
+            GlobalSearchSheet(api: api, apps: LibraryApp.allCases.filter { dashboard.has($0.rawValue) },
+                              hasPlex: dashboard.has("plex"), query: model.query) { searchingEverything = false }
         }
         .onChange(of: model.rows.value?.count) { _, _ in
             // the titles into iOS search, refreshed whenever the library reloads,
@@ -335,7 +329,6 @@ struct LibraryGrid: View {
     let rows: [LibraryRow]
     let layout: LibraryLayout
     let dimUnmonitored: Bool
-    let baseURL: URL
     let progress: [MediaRef: Double]
     let webURL: URL?
     let requests: [String: RequestState]
@@ -363,7 +356,7 @@ struct LibraryGrid: View {
                                      count: fit.count),
                       spacing: 18) {
                 ForEach(rows) { row in
-                    LibraryCard(row: row, app: model.app, baseURL: baseURL, posterWidth: fit.poster, progress: progress[row.ref],
+                    LibraryCard(row: row, app: model.app, posterWidth: fit.poster, progress: progress[row.ref],
                                 watched: model.watched(row), selected: model.selecting ? model.selected.contains(row.id) : nil,
                                 request: request(row))
                         .opacity(dimUnmonitored && row.isUnmonitored ? 0.4 : 1)
@@ -374,7 +367,7 @@ struct LibraryGrid: View {
         default:
             LazyVStack(spacing: 0) {
                 ForEach(rows) { row in
-                    LibraryListRow(row: row, app: model.app, baseURL: baseURL, details: layout == .details,
+                    LibraryListRow(row: row, app: model.app, details: layout == .details,
                                    progress: progress[row.ref], watched: model.watched(row),
                                    selected: model.selecting ? model.selected.contains(row.id) : nil,
                                    request: request(row))
@@ -458,7 +451,6 @@ struct CardTap: ViewModifier {
 struct LibraryListRow: View {
     let row: LibraryRow
     let app: LibraryApp
-    let baseURL: URL
     let details: Bool
     let progress: Double?
     let watched: Watched?
@@ -490,7 +482,7 @@ struct LibraryListRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Poster(path: row.poster, baseURL: baseURL, width: details ? 56 : 36, cornerRadius: details ? 8 : 6, title: row.title,
+            Poster(path: row.poster, width: details ? 56 : 36, cornerRadius: details ? 8 : 6, title: row.title,
                    square: app.squareArtwork)
                 .overlay(alignment: .topTrailing) {
                     if let selected {
@@ -574,7 +566,6 @@ struct LetterStrip: View {
 struct LibraryCard: View {
     let row: LibraryRow
     let app: LibraryApp
-    let baseURL: URL
     var posterWidth: CGFloat = PosterColumns.target
     let progress: Double?
     let watched: Watched?
@@ -608,7 +599,7 @@ struct LibraryCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Poster(path: row.poster, baseURL: baseURL, width: posterWidth, cornerRadius: 12, title: row.title, subtitle: subtitle,
+            Poster(path: row.poster, width: posterWidth, cornerRadius: 12, title: row.title, subtitle: subtitle,
                    square: app.squareArtwork)
                 .frame(maxWidth: .infinity)
                 .overlay(alignment: .topTrailing) {
@@ -668,7 +659,6 @@ extension SearchFieldPlacement {
 /// The books being read now, above the Books tab's list.
 struct NowReadingStrip: View {
     let rows: [LibraryRow]
-    let baseURL: URL
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -678,7 +668,7 @@ struct NowReadingStrip: View {
                     ForEach(rows) { row in
                         NavigationLink(value: row.ref) {
                             VStack(alignment: .leading, spacing: 4) {
-                                Poster(path: row.poster, baseURL: baseURL, width: 80, cornerRadius: 8, title: row.title)
+                                Poster(path: row.poster, width: 80, cornerRadius: 8, title: row.title)
                                 Text(row.title).font(.caption2).lineLimit(1).frame(width: 80, alignment: .leading)
                             }
                         }

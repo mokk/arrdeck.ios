@@ -9,20 +9,18 @@ struct TorrentDetailSheet: View {
     let model: DownloadsModel
     let dismiss: () -> Void
     let api: any ExtrasAPI
-    let onSessionLost: @MainActor () -> Void
     @State private var extras: TorrentExtrasModel
     @State private var importing: ImportJob?
 
     @State private var details: Loadable<TorrentDetails> = .loading
     @State private var confirmingDelete = false
 
-    init(torrent: Torrent, model: DownloadsModel, api: any ExtrasAPI, onSessionLost: @escaping @MainActor () -> Void, dismiss: @escaping () -> Void) {
+    init(torrent: Torrent, model: DownloadsModel, api: any ExtrasAPI, dismiss: @escaping () -> Void) {
         self.torrent = torrent
         self.model = model
         self.dismiss = dismiss
         self.api = api
-        self.onSessionLost = onSessionLost
-        _extras = State(initialValue: TorrentExtrasModel(torrent: torrent, api: api, onSessionLost: onSessionLost))
+        _extras = State(initialValue: TorrentExtrasModel(torrent: torrent, api: api))
     }
 
     var subtitle: String {
@@ -121,7 +119,7 @@ struct TorrentDetailSheet: View {
             .navigationTitle("Torrent")
             .toolbar { Button("Done") { dismiss() } }
             .sheet(item: $importing) { job in
-                ImportSheet(job: job, api: api, onSessionLost: onSessionLost) { importing = nil }
+                ImportSheet(job: job, api: api) { importing = nil }
             }
             .task {
                 do {

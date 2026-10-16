@@ -32,7 +32,6 @@ public final class DownloadsModel {
     /// server answers, and always nil on a server without the endpoint.
     public private(set) var attention: Attention?
     public private(set) var throttled: [TorrentClient: Bool] = [:]
-    public private(set) var connectionError: String?
     public private(set) var refreshError: String?
     public var actionError: String?
     public private(set) var pending: Set<String> = []
@@ -51,25 +50,21 @@ public final class DownloadsModel {
 
     private let api: any DownloadsAPI
     private let cadence: Cadence
-    private let onSessionLost: @MainActor () -> Void
     private var generation = 0
     private var debounce: Task<Void, Never>?
-    private var stopped = false
 
     public init(
         api: any DownloadsAPI,
         clients: [TorrentClient],
         hasArr: Bool,
         arrs: [ArrApp] = [],
-        cadence: Cadence = .standard,
-        onSessionLost: @escaping @MainActor () -> Void
+        cadence: Cadence = .standard
     ) {
         self.api = api
         self.clients = clients
         self.hasArr = hasArr
         self.arrs = arrs
         self.cadence = cadence
-        self.onSessionLost = onSessionLost
         enabledClients = Set(clients)
     }
 
@@ -156,7 +151,7 @@ public final class DownloadsModel {
     }
 
     private func pollTorrents() async {
-        while !Task.isCancelled, !stopped {
+        while !Task.isCancelled {
             await fetchTorrents()
             let moving = torrents.value.map(Motion.torrentsMoving) ?? false
             try? await Task.sleep(for: .seconds(moving ? cadence.fast : cadence.idle))
@@ -164,7 +159,7 @@ public final class DownloadsModel {
     }
 
     private func pollQueue() async {
-        while !Task.isCancelled, !stopped {
+        while !Task.isCancelled {
             await fetchQueue()
             let moving = queue.value.map(Motion.queueMoving) ?? false
             try? await Task.sleep(for: .seconds(moving ? cadence.fast : cadence.idle))
@@ -172,7 +167,7 @@ public final class DownloadsModel {
     }
 
     private func pollThrottle() async {
-        while !Task.isCancelled, !stopped {
+        while !Task.isCancelled {
             await fetchThrottle()
             try? await Task.sleep(for: .seconds(cadence.medium))
         }
@@ -187,7 +182,6 @@ public final class DownloadsModel {
             guard mine == generation else { return }   // a newer query answered first
             torrents = .loaded(result)
             refreshError = nil
-            connectionError = nil
         } catch {
             guard mine == generation else { return }
             handle(error, keeping: torrents.value != nil) { torrents = .failed($0) }
@@ -197,22 +191,19 @@ public final class DownloadsModel {
     func fetchQueue() async {
         do {
             queue = .loaded(try await api.queue())
-            connectionError = nil
         } catch {
             handle(error, keeping: queue.value != nil) { queue = .failed($0) }
         }
         await fetchAttention()
     }
 
-    /// Alongside the queue, at its pace. Any other failure keeps the last
+    /// Alongside the queue, at its pace. A failure keeps the last
     /// answer quietly: the queue's own fetch already reports an unreachable
     /// server, and an older one without the endpoint has nothing to say.
     private func fetchAttention() async {
         guard let importer = api as? any ManualImportAPI else { return }
         do {
             attention = try await importer.attention()
-        } catch APIError.unauthorized {
-            handle(APIError.unauthorized, keeping: true) { _ in }
         } catch {}
     }
 
@@ -230,15 +221,9 @@ public final class DownloadsModel {
     }
 
     private func handle(_ error: any Error, keeping: Bool, otherwise fail: (String) -> Void) {
-        if case .some(.unauthorized) = error as? APIError {
-            stopped = true
-            onSessionLost()
-            return
-        }
         if error is CancellationError { return }
         let reason = describe(error)
         if keeping { refreshError = reason } else { fail(reason) }
-        if case .transport = error as? APIError { connectionError = reason }
     }
 
     private func describe(_ error: any Error) -> String {
@@ -337,9 +322,6 @@ public final class DownloadsModel {
         defer { pending.remove(key) }
         do {
             try await work()
-        } catch APIError.unauthorized {
-            stopped = true
-            onSessionLost()
         } catch {
             actionError = describe(error)
         }

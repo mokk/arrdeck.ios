@@ -7,7 +7,6 @@ struct PersonView: View {
     let ref: PersonRef
     let api: any PeopleAPI
     let adder: (any DiscoverAPI & LibraryAPI)?
-    let baseURL: URL
     @State private var person: Loadable<Person> = .loading
     @State private var adding: SearchResult?
 
@@ -22,7 +21,7 @@ struct PersonView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     PageHeading(title: person.name ?? "", horizontal: 0)
                     HStack(spacing: 14) {
-                        if let image = person.image, let url = URL(string: image, relativeTo: baseURL) {
+                        if let image = person.image, let url = URL(string: image) {
                             AsyncImage(url: url) { $0.resizable().scaledToFill() } placeholder: { Circle().fill(.quaternary) }
                                 .frame(width: 72, height: 72).clipShape(Circle())
                         }
@@ -68,13 +67,13 @@ struct PersonView: View {
             do { person = .loaded(try await api.person(ref.tmdbID)) } catch { person = .failed(error.localizedDescription) }
         }
         .sheet(item: $adding) { result in
-            if let adder { MediaSheet(result: result, api: adder, baseURL: baseURL) { adding = nil } }
+            if let adder { MediaSheet(result: result, api: adder) { adding = nil } }
         }
     }
 
     func tile(title: String, poster: String?, caption: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Poster(path: poster, baseURL: baseURL, width: 100, cornerRadius: 10, title: title)
+            Poster(path: poster, width: 100, cornerRadius: 10, title: title)
             Text(title).font(.caption.weight(.semibold)).lineLimit(2)
             Text(caption).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
         }
@@ -85,11 +84,10 @@ struct PersonView: View {
 /// The wide fanart above a title's page; a book passes its cover, blurred.
 struct Backdrop: View {
     let path: String
-    let baseURL: URL
     var blurred = false
 
     var body: some View {
-        AsyncImage(url: URL(string: path, relativeTo: baseURL)) { phase in
+        AsyncImage(url: URL(string: path)) { phase in
             if let image = phase.image {
                 image.resizable().scaledToFill()
                     .blur(radius: blurred ? 30 : 0)
@@ -109,13 +107,12 @@ struct Backdrop: View {
 /// The backdrop as a list's first, edge-to-edge section.
 struct BackdropSection: View {
     let path: String?
-    let baseURL: URL
     var blurred = false
 
     var body: some View {
         if let path {
             Section {
-                Backdrop(path: path, baseURL: baseURL, blurred: blurred)
+                Backdrop(path: path, blurred: blurred)
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
             }

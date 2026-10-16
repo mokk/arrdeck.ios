@@ -27,13 +27,13 @@ public struct HistoryScreen: View {
     /// With `newSince`, what happened after it is marked NEW, and `onShown`
     /// runs once the first page is in — the Activity tab's "seen" mark.
     public init(api: any HistoryAPI, apps: [ArrApp], newSince: Date? = nil, onShown: (@MainActor () -> Void)? = nil,
-                titled: Bool = true, onSessionLost: @escaping @MainActor () -> Void) {
+                titled: Bool = true) {
         hasDetail = true
         self.titled = titled
         self.apps = apps
         self.onShown = onShown
         _newSince = State(initialValue: newSince)
-        _model = State(initialValue: HistoryModel(api: api, onSessionLost: onSessionLost))
+        _model = State(initialValue: HistoryModel(api: api))
     }
 
     func isNew(_ item: HistoryItem) -> Bool {

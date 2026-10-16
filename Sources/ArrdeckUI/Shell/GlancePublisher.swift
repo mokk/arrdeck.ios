@@ -13,7 +13,6 @@ struct GlanceFeed: View {
     let model: DashboardModel
     let server: String
     /// Where the posters are fetched from: the address answering now.
-    let baseURL: URL
     /// The Activity widget's feed: one record per episode, where the
     /// dashboard's history has one per torrent (a season pack is one row).
     let api: any ActivityAPI
@@ -51,12 +50,12 @@ struct GlanceFeed: View {
     func publish() {
         // the polls answer only while in front; this is belt and braces
         guard scenePhase != .background else { return }
-        GlancePublisher.shared.publish(model, recent: recent, server: server, baseURL: baseURL, liveActivity: liveActivity)
+        GlancePublisher.shared.publish(model, recent: recent, server: server, liveActivity: liveActivity)
     }
 
     /// The last two weeks of the arrs' events, every few minutes while open.
     /// A failure keeps the last answer; the Activity tab's own poll is the
-    /// one that notices a lost session.
+    /// one that reports it.
     func pollRecent() async {
         while !Task.isCancelled {
             if let since = try? await api.activitySince(.now.addingTimeInterval(-Self.lookback)) {
@@ -87,7 +86,7 @@ final class GlancePublisher {
 
     /// After any of the dashboard's torrent, calendar or disk polls, and when
     /// Activity's feed, titles or posters change.
-    func publish(_ model: DashboardModel, recent: [ActivityEvent]?, server: String, baseURL: URL,
+    func publish(_ model: DashboardModel, recent: [ActivityEvent]?, server: String,
                  liveActivity enabled: Bool, now: Date = .now) {
         // until /services answers, "no torrent client" only means "not known
         // yet", and would end an activity adopted from the last run
@@ -115,7 +114,7 @@ final class GlancePublisher {
         let previous = written ?? store.read()
         let merged = fresh.merging(previous)
         if let entries = merged.activity?.entries {
-            GlancePosters.shared.update(for: entries, titles: LibraryTitles.shared.titles, baseURL: baseURL)
+            GlancePosters.shared.update(for: entries, titles: LibraryTitles.shared.titles)
         }
         guard merged != previous else { return }
         store.write(merged)

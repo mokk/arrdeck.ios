@@ -117,7 +117,7 @@ actor FakeManageAPI: ManageAPI {
     }
     func testService(_ name: String) async throws -> String {
         log("test-service-\(name)")
-        if testFails { throw APIError.transport("refused") }
+        if testFails { throw APIError.refused("refused") }
         return "6.4.4"
     }
 }
@@ -151,7 +151,7 @@ extension FakeManageAPI: LibraryAPI {
 @Suite struct ManageModelTests {
     @Test func libraryLoadsRowsTagsAndPlexOnlyWhenConfigured() async {
         let api = FakeManageAPI()
-        let model = LibraryListModel(app: .radarr, api: api, hasPlex: false, onSessionLost: {})
+        let model = LibraryListModel(app: .radarr, api: api, hasPlex: false)
         await model.load()
         #expect(model.shown.map(\.title) == ["Film"])
         #expect(model.tags.map(\.label) == ["kids"])
@@ -162,7 +162,7 @@ extension FakeManageAPI: LibraryAPI {
 
     @Test func indexersToggleRefetchAndTestsAreVerdicts() async {
         let api = FakeManageAPI()
-        let model = IndexersModel(api: api, onSessionLost: {})
+        let model = IndexersModel(api: api)
         await model.load()
         #expect(model.sorted.map(\.name) == ["alpha", "Zeta"])
         await model.setEnabled(model.sorted[0], true)
@@ -178,7 +178,7 @@ extension FakeManageAPI: LibraryAPI {
 
     @Test func systemShowsNotableOrOverdueUnlessAsked() async throws {
         let api = FakeManageAPI()
-        let model = SystemModel(configured: ["radarr", "sonarr", "prowlarr"], api: api, onSessionLost: {})
+        let model = SystemModel(configured: ["radarr", "sonarr", "prowlarr"], api: api)
         await model.load()
         #expect(model.shownTasks.map(\.name) == ["RssSync", "Housekeeping"])
         #expect(model.overdueCount == 1)
@@ -198,7 +198,7 @@ extension FakeManageAPI: LibraryAPI {
 
     @Test func servicesFormsTrackDirtinessAndResults() async {
         let api = FakeManageAPI()
-        let model = ServicesModel(api: api, onSessionLost: {})
+        let model = ServicesModel(api: api)
         await model.load()
         let forms = model.forms
         #expect(model.loaded)
@@ -255,7 +255,7 @@ extension FakeManageAPI: ExtrasAPI {
 @Suite struct LibraryBulkTests {
     @Test func selectionDrivesBulkActionsAndRefetches() async {
         let api = FakeManageAPI()
-        let model = LibraryListModel(app: .radarr, api: api, hasPlex: false, onSessionLost: {})
+        let model = LibraryListModel(app: .radarr, api: api, hasPlex: false)
         await model.load()
         let row = model.shown[0]
         model.selecting = true
