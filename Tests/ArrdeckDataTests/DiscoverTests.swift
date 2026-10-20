@@ -146,6 +146,21 @@ actor FakeDiscoverAPI: DiscoverAPI, LibraryAPI {
         #expect(model.grabbed.contains("g1"))
     }
 
+    @Test func bookTypingWaitsLongerBeforeSearching() async throws {
+        let api = FakeDiscoverAPI()
+        let model = AddModel(configured: ["radarr", "readarr"], api: api)
+        model.tab = .books
+        model.input = "kruc"
+        try await Task.sleep(for: .milliseconds(700))
+        #expect(await api.count("search-books-kruc") == 0, "a pause mid-word is not the end of the title")
+        model.input = "krucifiks"
+        try await Task.sleep(for: .milliseconds(700))
+        #expect(await api.calls.filter { $0.hasPrefix("search-") }.isEmpty)
+        try await Task.sleep(for: .milliseconds(900))
+        #expect(await api.count("search-books-krucifiks") == 1)
+        #expect(await api.calls.filter { $0.hasPrefix("search-") }.count == 1)
+    }
+
     @Test func collectionsFilterLocallyAndToggleRefetches() async {
         let api = FakeDiscoverAPI()
         let model = AddModel(configured: ["radarr"], api: api)

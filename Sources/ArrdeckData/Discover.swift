@@ -222,12 +222,19 @@ public final class AddModel {
         Task { await load() }
     }
 
+    /// How long typing has to pause before a search goes out. Books wait
+    /// longer: every fresh Readarr search reaches the shared metadata server,
+    /// which refuses an address after a handful in a row, so a half-typed
+    /// title must not spend one. Return still searches at once.
+    private var settle: Duration { tab == .books ? .milliseconds(1200) : .milliseconds(450) }
+
     private func inputChanged() {
         guard tab.mediaKind != nil else { return }
         debounce?.cancel()
         guard searching else { results = nil; generation += 1; return }
+        let settle = settle
         debounce = Task {
-            try? await Task.sleep(for: .milliseconds(450))
+            try? await Task.sleep(for: settle)
             guard !Task.isCancelled else { return }
             await submit()
         }
