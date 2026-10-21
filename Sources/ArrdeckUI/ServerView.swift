@@ -98,13 +98,15 @@ public struct ServerView: View {
 
     #if os(iOS)
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     #endif
 
-    /// The sidebar on an iPad at regular width, the floating capsule anywhere
-    /// else; it follows Split View and Slide Over as their width changes.
+    /// The sidebar when the window is regular both ways, the floating capsule
+    /// anywhere else; it follows Split View, Slide Over and the iPhone Duo's
+    /// fold as the window's size changes.
     var layout: ShellLayout {
         #if os(iOS)
-        ShellLayout(regularWidth: sizeClass == .regular, isPad: UIDevice.current.userInterfaceIdiom == .pad)
+        ShellLayout(regularWidth: sizeClass == .regular, regularHeight: verticalSizeClass == .regular)
         #else
         .tabBar
         #endif

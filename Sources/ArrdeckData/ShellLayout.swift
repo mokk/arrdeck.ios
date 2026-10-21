@@ -1,15 +1,16 @@
 import Foundation
 
 /// How the tabs are offered: the floating capsule at the bottom, or a sidebar
-/// beside the content. Only an iPad at regular width gets the sidebar — a
-/// Plus or Max iPhone is regular width in landscape too, and the phone keeps
-/// its capsule whichever way it is turned. An iPad in Slide Over or a narrow
-/// Split View is compact and looks like the phone.
+/// beside the content. Only a window regular in both directions gets the
+/// sidebar: a wide iPad, or an unfolded iPhone Duo. A Plus or Max iPhone is
+/// regular width in landscape too, but compact height, so it keeps its
+/// capsule whichever way it is turned. An iPad in Slide Over or a narrow
+/// Split View, or a folded iPhone Duo, is compact and looks like the phone.
 public enum ShellLayout: Sendable, Equatable {
     case tabBar, sidebar
 
-    public init(regularWidth: Bool, isPad: Bool) {
-        self = regularWidth && isPad ? .sidebar : .tabBar
+    public init(regularWidth: Bool, regularHeight: Bool) {
+        self = regularWidth && regularHeight ? .sidebar : .tabBar
     }
 }
 

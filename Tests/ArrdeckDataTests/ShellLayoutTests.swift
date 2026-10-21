@@ -3,11 +3,11 @@ import Testing
 @testable import ArrdeckData
 
 struct ShellLayoutTests {
-    @Test func onlyAWideIPadGetsTheSidebar() {
-        #expect(ShellLayout(regularWidth: true, isPad: true) == .sidebar)
-        #expect(ShellLayout(regularWidth: false, isPad: true) == .tabBar, "Slide Over and narrow Split View look like the phone")
-        #expect(ShellLayout(regularWidth: true, isPad: false) == .tabBar, "a Max iPhone in landscape keeps its capsule")
-        #expect(ShellLayout(regularWidth: false, isPad: false) == .tabBar)
+    @Test func onlyARegularWindowGetsTheSidebar() {
+        #expect(ShellLayout(regularWidth: true, regularHeight: true) == .sidebar, "a wide iPad or an unfolded iPhone Duo")
+        #expect(ShellLayout(regularWidth: false, regularHeight: true) == .tabBar, "Slide Over, narrow Split View and a folded Duo look like the phone")
+        #expect(ShellLayout(regularWidth: true, regularHeight: false) == .tabBar, "a Max iPhone in landscape keeps its capsule")
+        #expect(ShellLayout(regularWidth: false, regularHeight: false) == .tabBar)
     }
 
     @Test func tappingAnotherTabShowsIt() {

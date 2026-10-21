@@ -1,66 +1,72 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "What's downloading in ${applicationName}": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hvad downloader ${applicationName}"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "${applicationName} downloads" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloads i ${applicationName}"
           }
         }
       }
     },
-    "${applicationName} downloads": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Downloads i ${applicationName}"
+    "${applicationName} today" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "${applicationName} i dag"
           }
         }
       }
     },
-    "What's on today in ${applicationName}": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hvad kommer der i dag i ${applicationName}"
+    "Open ${screen} in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Åbn ${screen} i ${applicationName}"
           }
         }
       }
     },
-    "${applicationName} today": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "${applicationName} i dag"
+    "Show ${applicationName} ${screen}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis ${screen} i ${applicationName}"
           }
         }
       }
     },
-    "Open ${screen} in ${applicationName}": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Åbn ${screen} i ${applicationName}"
+    "What's downloading in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hvad downloader ${applicationName}"
           }
         }
       }
     },
-    "Show ${applicationName} ${screen}": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vis ${screen} i ${applicationName}"
+    "What's on today in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hvad kommer der i dag i ${applicationName}"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }
